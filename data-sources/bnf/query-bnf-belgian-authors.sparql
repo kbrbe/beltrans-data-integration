@@ -1,0 +1,41 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX isni: <http://isni.org/ontology#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+
+
+#CONSTRUCT {
+#  ?person a schema:Person ;
+#    schema:familyName ?familyName ;
+#    schema:givenName ?firstName ;
+#    schema:gender ?gender ;
+#    bf:identifiedBy ?isni ;
+#    rdagroup2elements:languageOfThePerson ?language ;
+#    rdagroup2elements:fieldOfActivityOfThePerson ?field ;
+#    owl:sameAs ?same .
+#}
+SELECT ?person ?familyName ?firstName ?gender ?isni ?language ?field ?same
+WHERE {
+ 
+  ?person rdf:type foaf:Person ;
+          foaf:familyName ?familyName ;
+          foaf:givenName ?firstName ;
+          foaf:gender ?gender ;
+          ?p ?o ;
+          rdagroup2elements:countryAssociatedWithThePerson <http://id.loc.gov/vocabulary/countries/be> .
+          
+  OPTIONAL { ?person rdagroup2elements:languageOfThePerson ?language .}
+  OPTIONAL { ?person rdagroup2elements:fieldOfActivityOfThePerson ?field .}
+ 
+  # Information such as ISNI number or linked resources are available via a person's corresponding skos:Concept
+  ?personConcept a skos:Concept ;
+      foaf:focus ?person .
+  
+  OPTIONAL { ?personConcept isni:identifierValid ?isni . }
+  OPTIONAL { ?personConcept skos:exactMatch ?same . }
+  
+  
+}
