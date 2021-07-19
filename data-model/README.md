@@ -1,5 +1,15 @@
 # Data model
 
+The aim of this data model is to represent books, their translations as well as involved parties such as authors, publishers, etc within a RDF Knowledge Graph (Linked Data).
+Therefore we have to consider the following high-level objectives:
+
+* Translations are different *expressions* of some *creative work* (similar to how the original work is only *one possible* expression of a *creative work*)
+* *Things*, such as authors or creative works, are different to their descriptions and thus both should be represented by different URIs
+* Different Linked Data vocabularies may be used to express our conceptual model
+* Constraints on data may be expressed on source data, e.g. to verify their completeness with respect to the constraints, or on the already integrated data
+
+In the following we elaborate on the data model.
+
 ## Metadata entities
 
 Following Linked Data best practices a thing or person is different to their descriptions.
@@ -14,17 +24,24 @@ more concretely an instance of `schema:WebPage` and `schema:Dataset`.
 
 At **BnF** a *thing*'s URI is reused for the metadata entity
 but without the trailing `#about` (an HTML anchor).
-For example `<http://data.bnf.fr/ark:/12148/cb11927594h#about>` for a person,
+For example `<http://data.bnf.fr/ark:/12148/cb11927594h>` for a person,
 more concretely an instance of `foaf:Person`,
-and `<http://data.bnf.fr/ark:/12148/cb11927594h> for the metadata entity of this person,
+and `<http://data.bnf.fr/ark:/12148/cb11927594h#about> for the metadata entity of this person,
 more concretely an instance of `skos:Concept`.
 
-The tool [trifid](https://github.com/zazuko/trifid) which provides a basic UI to browse resources seems to have issues with the BnF notation.
+The tool [trifid](https://github.com/zazuko/trifid) which provides a basic UI to browse resources seems to have issues with the notation of BnF.
 The HTML anchor `#about` which is part of the IRI of a thing is not recognized
 as part of the IRI in trifid but just as HTML anchor.
-Thus trifid shows the related metadata entity.
+Thus, instead of the metadata entity trifid always shows the related *thing*
+(the other URI without `#about`) assuming there is a `#about` section in the HTML page.
 
 ## Authors
+
+Authors usually have a given name and a family name and might be uniquely identified by an International Standard Name Identifier (ISNI).
+Besides an actual author, any expression may have several other collaborators involved
+such as translators or illustrators.
+For the BELTRANS project the nationality of authors is important
+as we only consider Belgian authors.
 
 According to a LRM to schema.org mapping performed by the Royal Library of the Netherlands (KB),
 the *LRM Agent* concept is not fully compatible with a `schema:Agent`,
