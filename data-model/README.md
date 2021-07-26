@@ -1,5 +1,36 @@
 # Data model
 
+This data model has the aim to enable data stewardship on bibliographic data from heterogeneous data sources.
+
+## Explanations
+
+In this document we develop requirements in the form of user stories which are rendered the following:
+
+> :smiley: *I am a user story from the perspective of the public*
+
+> :computer: *I am a user story from the perspective of a data steward*
+
+> :books: *I am a user story from the perspective of a researcher*
+
+Our data model is represented using the Resource Description Framework (RDF)
+and for the different components of the model (and the data) we use the following namespaces.
+
+```
+# BELTRANS data model (concepts and properties)
+btm: <http://data.kbr.be/beltrans/model#> .
+
+# BELTRANS data model shapes (constraints on the data)
+bts: <http://data.kbr.be/beltrans/shapes#> .
+
+# BELTRANS data regarding real world things
+btd: <http://data.kbr.be/id/data/> .
+
+# BELTRANS data regarding metadata entities
+btmd: <http://data.kbr.be/doc/>
+```
+
+## High level goals
+
 The aim of this data model is to represent books, their translations as well as involved parties such as authors, publishers, etc within a RDF Knowledge Graph (Linked Data).
 Therefore we have to consider the following high-level objectives:
 
@@ -35,6 +66,8 @@ as part of the IRI in trifid but just as HTML anchor.
 Thus, instead of the metadata entity trifid always shows the related *thing*
 (the other URI without `#about`) assuming there is a `#about` section in the HTML page.
 
+> :computer: *As a data steward, I want to represent information about things different from things.*
+
 ## Authors
 
 Authors usually have a given name and a family name and might be uniquely identified by an International Standard Name Identifier (ISNI).
@@ -49,6 +82,8 @@ because *LRM agents* are non-fictive persons who are alive or have lived.
 Different personas (or pseudonyms of authors) are represented as different instances of `schema:Person`,
 which are linked together with `schema:sameAs`.
 
+
+> :books: *As a researcher, I want to get all information related to an author.*
 
 ## Translations
 
