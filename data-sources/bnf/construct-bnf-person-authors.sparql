@@ -1,0 +1,59 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX schema: <http://schema.org/>
+PREFIX isni: <http://isni.org/ontology#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+
+
+INSERT {
+
+  GRAPH <http://data.kbr.be/graphs/staging/authors> {
+    ?person a schema:Person ;
+      schema:familyName    ?familyName ;
+      schema:givenName     ?firstName ;
+      schema:gender        ?gender ;
+      schema:nationality   ?nationality ;
+      schema:knowsLanguage ?language ;
+      bf:identifiedBy      ?isni ;
+      owl:sameAs ?sameSKOS ;
+      owl:sameAs ?sameOWL .
+  }
+}
+WHERE {
+ 
+  SERVICE <http://localhost:8090/bigdata/namespaces/bnf-person-authors>
+  {
+    ?person rdf:type foaf:Person .
+
+    OPTIONAL { ?person foaf:familyName ?familyName .}
+    OPTIONAL { ?person foaf:givenName ?firstName .}
+
+    # Use schema:Male, schema:Female or if not matching any literal
+    OPTIONAL {
+      ?person foaf:gender ?g .
+      BIND( IF( ?g="male", IRI(schema:Male),
+              IF( ?g="female", IRI(schema:Female), ?g)
+            ) AS ?gender 
+      )
+    }
+
+    # Belgium would be <http://id.loc.gov/vocabulary/countries/be>
+    OPTIONAL { ?person rdagroup2elements:countryAssociatedWithThePerson ?nationality .}
+
+    OPTIONAL { ?person rdagroup2elements:languageOfThePerson ?language .}
+    OPTIONAL { ?person owl:sameAs ?sameOWL . }
+
+    #  OPTIONAL { ?person rdagroup2elements:fieldOfActivityOfThePerson ?field .}
+ 
+    # Information such as ISNI number or linked resources are available via a person's corresponding skos:Concept
+    ?personConcept a skos:Concept ;
+        foaf:focus ?person .
+  
+    OPTIONAL { ?personConcept isni:identifierValid ?isni . }
+    OPTIONAL { ?personConcept skos:exactMatch ?sameSKOS . }
+  
+  }  
+}
