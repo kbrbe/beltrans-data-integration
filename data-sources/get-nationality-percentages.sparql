@@ -1,0 +1,31 @@
+# This query returns different percentages to gain insights, it should be executed against the integrated model
+prefix schema: <http://schema.org/>
+
+SELECT
+  (?nationality AS ?value)
+  (?nationalityCount AS ?number)
+  (( ?nationalityCount * 100  / ?personsTotal) AS ?percentage)
+WHERE {
+  
+  # Get the number of persons with a nationality
+  {
+    SELECT ?nationality (COUNT(?nationality) AS ?nationalityCount)
+    WHERE {
+      ?p a schema:Person ;
+         schema:nationality ?nationality .
+    }
+    GROUP BY ?nationality
+    ORDER BY DESC(?nationalityCount)
+    LIMIT 10
+
+  }
+
+  # This sub query gets the total number of authors and is used to calculate percentages
+  {
+    SELECT (COUNT(?person) AS ?personsTotal)
+    WHERE {
+      ?person a schema:Person .
+    }   
+  }
+
+}
