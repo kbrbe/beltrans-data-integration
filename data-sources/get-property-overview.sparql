@@ -1,0 +1,7 @@
+# get a list of used properties and their number
+SELECT (?p AS ?value) (COUNT(?p) AS ?count)
+WHERE {
+  ?s ?p ?o .
+}
+GROUP BY ?p
+ORDER BY DESC(?count)

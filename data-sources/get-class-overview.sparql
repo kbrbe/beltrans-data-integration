@@ -1,0 +1,7 @@
+# get a list of used classes and number of their instances
+SELECT (?class AS ?value) (COUNT(?instance) AS ?count)
+WHERE {
+  ?instance a ?class .
+}
+GROUP BY ?class
+ORDER BY DESC(?count)
