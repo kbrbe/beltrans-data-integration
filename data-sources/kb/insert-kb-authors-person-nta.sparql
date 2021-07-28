@@ -10,16 +10,16 @@ PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 
 INSERT {
 
-  GRAPH <http://data.kbr.be/graphs/staging/authors> {
+  GRAPH <http://data.kbr.be/graphs/staging/authors/kb/persons/nta> {
+
     ?person a schema:Person ;
       schema:familyName    ?familyName ;
-      schema:givenName     ?firstName ;
-#      schema:gender        ?gender ;
+      schema:givenName     ?givenName ;
       schema:nationality   ?nationality ;
-      schema:knowsLanguage ?language ;
-      bf:identifiedBy      ?isni ;
-      owl:sameAs ?sameSKOS ;
-      owl:sameAs ?sameOWL .
+      owl:sameAs ?sameAsSchema ;
+
+      # The ISNI reference is stored as an ISNI URI, but we only want the number
+      bf:identifiedBy      STRAFTER((STR(?isni), 'isni.org/isni/') .
   }
 }
 WHERE {
@@ -31,11 +31,16 @@ WHERE {
   
     OPTIONAL { ?person rdfs:label ?label .}
     OPTIONAL { ?person schema:familyName ?familyName .}
-    OPTIONAL { ?person schema:givenname ?givenname .}
+    OPTIONAL { ?person schema:givenName ?givenName .}
     OPTIONAL { ?person schema:alternateName ?altName .}
     OPTIONAL { ?person schema:nationality ?nationality .}
     OPTIONAL { ?person schema:birthDate ?birthDate .}
     OPTIONAL { ?person schema:deathDate ?deathDate .} 
+
+    OPTIONAL {
+      ?person schema:sameAs ?isni .
+      FILTER(regex(str(?isni), 'isni', 'i'))
+    }
     OPTIONAL { ?person schema:sameAs ?sameAsSchema .}
    
   }  

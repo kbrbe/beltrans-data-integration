@@ -10,7 +10,7 @@ PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 
 INSERT {
 
-  GRAPH <http://data.kbr.be/graphs/staging/authors> {
+  GRAPH <http://data.kbr.be/graphs/staging/authors/bnf/persons/> {
     ?person a schema:Person ;
       schema:familyName    ?familyName ;
       schema:givenName     ?firstName ;
