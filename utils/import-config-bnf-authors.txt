@@ -1,0 +1,9 @@
+namespace=bnf-authors
+propertyFile=/RWStore.properties
+fileOrDirs=/data/bnf/authors
+-format=n-triples
+quiet=false
+verbose=0
+closure=false
+durableQueues=true
+namespace=bnf-authors-persons

@@ -1,0 +1,8 @@
+namespace=kb-authors
+propertyFile=/RWStore.properties
+fileOrDirs=/data/kb/authors/nta
+-format=turtle
+quiet=false
+verbose=0
+closure=false
+durableQueues=true

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="com.bigdata.rdf.sail.namespace">kb-authors-nta</entry>
+<entry key="com.bigdata.rdf.store.AbstractTripleStore.quads">false</entry>
+<entry key="com.bigdata.rdf.sail.truthMaintenance">false</entry>
+</properties>
