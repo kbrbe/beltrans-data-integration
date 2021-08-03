@@ -8,8 +8,6 @@ services:
   #
   blazegraph:
     build: ./blazegraph
-    ports:
-      - "8090:8080"
     environment:
       - JAVA_OPTS=-Xmx2g
     volumes:
@@ -35,9 +33,9 @@ services:
       # Static HTML pages which should be served by nginx
       - $PWD/data/nginx/www:/www/data
       # A directory to store the 'challenge' (needed for domain validation as part of the certification creation)
-      - $PWD/data/certbot/conf:/etc/letsencrypt
+      #- $PWD/data/certbot/conf:/etc/letsencrypt
       # The actual SSL certificate will be stored here
-      - $PWD/data/certbot/www:/var/www/certbot
+      #- $PWD/data/certbot/www:/var/www/certbot
     # reload the config every 6 hours to also profit from renewed SSL certificates
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     logging:
@@ -53,9 +51,9 @@ services:
   # The entrypoint command ensures the certificat will be renewed every 12 hours
   # (please note that nginx needs to reload its config to use the renewed certificate)
   #
-  certbot:
-    image: cerbot/cerbot
-    volumes:
-      - $PWD/data/certbot/conf:/etc/letsencrypt
-      - $PWD/data/certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  #certbot:
+  #  image: cerbot/cerbot
+  #  volumes:
+  #    - $PWD/data/certbot/conf:/etc/letsencrypt
+  #    - $PWD/data/certbot/www:/var/www/certbot
+  #  entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
