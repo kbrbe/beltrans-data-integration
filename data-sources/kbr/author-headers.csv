@@ -1,0 +1,61 @@
+Type,TYPL
+Geautoriseerde vorm,REFA
+KBR - Autorité date,ADAT
+ISNI/VIAF (024$a),ISNI
+Lieu de naissance,APAY
+Lieu de décès,ADEC
+Adres,ADRS
+Uitgeversnummer,EDNR
+Gelinkte documenten,NBDL
+Identifier,IDNO
+043$c - pays de collectivité - country code ISO,C043
+Actif,ACTI
+Agence de catalogage,AGEN
+Aire,AREA
+Autorité - Public note,AUNO
+Context,TYPE
+Copyright,COPA
+Créateur de la notice,CREA
+Culture,CULT
+Date de création de la notice,DACR
+Date de dernière vendange,DCDA
+Date de désactivation de la notice,CODD
+Date de modification de la notice,DAMO
+Est enrichie par la vendange,DCEN
+Est un sujet Rameau,RAME
+Forme autorisée,AFAU
+Forme autorisée - Elément d'entrée,AFAE
+Forme rejetée,AFRE
+Fournisseur d'import,SYSBASE
+Identifiant,id
+Identifiant complet,IDCN
+Identifiant de la notice mère,IDMN
+KBR - 046$f,F046
+KBR - 046$g,G046
+KBR - 150$g,G150
+KBR - Langue autorité,APLA
+KBR - Nationalité APEP,ANAT
+KBR - Premier lettre autorité,ABCD
+KBR - Utilisateur Vubis,D940
+KBR - autorités $l,ALAN
+KBR - autorités données biographiques,ABIO
+KBR ancien IDN,VBID
+KBR-Identifiant (ID Syracuse et IDENT),KBRI
+Langue de catalogage,LANG
+Matière : avec subdivision géo.,AVMG
+Matière : type d'utilisation,AVMT
+Matière : utilisation,AVMU
+Modificateur de la notice,MODI
+No. d'éditeur/note,EDNO
+Nom de la personne ayant désactivé la notice,CODN
+Non réservable,NONR
+Pays d'édition,ALIE
+Règle,RULE
+Règle de la notice mère,RUNM
+Référence,REFA
+Traitement d'import,TRAI
+Type de la notice mère,TYNM
+Type de notice,TYPN
+Type de vedette matière,TYVM
+Téléphone mail url source note,MAIL
+Unité de gestion,SITE
