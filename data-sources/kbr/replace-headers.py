@@ -1,5 +1,6 @@
 #
-# Sven Lieber
+# (c) 2021 Sven Lieber
+# KBR Brussels
 #
 import csv
 from optparse import OptionParser
@@ -24,7 +25,7 @@ def main():
     exit(1)
 
   #
-  # Open input file with encoding 'utf-8-sig' because the Syracuse export contains Byte Order marks (BOM)
+  # Open input file with encoding 'utf-8-sig' (instead of 'utf-8') because the Syracuse export contains Byte Order marks (BOM)
   #
   with open(options.input_file, 'r', encoding="utf-8-sig") as inFile:
     inputReader = csv.reader(inFile, delimiter=options.delimiter)
@@ -54,10 +55,19 @@ def main():
           notFound.append(h)
 
        # todo: write new header and content to output file 
+      with open(options.output_file, 'w', encoding="utf-8") as outFile:
+        outputWriter = csv.writer(outFile, delimiter=options.delimiter, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        # write new header (which is the updated oldHeader)
+        outputWriter.writerow(oldHeader)
+
+        # write the content of the input file
+        for row in inputReader:
+          outputWriter.writerow(row)
 
       print("replaced " + str(replaced) + "/" + str(oldHeaderLength) + " headers!")
       if(replaced != oldHeaderLength):
-        print("Could not find the following fields in the mapping:")
+        print("Finished with warnings: could not find the following fields in the mapping:")
         print(notFound)
       
 
