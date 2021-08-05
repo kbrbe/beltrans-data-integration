@@ -1,0 +1,88 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  authors:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates authorities represented as schema Person."
+    sources:
+      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
+    s: btid:authority_$(IDNO)
+    po:
+      - [a, schema:Person]
+      - [rdfs:label, $(REFA)]
+      - [schema:nationality, countries:be~iri] 
+      - [foaf:isPrimaryTopicOf, btabout:authority_$(IDNO)~iri]
+      - p: bf:identifiedBy
+        o: btid:identifier_isni_$(IDNO)
+        condition:
+          function: startsWith
+          parameters:
+            - [grel:valueParameter, $(ISNI)]
+            - [grel:string_sub, "ISNI 0"]
+      - p: bf:identifiedBy
+        o: btid:identifier_viaf_$(IDNO)
+        condition:
+          function: startsWith
+          parameters:
+            - [grel:valueParameter, $(ISNI)]
+            - [grel:string_sub, "VIAF"]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsAbout:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates descriptions of authorities represented as schema WebPage."
+    sources:
+      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
+    s: btabout:authority_$(IDNO)
+    po:
+      - [a, schema:WebPage]
+      - [foaf:primaryTopic, btid:authority_$(IDNO)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsISNI:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
+    sources:
+      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
+    s: btid:identifier_isni_$(IDNO)
+    po:
+      - [a, bf:Isni]
+      - [rdf:value, $(ISNI)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsVIAF:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
+    sources:
+      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
+    s: btid:identifier_viaf_$(IDNO)
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "VIAF"]
+      - [rdf:value, $(ISNI)]
