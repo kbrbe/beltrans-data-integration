@@ -26,7 +26,7 @@ bts: <http://data.kbr.be/beltrans/shapes#> .
 btd: <http://data.kbr.be/id/data/> .
 
 # BELTRANS data regarding metadata entities
-btmd: <http://data.kbr.be/doc/>
+btmd: <http://data.kbr.be/about/data/>
 ```
 
 ## High level goals

@@ -25,7 +25,10 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates authorities represented as schema Person."
     sources:
-      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
+#      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
+      - access: "2021-08-04-kbr-belgian-authors-normalized.csv"
+        referenceFormulation: csv
+        delimiter: ';'
     s: btid:authority_$(IDNO)
     po:
       - [a, schema:Person]
@@ -35,14 +38,14 @@ mappings:
       - p: bf:identifiedBy
         o: btid:identifier_isni_$(IDNO)
         condition:
-          function: startsWith
+          function: grel:string_startsWith
           parameters:
             - [grel:valueParameter, $(ISNI)]
             - [grel:string_sub, "ISNI 0"]
       - p: bf:identifiedBy
         o: btid:identifier_viaf_$(IDNO)
         condition:
-          function: startsWith
+          function: grel:string_startsWith
           parameters:
             - [grel:valueParameter, $(ISNI)]
             - [grel:string_sub, "VIAF"]
@@ -54,7 +57,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates descriptions of authorities represented as schema WebPage."
     sources:
-      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
+      - access: "2021-08-04-kbr-belgian-authors-normalized.csv"
+        referenceFormulation: csv
+        delimiter: ';'
     s: btabout:authority_$(IDNO)
     po:
       - [a, schema:WebPage]
@@ -67,7 +72,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
     sources:
-      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
+      - access: "2021-08-04-kbr-belgian-authors-normalized.csv"
+        referenceFormulation: csv
+        delimiter: ';'
     s: btid:identifier_isni_$(IDNO)
     po:
       - [a, bf:Isni]
@@ -80,7 +87,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
     sources:
-      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
+      - access: "2021-08-04-kbr-belgian-authors-normalized.csv"
+        referenceFormulation: csv
+        delimiter: ';'
     s: btid:identifier_viaf_$(IDNO)
     po:
       - [a, bf:Identifier]
