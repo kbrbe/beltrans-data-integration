@@ -16,6 +16,7 @@ prefixes:
   btabout: "http://kbr.be/about/data/"
   ex: "http://example.org/ns#"
   countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
 
 mappings:
 
@@ -25,8 +26,8 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates authorities represented as schema Person."
     sources:
-#      - [2021-08-04-kbr-belgian-authors-normalized.csv~csv]
-      - access: "2021-08-04-kbr-belgian-authors-normalized.csv"
+#      - [2021-08-09-kbr-belgian-authors-enriched.csv~csv]
+      - access: "2021-08-09-kbr-belgian-authors-enriched.csv"
         referenceFormulation: csv
         delimiter: ';'
     s: btid:authority_$(IDNO)
@@ -34,16 +35,18 @@ mappings:
       - [a, schema:Person]
       - [rdfs:label, $(REFA)]
       - [schema:nationality, countries:be~iri] 
+      - [schema:givenName, $(given_name)]
+      - [schema:familyName, $(family_name)]
       - [foaf:isPrimaryTopicOf, btabout:authority_$(IDNO)~iri]
       - p: bf:identifiedBy
-        o: btid:identifier_isni_$(IDNO)
+        o: btid:identifier_isni_$(IDNO)~iri
         condition:
           function: grel:string_startsWith
           parameters:
             - [grel:valueParameter, $(ISNI)]
             - [grel:string_sub, "ISNI 0"]
       - p: bf:identifiedBy
-        o: btid:identifier_viaf_$(IDNO)
+        o: btid:identifier_viaf_$(IDNO)~iri
         condition:
           function: grel:string_startsWith
           parameters:
@@ -57,7 +60,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates descriptions of authorities represented as schema WebPage."
     sources:
-      - access: "2021-08-04-kbr-belgian-authors-normalized.csv"
+      - access: "2021-08-09-kbr-belgian-authors-enriched.csv"
         referenceFormulation: csv
         delimiter: ';'
     s: btabout:authority_$(IDNO)
@@ -72,10 +75,15 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
     sources:
-      - access: "2021-08-04-kbr-belgian-authors-normalized.csv"
+      - access: "2021-08-09-kbr-belgian-authors-enriched.csv"
         referenceFormulation: csv
         delimiter: ';'
     s: btid:identifier_isni_$(IDNO)
+    condition:
+      function: grel:string_startsWith
+      parameters:
+        - [grel:valueParameter, $(ISNI)]
+        - [grel:string_sub, "ISNI 0"]
     po:
       - [a, bf:Isni]
       - [rdf:value, $(ISNI)]
@@ -87,10 +95,15 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
     sources:
-      - access: "2021-08-04-kbr-belgian-authors-normalized.csv"
+      - access: "2021-08-09-kbr-belgian-authors-enriched.csv"
         referenceFormulation: csv
         delimiter: ';'
     s: btid:identifier_viaf_$(IDNO)
+    condition:
+      function: grel:string_startsWith
+      parameters:
+        - [grel:valueParameter, $(ISNI)]
+        - [grel:string_sub, "VIAF"]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "VIAF"]
