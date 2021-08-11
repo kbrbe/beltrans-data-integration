@@ -39,6 +39,12 @@ def getNormalizedDate(row, sourceColumn):
     pass
 
 
+def getNonEmptyRowPercentage(df, column):
+  """This function counts the number of non empty cells of df[column] and returns the percentage based on the total number of rows."""
+  notEmpty = df[column].notnull().sum()
+  return (notEmpty*100)/len(df.index)
+
+
 def main():
   """This script performs pre processing before the data can be mapped to RDF, e.g. by adding a given_name and family_name column based on a split on the AFAE column."""
 
@@ -68,6 +74,9 @@ def main():
   #
   inputCSV['birth_date'] = inputCSV.apply(lambda row: getNormalizedDate(row, 'F046'), axis=1)
   inputCSV['death_date'] = inputCSV.apply(lambda row: getNormalizedDate(row, 'G046'), axis=1)
+
+  print("parsed birth dates (F046): " + str( getNonEmptyRowPercentage(inputCSV, 'birth_date') ) + "%")
+  print("parsed death dates (G046): " + str( getNonEmptyRowPercentage(inputCSV, 'death_date') ) + "%")
 
   inputCSV.to_csv(options.output_file, sep=options.delimiter, encoding="utf-8", index=False)
 
