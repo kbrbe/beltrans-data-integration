@@ -9,13 +9,28 @@ The setup is configured via environment variables (see `example.env`).
 
 The database can be started with the following **three steps**.
 
-1. Configure the setup by setting required environment variables
+1. Configure the setup
+
+1.1. set required environment variables
 
 ```bash
 cp example.env .env
 
 # provide values for the variables in .env using your favorite text editor
 ```
+
+1.2. generate user and passwords for the NGINX reverse proxy
+
+```bash
+# install tool if needed
+sudo apt-get install apache2-utils
+
+# generate a user by providing a username (you will be prompoted to set a password)
+htpasswd -n <user_name>
+
+# add the resulting line consisting of username and password hash to the file ./data/nginx/conf.d/.htpasswd
+``` 
+
 
 **The use of Letsencrypt currently does not work**
 ~~2. Initialize SSL certificates (start with a dummy certifiate such that nginx can start and then generate a real Letsencrypt certificate)
@@ -51,6 +66,6 @@ Therefore the corresponding variables in `blazegraph/Dockerfile` need to be upda
 
 The setup is based on several online sources
 
-* Blazegraph Dockerfile based on: github.com/viaacode/knowledge-graph-organizations
-* Setting up reverse proxy rules for nginx and Blazegraph baskauf.blogspot.com/2017/07/how-and-why-we-set-up-sparql-endpoint.html
-* Setting up an nginx docker container with Letsencrypt pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71
+* Blazegraph Dockerfile based on: https://github.com/viaacode/knowledge-graph-organizations
+* Setting up reverse proxy rules for nginx and Blazegraph https://baskauf.blogspot.com/2017/07/how-and-why-we-set-up-sparql-endpoint.html
+* Setting up an nginx docker container with Letsencrypt https://pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71
