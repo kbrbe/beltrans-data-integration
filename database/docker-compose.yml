@@ -11,7 +11,7 @@ services:
     environment:
       - JAVA_OPTS=-Xmx2g
     volumes:
-      - "$PWD/data/blazegraph:/data"
+      - "./data/blazegraph:/data"
 
 
   # ---------------------------------------------------------------------------
@@ -29,9 +29,9 @@ services:
       - SPARQL_ENDPOINT
     volumes:
       # Configuration files for nginx
-      - $PWD/data/nginx/conf.d:/etc/nginx/conf.d
+      - ./data/nginx/conf.d:/etc/nginx/conf.d
       # Static HTML pages which should be served by nginx
-      - $PWD/data/nginx/www:/www/data
+      - ./data/nginx/www:/www/data
       # A directory to store the 'challenge' (needed for domain validation as part of the certification creation)
       #- $PWD/data/certbot/conf:/etc/letsencrypt
       # The actual SSL certificate will be stored here
