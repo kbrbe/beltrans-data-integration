@@ -11,7 +11,11 @@ then
   exit 1
 fi;
 
+# get environment variables
+export $(cat .env | sed 's/#.*//g' | xargs)
+
 curl -X POST \
+  --user $SPARQL_ENDPOINT_USER:$SPARQL_ENDPOINT_PASSWORD \
   --data-binary @$1 \
   --header 'Content-Type:application/xml' \
-  http://localhost:8090/bigdata/namespace
+  $SPARQL_ENDPOINT_PUBLIC/namespace
