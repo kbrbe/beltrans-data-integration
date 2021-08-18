@@ -1,0 +1,214 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  authors:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates authorities represented as schema Person."
+    sources:
+      - access: "wikidata/wikidata-belgians-kbr.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:wikidata_dump_$(rowID)
+    po:
+      - [a, schema:Person]
+      - [rdfs:label, $(Nom complet)]
+      - [schema:nationality, countries:be~iri] 
+      - [foaf:isPrimaryTopicOf, btabout:wikidata_dump_$(rowID)~iri]
+      - p: schema:sameAs
+        o: $(Lien Wikidata)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(Lien Wikidata)]
+            - [grel:valueParameter2, ""]
+      - p: schema:birthDate
+        o:
+          value: $(birth_date)
+          datatype: xsd:date
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(birth_date)]
+            - [grel:valueParameter2, ""]
+      - p: schema:deathDate
+        o:
+          value: $(death_date)
+          datatype: xsd:date
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(death_date)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_isni_$(rowID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(ISNI)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_kbr_$(KBR Identifiant)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(KBR Identifiant)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_nta_$(NTA)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(NTA)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_bnf_$(BnF)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(BnF)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_dnb_$(DNB)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(DNB)]
+            - [grel:valueParameter2, ""]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsAbout:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates descriptions of authorities represented as schema WebPage."
+    sources:
+      - access: "wikidata/wikidata-belgians-kbr.csv"
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btabout:wikidata_dump_$(rowID)
+    po:
+      - [a, schema:WebPage]
+      - [foaf:primaryTopic, btid:wikidata_dump_$(rowID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsKBR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for KBR identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated KBR subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'KBR' identifiers."
+    sources:
+      - access: "wikidata/wikidata-belgians-kbr.csv"
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:identifier_kbr_$(rowID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(KBR Identifiant)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "KBR"]
+      - [rdf:value, $(KBR Identifiant)]
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsISNI:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
+    sources:
+      - access: "wikidata/wikidata-belgians-kbr.csv"
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:identifier_isni_$(rowID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(ISNI)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Isni]
+      - [rdf:value, $(ISNI)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsBnF:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for BnF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated BnF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'BnF' identifiers."
+    sources:
+      - access: "wikidata/wikidata-belgians-kbr.csv"
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:identifier_bnf_$(rowID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(BnF)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "BnF"]
+      - [rdf:value, $(BnF)]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsNTA:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for NTA identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated NTA subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'NTA' identifiers."
+    sources:
+      - access: "wikidata/wikidata-belgians-kbr.csv"
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:identifier_nta_$(rowID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(NTA)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "NTA"]
+      - [rdf:value, $(NTA)]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsDNB:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for DNB identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated DNB subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'DNB' identifiers."
+    sources:
+      - access: "wikidata/wikidata-belgians-kbr.csv"
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:identifier_dnb_$(rowID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(DNB)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "DNB"]
+      - [rdf:value, $(DNB)]
