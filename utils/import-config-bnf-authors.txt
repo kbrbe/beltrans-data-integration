@@ -1,9 +1,8 @@
-namespace=bnf-authors
 propertyFile=/RWStore.properties
-fileOrDirs=/data/bnf/authors
+fileOrDirs=/data/bnf/authors/merged/
 -format=n-triples
 quiet=false
-verbose=0
+verbose=2
 closure=false
 durableQueues=true
 namespace=bnf-authors-persons
