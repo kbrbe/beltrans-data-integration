@@ -1,0 +1,16 @@
+# This query returns the number of schema:Person instances which have a VIAF identifier
+# The dollar variables need to be replaced by any calling script
+
+prefix bf: <http://id.loc.gov/ontologies/bibframe/> 
+prefix schema: <http://schema.org/>
+prefix countries: <http://id.loc.gov/vocabulary/countries/>
+
+SELECT (COUNT(?person) as ?count)
+WHERE {
+  ?person a schema:Person ;
+    schema:nationality countries:be ;
+    bf:identifiedBy ?identifierEntity .
+
+  ?identifierEntity a bf:Identifier ;
+    rdfs:label "$identifierName" .
+}

@@ -17,10 +17,15 @@ def _readSPARQLQuery(filename):
     return content
 
 # ------------------------------------------------------------
-def _queryJSON(sparqlObject, sparqlQueryFile):
+def _queryJSON(sparqlObject, sparqlQueryFile, variables={}):
     """Queries the given SPARQL endpoint (SPARQLWrapper object)
-    with the SPARQL query read from the given file and convert output to JSON."""
-    sparqlObject.setQuery(_readSPARQLQuery(sparqlQueryFile))
+    with the SPARQL query read from the given file and convert output to JSON. Dollar variables can be replaced based on the provided parameter"""
+    queryString = _readSPARQLQuery(sparqlQueryFile) 
+
+    if variables:
+      for v in variables:
+        queryString = queryString.replace('$'+ v, variables[v])
+    sparqlObject.setQuery(queryString)
     sparqlObject.setReturnFormat(JSON)
     return sparqlObject.queryAndConvert()
 
@@ -47,6 +52,11 @@ def _convertPercentage(result):
     return _convertResultsToArray(result, ['value', 'number', 'percentage'])
 
 # ------------------------------------------------------------
+def _convertCount(result):
+    """Converts SPARQL result bindings of a '?count' query to integer."""
+    return int(_convertResultsToArray(result, ['count'])[0][0])
+
+# ------------------------------------------------------------
 def getPropertyOverview(sparqlObject):
     """Query the given SPARQL endpoint (SPARQLWrapper object) for all properties and their number."""
     result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-property-overview.sparql'))
@@ -64,4 +74,39 @@ def getNationalityOverview(sparqlObject):
     result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-nationality-percentages.sparql'))
     return _convertPercentage(result)
     
+# ------------------------------------------------------------
+def getNumberOfBelgiansLOCURI(sparqlObject):
+    """Query the given SPARQL endpoint (SPARQLWrapper object)
+    for the number of Belgian authors, i.e. instances of schema:Person
+    with schema:nationality <http://id.loc.gov/vocabulary/countries/be>"""
+    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-belgians-LOC-URI.sparql'))
+    return _convertCount(result)
+
+# ------------------------------------------------------------
+def getNumberOfPersonsWithISNI(sparqlObject):
+    """Query the given SPARQL endpoint (SPARQLWrapper object)
+    for the number of schema:Person instances having an ISNI identifier"""
+    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-persons-with-isni.sparql'))
+    return _convertCount(result)
+
+# ------------------------------------------------------------
+def getNumberOfBelgiansWithISNI(sparqlObject):
+    """Query the given SPARQL endpoint (SPARQLWrapper object)
+    for the number of schema:Person instances with nationality Belgian having an ISNI identifier"""
+    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-belgians-with-isni.sparql'))
+    return _convertCount(result)
+
+# ------------------------------------------------------------
+def getNumberOfPersonsWithIdentifier(sparqlObject, identifierName):
+    """Query the given SPARQL endpoint (SPARQLWrapper object)
+    for the number of schema:Person instances having an identifier with the given name."""
+    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-persons-with-custom-identifier.sparql'), {'identifierName': identifierName})
+    return _convertCount(result)
+
+# ------------------------------------------------------------
+def getNumberOfBelgiansWithIdentifier(sparqlObject, identifierName):
+    """Query the given SPARQL endpoint (SPARQLWrapper object)
+    for the number of schema:Person instances with nationality Belgian having an identifier with the given name."""
+    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-belgians-with-custom-identifier.sparql'), {'identifierName': identifierName})
+    return _convertCount(result)
 
