@@ -3,8 +3,13 @@
 The Royal Library of the Netherlands provides information via a SPARQL endpoint or RDF dumps.
 There are several datasets which we briefly discuss in this section.
 
+There are several dumps which cover different datasets, an overview of all dumps is available here: https://data.bibliotheken.nl/files/
+
 * **NTA**: Personen uit de Nederlandse Thesaurus van Auteursnamen
 * **DBNLA**: Thesaurus Auteurs Digitale bibliotheek voor de Nederlandse letteren
+
+The import of all author information (`48,702,577 triples`)
+from the `3.4 GB` XML dump of NTA took *3.8 hours* on a Blazegraph instance on a server given 2GB of RAM.
 
 ### Personen uit de Nederlandse Thesaurus van Auteursnamen (NTA)
 
