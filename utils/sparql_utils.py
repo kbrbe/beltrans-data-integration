@@ -1,4 +1,7 @@
 from SPARQLWrapper import SPARQLWrapper, TURTLE, JSON
+
+#import pandas as pd
+from pandas.io.json import json_normalize
 import os
 
 baseDir = '/home/slieber/repos/beltrans-data'
@@ -109,4 +112,27 @@ def getNumberOfBelgiansWithIdentifier(sparqlObject, identifierName):
     for the number of schema:Person instances with nationality Belgian having an identifier with the given name."""
     result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-belgians-with-custom-identifier.sparql'), {'identifierName': identifierName})
     return _convertCount(result)
+
+# ------------------------------------------------------------
+def getQueryResultsAsDataframe(sparqlObject, queryFile):
+    """Query the given SPARQL endpoint (SPARQLWrapper object)
+    with the query in the given file and return the result as pandas dataframe."""
+    result = _queryJSON(sparqlObject, queryFile)
+    return json_normalize(result['results']['bindings'])
+
+# ------------------------------------------------------------
+def getWikidataBelgiansIdentifiers(sparqlObject):
+    """Query the given SPARQL endpoint (SPARQLWrapper object)
+    for instances of schema:Person with optional KB, BnF and ISNI identifiers."""
+    results = getQueryResultsAsDataframe(sparqlObject, os.path.join(dsDir, 'get-identifier-integration-data.sparql'))
+    results = results[['wdKbrID.value', 'wdKbID.value', 'wdBnfID.value', 'wdISNI.value']]
+    return results.rename(columns = lambda col: col.replace(".value", ""))
+
+# ------------------------------------------------------------
+def getKBIdentifiers(sparqlObject):
+    """Query the given SPARQL endpoint (SPARQLWrapper object)
+    for instances of schema:Person to obtain VIAF and ISNI identifiers and schema:WebPage to obtain KB identifiers."""
+    results = getQueryResultsAsDataframe(sparqlObject, os.path.join(dsDir, 'get-kb-identifiers.sparql'))
+    results = results[['kbKbrID.value', 'kbViafID.value', 'kbIsniID.value']]
+    return results.rename(columns = lambda col: col.replace(".value", ""))
 
