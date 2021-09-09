@@ -1,0 +1,24 @@
+prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+prefix schema: <http://schema.org/>
+
+SELECT DISTINCT ?kbKbID (strafter(str(?viaf), "viaf.org/viaf/") as ?kbViafID) (strafter(str(?isni), "isni.org/isni/") as ?kbIsniID)
+WHERE {
+  
+  ?meta a schema:WebPage ;
+          <http://data.bibliotheken.nl/def#ppn> ?kbKbID ;
+          schema:mainEntity ?person .
+  
+  ?person a schema:Person .
+  
+  OPTIONAL {
+    ?person schema:sameAs ?isni .
+    FILTER(regex(str(?isni), 'isni', 'i'))
+  }
+  
+  OPTIONAL {
+    ?person schema:sameAs ?viaf .
+    FILTER(regex(str(?viaf), 'viaf', 'i'))
+  }
+  
+}
+

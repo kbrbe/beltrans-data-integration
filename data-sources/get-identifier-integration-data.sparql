@@ -1,0 +1,42 @@
+# This query returns the number of schema:Person instances which have a VIAF identifier
+# The dollar variables need to be replaced by any calling script
+
+prefix bf: <http://id.loc.gov/ontologies/bibframe/> 
+prefix schema: <http://schema.org/>
+
+SELECT DISTINCT ?wdKbrID ?wdKbID ?wdBnfID ?wdISNI
+WHERE {
+  ?person a schema:Person .
+
+  OPTIONAL{
+    ?person bf:identifiedBy ?kbr .
+
+    ?kbr a bf:Identifier ;
+      rdfs:label "KBR" ;
+      rdf:value ?wdKbrID .
+  }
+
+  OPTIONAL{
+    ?person bf:identifiedBy ?kb .
+
+    ?kb a bf:Identifier ;
+      rdfs:label "NTA" ;
+      rdf:value ?wdKbID .
+  }
+
+  OPTIONAL{
+    ?person bf:identifiedBy ?bnf .
+
+    ?bnf a bf:Identifier ;
+      rdfs:label "BnF" ;
+      rdf:value ?wdBnfID .
+  }
+
+  OPTIONAL{
+    ?person bf:identifiedBy ?isni .
+
+    ?isni a bf:Isni ;
+      rdf:value ?wdISNI .
+  }
+
+}
