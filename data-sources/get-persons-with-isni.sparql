@@ -1,0 +1,12 @@
+# This query returns the number of schema:Person instances which have an ISNI identifier
+
+prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+prefix schema: <http://schema.org/>
+
+SELECT (COUNT(?person) as ?count)
+WHERE {
+  ?person a schema:Person ;
+    bf:identifiedBy ?identifierEntity .
+
+  ?identifierEntity a bf:Isni .
+}

@@ -8,6 +8,7 @@ import math
 from datetime import datetime
 
 
+# -----------------------------------------------------------------------------
 def getNormalizedDate(row, sourceColumn):
   """This function takes a data frame containing a date in 'sourceColumn', normalizes the date value and returns it."""
 
@@ -39,12 +40,35 @@ def getNormalizedDate(row, sourceColumn):
     pass
 
 
+# -----------------------------------------------------------------------------
+def extractIdentifier(row, col, pattern):
+  """Extracts the digits of an identifier in column 'col' if it starts with 'pattern'."""
+
+  value = row[col]
+  identifier = ''
+
+  if( isinstance(value, str) ):
+
+    if(str.startswith(value, pattern) and not str.endswith(value, '-') and not '?' in value):
+      # remove the prefix (e.g. VIAF or ISNI) and replace spaces (e.g. '0000 0000 1234')
+      tmp = value.replace(pattern, '')
+      #identifier = value.replace(pattern, '').replace(' ', '')
+      identifier = tmp.replace(' ', '')
+
+      if(pattern == 'ISNI' and len(identifier) > 16):
+        print("Several ISNI numbers (?) for '" + row['AFAE'] + ": '" + identifier + "'")
+        identifier = identifier[0:16]
+  return str(identifier)
+
+
+# -----------------------------------------------------------------------------
 def getNonEmptyRowPercentage(df, column):
   """This function counts the number of non empty cells of df[column] and returns the percentage based on the total number of rows."""
   notEmpty = df[column].notnull().sum()
   return (notEmpty*100)/len(df.index)
 
 
+# -----------------------------------------------------------------------------
 def main():
   """This script performs pre processing before the data can be mapped to RDF, e.g. by adding a given_name and family_name column based on a split on the AFAE column."""
 
@@ -68,6 +92,12 @@ def main():
   #
   inputCSV['family_name'] = inputCSV['AFAE'].str.split(',').apply(lambda x: [ e.strip() for e in x]).str[0]
   inputCSV['given_name'] = inputCSV['AFAE'].str.split(',').apply(lambda x: [ e.strip() for e in x]).str[1]
+
+  #
+  # extract VIAF/ISNI identifiers
+  #
+  inputCSV['isni_id'] = inputCSV.apply(lambda row: extractIdentifier(row, col='ISNI', pattern='ISNI'), axis=1)
+  inputCSV['viaf_id'] = inputCSV.apply(lambda row: extractIdentifier(row, col='ISNI', pattern='VIAF'), axis=1)
 
   #
   # clean birth/death date column

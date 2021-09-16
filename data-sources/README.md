@@ -1,31 +1,14 @@
 # Data sources
 
-This directory provides information about the different data sources.
-For each data source we provide an overview, detailled information are listed in the README of the respective data source directory.
+This directory provides information about the different data sources and how we integrate data.
+For each data source we provide, among others, a Jupyter notebook with an analysis to provide an overview, detailled information are listed in the README of the respective data source directory.
 
-## KBR (Belgium)
-The Royal Library of Belgium.
+Additionally, we provide a general Jupyter notebook for the systematic integration of the different data sources (`linking-analysis.ipynb`)
 
-* **source**: Library Management System (LMS) Syracuse
-* **URL**: https://catalog.kbr.be/
+Currently the following data sources are considered
 
-
-## BnF (France)
-The national library of France.
-
-* **source**:
-* **URL**: https://data.bnf.fr/
-
-The import of all author information (`58,390,749 triples` from both skos and foaf dump)
-from an `7.5 GB` dump
-into a Blazegraph instance running on a local VM with less than 4 GB RAM took *54 minutes*.
-
-## KB (Netherlands)
-The Royal Library of the Netherlands.
-
-* **source**:
-* **URL**:
-
-There are several dumps which cover different datasets, an overview of all dumps is available here: https://data.bibliotheken.nl/files/
-
+* The Royal Library of Belgium (KBR)
+* The Royal Library of the Netherlands (KB)
+* The national library of France (BnF)
+* A wikidata dump of Belgians including some other identifiers, manually enriched with KBR identifiers
 

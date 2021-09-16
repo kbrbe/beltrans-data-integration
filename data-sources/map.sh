@@ -16,7 +16,7 @@ fi
 if [ ! -f $YARRRML_PARSER ];
 then
   echo "yarrrml parser not found at '$YARRRML_PARSER', installing it ..."
-  git clone --branch v1.3.0 https://github.com/RMLio/yarrrml-parser.git \
+  git clone --branch feature/env-variables https://github.com/SvenLieber/yarrrml-parser.git \
   && cd yarrrml-parser \
   && npm i
   cd -
@@ -49,7 +49,7 @@ if [ $? -eq 0 ]
 then
   echo "Execute RML mapping ..."
   echo "time java -jar $RML_MAPPER -m $rml_file -s $FORMAT > $output_file"
-  time $JAVA -jar $RML_MAPPER  -m $rml_file -s $FORMAT > $output_file
+  time $JAVA -jar $RML_MAPPER -m $rml_file -s $FORMAT > $output_file
   if [ $? -eq 0 ]
   then
     echo "RDF created at '$output_file'"
