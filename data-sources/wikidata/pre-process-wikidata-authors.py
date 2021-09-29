@@ -83,6 +83,11 @@ def main():
   inputCSV['birth_date'] = inputCSV.apply(lambda row: getNormalizedDate(row, 'Date de naissance'), axis=1)
   inputCSV['death_date'] = inputCSV.apply(lambda row: getNormalizedDate(row, 'Date de décès'), axis=1)
 
+  #
+  # clean ISNI numbers, i.e. remove spaces
+  #
+  inputCSV['ISNI'] = inputCSV['ISNI'].str.replace(' ', '')
+
   print("birth dates as number with t prefix: " + str( getPatternPercentage(inputCSV, 'Date de naissance', 't')) + "%")
   print("death dates as number with t prefix: " + str( getPatternPercentage(inputCSV, 'Date de décès', 't' )) + "%")
   print("parsed birth dates (Date de naissance): " + str( getNonEmptyRowPercentage(inputCSV, 'birth_date') ) + "%")
