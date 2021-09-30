@@ -52,7 +52,7 @@ def main():
           oldHeader[i] = mapping[val]
           replaced+=1
         else:
-          notFound.append(h)
+          notFound.append(val)
 
        # todo: write new header and content to output file 
       with open(options.output_file, 'w', encoding="utf-8") as outFile:
