@@ -17,7 +17,7 @@ def main():
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC slim XML records')
-  parser.add_option('-p', '--pattern', action='store', help='The pattern for the name of the output files, e.g. "2021-10-export" which could result in files such as "2021-10-export-pbl" for publishers')
+  parser.add_option('-p', '--pattern', action='store', help='The pattern for the name of the output files, e.g. "2021-10-export" which could result in files such as "2021-10-export-pbl.csv" for publishers')
   parser.add_option('-r', '--roles', action='append', help='A list of possible roles for which output files should be generated, see list of MARC roles. Possible values are "pbl" for publisher or "trl" for translator')
   (options, args) = parser.parse_args()
 
@@ -118,6 +118,7 @@ def main():
         for bibID in stats[role]:
           for contributor in stats[role][bibID]:
             writer.writerow([role, bibID, contributor[0], contributor[1]])
+      print("Created file '" + outputFilename + "' for role '" + role + "'")
     else:
       print("Skipping '" + role + "', no contributors found with that role!")
 
