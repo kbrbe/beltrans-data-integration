@@ -17,13 +17,14 @@ def main():
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC slim XML records')
-  parser.add_option('-o', '--output-file', action='store', help='The file in which statistics about the input is stored')
+  parser.add_option('-p', '--pattern', action='store', help='The pattern for the name of the output files, e.g. "2021-10-export" which could result in files such as "2021-10-export-pbl" for publishers')
+  parser.add_option('-r', '--roles', action='append', help='A list of possible roles for which output files should be generated, see list of MARC roles. Possible values are "pbl" for publisher or "trl" for translator')
   (options, args) = parser.parse_args()
 
   #
   # Check if we got all required arguments
   #
-  if( (not options.input_file) or (not options.output_file) ):
+  if( (not options.input_file) or (not options.pattern) or (not options.roles) ):
     parser.print_help()
     exit(1)
 
@@ -101,8 +102,23 @@ def main():
 
       elem.clear()
 
-  print(json.dumps(stats, indent=4))
+  #print(json.dumps(stats, indent=4))
   print("Found roles: ")
   print(stats.keys())
+
+  #
+  # Create CSV files for some of the selected roles
+  #
+  for role in options.roles:
+    if role in stats.keys():
+      outputFilename = options.pattern + '-' + role + ".csv"
+      with open(outputFilename, 'w', encoding='utf-8') as outFile:
+        writer = csv.writer(outFile, delimiter=',')
+        writer.writerow(['role', 'bibID', 'contributorID', 'contributorName'])
+        for bibID in stats[role]:
+          for contributor in stats[role][bibID]:
+            writer.writerow([role, bibID, contributor[0], contributor[1]])
+    else:
+      print("Skipping '" + role + "', no contributors found with that role!")
 
 main()
