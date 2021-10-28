@@ -56,7 +56,7 @@ def cleanTitleVariants(df):
           code = sf.attrib['code']
           if(code == 'i'):
             variantType = sf.text
-            if( sf.text.startswith( ('original tit', 'Oorspronkel', 'Titre original', 'oorspronkelijk', 'titre original', 'Originele', 'originele', 'Ooors', 'Oorsp') ) ):
+            if( sf.text.startswith( ('original tit', 'Oorspronkel', 'Titre original', 'oorspronkelijk', 'titre original', 'Originele', 'originele', 'Ooors', 'Oorsp', 'Original') ) ):
               sf.text = "Titre original / oorspronkelijke titel"
 
 # -----------------------------------------------------------------------------
