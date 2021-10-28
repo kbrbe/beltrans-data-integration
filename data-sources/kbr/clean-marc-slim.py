@@ -76,7 +76,7 @@ def countTitleVariants(df, countDict):
 
 # -----------------------------------------------------------------------------
 def main():
-  """This script reads an XML file in MARC slim format and generates statistics about used fields."""
+  """This script reads an XML file in MARC slim format in a streaming fashion, performs some cleaning and creates a new output file with the cleaned records."""
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC slim XML records')
