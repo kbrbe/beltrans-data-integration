@@ -39,8 +39,8 @@ def cleanDate(df):
           
 
 # -----------------------------------------------------------------------------
-def countTitleVariants(df, countDict):
-  """This function counts the type of a variant title and the language based on MARC field 246 $g (language) $i (type)."""
+def cleanTitleVariants(df):
+  """This function cleans the subfield type of title variant ($i) of MARC field 246."""
 
   if(df.tag == ET.QName(NS_MARCSLIM, 'datafield')):
     tagNumber = df.attrib['tag']
@@ -49,30 +49,15 @@ def countTitleVariants(df, countDict):
       variantLanguage = 'NOT_FOUND'
 
       #
-      # iterate over subfields to find the type ($i) and language ($g)
+      # iterate over subfields to find the type ($i)
       #
       for sf in df.iter():
         if(sf.tag == ET.QName(NS_MARCSLIM, 'subfield')):
           code = sf.attrib['code']
-          if(code == 'g'):
-            variantLanguage = sf.text
           if(code == 'i'):
             variantType = sf.text
-
-      if(variantType != ''):
-        if variantType in countDict:
-          if variantLanguage in countDict[variantType]:
-            countDict[variantType][variantLanguage] += 1
-          else:
-            countDict[variantType][variantLanguage] = 1
-        else:
-          countDict[variantType] = {variantLanguage: 1}
-      else:
-        if 'NO_VARIANT_TYPE' in countDict:
-          countDict['NO_VARIANT_TYPE'] += 1
-        else:
-          countDict['NO_VARIANT_TYPE'] = 1
-      
+            if( sf.text.startswith( ('original tit', 'Oorspronkel', 'Titre original', 'oorspronkelijk', 'titre original', 'Originele', 'originele', 'Ooors', 'Oorsp') ) ):
+              sf.text = "Titre original / oorspronkelijke titel"
 
 # -----------------------------------------------------------------------------
 def main():
@@ -80,7 +65,7 @@ def main():
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC slim XML records')
-  parser.add_option('-o', '--output-file', action='store', help='The file in which statistics about the input is stored')
+  parser.add_option('-o', '--output-file', action='store', help='The file in which the cleaned data is stored')
   (options, args) = parser.parse_args()
 
   #
@@ -111,6 +96,7 @@ def main():
         counter += 1
         for datafield in elem:
           cleanDate(datafield)
+          cleanTitleVariants(datafield)
 
         outFile.write(ET.tostring(elem, encoding='utf-8'))
         elem.clear()
