@@ -360,6 +360,86 @@
 
 </details>
 
+<details>
+  <summary> Number of found roles ...</summary>
+
+Found roles: 
+
+```
+Persons
+	Scenarist: 652
+	Illustrator: 2134
+	Colorist: 426
+	Translator: 6700
+	Author: 912
+	Non-valid MARC relator code 'NO_ROLE': 7632
+	Adapter: 60
+	Book designer: 72
+	Contributor: 675
+	Other: 13
+	Author of introduction, etc.: 273
+	Photographer: 298
+	Editor: 95
+	Writer of supplementary textual content: 4
+	Author of afterword, colophon, etc.: 35
+	Compiler: 41
+	Publisher: 35
+	Type designer: 1
+	Typographer: 1
+	Former owner: 19
+	Redaktor: 208
+	Screenwriter: 90
+	Creator: 32
+	Delineator: 5
+	Publishing director: 1962
+	Non-valid MARC relator code 'apr': 18
+	Binding designer: 28
+	Cover designer: 25
+	Transcriber: 1
+	Conceptor: 32
+	Originator: 1
+	Cartographer: 301
+	Project director: 10
+	Bibliographic antecedent: 13
+	Researcher: 8
+	Restorationist: 1
+	Book producer: 1
+	Musician: 3
+	Designer: 1
+	Editor of compilation: 1
+	Scientific advisor: 1
+	Commentator for written text: 6
+	Commentator: 1
+	Lead: 1
+	Writer of added text: 1
+	Wood engraver: 1
+	Artistic director: 4
+	Attributed name: 1
+	Corrector: 1
+	Artist: 3
+	Engraver: 2
+Organizations
+	Publisher: 20672
+	Translator: 255
+	Non-valid MARC relator code 'NO_ROLE': 131
+	Printer: 5
+	Organizer: 32
+	Contributor: 29
+	Redaktor: 1
+	Colorist: 17
+	Type designer: 2
+	Illustrator: 7
+	Copyright holder: 1
+	Editor: 5
+	Publishing director: 2
+	Former owner: 2
+	Author: 1
+
+
+```
+
+</details>
+
 ## ExportSyracuse_20211103_NL-FR_1970-2020_3234records.xml
 
 <details>
@@ -502,6 +582,7 @@
 }
 
 ```
+
 </details>
 
 ## ExportSyracuse_20211103_NL-FR_1970-2020_3234records-cleaned.xml
@@ -599,4 +680,68 @@
 }
 
 ```
+
+</details>
+
+
+<details>
+  <summary> Number of found roles ...</summary>
+
+Found roles: 
+
+```
+Persons
+	Author: 505
+	Illustrator: 542
+	Translator: 2417
+	Non-valid MARC relator code 'apr': 23
+	Author of introduction, etc.: 236
+	Photographer: 147
+	Redaktor: 10
+	Publishing director: 160
+	Associated name: 1
+	Publisher: 43
+	Editor: 71
+	Book designer: 9
+	Non-valid MARC relator code 'NO_ROLE': 2490
+	Author of afterword, colophon, etc.: 16
+	Author in quotations or text abstracts: 1
+	Colorist: 15
+	Author of dialog: 1
+	Adapter: 44
+	Contributor: 171
+	Compiler: 12
+	Delineator: 1
+	Project director: 4
+	Scenarist: 36
+	Cartographer: 3
+	Collaborator: 1
+	Former owner: 9
+	Artistic director: 2
+	Typographer: 1
+	Engraver: 1
+	Composer: 1
+	Corrector: 1
+	Commentator for written text: 3
+	Other: 2
+	Commentator: 1
+	Consultant to a project: 1
+	Lyricist: 1
+	Binding designer: 1
+Organizations
+	Publisher: 6690
+	Non-valid MARC relator code 'NO_ROLE': 92
+	Organizer: 37
+	Author: 10
+	Contributor: 8
+	Photographer: 8
+	Translator: 17
+	Publishing director: 8
+	Compiler: 3
+	Non-valid MARC relator code 'ori': 2
+	Other: 2
+
+
+```
+
 </details>
