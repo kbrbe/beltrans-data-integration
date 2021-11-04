@@ -4,6 +4,8 @@
 
 <details>
   <summary> date and title variant info ...</summary>
+
+  Stats:
 ```
 {
     "totalRecords": 9039,
@@ -243,6 +245,7 @@
 }
 
 ```
+
 </details>
 
 ## ExportSyracuse_20211103_FR-NL_1970-2020_9039records-cleaned.xml
