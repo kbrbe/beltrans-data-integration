@@ -26,3 +26,8 @@ The following command will create the four files
 python get-contributors.py --input cleaned.xml --pattern 2021-10-27-dut --role pbl --role trl --role ill --role aut
 ```
 
+if we are only interested in role statistics the following command can be used
+
+```bash
+python get-contributors.py --input cleaned.xml --stats
+```
