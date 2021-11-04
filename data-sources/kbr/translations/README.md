@@ -510,6 +510,7 @@
 <details>
   <summary> date and title variant info ...</summary>
   Stats:
+
 ```
 {
     "totalRecords": 3234,
