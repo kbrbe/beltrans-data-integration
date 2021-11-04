@@ -252,6 +252,7 @@
 
 <details>
   <summary> date and title variant info ...</summary>
+  Stats:
 
 ```
 {
@@ -361,6 +362,7 @@
 
 <details>
   <summary> date and title variant info ...</summary>
+  Stats:
 ```
 {
     "totalRecords": 3234,
@@ -504,6 +506,7 @@
 
 <details>
   <summary> date and title variant info ...</summary>
+  Stats:
 ```
 {
     "totalRecords": 3234,
