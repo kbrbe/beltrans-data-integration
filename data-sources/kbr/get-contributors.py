@@ -43,10 +43,6 @@ def main():
     print("If you use stats no pattern or roles can be provided")
     parser.print_help()
     exit(1)
-  else:
-    print("This shouldn't happen")
-    parser.print_help()
-    exit(1)
 
   #
   # Set the default namespace for the collection (and thus also for all child records)
