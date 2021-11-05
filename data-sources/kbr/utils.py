@@ -1,4 +1,5 @@
 from datetime import datetime
+import xml.etree.ElementTree as ET
 
 # -----------------------------------------------------------------------------
 def parseYear(year, patterns):
@@ -26,6 +27,48 @@ def parseYear(year, patterns):
     return year
   else:
     return parsedYear
+
+
+# -----------------------------------------------------------------------------
+def getDataprofileRecordFromMARCXML(elem, fieldMapping):
+  """This function iterates over the MARC XML record given in 'elem' and creates a dictionary based on MARC fields and the provided 'fieldMapping'.
+
+  >>> getDataprofileRecordFromMARCXML('', {})
+  {'hello': 'world'}
+  """
+  for df in elem:
+    if(df.tag == EQ.QName(NS_MARCSLIM, 'controlfield')):
+      pass
+    if(df.tag == EQ.QName(NS_MARCSLIM, 'datafield')):
+      tagNumber = df.attrib['tag']
+      if(tagNumber == '020'):
+        pass
+      elif(tagNumber == '041'):
+        pass
+      elif(tagNumber == '044'):
+        pass
+      elif(tagNumber == '245'):
+        pass
+      elif(tagNumber == '250'):
+        pass
+      elif(tagNumber == '264'):
+        pass
+      elif(tagNumber == '300'):
+        pass
+      elif(tagNumber == '700'):
+        pass
+      elif(tagNumber == '710'):
+        pass
+      elif(tagNumber == '765'):
+        pass
+      elif(tagNumber == '773'):
+        pass
+      elif(tagNumber == '775'):
+        pass
+      elif(tagNumber == '911'):
+        pass
+      elif(tagNumber == '944'):
+        pass
 
 
 # -----------------------------------------------------------------------------
