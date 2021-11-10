@@ -26,6 +26,7 @@ def getRecordSetID(xmlContent):
 # -----------------------------------------------------------------------------
 def writeRecord(xmlContent, outFile):
 
+  counter = 0
   xmlInputStream = BytesIO(xmlContent)
   for event, elem in ET.iterparse(xmlInputStream, events=('start', 'end')):
 
@@ -34,7 +35,10 @@ def writeRecord(xmlContent, outFile):
     #
     if event == 'end' and elem.tag == 'responseRecord':
       outFile.write(ET.tostring(elem, encoding='utf-8'))
+      counter += 1
       elem.clear()
+
+  return counter
 
 # -----------------------------------------------------------------------------
 def main():
@@ -63,7 +67,7 @@ def main():
 
   namespaces = {'srw': NS_SRW}
 
-  payload = {'operation': 'searchRetrieval', 'version': '1.1', 'recordSchema': 'isni-e', 'maximumRecords': 1, 'startRecord': 1, 'query': 'pica.noi%3D%22BE%22'}
+  payload = {'operation': 'searchRetrieval', 'version': '1.1', 'recordSchema': 'isni-e', 'maximumRecords': 1000, 'startRecord': 1, 'query': 'pica.noi%3D%22BE%22'}
   url = f'{BASE_URL}/username={USERNAME}/password={PASSWORD}/DB=1.3/'
 
   with open(options.output_file, 'wb') as outFile:
@@ -107,9 +111,9 @@ def main():
           print("No authentication token found, can't process further requests")
           exit(1)
     
-      writeRecord(r.content, outFile)
+      numRecordsWritten = writeRecord(r.content, outFile)
       counter += 1
-      print("sleep 5 seconds")
+      print(f'Wrote {numRecordsWritten} result records to the output file, now sleep 5 seconds')
       time.sleep(5)
 
     outFile.write(b'</collection>')
