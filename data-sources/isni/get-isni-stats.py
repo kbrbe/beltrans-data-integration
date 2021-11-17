@@ -7,6 +7,7 @@ import json
 import itertools
 import csv
 from optparse import OptionParser
+import utils
 
 NS_MARCSLIM = 'http://www.loc.gov/MARC21/slim'
 
@@ -37,25 +38,6 @@ def calculatePercentages(countDict):
     # only count percentages for MARC datafields (they all are numbers)
     if df.isdigit():
       countDict[df]['percentage'] = round((countDict[df]['unique']/total)*100, 4)
-
-# -----------------------------------------------------------------------------
-def count(stats, counter):
-  if counter in stats:
-    stats[counter] += 1
-  else:
-    stats[counter] = 1
-
-# -----------------------------------------------------------------------------
-def countStat(stats, counter, value):
-  if counter in stats:
-    stats[counter]['values'].append(value)
-    stats[counter]['number'] += 1
-    stats[counter]['min'] = min(stats[counter]['min'], value)
-    stats[counter]['max'] = max(stats[counter]['max'], value)
-    stats[counter]['avg'] = sum(stats[counter]['values'])/len(stats[counter]['values'])
-  else:
-    stats[counter] = {'min': value, 'max': value, 'avg': value, 'number': value, 'values': [value]}
-
 # -----------------------------------------------------------------------------
 def main():
   """This script reads an XML file in MARC slim format and generates statistics about used fields."""
@@ -84,16 +66,16 @@ def main():
     # The parser finished reading one MARC SLIM record, get information and then discard the record
     #
     if  event == 'end' and elem.tag == 'responseRecord':
-      count(stats, 'responseRecord')
+      utils.count(stats, 'responseRecord')
 
       for datafield in elem:
         if datafield.tag == 'ISNIAssigned':
-          count(stats, 'ISNIAssigned')
+          utils.count(stats, 'ISNIAssigned')
           for subfield in datafield:
             if subfield.tag == 'dataConfidence':
-              countStat(stats, 'assignedConfidence', subfield.text)
+              utils.countStat(stats, 'assignedConfidence', subfield.text)
         elif datafield.tag == 'ISNINotAssigned':
-          count(stats, 'ISNINotAssigned')
+          utils.count(stats, 'ISNINotAssigned')
 
         #
         # check for subfields which are the same for ISNIAssigned and ISNINotAssigned
