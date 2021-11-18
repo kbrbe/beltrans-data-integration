@@ -38,6 +38,8 @@ def calculatePercentages(countDict):
     # only count percentages for MARC datafields (they all are numbers)
     if df.isdigit():
       countDict[df]['percentage'] = round((countDict[df]['unique']/total)*100, 4)
+
+
 # -----------------------------------------------------------------------------
 def main():
   """This script reads an XML file in MARC slim format and generates statistics about used fields."""
@@ -57,10 +59,9 @@ def main():
   #
   # Instead of loading everything to main memory, stream over the XML using iterparse
   #
-  stats = {'totalRecords': 0}
+  stats = {}
+  uniqueISNINumbers = set()
   for event, elem in ET.iterparse(options.input_file, events=('start', 'end')):
-    if  event == 'start' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
-      stats['totalRecords'] += 1
 
     #
     # The parser finished reading one MARC SLIM record, get information and then discard the record
@@ -74,6 +75,9 @@ def main():
           for subfield in datafield:
             if subfield.tag == 'dataConfidence':
               utils.countStat(stats, 'assignedConfidence', subfield.text)
+            elif subfield.tag == 'isniUnformatted':
+              utils.count(stats, 'unformattedISNINumbers')
+              uniqueISNINumbers.add(subfield.text)
         elif datafield.tag == 'ISNINotAssigned':
           utils.count(stats, 'ISNINotAssigned')
 
@@ -82,30 +86,74 @@ def main():
         #
         for subfield in datafield:
           if subfield.tag == 'ISNIMetadata':
-            for subsubfield in subfield:
-              if subsubfield.tag == 'identity':
-                pass
+            for metadataField in subfield:
+              if metadataField.tag == 'identity':
+                for identityField in metadataField:
+                  utils.count(stats, identityField.tag)
+                  if identityField.tag == 'personOrFiction':
+                    for personInfo in identityField:
+                      if personInfo.tag == 'personalName':
+                        forename = ''
+                        surname = ''
+                        for nameInfo in personInfo:
+                          if nameInfo.tag == 'forename':
+                            forename = nameInfo.text
+                          if nameInfo.tag == 'surename':
+                            surname = nameInfo.text
+                          if nameInfo.tag == 'languageOfName':
+                            utils.count(stats, 'name-language-' + nameInfo.text)
+                        #print(f'{surname}, {forename}')
+                      if personInfo.tag == 'additionalInformation':
+                        for info in personInfo:
+                          nationalityCounter = 0
+                          associatedCountriesCounter = 0
+                          genderCounter = 0
+                          if info.tag == 'nationality':
+                            nationalityCounter += 1
+                            utils.count(stats, 'person-nationality-' + info.text)
+                          if info.tag == 'gender':
+                            genderCounter += 1
+                            utils.count(stats, 'person-gender-' + info.text)
+                          if info.tag == 'countriesAssociated':
+                            for countryInfo in info:
+                              if countryInfo.tag == 'countryCode':
+                                associatedCountriesCounter += 1
+                                utils.count(stats, 'person-associated-' + countryInfo.text)
+                        utils.countStat(stats, 'multipleNationalities', nationalityCounter)
+                        utils.countStat(stats, 'multipleAssociatedCountries', associatedCountriesCounter)
+                        utils.countStat(stats, 'multipleGenders', genderCounter)
+                  if identityField.tag == 'organisation':
+                    pass
+                
 
-        #print(datafield.tag, datafield.attrib, datafield.text)
-        countDatafields(datafield, stats)
-        if datafield.tag == ET.QName(NS_MARCSLIM, 'datafield'):
-          foundFields.add(datafield.attrib['tag'])
-      countUniqueDatafields(foundFields, stats)
       elem.clear()
 
+  print(f'unique unformatted ISNI numbers {len(uniqueISNINumbers)}')
+  for key,val in sorted(stats.items()):
+    if isinstance(val, dict):
+      minVal = val['min']
+      maxVal = val['max']
+      avgVal = val['avg']
+      numVal = val['number']
+      print(key)
+      print(f'\tmin {minVal}, max {maxVal}, avg {avgVal}, amount {numVal}')
+    else:
+      print(key)
+      print("\t" + str(val))
   #
   # Calculate percentages
   #
-  calculatePercentages(stats)
-  with open(options.output_file, 'w') as outFile:
-    fields=['field', 'number', 'unique', 'percentage']
-    outputWriter = csv.DictWriter(outFile, fieldnames=fields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    outputWriter.writeheader()
+  #calculatePercentages(stats)
+  #with open(options.output_file, 'w') as outFile:
+  #  fields=['field', 'number', 'unique', 'percentage']
+  #  outputWriter = csv.DictWriter(outFile, fieldnames=fields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+  #  outputWriter.writeheader()
 
-    for key,val in sorted(stats.items()):
-      if(key.isdigit()):
-        row = {'field': key}
-        row.update(val)
-        outputWriter.writerow(row)
+  #  for key,val in sorted(stats.items()):
+  #    if(key.isdigit()):
+  #      row = {'field': key}
+  #      row.update(val)
+  #      outputWriter.writerow(row)
+
 
 main()

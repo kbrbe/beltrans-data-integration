@@ -29,6 +29,7 @@ def countStat(stats, counter, value):
   >>> stats['myCounter']
   {'min': 1, 'max': 7, 'avg': 3.25, 'number': 4, 'values': [1, 2, 3, 7]}
   """
+  value = float(value)
   if counter in stats:
     stats[counter]['values'].append(value)
     stats[counter]['number'] += 1
