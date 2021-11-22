@@ -2,6 +2,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import date
+import logging
 import time
 import xml.etree.ElementTree as ET
 import urllib
@@ -65,12 +66,31 @@ def main():
   dateString = date.today().strftime('%Y-%m-%d')
   outputFilePrefix = dateString + "-sru-result"
 
+  #
+  # load environment variables from .env file
+  #
   load_dotenv()
 
   USERNAME = os.getenv('ISNI_SRU_USERNAME')
   PASSWORD = os.getenv('ISNI_SRU_PASSWORD')
   existingQuery = os.getenv('ISNI_RESULT_SET_NAME')
   authValue = os.getenv('ISNI_API_AUTH_TEMP')
+
+  logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+  logger = logging.getLogger(__file__)
+  logger.setLevel(logging.INFO)
+
+  loggingFilename = f'{outputFilePrefix}-{options.output_name_pattern}.log'
+  logFilehandler = logging.FileHandler(loggingFilename)
+  logFilehandler.setLevel(logging.INFO)
+  logFilehandler.setFormatter(logFormatter)
+  logger.addHandler(logFilehandler)
+
+  consoleHandler = logging.StreamHandler()
+  consoleHandler.setLevel(logging.INFO)
+  consoleHandler.setFormatter(logFormatter)
+  logger.addHandler(consoleHandler)
+  #logging.basicConfig(filename=loggingFilename, level=logging.INFO)
 
   #payload = {'operation': 'searchRetrieve', 'version': '1.1', 'startRecord': 1, 'maximumRecords': numberRecords, 'recordSchema': 'isni-e', 'sortKeys': 'none', 'query': existingQuery, 'x-info-2-auth1.0-authenticationToken': authValue}
   payload = {'operation': 'searchRetrieve', 'version': '1.1', 'startRecord': 1, 'maximumRecords': numberRecords, 'recordSchema': 'isni-e', 'sortKeys': 'none', 'query': query}
@@ -85,22 +105,20 @@ def main():
   #
   for i in range(1, maxRecords, numberRecords):
 
-    print(f'Iteration {counter}: requesting {numberRecords} from startRecord {i} (up until {maxRecords})')
+    logger.info(f'Iteration {counter}: requesting {numberRecords} from startRecord {i} (up until {maxRecords})')
     payload['startRecord'] = i
 
     try: 
       payloadStr = urllib.parse.urlencode(payload, safe=',+*\\')
-      #print(payloadStr)
       r = requests.get(url, params=payloadStr)
-      print("requesting: ")
-      print(r.url)
+      logger.info(f'requesting URL {r.url}')
       r.raise_for_status()
     except requests.exceptions.Timeout:
-      print(f'There was a timeout in iteration {counter}')
+      logging.error(f'There was a timeout in iteration {counter}')
     except requests.exceptions.TooManyRedirects:
-      print(f'There were too many redirects in iteration {counter}')
+      logging.error(f'There were too many redirects in iteration {counter}')
     except requests.exceptions.HTTPError as err:
-      print(f'There was an HTTP response code which is not 200 in iteration {counter}')
+      logging.error(f'There was an HTTP response code which is not 200 in iteration {counter}')
     except requests.exceptions.RequestException as e:
       raise SystemExit(e)
 
@@ -108,18 +126,17 @@ def main():
     # set the result set ID and authentication token for further requests after obtained from the first request
     #
     if i == 1:
-      print("First request, obtaining values for further requests")
+      logger.info("First request, obtaining values for further requests")
       recordSetID = getRecordSetID(r.content)
-      print("srw.resultSetName is: '" + str(recordSetID) + "'")
+      logger.info(f'srw.resultSetName is {recordSetID}')
       payload['query'] = 'srw.resultSetName=' + recordSetID
       if 'X-SRU-Authentication-Token' in r.headers:
-        print("x-info-2-auth1.0-authenticationToken is: '" + r.headers['X-SRU-Authentication-Token'] + "'")
-        payload['x-info-2-auth1.0-authenticationToken'] = urllib.parse.unquote(r.headers['X-SRU-Authentication-Token'])
-        print("values obtained!")
-        print("payload is now:")
-        print(payload)
+        token = r.headers['X-SRU-Authentication-Token']
+        logger.info(f'x-info-2-auth1.0-authenticationToken is {token}')
+        payload['x-info-2-auth1.0-authenticationToken'] = urllib.parse.unquote(token)
+        logger.info(f'values obtained, new payload is {payload}')
       else:
-        print("No authentication token found, can't process further requests")
+        logging.error("No authentication token found, can't process further requests")
         exit(1)
     
 
@@ -132,10 +149,10 @@ def main():
       numRecordsWritten = writeResponseRecords(r.content, outFile)
       outFile.write(b'</collection>')
       if numRecordsWritten == 0:
-        print("No records written, received content was:")
-        print(r.content)
+        logger.info("No records written, received content was:")
+        logger.info(r.content)
       counter += 1
-      print(f'Wrote {numRecordsWritten} result records to the output file {outputFilename}, now sleep {secondsBetweenAPIRequests} seconds')
+      logger.info(f'Wrote {numRecordsWritten} result records to the output file {outputFilename}, now sleep {secondsBetweenAPIRequests} seconds')
     time.sleep(secondsBetweenAPIRequests)
 
 
