@@ -8,6 +8,7 @@ import urllib
 from io import BytesIO
 from optparse import OptionParser
 
+NS_SRW = 'http://www.loc.gov/zing/srw/'
 
 # -----------------------------------------------------------------------------
 def getRecordSetID(xmlContent):
@@ -60,7 +61,7 @@ def main():
   maxRecords = options.max_records
   secondsBetweenAPIRequests = 5
   baseURL = 'https://isni-m.oclc.org/sru'
-  query = 'pica.noi%3D%22BE%22'
+  query = 'pica.noi="BE"'
   dateString = date.today().strftime('%Y-%m-%d')
   outputFilePrefix = dateString + "-sru-result"
 
@@ -71,8 +72,8 @@ def main():
   existingQuery = os.getenv('ISNI_RESULT_SET_NAME')
   authValue = os.getenv('ISNI_API_AUTH_TEMP')
 
-  payload = {'operation': 'searchRetrieve', 'version': '1.1', 'startRecord': 1, 'maximumRecords': numberRecords, 'recordSchema': 'isni-e', 'sortKeys': 'none', 'query': existingQuery, 'x-info-2-auth1.0-authenticationToken': authValue}
-  #payload = {'operation': 'searchRetrieve', 'version': '1.1', 'recordSchema': 'isni-e', 'maximumRecords': 50, 'startRecord': 1, 'query': query}
+  #payload = {'operation': 'searchRetrieve', 'version': '1.1', 'startRecord': 1, 'maximumRecords': numberRecords, 'recordSchema': 'isni-e', 'sortKeys': 'none', 'query': existingQuery, 'x-info-2-auth1.0-authenticationToken': authValue}
+  payload = {'operation': 'searchRetrieve', 'version': '1.1', 'startRecord': 1, 'maximumRecords': numberRecords, 'recordSchema': 'isni-e', 'sortKeys': 'none', 'query': query}
   url = f'{baseURL}/username={USERNAME}/password={PASSWORD}/DB=1.3'
 
   recordSetID = None
@@ -106,20 +107,20 @@ def main():
     #
     # set the result set ID and authentication token for further requests after obtained from the first request
     #
-    #if i == 1:
-    #  print("First request, obtaining values for further requests")
-    #  recordSetID = getRecordSetID(r.content)
-    #  print("srw.resultSetName is: '" + str(recordSetID) + "'")
-    #  payload['query'] = 'srw.resultSetName=' + recordSetID
-    #  if 'X-SRU-Authentication-Token' in r.headers:
-    #    print("x-info-2-auth1.0-authenticationToken is: '" + r.headers['X-SRU-Authentication-Token'] + "'")
-    #    payload['x-info-2-auth1.0-authenticationToken'] = r.headers['X-SRU-Authentication-Token']
-    #    print("values obtained!")
-    #    print("payload is now:")
-    #    print(payload)
-    #  else:
-    #    print("No authentication token found, can't process further requests")
-    #    exit(1)
+    if i == 1:
+      print("First request, obtaining values for further requests")
+      recordSetID = getRecordSetID(r.content)
+      print("srw.resultSetName is: '" + str(recordSetID) + "'")
+      payload['query'] = 'srw.resultSetName=' + recordSetID
+      if 'X-SRU-Authentication-Token' in r.headers:
+        print("x-info-2-auth1.0-authenticationToken is: '" + r.headers['X-SRU-Authentication-Token'] + "'")
+        payload['x-info-2-auth1.0-authenticationToken'] = urllib.parse.unquote(r.headers['X-SRU-Authentication-Token'])
+        print("values obtained!")
+        print("payload is now:")
+        print(payload)
+      else:
+        print("No authentication token found, can't process further requests")
+        exit(1)
     
 
     #
