@@ -3,6 +3,7 @@
 # KBR Brussels
 #
 import xml.etree.ElementTree as ET
+import os
 import json
 import itertools
 import csv
@@ -39,29 +40,10 @@ def calculatePercentages(countDict):
     if df.isdigit():
       countDict[df]['percentage'] = round((countDict[df]['unique']/total)*100, 4)
 
-
 # -----------------------------------------------------------------------------
-def main():
-  """This script reads an XML file in MARC slim format and generates statistics about used fields."""
+def parseISNIXMLFile(stats, uniqueISNINumbers, filename):
 
-  parser = OptionParser(usage="usage: %prog [options]")
-  parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC slim XML records')
-  parser.add_option('-o', '--output-file', action='store', help='The file in which statistics about the input is stored')
-  (options, args) = parser.parse_args()
-
-  #
-  # Check if we got all required arguments
-  #
-  if( (not options.input_file) or (not options.output_file) ):
-    parser.print_help()
-    exit(1)
-
-  #
-  # Instead of loading everything to main memory, stream over the XML using iterparse
-  #
-  stats = {}
-  uniqueISNINumbers = set()
-  for event, elem in ET.iterparse(options.input_file, events=('start', 'end')):
+  for event, elem in ET.iterparse(filename, events=('start', 'end')):
 
     #
     # The parser finished reading one MARC SLIM record, get information and then discard the record
@@ -127,6 +109,38 @@ def main():
                 
 
       elem.clear()
+
+
+
+# -----------------------------------------------------------------------------
+def main():
+  """This script reads an XML file in MARC slim format and generates statistics about used fields."""
+
+  parser = OptionParser(usage="usage: %prog [options]")
+  parser.add_option('-i', '--input-folder', action='store', help='The input folder containing ISNI XML files')
+  parser.add_option('-o', '--output-file', action='store', help='The file in which statistics about the input is stored')
+  (options, args) = parser.parse_args()
+
+  #
+  # Check if we got all required arguments
+  #
+  if( (not options.input_folder) or (not options.output_file) ):
+    parser.print_help()
+    exit(1)
+
+  #
+  # Instead of loading everything to main memory, stream over the XML using iterparse
+  #
+  stats = {}
+  uniqueISNINumbers = set()
+
+  #
+  # iterate over all XML Files in the given directory and count ISNI statistics
+  #
+  for filename in os.listdir(options.input_folder):
+    if filename.endswith('.xml'):
+      f = os.path.join(options.input_folder, filename)
+      parseISNIXMLFile(stats, uniqueISNINumbers, f)
 
   print(f'unique unformatted ISNI numbers {len(uniqueISNINumbers)}')
   for key,val in sorted(stats.items()):
