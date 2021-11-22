@@ -118,13 +118,12 @@ def main():
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-i', '--input-folder', action='store', help='The input folder containing ISNI XML files')
-  parser.add_option('-o', '--output-file', action='store', help='The file in which statistics about the input is stored')
   (options, args) = parser.parse_args()
 
   #
   # Check if we got all required arguments
   #
-  if( (not options.input_folder) or (not options.output_file) ):
+  if( (not options.input_folder) ):
     parser.print_help()
     exit(1)
 
@@ -154,20 +153,5 @@ def main():
     else:
       print(key)
       print("\t" + str(val))
-  #
-  # Calculate percentages
-  #
-  #calculatePercentages(stats)
-  #with open(options.output_file, 'w') as outFile:
-  #  fields=['field', 'number', 'unique', 'percentage']
-  #  outputWriter = csv.DictWriter(outFile, fieldnames=fields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-  #  outputWriter.writeheader()
-
-  #  for key,val in sorted(stats.items()):
-  #    if(key.isdigit()):
-  #      row = {'field': key}
-  #      row.update(val)
-  #      outputWriter.writerow(row)
-
 
 main()
