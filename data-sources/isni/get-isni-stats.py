@@ -122,6 +122,16 @@ def parseISNIXMLFile(stats, uniqueISNINumbers, filename):
     if  event == 'end' and elem.tag == 'responseRecord':
       utils.count(stats, 'responseRecord')
 
+      isPerson = False
+      isOrg = False
+      if elem.find('.//personalName'):
+        isPerson = True
+        utils.count(stats, 'numberOfPersons')
+
+      if elem.find('.//organisationName'):
+        isOrg = True
+        utils.count(stats, 'numberOfOrgs')
+
       for datafield in elem:
         if datafield.tag == 'ISNIAssigned':
           utils.count(stats, 'ISNIAssigned')
