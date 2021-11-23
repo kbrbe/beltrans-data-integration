@@ -95,6 +95,21 @@ def parseIdentity(stats, identityTag):
     if identityField.tag == 'organisation':
       pass
  
+# -----------------------------------------------------------------------------
+def parseISNINotAssignedMetadata(stats, metadataField):
+  """This function parses the 'ISNIMetadata' field of 'ISNINotAssigned' records of the ISNI extended schema: https://isni.oclc.org:2443/isni/ISNI_enquiry_response/ISNI_enquiry_response_xsd.html#responseRecord_responseRecord_ISNINotAssigned_ISNIMetadata"""
+
+  for metadata in metadataField:
+    if metadata.tag == 'identity':
+      parseIdentity(stats, metadata)
+
+# -----------------------------------------------------------------------------
+def parseISNIAssignedMetadata(stats, metadataField):
+  """This function parses the 'ISNIMetadata' field of 'ISNIAssigned' records of the ISNI extended schema: https://isni.oclc.org:2443/isni/ISNI_enquiry_response/ISNI_enquiry_response_xsd.html#responseRecord_responseRecord_ISNIAssigned_ISNIMetadata"""
+
+  for metadata in metadataField:
+    if metadata.tag == 'identity':
+      parseIdentity(stats, metadata)
 
 # -----------------------------------------------------------------------------
 def parseISNIXMLFile(stats, uniqueISNINumbers, filename):
@@ -102,7 +117,7 @@ def parseISNIXMLFile(stats, uniqueISNINumbers, filename):
   for event, elem in ET.iterparse(filename, events=('start', 'end')):
 
     #
-    # The parser finished reading one MARC SLIM record, get information and then discard the record
+    # The parser finished reading one responseRecord, get information and then discard the record
     #
     if  event == 'end' and elem.tag == 'responseRecord':
       utils.count(stats, 'responseRecord')
@@ -116,18 +131,13 @@ def parseISNIXMLFile(stats, uniqueISNINumbers, filename):
             elif subfield.tag == 'isniUnformatted':
               utils.count(stats, 'unformattedISNINumbers')
               uniqueISNINumbers.add(subfield.text)
+            elif subfield.tag == 'ISNIMetadata':
+              parseISNIAssignedMetadata(stats, subfield)
         elif datafield.tag == 'ISNINotAssigned':
           utils.count(stats, 'ISNINotAssigned')
-
-        #
-        # check for subfields which are the same for ISNIAssigned and ISNINotAssigned
-        #
-        for subfield in datafield:
-          if subfield.tag == 'ISNIMetadata':
-            for metadataField in subfield:
-              if metadataField.tag == 'identity':
-                parseIdentity(stats, metadataField)
-                 
+          for subfield in datafield:
+            if subfield.tag == 'ISNIMetadata':
+              parseISNINotAssignedMetadata(stats, subfield)
 
       elem.clear()
 
