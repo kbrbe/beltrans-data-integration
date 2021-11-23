@@ -41,6 +41,62 @@ def calculatePercentages(countDict):
       countDict[df]['percentage'] = round((countDict[df]['unique']/total)*100, 4)
 
 # -----------------------------------------------------------------------------
+def parsePersonAdditionalInformation(stats, additionalInfoTag):
+  """This function parses the 'additionalInformation' tag of the 'personOrFiction' field of the ISNI extended schema: https://isni.oclc.org:2443/isni/ISNI_enquiry_response/ISNI_enquiry_response_xsd.html#personOrFiction_additionalInformation"""
+
+  for info in additionalInfoTag:
+    nationalityCounter = 0
+    associatedCountriesCounter = 0
+    genderCounter = 0
+    if info.tag == 'nationality':
+      nationalityCounter += 1
+      utils.count(stats, 'person-nationality-' + info.text)
+    if info.tag == 'gender':
+      genderCounter += 1
+      utils.count(stats, 'person-gender-' + info.text)
+    if info.tag == 'countriesAssociated':
+      for countryInfo in info:
+        if countryInfo.tag == 'countryCode':
+          associatedCountriesCounter += 1
+          utils.count(stats, 'person-associated-' + countryInfo.text)
+  utils.countStat(stats, 'multipleNationalities', nationalityCounter)
+  utils.countStat(stats, 'multipleAssociatedCountries', associatedCountriesCounter)
+  utils.countStat(stats, 'multipleGenders', genderCounter)
+
+
+
+# -----------------------------------------------------------------------------
+def parsePersonOrFiction(stats, personOrFictionTag):
+  """This function parses the 'personOrFiction' field of the ISNI extended schema: https://isni.oclc.org:2443/isni/ISNI_enquiry_response/ISNI_enquiry_response_xsd.html#personOrFiction"""
+
+  for personInfo in personOrFictionTag:
+    if personInfo.tag == 'personalName':
+      forename = ''
+      surname = ''
+      for nameInfo in personInfo:
+        if nameInfo.tag == 'forename':
+          forename = nameInfo.text
+        if nameInfo.tag == 'surename':
+          surname = nameInfo.text
+        if nameInfo.tag == 'languageOfName':
+          utils.count(stats, 'name-language-' + nameInfo.text)
+      #print(f'{surname}, {forename}')
+    if personInfo.tag == 'additionalInformation':
+      parsePersonAdditionalInformation(stats, personInfo)
+
+# -----------------------------------------------------------------------------
+def parseIdentity(stats, identityTag):
+  """This function parses the 'identity' field of the ISNI extended schema: https://isni.oclc.org:2443/isni/ISNI_enquiry_response/ISNI_enquiry_response_xsd.html#identity"""
+
+  for identityField in identityTag:
+    utils.count(stats, identityField.tag)
+    if identityField.tag == 'personOrFiction':
+      parsePersonOrFiction(stats, identityField)
+    if identityField.tag == 'organisation':
+      pass
+ 
+
+# -----------------------------------------------------------------------------
 def parseISNIXMLFile(stats, uniqueISNINumbers, filename):
 
   for event, elem in ET.iterparse(filename, events=('start', 'end')):
@@ -70,43 +126,8 @@ def parseISNIXMLFile(stats, uniqueISNINumbers, filename):
           if subfield.tag == 'ISNIMetadata':
             for metadataField in subfield:
               if metadataField.tag == 'identity':
-                for identityField in metadataField:
-                  utils.count(stats, identityField.tag)
-                  if identityField.tag == 'personOrFiction':
-                    for personInfo in identityField:
-                      if personInfo.tag == 'personalName':
-                        forename = ''
-                        surname = ''
-                        for nameInfo in personInfo:
-                          if nameInfo.tag == 'forename':
-                            forename = nameInfo.text
-                          if nameInfo.tag == 'surename':
-                            surname = nameInfo.text
-                          if nameInfo.tag == 'languageOfName':
-                            utils.count(stats, 'name-language-' + nameInfo.text)
-                        #print(f'{surname}, {forename}')
-                      if personInfo.tag == 'additionalInformation':
-                        for info in personInfo:
-                          nationalityCounter = 0
-                          associatedCountriesCounter = 0
-                          genderCounter = 0
-                          if info.tag == 'nationality':
-                            nationalityCounter += 1
-                            utils.count(stats, 'person-nationality-' + info.text)
-                          if info.tag == 'gender':
-                            genderCounter += 1
-                            utils.count(stats, 'person-gender-' + info.text)
-                          if info.tag == 'countriesAssociated':
-                            for countryInfo in info:
-                              if countryInfo.tag == 'countryCode':
-                                associatedCountriesCounter += 1
-                                utils.count(stats, 'person-associated-' + countryInfo.text)
-                        utils.countStat(stats, 'multipleNationalities', nationalityCounter)
-                        utils.countStat(stats, 'multipleAssociatedCountries', associatedCountriesCounter)
-                        utils.countStat(stats, 'multipleGenders', genderCounter)
-                  if identityField.tag == 'organisation':
-                    pass
-                
+                parseIdentity(stats, metadataField)
+                 
 
       elem.clear()
 
