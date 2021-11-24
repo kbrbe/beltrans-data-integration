@@ -1,0 +1,59 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestations:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates creative works, currently on the LRM level of manifestations."
+    sources:
+      - access: "kbr/translations/2021-11-24_FR-NL_works.csv"
+        referenceFormulation: csv
+        delimiter: ','
+      - access: "kbr/translations/2021-11-24_NL-FR_works.csv"
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:work_$(KBRID)
+    po:
+      - [a, schema:CreativeWork]
+      - [schema:name, $(title) ]
+      - p: schema:isbn
+        o: $(isbn)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isbn)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:inLanguage
+        o: "nl-BE"
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(language)]
+            - [grel:valueParameter2, "dut"] 
+      - p: schema:inLanguage
+        o: "fr-FR"
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(language)]
+            - [grel:valueParameter2, "fre"] 
