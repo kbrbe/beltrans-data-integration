@@ -60,6 +60,25 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
+  creationActivity:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity."
+    sources:
+      - access: "kbr/translations/2021-11-24_FR-NL_works.csv"
+        referenceFormulation: csv
+        delimiter: ','
+      - access: "kbr/translations/2021-11-24_NL-FR_works.csv"
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    po:
+      - [rdfs:label, "Translation context of $(KBRID)", en~lang]
+      - [a, prov:Activity]
+      - [prov:generated, btid:work_$(KBRID)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
   directContributions:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates direct schema.org links for authors, translators and publishers from the translated manifestation."
@@ -93,3 +112,40 @@ mappings:
           parameters:
             - [grel:valueParameter, $(contributorRole)]
             - [grel:valueParameter2, "aut"] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  contributionAssocations:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates qualified associations between contributors and the creation activity of a translated work (according to W3C PROV)."
+    sources:
+      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ','
+      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)
+    po:
+      - [a, prov:Association]
+      - [prov:agent, btid:authority_$(contributorID)~iri]
+      - [prov:hadRole, btid:role_$(contributorRole)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  contributionAssocationsLinks:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links between translation activities and qualified associations."
+    sources:
+      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ','
+      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    po:
+      - [prov:qualifiedAssociation, btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)~iri]
+
