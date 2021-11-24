@@ -57,3 +57,110 @@ mappings:
           parameters:
             - [grel:valueParameter, $(language)]
             - [grel:valueParameter2, "fre"] 
+
+  # ---------------------------------------------------------------------------
+  #
+  creationActivity:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity."
+    sources:
+      - access: "kbr/translations/2021-11-24_FR-NL_works.csv"
+        referenceFormulation: csv
+        delimiter: ','
+      - access: "kbr/translations/2021-11-24_NL-FR_works.csv"
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    po:
+      - [rdfs:label, "Translation context of $(KBRID)", en~lang]
+      - [a, prov:Activity]
+      - [prov:generated, btid:work_$(KBRID)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  directContributions:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates direct schema.org links for authors, translators and publishers from the translated manifestation."
+    sources:
+      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ','
+      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:work_$(KBRID)
+    po:
+      - p: schema:translator
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "trl"] 
+      - p: schema:publisher
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "pbl"] 
+      - p: schema:author
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "aut"] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  contributionAssocations:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates qualified associations between contributors and the creation activity of a translated work (according to W3C PROV)."
+    sources:
+      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ','
+      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)
+    po:
+      - [a, prov:Association]
+      - [prov:agent, btid:authority_$(contributorID)~iri]
+      - [prov:hadRole, btid:role_$(contributorRole)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  contributionAssocationsLinks:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links between translation activities and qualified associations."
+    sources:
+      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ','
+      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    po:
+      - [prov:qualifiedAssociation, btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  marcRoles:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates RDF resources for MARC roles such that we can refer to it and do not have to rely on text. Currently with English labels, but labels in other languages may be added."
+    sources:
+      - access: "marc-roles.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:role_$(code)
+    po:
+      - [a, prov:Role]
+      - [rdfs:label, $(title), en~lang]
+
