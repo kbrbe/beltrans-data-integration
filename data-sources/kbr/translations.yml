@@ -57,3 +57,39 @@ mappings:
           parameters:
             - [grel:valueParameter, $(language)]
             - [grel:valueParameter2, "fre"] 
+
+  # ---------------------------------------------------------------------------
+  #
+  directContributions:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates direct schema.org links for authors, translators and publishers from the translated manifestation."
+    sources:
+      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ','
+      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:work_$(KBRID)
+    po:
+      - p: schema:translator
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "trl"] 
+      - p: schema:publisher
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "pbl"] 
+      - p: schema:author
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "aut"] 
