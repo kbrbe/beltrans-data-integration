@@ -25,7 +25,7 @@ fi
 if [ ! -f $RML_MAPPER ]
 then
   echo "rml mapper not found at '$RML_MAPPER', downloading it ..."
-  wget https://github.com/RMLio/rmlmapper-java/releases/download/v4.12.0/rmlmapper.jar
+  wget https://github.com/RMLio/rmlmapper-java/releases/download/v4.13.0/rmlmapper-4.13.0-r359-all.jar -o $RML_MAPPER
 fi
 
 
