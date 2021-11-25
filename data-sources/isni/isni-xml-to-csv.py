@@ -52,22 +52,25 @@ def addAuthorityRecordsToFile(assignedRecord, writer):
     marcDate = utils.getElementValue(names.find('marcDate'))
     sourceID = utils.getElementValue(names.find('subsourceIdentifier'))
 
-    newRecord = {
-      'ISNI': isniID,
-      'dataConfidence': dataConfidence,
-      'nationality': nationality,
-      'gender': gender,
-      'surname': surname,
-      'forename': forename,
-      'marcDate': marcDate,
-      'sourceName': sourceName,
-      'subSourceName': subSourceName,
-      'sourceID': sourceID,
-      'externalInfo': externalInfo,
-      'externalInfoURI': externalInfoURI,
-      'externalInfoID': externalInfoID
-    }
-    writer.writerow(newRecord)
+    if sourceID != '':
+      newRecord = {
+        'ISNI': isniID,
+        'dataConfidence': dataConfidence,
+        'nationality': nationality,
+        'gender': gender,
+        'surname': surname,
+        'forename': forename,
+        'marcDate': marcDate,
+        'sourceName': sourceName,
+        'subSourceName': subSourceName,
+        'sourceID': sourceID,
+        'externalInfo': externalInfo,
+        'externalInfoURI': externalInfoURI,
+        'externalInfoID': externalInfoID
+      }
+      if(isniID.endswith('61719351')):
+        print(newRecord)
+      writer.writerow(newRecord)
      
 
 # -----------------------------------------------------------------------------
@@ -93,8 +96,7 @@ def main():
   stats = {}
   uniqueISNINumbers = set()
 
-  with open(options.output_authority_file, 'w') as outAutFile, \
-       open(options.output_works_file, 'w') as outWorksFile: 
+  with open(options.output_authority_file, 'w') as outAutFile:
 
     fields = ['ISNI', 'dataConfidence', 'nationality', 'gender', 'surname', 'forename', 'marcDate', 'sourceName', 'subSourceName', 'sourceID', 'externalInfo', 'externalInfoURI', 'externalInfoID']
     authorityWriter = csv.DictWriter(outAutFile, fieldnames=fields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
