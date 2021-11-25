@@ -1,0 +1,89 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  btisni: "http://kbr.be/isni/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  authorities:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates authorities represented as schema Person."
+    sources:
+#      - [kbr/belgian-authors-enriched.csv~csv]
+      - access: "isni/2021-11-23-isni-authorities-belgian.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btisni:authority_$(ISNI)
+    po:
+      - [a, schema:Person]
+      - [rdfs:label, "$(surname), $(forename)"]
+      - [schema:familyName, $(surname)]
+      - [foaf:isPrimaryTopicOf, btisni:authority_$(ISNI)~iri]
+      - [bf:identifiedBy, btisni:identifier_isni_$(ISNI)~iri]
+      - p: schema:givenName
+        o: $(forename)
+        condition:
+          function: idlab-fn:notEqual
+          parameters: 
+            - [grel:valueParameter, $(forename)]
+            - [grel:valueParameter2, ""]
+      - p: schema:nationality
+        o:
+          function: grel:array_join
+          parameters:
+            - [grel:p_array_a, "http://id.loc.gov/vocabulary/countries/"]
+            - parameter: grel:p_array_a
+              value:
+                function: grel:toLowerCase
+                parameters:
+                  - [grel:valueParameter, $(nationality)]
+          type: iri
+#      - p: bf:identifiedBy
+#        o: btisni:identifier_isni_$(ISNI)~iri
+#        condition:
+#          function: idlab-fn:equal
+#          parameters:
+#            - [grel:valueParameter, $(sourceName)]
+#            - [grel:valueParameter1, "BNF"]
+#      - p: bf:identifiedBy
+#        o: btid:identifier_viaf_$(IDNO)~iri
+#        condition:
+#          function: idlab-fn:equal
+#          parameters:
+#            - [grel:valueParameter, $(sourceName)]
+#            - [grel:valueParameter1, "VIAF"]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authoritiesAbout:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates descriptions of authorities represented as schema WebPage."
+    sources:
+      - access: "isni/2021-11-23-isni-authorities-belgian.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btabout:authority_$(ISNI)
+    po:
+      - [a, schema:WebPage]
+      - [foaf:primaryTopic, btisni:authority_$(ISNI)~iri]
+
+
