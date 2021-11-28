@@ -1,10 +1,12 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix schema: <http://schema.org/>
 PREFIX btid: <http://kbr.be/id/data/> 
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX btisni: <http://kbr.be/isni/>
 
 
-SELECT ?manifestation ?kbrTargetLang ?isbn ?kbrAuthor ?kbrTranslator ?kbrPublisher ?kbrNationality ?kbrISNI ?p ?o
+
+SELECT ?manifestation ?kbrTargetLang ?isbn ?kbrAuthor ?kbrTranslator ?kbrPublisher ?kbrNationality ?kbrISNI ?isniSRUEntity ?isniSRUISNI ?p ?o
 FROM NAMED <http://kbr-syracuse>
 WHERE {
   
@@ -31,7 +33,11 @@ WHERE {
  }
         
   graph <http://isni-sru> {
-      
+      ?isniSRUAUthor a schema:Person ;
+                       bf:identifiedBy ?isniSRUEntity .
+    
+      #?isniSRUEntity a bf:Isni ;
+      #                 rdf:value ?isniSRUISNI .
   }
   
     
