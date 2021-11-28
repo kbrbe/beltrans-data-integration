@@ -50,6 +50,9 @@ def main():
   recordsWithoutID = 0
   numRecordsTaken = 0
 
+  for (prefix, uri) in ALL_NS.items():
+    ET.register_namespace(prefix, uri)
+
   with open(options.filter_file, 'r') as filterFile, \
        open(options.output_file, 'wb') as outFile:
 
