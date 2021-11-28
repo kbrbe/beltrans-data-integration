@@ -1,0 +1,41 @@
+prefix schema: <http://schema.org/>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+
+
+SELECT ?manifestation ?kbrTargetLang ?isbn ?kbrAuthor ?kbrTranslator ?kbrPublisher ?kbrNationality ?kbrISNI ?p ?o
+FROM NAMED <http://kbr-syracuse>
+WHERE {
+  
+  graph <http://kbr-syracuse> { 
+    
+    ?manifestation a schema:CreativeWork . 
+  
+    OPTIONAL { ?manifestation schema:isbn ?isbn . } 
+    OPTIONAL { ?manifestation schema:author ?kbrAuthor . }
+    OPTIONAL { ?manifestation schema:translator ?kbrTranslator . } 
+    OPTIONAL { ?manifestation schema:publisher ?kbrPublisher . } 
+    OPTIONAL { ?manifestation schema:inLanguage ?kbrTargetLang . } 
+  
+  }
+
+  graph <http://kbr-belgians> {
+    ?kbrAuthor a schema:Person .
+   
+    OPTIONAL { ?kbrAuthor schema:nationality ?kbrNationality . }
+    OPTIONAL { 
+      ?kbrAuthor bf:identifiedBy ?isniEntity .
+      ?isniEntity a bf:Isni ;
+                  rdf:value ?kbrISNI . }
+ }
+        
+  graph <http://isni-sru> {
+      
+  }
+  
+    
+}
+
+limit 100 
+
