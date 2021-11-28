@@ -67,7 +67,7 @@ def main():
     numFilterIdentifiers = len(uniqueISNIIdentifiers)
     print(f'Successfully read {numFilterIdentifiers} unique ISNI identifiers from {filterFileCounter} records in given CSV file')
     
-    outFile.write(b'<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:madsrdf="http://www.loc.gov/mads/rdf/v1#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="http://schema.org/" xmlns:void="http://rdfs.org/ns/void#" xmlns:xmlns="http://www.w3.org/2000/01/rdf-schema#">')
+    outFile.write(b'<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:madsrdf="http://www.loc.gov/mads/rdf/v1#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="http://schema.org/" xmlns:void="http://rdfs.org/ns/void#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">')
 
     #
     # read ISNI RDF records from input RDF/XML
