@@ -7,6 +7,10 @@ ISNI dumps can be downloaded in RDF/XML and JSON-LD from the ISNI website: https
 The RDF/XML dump can be filtered in a streaming fashion such that we only end up with relevant data.
 However, there is no nationality in the person data on which we could filter.
 
+This dump contains one `rdf:RDF` record per line which means one file contains several dumps.
+**This means other tools such as Comunica may stop parsing after the first `rdf:RDF` record**
+
+
 
 ## Stats full file
 There are 756,780 entries which have an `owl:sameAs` link to Wikidata entities.
@@ -33,6 +37,8 @@ real    23m1.837s
 user    19m42.333s
 sys     0m17.423s
 ```
+
+There is one syntax issue in the dump which needs to be fixed manually: `ParseError: Invalid URI: https://isni.org/isni/0000 0000 1968 9240` (the spaces in the ISNI identifier need to be removed)
 
 ## Stats Belgian file
 
