@@ -157,7 +157,7 @@ mappings:
       - access: "isni/2021-11-25-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_isni_$(ISNI)
+    s: btisni:identifier_isni_$(ISNI)
     po:
       - [a, bf:Isni]
       - [rdf:value, $(ISNI)]
@@ -172,7 +172,7 @@ mappings:
       - access: "isni/2021-11-25-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_viaf_$(ISNI)
+    s: btisni:identifier_viaf_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -193,7 +193,7 @@ mappings:
       - access: "isni/2021-11-25-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_bnf_$(ISNI)
+    s: btisni:identifier_bnf_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -214,7 +214,7 @@ mappings:
       - access: "isni/2021-11-25-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_nta_$(ISNI)
+    s: btisni:identifier_nta_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -235,7 +235,7 @@ mappings:
       - access: "isni/2021-11-25-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_dnb_$(ISNI)
+    s: btisni:identifier_dnb_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
