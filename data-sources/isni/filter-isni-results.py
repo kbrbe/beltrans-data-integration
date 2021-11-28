@@ -67,7 +67,7 @@ def main():
     numFilterIdentifiers = len(uniqueISNIIdentifiers)
     print(f'Successfully read {numFilterIdentifiers} unique ISNI identifiers from {filterFileCounter} records in given CSV file')
     
-    outFile.write(b'<catalog>')
+    outFile.write(b'<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:madsrdf="http://www.loc.gov/mads/rdf/v1#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="http://schema.org/" xmlns:void="http://rdfs.org/ns/void#" xmlns:xmlns="http://www.w3.org/2000/01/rdf-schema#">')
 
     #
     # read ISNI RDF records from input RDF/XML
@@ -86,7 +86,10 @@ def main():
           elementISNI = isniIDElement.text
           if elementISNI in uniqueISNIIdentifiers:
             numRecordsTaken += 1
-            outFile.write(ET.tostring(elem, encoding='utf-8'))
+            recordContent = elem.findall('./rdf:Description', ALL_NS)
+            for r in recordContent:
+              outFile.write(ET.tostring(r, encoding='utf-8'))
+            #outFile.write(ET.tostring(elem, encoding='utf-8'))
         else:
           print("No ISNI ID found via schema:PropertyValue")
           recordsWithoutID += 1
@@ -94,7 +97,7 @@ def main():
         # discard record to keep space in main memory
         processedRecords += 1
         elem.clear()
-    outFile.write(b'</catalog>')
+    outFile.write(b'</rdf:RDF>')
 
     print(f'{numRecordsTaken} records from the input matched with the {numFilterIdentifiers} of the filter')
  
