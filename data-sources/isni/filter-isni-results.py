@@ -11,7 +11,7 @@ from optparse import OptionParser
 import utils
 
 NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-NS_XMLNS = "http://www.w3.org/2000/01/rdf-schema#"
+NS_RDFS = "http://www.w3.org/2000/01/rdf-schema#"
 NS_SCHEMA = "http://schema.org/"
 NS_MADSRDF = "http://www.loc.gov/mads/rdf/v1#"
 NS_DCTERMS = "http://purl.org/dc/terms/"
@@ -21,7 +21,7 @@ NS_XSD = "http://www.w3.org/2001/XMLSchema#"
 NS_FOAF = "http://xmlns.com/foaf/0.1/"
 NS_VOID = "http://rdfs.org/ns/void#"
 
-ALL_NS = {'rdf': NS_RDF, 'xmlns': NS_XMLNS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID}
+ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID}
 
 
 
