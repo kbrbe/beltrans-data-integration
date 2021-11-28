@@ -150,6 +150,21 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
+  authorsISNI:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for ISNI identifiers according to BIBFRAME."
+    sources:
+      - access: "isni/2021-11-25-isni-authorities-belgian.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:identifier_isni_$(ISNI)
+    po:
+      - [a, bf:Isni]
+      - [rdf:value, $(ISNI)]
+
+
+  # ---------------------------------------------------------------------------
+  #
   authorsVIAF:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
