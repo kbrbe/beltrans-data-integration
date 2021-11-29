@@ -6,42 +6,71 @@ PREFIX btisni: <http://kbr.be/isni/>
 
 
 
-SELECT ?manifestation ?kbrTargetLang ?isbn ?kbrAuthor ?kbrTranslator ?kbrPublisher ?kbrNationality ?kbrISNI ?isniSRUEntity ?isniSRUISNI ?p ?o
-FROM NAMED <http://kbr-syracuse>
+SELECT ?manifestation ?kbrTargetLang ?isbn ?kbrAuthor ?kbrTranslator ?kbrPublisher ?kbrNationality ?kbrISNI ?isniSRUEntity ?isniRDFAuthor ?isniRDFBirthDate ?isniRDFDeathDate
+FROM  <http://kbr-syracuse>
+FROM <http://isni-sru>
+FROM <http://kbr-belgians>
+FROM <http://isni-rdf>
 WHERE {
   
-  graph <http://kbr-syracuse> { 
-    
-    ?manifestation a schema:CreativeWork . 
+  graph <http://kbr-syracuse> { ?manifestation a schema:CreativeWork . }
   
-    OPTIONAL { ?manifestation schema:isbn ?isbn . } 
-    OPTIONAL { ?manifestation schema:author ?kbrAuthor . }
-    OPTIONAL { ?manifestation schema:translator ?kbrTranslator . } 
-    OPTIONAL { ?manifestation schema:publisher ?kbrPublisher . } 
-    OPTIONAL { ?manifestation schema:inLanguage ?kbrTargetLang . } 
-  
-  }
+  OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:isbn ?isbn . }  }
 
-  graph <http://kbr-belgians> {
-    ?kbrAuthor a schema:Person .
-   
-    OPTIONAL { ?kbrAuthor schema:nationality ?kbrNationality . }
-    OPTIONAL { 
-      ?kbrAuthor bf:identifiedBy ?isniEntity .
-      ?isniEntity a bf:Isni ;
-                  rdf:value ?kbrISNI . }
- }
-        
-  graph <http://isni-sru> {
-      ?isniSRUAUthor a schema:Person ;
-                       bf:identifiedBy ?isniSRUEntity .
+  OPTIONAL { 
+    graph <http://kbr-syracuse> { ?manifestation schema:author ?kbrAuthor . } 
     
-      #?isniSRUEntity a bf:Isni ;
-      #                 rdf:value ?isniSRUISNI .
+    # within this optional author check optionally for Belgians from KBR (it could be the author from kbr-syracuse is not in kbr-belgians
+    OPTIONAL {
+      graph <http://kbr-belgians> { 
+        # There is always a nationality for this dataset, thus not optional
+        ?kbrAuthor a schema:Person ;
+                   schema:nationality ?kbrNationality . 
+      }
+    }
+          
+    # within this optional author, check optionally for Belgians with ISNI
+    OPTIONAL {
+      graph <http://kbr-belgians> { 
+        ?kbrAuthor bf:identifiedBy ?isniEntity . 
+        ?isniEntity a bf:Isni ;
+                    rdf:value ?kbrISNI . 
+      }
+                  
+      # if there is an optional ISNI we look it up in Belgians from ISNI SRU
+      # optional in case it is not a person marked as Belgian in ISNI SRU
+      OPTIONAL {
+        graph <http://isni-sru> {
+          ?isniSRUAUthor a schema:Person ;
+                         bf:identifiedBy ?isniSRUEntity . 
+     
+          ?isniSRUEntity a bf:Isni ;
+                         rdf:value ?kbrISNI .
+        }
+      }
+              
+      # if there is an optional ISNI we look it up in the ISNI RDF dump
+      # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+      OPTIONAL {
+        graph <http://isni-rdf> {
+          ?isniRDFAuthor a schema:Person ;
+                         schema:identifier [ schema:value ?kbrISNI ] .
+                         
+        }
+              
+        # optional attributes of the ISNI RDF dump
+        OPTIONAL { graph <http://isni-rdf> { ?isniRDFAuthor schema:birthDate ?isniRDFBirthDate . } }
+        OPTIONAL { graph <http://isni-rdf> { ?isniRDFAuthor schema:deathDAte ?isniRDFDeathDate . } }
+      }
+    }
+    
+  
   }
+  #OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:translator ?kbrTranslator . } }
+  #OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:publisher ?kbrPublisher . } }
+  OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:inLanguage ?kbrTargetLang . } } 
   
     
 }
-
 limit 100 
 
