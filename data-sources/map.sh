@@ -3,7 +3,7 @@
 YARRRML_PARSER="./yarrrml-parser/bin/parser.js"
 RML_MAPPER="rmlmapper.jar"
 COMUNICA_SPARQL_FILE="comunica-sparql-file"
-JAVA="java"
+JAVA="java -Xmx4g"
 FORMAT="turtle"
 
 
