@@ -1,12 +1,19 @@
 Type,TYPL
+Type de notice (TYPL),TYPL
 Geautoriseerde vorm,REFA
+Forme autorisée (REFA),REFA
+Adresse,Adresse
 KBR - Autorité date,ADAT
 ISNI/VIAF (024$a),ISNI
+KBR - ISNI,ISNI
 Lieu de naissance,APAY
 Lieu de décès,ADEC
+KBR - Lieu de décès APEP,ADEC
 Adres,ADRS
 Uitgeversnummer,EDNR
+Numéro éditeur,EDNR
 Gelinkte documenten,NBDL
+Documents liés,NBDL
 Identifier,IDNO
 043$c - pays de collectivité - country code ISO,C043
 Actif,ACTI
@@ -24,6 +31,8 @@ Date de modification de la notice,DAMO
 Est enrichie par la vendange,DCEN
 Est un sujet Rameau,RAME
 Forme autorisée,AFAU
+Forme autorisée (AFAU_display),AFAU
+KBR - Autorité 375a sexe,GENDER
 Forme autorisée - Elément d'entrée,AFAE
 Forme rejetée,AFRE
 Fournisseur d'import,SYSBASE
@@ -50,12 +59,15 @@ No. d'éditeur/note,EDNO
 Nom de la personne ayant désactivé la notice,CODN
 Non réservable,NONR
 Pays d'édition,ALIE
+KBR - Pays APEP,COUNTRY
+Personne - dates,dates
 Règle,RULE
 Règle de la notice mère,RUNM
-Référence,REFA
+Référence,Reference
 Traitement d'import,TRAI
 Type de la notice mère,TYNM
 Type de notice,TYPN
+Type de notice (TYPN),TYPN
 Type de vedette matière,TYVM
 Téléphone mail url source note,MAIL
 Unité de gestion,SITE
