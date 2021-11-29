@@ -18,6 +18,13 @@ prefixes:
   countries: "http://id.loc.gov/vocabulary/countries/"
   schema: "http://schema.org/"
 
+variables:
+  sourceWorksFR: &sourceWorksFR ${RML_SOURCE_WORKS_FR}
+  sourceContFR: &sourceContFR ${RML_SOURCE_CONT_FR}
+  sourceWorksNL: &sourceWorksNL ${RML_SOURCE_WORKS_NL}
+  sourceContNL: &sourceContNL ${RML_SOURCE_CONT_NL}
+  sourceRoles: &sourceRoles ${RML_SOURCE_ROLES}
+
 mappings:
 
   # ---------------------------------------------------------------------------
@@ -26,10 +33,12 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates creative works, currently on the LRM level of manifestations."
     sources:
-      - access: "kbr/translations/2021-11-24_FR-NL_works.csv"
+#      - access: "kbr/translations/2021-11-24_FR-NL_works.csv"
+      - access: *sourceWorksFR
         referenceFormulation: csv
         delimiter: ','
-      - access: "kbr/translations/2021-11-24_NL-FR_works.csv"
+#      - access: "kbr/translations/2021-11-24_NL-FR_works.csv"
+      - access: *sourceWorksNL
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:work_$(KBRID)
@@ -64,10 +73,12 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity."
     sources:
-      - access: "kbr/translations/2021-11-24_FR-NL_works.csv"
+#      - access: "kbr/translations/2021-11-24_FR-NL_works.csv"
+      - access: *sourceWorksFR
         referenceFormulation: csv
         delimiter: ','
-      - access: "kbr/translations/2021-11-24_NL-FR_works.csv"
+#      - access: "kbr/translations/2021-11-24_NL-FR_works.csv"
+      - access: *sourceWorksNL
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:translationActivity_$(KBRID)
@@ -83,10 +94,12 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates direct schema.org links for authors, translators and publishers from the translated manifestation."
     sources:
-      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+#      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+      - access: *sourceContFR
         referenceFormulation: csv
         delimiter: ','
-      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+#      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+      - access: *sourceContNL
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:work_$(KBRID)
@@ -120,10 +133,12 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates qualified associations between contributors and the creation activity of a translated work (according to W3C PROV)."
     sources:
-      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+#      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+      - access: *sourceContFR
         referenceFormulation: csv
         delimiter: ','
-      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+#      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+      - access: *sourceContNL
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)
@@ -139,10 +154,12 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates links between translation activities and qualified associations."
     sources:
-      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+#      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+      - access: *sourceContFR
         referenceFormulation: csv
         delimiter: ','
-      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+#      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+      - access: *sourceContNL
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:translationActivity_$(KBRID)
@@ -156,7 +173,8 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates RDF resources for MARC roles such that we can refer to it and do not have to rely on text. Currently with English labels, but labels in other languages may be added."
     sources:
-      - access: "marc-roles.csv"
+#      - access: "marc-roles.csv"
+      - access: *sourceRoles
         referenceFormulation: csv
         delimiter: ','
     s: btid:role_$(code)
