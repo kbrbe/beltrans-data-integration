@@ -23,6 +23,9 @@ variables:
   sourceKBRLinkedAuthoritiesPersonsFR: &sourceKBRLinkedAuthoritiesPersonsFR ${RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_FR}
   sourceKBRLinkedAuthoritiesOrgsNL: &sourceKBRLinkedAuthoritiesOrgsNL ${RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_NL}
   sourceKBRLinkedAuthoritiesOrgsFR: &sourceKBRLinkedAuthoritiesOrgsFR ${RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_FR}
+  sourceKBRPublisherPlacesFlanders: &sourceKBRPublisherPlacesFlanders ${RML_SOURCE_KBR_PUBLISHER_PLACES_FLANDERS}
+  sourceKBRPublisherPlacesWallonia: &sourceKBRPublisherPlacesWallonia ${RML_SOURCE_KBR_PUBLISHER_PLACES_WALLONIA}
+  sourceKBRPublisherPlacesBrussels: &sourceKBRPublisherPlacesBrussels ${RML_SOURCE_KBR_PUBLISHER_PLACES_BRUSSELS}
 
 mappings:
 
@@ -256,3 +259,25 @@ mappings:
           parameters:
             - [grel:valueParameter, $(C043)]
             - [grel:string_sub, "BE"]
+
+  # ---------------------------------------------------------------------------
+  #
+  regionOrgs:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates an address resource for an organizational authority such that the country can be stored according to schema.org"
+    sources:
+      - access: *sourceKBRPublisherPlacesFlanders
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRPublisherPlacesWallonia
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRPublisherPlacesBrussels
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:address_$(IDN)
+    po:
+      - [a, schema:PostalAddress]
+      - [rdfs:label, "Address of authority $(IDN)"]
+      - [schema:addressRegion, $(REGION)]
+      - [schema:addressLocality, $(place)]

@@ -45,6 +45,34 @@ mappings:
     po:
       - [a, schema:CreativeWork]
       - [schema:name, $(title) ]
+      - p: rdfs:comment
+        o: $(responsibilityStatement)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(responsibilityStatement)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:datePublished
+        o: $(yearOfPublication)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(yearOfPublication)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:locationCreated
+        o: $(placeOfPublication)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(placeOfPublication)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:countryOfOrigin
+        o: countries:$(countryOfPublication)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(countryOfPublication)]
+            - [grel:valueParameter2, ""] 
       - p: schema:isbn
         o: $(isbn)
         condition:
