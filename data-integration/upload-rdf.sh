@@ -10,4 +10,5 @@ bash upload-data.sh integration ../data-sources/kbr/kbr-translations.ttl "applic
 bash delete-named-graph.sh integration http://wikibase-test-srv01.kbr.be/sparql http://kbr-belgians
 bash upload-data.sh integration ../data-sources/kbr/kbr-belgians.ttl "application/x-turtle" http://wikibase-test-srv01.kbr.be/sparql http://kbr-belgians
 
+bash delete-named-graph.sh integration http://wikibase-test-srv01.kbr.be/sparql http://kbr-linked-authorities
 bash upload-data.sh integration ../data-sources/kbr/kbr-linked-authorities.ttl "application/x-turtle" http://wikibase-test-srv01.kbr.be/sparql http://kbr-linked-authorities
