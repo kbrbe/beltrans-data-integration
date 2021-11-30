@@ -38,6 +38,20 @@ mappings:
       - [schema:familyName, $(surname)]
       - [foaf:isPrimaryTopicOf, btisni:authority_$(ISNI)~iri]
       - [bf:identifiedBy, btisni:identifier_isni_$(ISNI)~iri]
+      - p: schema:gender
+        o: schema:Female~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(gender)]
+            - [grel:valueParameter2, "female"]
+      - p: schema:gender
+        o: schema:Male~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(gender)]
+            - [grel:valueParameter2, "male"]
       - p: schema:givenName
         o: $(forename)
         condition:
