@@ -10,6 +10,7 @@ bnfDir = os.path.join(queriesDir, 'bnf/')
 kbDir = os.path.join(queriesDir, 'kb/')
 
 sparqlServer = "http://wikibase-test-srv01.kbr.be/sparql/"
+namedGraphKBRTranslations = "http://kbr-syracuse"
 
 # ------------------------------------------------------------
 def _readSPARQLQuery(filename):
@@ -137,18 +138,39 @@ def getKBIdentifiers(sparqlObject):
     return results.rename(columns = lambda col: col.replace(".value", ""))
 
 # ------------------------------------------------------------
+def _convertPropertyStatResultsToArray(results):
+  """This function takes the results of a property query
+  in which we have the following variables in the result bindings:
+  'countWith', 'total', 'countWithout', and 'percentage'"""
+  return _convertResultsToArray(results, ['percentageWith', 'countWith', 'total', 'countWithout'])[0]
+
+# ------------------------------------------------------------
 def getISBNStats(sparqlObject):
   """Query the given SPARQL endpoint (SPARQLWrapper object)
   for stats regarding the use of schema:isbn for instances of schema:CreativeWork."""
-  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-isbn-stats.sparql'))
-  return _convertResultsToArray(result, ['isbnCount', 'worksTotal', 'worksWithoutISBN', 'isbnPercentage'])
+  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-translation-property-stats.sparql'), {'namedGraph': namedGraphKBRTranslations, 'property': 'schema:isbn'})
+  return _convertPropertyStatResultsToArray(result)
 
 # ------------------------------------------------------------
 def getTranslationAuthorStats(sparqlObject):
   """Query the given SPARQL endpoint (SPARQLWrapper object)
-  for stats regarding the use of dc:creator for instances of schema:CreativeWork."""
-  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-translation-author-stats.sparql'))
-  return _convertResultsToArray(result, ['worksWithAuthorCount', 'worksTotal', 'worksWithoutAuthor', 'percentage'])
+  for stats regarding the use of schema:author for instances of schema:CreativeWork."""
+  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-translation-property-stats.sparql'), {'namedGraph': namedGraphKBRTranslations, 'property': 'schema:author'})
+  return _convertPropertyStatResultsToArray(result)
+
+# ------------------------------------------------------------
+def getTranslatorStats(sparqlObject):
+  """Query the given SPARQL endpoint (SPARQLWrapper object)
+  for stats regarding the use of schema:translator for instances of schema:CreativeWork."""
+  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-translation-property-stats.sparql'), {'namedGraph': namedGraphKBRTranslations, 'property': 'schema:translator'})
+  return _convertPropertyStatResultsToArray(result)
+
+# ------------------------------------------------------------
+def getPublisherStats(sparqlObject):
+  """Query the given SPARQL endpoint (SPARQLWrapper object)
+  for stats regarding the use of schema:publisher for instances of schema:CreativeWork."""
+  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-translation-property-stats.sparql'), {'namedGraph': namedGraphKBRTranslations, 'property': 'schema:publisher'})
+  return _convertPropertyStatResultsToArray(result)
 
 # ------------------------------------------------------------
 def getPublicationStatsOverview(sparqlObject):
@@ -156,10 +178,11 @@ def getPublicationStatsOverview(sparqlObject):
   and returns a data frame containing the results."""
 
   queryFunctions = {
-    "ISBN identifiers": getISBNStats,
+    "Translations with ISBN identifiers": getISBNStats,
 #    "Translation source information": getTranslationSourceStats, 
-    "Specified author": getTranslationAuthorStats
-#    "Specified translator": getTranslatorStats, 
+    "Translations with specified author": getTranslationAuthorStats,
+    "Translations with specified translator": getTranslatorStats, 
+    "Translations with specified publisher": getPublisherStats
 #    "Specified illustrator": getIllustratorStats,
 #    "Specified scenarist": getScenaristStats,
 #    "Contributors without role": getNoRoleStats
@@ -168,8 +191,8 @@ def getPublicationStatsOverview(sparqlObject):
   results = list()
   rowIndex = list()
   for (name, fn) in queryFunctions.items():
-    results.append(fn(sparqlObject)[0])
+    results.append(fn(sparqlObject))
     rowIndex.append(name)
 
-  return pd.DataFrame(results, index=rowIndex, columns=['found', 'total', 'missing', 'percentage'])
+  return pd.DataFrame(results, index=rowIndex, columns=['%', 'found', 'total', 'missing'])
   
