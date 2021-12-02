@@ -1,0 +1,31 @@
+# This query returns different percentages to gain insights, it should be executed against the integrated model
+prefix schema: <http://schema.org/>
+
+SELECT
+  ?isbnCount
+  ?worksTotal
+  (( ?worksTotal - ?isbnCount) AS ?worksWithoutISBN)
+  (( ?isbnCount * 100  / ?worksTotal) AS ?isbnPercentage)
+FROM <http://kbr-syracuse>
+WHERE {
+  
+  # Get the number of works with a ISBN
+  {
+    SELECT (COUNT(?isbn) AS ?isbnCount)
+    WHERE {
+      graph <http://kbr-syracuse> {
+        ?s a schema:CreativeWork ;
+           schema:isbn ?isbn .
+      }
+    }
+  }
+
+  # This sub query gets the total number of works
+  {
+    SELECT (COUNT(distinct ?work) AS ?worksTotal)
+    WHERE {
+      graph <http://kbr-syracuse> { ?work a schema:CreativeWork . }
+    }
+  }
+}
+

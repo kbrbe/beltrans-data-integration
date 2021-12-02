@@ -1,13 +1,13 @@
 from SPARQLWrapper import SPARQLWrapper, TURTLE, JSON
 
-#import pandas as pd
+import pandas as pd
 from pandas.io.json import json_normalize
 import os
 
 baseDir = '/home/slieber/repos/beltrans-data'
-dsDir = os.path.join(baseDir, 'data-sources')
-bnfDir = os.path.join(dsDir, 'bnf/')
-kbDir = os.path.join(dsDir, 'kb/')
+queriesDir = os.path.join(baseDir, 'data-integration/sparql-queries')
+bnfDir = os.path.join(queriesDir, 'bnf/')
+kbDir = os.path.join(queriesDir, 'kb/')
 
 sparqlServer = "http://wikibase-test-srv01.kbr.be/sparql/"
 
@@ -62,19 +62,19 @@ def _convertCount(result):
 # ------------------------------------------------------------
 def getPropertyOverview(sparqlObject):
     """Query the given SPARQL endpoint (SPARQLWrapper object) for all properties and their number."""
-    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-property-overview.sparql'))
+    result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-property-overview.sparql'))
     return _convertValueCount(result)
 
 # ------------------------------------------------------------
 def getClassOverview(sparqlObject):
     """Query the given SPARQL endpoint (SPARQLWrapper object) for all classes and number of their instances."""
-    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-class-overview.sparql'))
+    result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-class-overview.sparql'))
     return _convertValueCount(result)
 
 # ------------------------------------------------------------
 def getNationalityOverview(sparqlObject):
     """Query the given SPARQL endpoint (SPARQLWrapper object) for percentages regarding nationality."""
-    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-nationality-percentages.sparql'))
+    result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-nationality-percentages.sparql'))
     return _convertPercentage(result)
     
 # ------------------------------------------------------------
@@ -82,35 +82,35 @@ def getNumberOfBelgiansLOCURI(sparqlObject):
     """Query the given SPARQL endpoint (SPARQLWrapper object)
     for the number of Belgian authors, i.e. instances of schema:Person
     with schema:nationality <http://id.loc.gov/vocabulary/countries/be>"""
-    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-belgians-LOC-URI.sparql'))
+    result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-belgians-LOC-URI.sparql'))
     return _convertCount(result)
 
 # ------------------------------------------------------------
 def getNumberOfPersonsWithISNI(sparqlObject):
     """Query the given SPARQL endpoint (SPARQLWrapper object)
     for the number of schema:Person instances having an ISNI identifier"""
-    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-persons-with-isni.sparql'))
+    result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-persons-with-isni.sparql'))
     return _convertCount(result)
 
 # ------------------------------------------------------------
 def getNumberOfBelgiansWithISNI(sparqlObject):
     """Query the given SPARQL endpoint (SPARQLWrapper object)
     for the number of schema:Person instances with nationality Belgian having an ISNI identifier"""
-    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-belgians-with-isni.sparql'))
+    result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-belgians-with-isni.sparql'))
     return _convertCount(result)
 
 # ------------------------------------------------------------
 def getNumberOfPersonsWithIdentifier(sparqlObject, identifierName):
     """Query the given SPARQL endpoint (SPARQLWrapper object)
     for the number of schema:Person instances having an identifier with the given name."""
-    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-persons-with-custom-identifier.sparql'), {'identifierName': identifierName})
+    result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-persons-with-custom-identifier.sparql'), {'identifierName': identifierName})
     return _convertCount(result)
 
 # ------------------------------------------------------------
 def getNumberOfBelgiansWithIdentifier(sparqlObject, identifierName):
     """Query the given SPARQL endpoint (SPARQLWrapper object)
     for the number of schema:Person instances with nationality Belgian having an identifier with the given name."""
-    result = _queryJSON(sparqlObject, os.path.join(dsDir, 'get-belgians-with-custom-identifier.sparql'), {'identifierName': identifierName})
+    result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-belgians-with-custom-identifier.sparql'), {'identifierName': identifierName})
     return _convertCount(result)
 
 # ------------------------------------------------------------
@@ -124,7 +124,7 @@ def getQueryResultsAsDataframe(sparqlObject, queryFile):
 def getWikidataBelgiansIdentifiers(sparqlObject):
     """Query the given SPARQL endpoint (SPARQLWrapper object)
     for instances of schema:Person with optional KB, BnF and ISNI identifiers."""
-    results = getQueryResultsAsDataframe(sparqlObject, os.path.join(dsDir, 'get-identifier-integration-data.sparql'))
+    results = getQueryResultsAsDataframe(sparqlObject, os.path.join(queriesDir, 'get-identifier-integration-data.sparql'))
     results = results[['wdKbrID.value', 'wdKbID.value', 'wdBnfID.value', 'wdISNI.value']]
     return results.rename(columns = lambda col: col.replace(".value", ""))
 
@@ -132,7 +132,44 @@ def getWikidataBelgiansIdentifiers(sparqlObject):
 def getKBIdentifiers(sparqlObject):
     """Query the given SPARQL endpoint (SPARQLWrapper object)
     for instances of schema:Person to obtain VIAF and ISNI identifiers and schema:WebPage to obtain KB identifiers."""
-    results = getQueryResultsAsDataframe(sparqlObject, os.path.join(dsDir, 'get-kb-identifiers.sparql'))
+    results = getQueryResultsAsDataframe(sparqlObject, os.path.join(queriesDir, 'get-kb-identifiers.sparql'))
     results = results[['kbKbrID.value', 'kbViafID.value', 'kbIsniID.value']]
     return results.rename(columns = lambda col: col.replace(".value", ""))
 
+# ------------------------------------------------------------
+def getISBNStats(sparqlObject):
+  """Query the given SPARQL endpoint (SPARQLWrapper object)
+  for stats regarding the use of schema:isbn for instances of schema:CreativeWork."""
+  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-isbn-stats.sparql'))
+  return _convertResultsToArray(result, ['isbnCount', 'worksTotal', 'worksWithoutISBN', 'isbnPercentage'])
+
+# ------------------------------------------------------------
+def getTranslationAuthorStats(sparqlObject):
+  """Query the given SPARQL endpoint (SPARQLWrapper object)
+  for stats regarding the use of dc:creator for instances of schema:CreativeWork."""
+  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-translation-author-stats.sparql'))
+  return _convertResultsToArray(result, ['worksWithAuthorCount', 'worksTotal', 'worksWithoutAuthor', 'percentage'])
+
+# ------------------------------------------------------------
+def getPublicationStatsOverview(sparqlObject):
+  """This function executes several queries with a similar output format to the given SPARQL endpoint (SPARQLWrapper object)
+  and returns a data frame containing the results."""
+
+  queryFunctions = {
+    "ISBN identifiers": getISBNStats,
+#    "Translation source information": getTranslationSourceStats, 
+    "Specified author": getTranslationAuthorStats
+#    "Specified translator": getTranslatorStats, 
+#    "Specified illustrator": getIllustratorStats,
+#    "Specified scenarist": getScenaristStats,
+#    "Contributors without role": getNoRoleStats
+  }
+
+  results = list()
+  rowIndex = list()
+  for (name, fn) in queryFunctions.items():
+    results.append(fn(sparqlObject)[0])
+    rowIndex.append(name)
+
+  return pd.DataFrame(results, index=rowIndex, columns=['found', 'total', 'missing', 'percentage'])
+  
