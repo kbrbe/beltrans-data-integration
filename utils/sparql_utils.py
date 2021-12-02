@@ -173,6 +173,20 @@ def getPublisherStats(sparqlObject):
   return _convertPropertyStatResultsToArray(result)
 
 # ------------------------------------------------------------
+def getIllustratorStats(sparqlObject):
+  """Query the given SPARQL endpoint (SPARQLWrapper object)
+  for stats regarding the use of prov:Role of an illustrator related to instances of schema:CreativeWork."""
+  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-translation-role-stats.sparql'), {'namedGraph': namedGraphKBRTranslations, 'role': 'btid:role_ill'})
+  return _convertPropertyStatResultsToArray(result)
+
+# ------------------------------------------------------------
+def getScenaristStats(sparqlObject):
+  """Query the given SPARQL endpoint (SPARQLWrapper object)
+  for stats regarding the use of prov:Role of an illustrator related to instances of schema:CreativeWork."""
+  result = _queryJSON(sparqlObject, os.path.join(queriesDir, 'get-translation-role-stats.sparql'), {'namedGraph': namedGraphKBRTranslations, 'role': 'btid:role_sce'})
+  return _convertPropertyStatResultsToArray(result)
+
+# ------------------------------------------------------------
 def getPublicationStatsOverview(sparqlObject):
   """This function executes several queries with a similar output format to the given SPARQL endpoint (SPARQLWrapper object)
   and returns a data frame containing the results."""
@@ -182,9 +196,9 @@ def getPublicationStatsOverview(sparqlObject):
 #    "Translation source information": getTranslationSourceStats, 
     "Translations with specified author": getTranslationAuthorStats,
     "Translations with specified translator": getTranslatorStats, 
-    "Translations with specified publisher": getPublisherStats
-#    "Specified illustrator": getIllustratorStats,
-#    "Specified scenarist": getScenaristStats,
+    "Translations with specified publisher": getPublisherStats,
+    "Specified illustrator": getIllustratorStats,
+    "Specified scenarist": getScenaristStats
 #    "Contributors without role": getNoRoleStats
   }
 
@@ -194,5 +208,5 @@ def getPublicationStatsOverview(sparqlObject):
     results.append(fn(sparqlObject))
     rowIndex.append(name)
 
-  return pd.DataFrame(results, index=rowIndex, columns=['%', 'found', 'total', 'missing'])
+  return pd.DataFrame(results, index=rowIndex, columns=['%', 'found', 'total', 'not having it'])
   
