@@ -15,6 +15,23 @@ This directory contains scripts to integrate the different data sources using RD
 
 We describe how we provide an interface to query the RDF generated from those sources with SPARQL.
 
+
+Setup
+
+```bash
+# create a virtual environment
+python3.8 -m venv py-integration-env
+
+# use the virtual environment
+source py-integration-env/bin/activate
+
+# install dependencies
+pip install -r requirements.txt
+
+# add a Python kernel based on the virtual environment
+python -m ipykernel install --user --name=py-integration-env
+```
+
 ## Cleaning data
 
 
