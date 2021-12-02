@@ -15,6 +15,10 @@ This directory contains scripts to integrate the different data sources using RD
 
 We describe how we provide an interface to query the RDF generated from those sources with SPARQL.
 
+## Cleaning data
+
+
+
 ## Generating RDF
 
 Different scripts and mapping files exist to create RDF from these different data sources (see `data-sources` directory).

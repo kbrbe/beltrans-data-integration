@@ -1,0 +1,8 @@
+*.csv
+*.tsv
+*.xml
+*.xlsx
+*.ttl
+*.json
+!author-headers.csv
+

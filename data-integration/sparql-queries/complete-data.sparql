@@ -1,0 +1,38 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX schema: <http://schema.org/>
+PREFIX isni: <http://isni.org/ontology#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+
+
+INSERT {
+
+  GRAPH <http://data.kbr.be/graphs/authors/persons/> {
+    ?person a schema:Person ;
+      schema:familyName    ?familyName ;
+      schema:givenName     ?givenName ;
+      schema:gender        ?gender ;
+      schema:nationality   ?nationality ;
+      schema:knowsLanguage ?language ;
+      bf:identifiedBy      ?isni ;
+      owl:sameAs ?sameSKOS ;
+      owl:sameAs ?sameOWL .
+  }
+}
+WHERE {
+
+  GRAPH ?graph {
+    ?person a schema:Person ;
+      schema:nationality   ?nationality ;
+      bf:identifiedBy      ?isni ;
+      owl:sameAs           ?samePerson .
+  }
+
+    ?samePerson a schema:Person ;
+      schema:nationality   ?sameNationality ;
+      bf:identifiedBy      ?sameIsni . 
+}
+GROUP BY 

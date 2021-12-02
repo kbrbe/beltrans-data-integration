@@ -1,0 +1,12 @@
+prefix schema: <http://schema.org/>
+
+SELECT ?person ?isni
+WHERE{
+  ?person a schema:Person .
+  
+  OPTIONAL {
+    ?person schema:sameAs ?isni .
+    FILTER(regex(?isni, "isni", "i")) 
+  }
+} LIMIT 100
+

@@ -5,37 +5,31 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX bio: <http://vocab.org/bio/0.1/>
+PREFIX bnf: <http://data.bnf.fr/ontology/bnf-onto/>
 
 
-#CONSTRUCT {
-#  ?person a schema:Person ;
-#    schema:familyName ?familyName ;
-#    schema:givenName ?firstName ;
-#    schema:gender ?gender ;
-#    bf:identifiedBy ?isni ;
-#    rdagroup2elements:languageOfThePerson ?language ;
-#    rdagroup2elements:fieldOfActivityOfThePerson ?field ;
-#    owl:sameAs ?same .
-#}
-SELECT ?person ?familyName ?firstName ?gender ?isni ?language ?field ?same
+SELECT DISTINCT ?bnfID ?familyName ?firstName ?gender ?isni ?birthDate ?deathDate ?birthPlace ?deathPlace ?language
 WHERE {
  
   ?person rdf:type foaf:Person ;
-          foaf:familyName ?familyName ;
-          foaf:givenName ?firstName ;
-          foaf:gender ?gender ;
-          ?p ?o ;
           rdagroup2elements:countryAssociatedWithThePerson <http://id.loc.gov/vocabulary/countries/be> .
-          
+    
+  OPTIONAL { ?person foaf:familyName ?familyName . }
+  OPTIONAL { ?person foaf:givenName ?firstName . }
+  OPTIONAL { ?person foaf:gender ?gender . }
+  OPTIONAL { ?person bio:birth ?birthDate . }
+  OPTIONAL { ?person bio:death ?deathDate . }
+  OPTIONAL { ?person rdagroup2elements:placeOfBirth ?birthPlace . }
+  OPTIONAL { ?person rdagroup2elements:placeOfDeath ?deathPlace . }
   OPTIONAL { ?person rdagroup2elements:languageOfThePerson ?language .}
-  OPTIONAL { ?person rdagroup2elements:fieldOfActivityOfThePerson ?field .}
  
   # Information such as ISNI number or linked resources are available via a person's corresponding skos:Concept
   ?personConcept a skos:Concept ;
       foaf:focus ?person .
   
-  OPTIONAL { ?personConcept isni:identifierValid ?isni . }
-  OPTIONAL { ?personConcept skos:exactMatch ?same . }
+  OPTIONAL { ?personConcept bnf:FRBNF ?bnfID . }
+  OPTIONAL { ?personConcept isni:identifierValid ?isni . } 
   
   
-}
+} 
