@@ -26,11 +26,77 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates RDF resources for MARC roles such that we can refer to it and do not have to rely on text. Currently with English labels, but labels in other languages may be added."
     sources:
-      - access: "marc-roles.csv"
+      - access: "master-data/marc-roles.csv"
         referenceFormulation: csv
         delimiter: ','
     s: btid:role_$(code)
     po:
       - [a, prov:Role]
       - [rdfs:label, $(title), en~lang]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  belgianBibliographyEN:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a SKOS taxonomy for the Belgian bibliography and uses English labels."
+    sources:
+      - access: "master-data/thesaurus-belgian-bibliography-en-hierarchy.csv"
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:$(id)
+    po:
+      - [a, skos:Concept]
+      - [skos:prefLabel, $(name), en~lang]
+      - p: skos:broaderTransitive
+        o: btid:$(parentID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(parentID)]
+            - [grel:valueParameter2, ""] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  belgianBibliographyNL:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a SKOS taxonomy for the Belgian bibliography and uses English labels."
+    sources:
+      - access: "master-data/thesaurus-belgian-bibliography-nl-hierarchy.csv"
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:$(id)
+    po:
+      - [skos:prefLabel, $(name), nl~lang]
+      - p: skos:broaderTransitive
+        o: btid:$(parentID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(parentID)]
+            - [grel:valueParameter2, ""] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  belgianBibliographyFR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a SKOS taxonomy for the Belgian bibliography and uses English labels."
+    sources:
+      - access: "master-data/thesaurus-belgian-bibliography-fr-hierarchy.csv"
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:$(id)
+    po:
+      - [skos:prefLabel, $(name), fr~lang]
+      - p: skos:broaderTransitive
+        o: btid:$(parentID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(parentID)]
+            - [grel:valueParameter2, ""] 
+
+
 
