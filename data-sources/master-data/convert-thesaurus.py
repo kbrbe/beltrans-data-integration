@@ -51,19 +51,25 @@ def main():
             lastLevel = currentLevel
           else:
             if currentLevel > lastLevel:
+              # we are now one hierarchy level lower
               writeResult(outputWriter, rowID, val, parents[-1])
+              # now we are a possible new parent
               parents.append(rowID)
               lastLevel = currentLevel
             elif currentLevel == lastLevel:
+              # we are still on the same hierarchy level
+              # following records might be our children,
+              # thus remove our neighboor and set ourselves as parent
               parents.pop()
               writeResult(outputWriter, rowID, val, parents[-1])
               parents.append(rowID)
               lastLevel = currentLevel
             else:
-              # it is smaller, so now entries of a previous hierarchy
-              # remove the current element because it is not a parent
+              # we are one or more hierarchy levels up again
+              # remove the current element because it is not a parent for anyone
               parents.pop()
-              # and also remove other parents, e.g. we were in level 4, but now we are in a hierarchy for 1, thus remove 4-1 = 3
+              # we might be several hierarchy levels higher,
+              # thus also remove other parents, e.g. we were in level 4, but now we are in a hierarchy for 1, thus remove 4-1 = 3
               levelDiff = lastLevel - currentLevel
               for i in range(levelDiff):
                 parents.pop()
