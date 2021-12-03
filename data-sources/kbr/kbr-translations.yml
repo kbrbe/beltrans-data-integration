@@ -23,7 +23,6 @@ variables:
   sourceContFR: &sourceContFR ${RML_SOURCE_CONT_FR}
   sourceWorksNL: &sourceWorksNL ${RML_SOURCE_WORKS_NL}
   sourceContNL: &sourceContNL ${RML_SOURCE_CONT_NL}
-  sourceRoles: &sourceRoles ${RML_SOURCE_ROLES}
 
 mappings:
 
@@ -194,19 +193,4 @@ mappings:
     po:
       - [prov:qualifiedAssociation, btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)~iri]
 
-
-  # ---------------------------------------------------------------------------
-  #
-  marcRoles:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates RDF resources for MARC roles such that we can refer to it and do not have to rely on text. Currently with English labels, but labels in other languages may be added."
-    sources:
-#      - access: "marc-roles.csv"
-      - access: *sourceRoles
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:role_$(code)
-    po:
-      - [a, prov:Role]
-      - [rdfs:label, $(title), en~lang]
 
