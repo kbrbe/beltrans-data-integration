@@ -1,5 +1,7 @@
 from datetime import datetime
 import xml.etree.ElementTree as ET
+import unicodedata as ud
+import enchant
 
 # -----------------------------------------------------------------------------
 def parseYear(year, patterns):
@@ -262,6 +264,219 @@ def extractIdentifier(rowID, value, pattern):
     return str(identifier)
 
 
+# -----------------------------------------------------------------------------
+def count(stats, counter):
+  """ This function simply adds to the given counter or creates it if not yet existing in 'stats'.
+
+  >>> stats = {}
+  >>> count(stats, 'myCounter')
+  >>> stats['myCounter']
+  1
+  """
+  if counter in stats:
+    stats[counter] += 1
+  else:
+    stats[counter] = 1
+
+
+
+
+# -----------------------------------------------------------------------------
+def compareStrings(s1, s2):
+  """This function normalizes both strings and compares them. It returns true if it matches, false if not.
+
+  >>> compareStrings("HeLlO", "Hello")
+  True
+  >>> compareStrings("judaïsme, islam, christianisme, ET sectes apparentées", "judaisme, islam, christianisme, et sectes apparentees")
+  True
+  >>> compareStrings("chamanisme, de l’Antiquité…)", "chamanisme, de lAntiquite...)")
+  True
+  """
+
+  nS1 = getNormalizedString(s1)
+  nS2 = getNormalizedString(s2)
+
+  if(nS1 == nS2):
+    return True
+  else:
+    return False
+
+# -----------------------------------------------------------------------------
+def getNormalizedString(s):
+  """This function returns a normalized copy of the given string.
+
+  >>> getNormalizedString("HeLlO")
+  'hello'
+  >>> getNormalizedString("judaïsme, islam, christianisme, ET sectes apparentées")
+  'judaisme islam christianisme et sectes apparentees'
+  >>> getNormalizedString("chamanisme, de l’Antiquité…)")
+  'chamanisme de lantiquite...)'
+  """
+  noComma = s.replace(',', '')
+  noColon = noComma.replace(':', '')
+  return ud.normalize('NFKD', noColon).encode('ASCII', 'ignore').lower().strip().decode("utf-8")
+
+
+# -----------------------------------------------------------------------------
+def smallLevenshteinInList(str1, wordList):
+  """This function checks the levensthein distance of str1 to each of the words
+     in the given wordList. As soon as one word has a very little distance,
+     consider it a match and return True.
+
+  >>> smallLevenshteinInList('balon', ['ballon', 'media'])
+  True
+  """
+
+  retVal = False
+
+  for word in wordList:
+    lsDist = enchant.utils.levenshtein(str1, word)
+    if(lsDist == 1):
+      retVal = True
+
+  return retVal
+
+# -----------------------------------------------------------------------------
+def smallLevenshteinBetweenLists(wordList1, wordList2):
+  """This function checks the levenshtein distances between the two word lists.
+  It considers a match if the words of the smaller list all match with distance 0 or 1 with
+  a word of the longer list.
+
+  >>> smallLevenshteinBetweenLists(['bauwens', 'noella'], ['noella', 'bauwens'])
+  True
+  >>> smallLevenshteinBetweenLists(['one', 'two', 'three'], ['three', 'two', 'one'])
+  True
+  >>> smallLevenshteinBetweenLists(['one', 'two', 'three'], ['two', 'one', 'three'])
+  True
+  >>> smallLevenshteinBetweenLists(['one', 'two', 'three', 'four', 'five'], ['two', 'one', 'three'])
+  True
+  >>> smallLevenshteinBetweenLists(['one', 'two', 'thrae', 'foor', 'five'], ['two', 'one', 'three'])
+  True
+  >>> smallLevenshteinBetweenLists(['one', 'two', 'one', 'thrae', 'foor', 'two', 'five'], ['two', 'one', 'three'])
+  True
+
+  >>> smallLevenshteinBetweenLists(['five', 'six', 'seven'], ['two', 'one', 'three'])
+  False
+  >>> smallLevenshteinBetweenLists(['five', 'six', 'seven', 'eight', 'nine'], ['two', 'one', 'three'])
+  False
+  """
+
+  #
+  # check which list is smaller
+  # so we know for how many 0 or 1 levenshtein numbers we have to look
+  smallerListLen = min(len(wordList1), len(wordList2))
+
+  distances = list()
+  for w1 in wordList1:
+    for w2 in wordList2:
+      distances.append(enchant.utils.levenshtein(w1, w2))
+
+  smallDistanceCounter = 0
+  for d in distances:
+    if d < 2:
+      smallDistanceCounter += 1
+
+  #
+  # If the items of the smaller list occured one or more times in the longer list (with slight variation)
+  # we consider it a match
+  if(smallDistanceCounter >= smallerListLen):
+    return True
+  else:
+    return False
+
+# -----------------------------------------------------------------------------
+def smallLevenshteinDistance(stats, str1, str2):
+  """This function checks both strings with respect to their levenshtein distance, checking also substrings.
+
+  >>> smallLevenshteinDistance({}, 'koninklijke bibliotheek albert i', 'koninklijke bibliotheek van belgie')
+  True
+  >>> smallLevenshteinDistance({}, 'athenaeum-polak & van gennep', 'athenaeum  polak & van gennep')
+  True
+  >>> smallLevenshteinDistance({}, 'publieboek : baart', 'publiboek')
+  True
+  >>> smallLevenshteinDistance({}, 'blake en mortimer', 'blake & mortimer')
+  True
+  >>> smallLevenshteinDistance({}, 'nomonkeybooks', 'no monkey business')
+  False
+  """
+
+  retVal = False
+
+  #
+  # check which string is longer
+  # needed to compare levenshtein distance relative to string length
+  #
+  longerNameLength = max([len(str1), len(str2)])
+  halfLongerNameLength = longerNameLength/2
+  
+  distance = enchant.utils.levenshtein(str1, str2)
+ 
+  print(f'compare "{str1}" and "{str2}"')
+  if(longerNameLength > 1 and distance == 1):
+    #
+    # the levenshtein distance is very small,
+    # very likely it was just a typo or there is a special character like a hyphen
+    #
+    retVal = True
+    count(stats, 'levenshtein-distance-match-just-1')
+    print("very possible match, distance is 1")
+  elif(distance < (longerNameLength/4)):
+    #
+    # the levenshtein distance is relatively low (less than a quarter of the length of the string)
+    #
+    retVal = True
+    count(stats, 'levenshtein-distance-match-less-than-a-quarter')
+    print("likely match, distance is less than a quarter of the length")
+  #
+  # Checking for a too big difference turned out to be to strict
+  # "Sven Lieber" and "Lieber, Sven" would have too much of a difference already
+  # thus going to the else condition where the words are checked separately
+  #
+  #elif(distance > halfLongerNameLength ):
+    #
+    # The distance is quite big
+    #
+    #count(stats, 'levenshtein-distance-no-match-too-big')
+    #retVal = False
+    #print("definitely no match, distance too long")
+  else:
+    #
+    # The levenshtein distance is not too small but also not too big
+    # check the distance for different words
+    #
+    strList1 = str1.split()
+    strList2 = str2.split()
+
+    print("distance not too short, but also not too long, check words:")
+    if(len(strList1) == 1 and len(strList2) > 1):
+      #
+      # We only have to check if a misspelled version of the single word first string
+      # matches with one of the words of the second string
+      #
+      if(smallLevenshteinInList(str1, strList2)):
+        count(stats, 'levenshtein-distance-match-word1-in-list2')
+        print("first name appears changed in the second list")
+        retVal = True
+    elif(len(strList2) == 1 and len(strList1) > 1):
+      #
+      # We only have to check if a misspelled version of the single word second string
+      # matches with one of the words of the first string
+      #
+      if(smallLevenshteinInList(str2, strList1)):
+        count(stats, 'levenshtein-distance-match-word2-in-list1')
+        print("second name appears changed in the first list")
+        retVal = True
+    elif(len(strList1) == 1 and len(strList2) == 1):
+      # both are just one word and the levenshtein distance was already too big
+      retVal = False
+    else:
+      # both names consist of many words
+      if(smallLevenshteinBetweenLists(strList1, strList2)):
+        count(stats, 'levenshtein-distance-match-words-in-lists')
+        print("levenshtein distance between two word lists is not too big")
+        retVal = True
+
+  return retVal
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":

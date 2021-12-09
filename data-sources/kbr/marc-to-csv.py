@@ -6,6 +6,8 @@ import xml.etree.ElementTree as ET
 import os
 import json
 import itertools
+import enchant
+import hashlib
 import csv
 from optparse import OptionParser
 import utils
@@ -25,12 +27,14 @@ def getContributorData(elem):
   return (cID, cName, cRole)
   
 # -----------------------------------------------------------------------------
-def addContributorFieldsToContributorCSV(elem, writer):
+def addContributorFieldsToContributorCSV(elem, writer, stats):
   """This function extracts contributor relevant data from the given XML element 'elem' and writes it to the given CSV file writer."""
 
   kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
+  print(kbrID)
 
   foundContributors = []
+  linkedOrganizationNames = set()
 
   #
   # add person contributors, in case the role is empty it is the author with role 'aut'
@@ -38,8 +42,12 @@ def addContributorFieldsToContributorCSV(elem, writer):
   personContributors = elem.findall('./datafield[@tag="700"]', ALL_NS)
   for p in personContributors:
     (cID, cName, cRole) = getContributorData(p)
+    # If no role is set it is an author (confirmed with KBRs cataloging agency)
     if cRole == '':
       cRole = 'aut'
+    # Also persons can publish, thus we should add them for the later check on publishers
+    if cRole == 'pbl':
+      linkedOrganizationNames.add(utils.getNormalizedString(cName))
     foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole})
 
   #
@@ -48,7 +56,49 @@ def addContributorFieldsToContributorCSV(elem, writer):
   orgContributors = elem.findall('./datafield[@tag="710"]', ALL_NS)
   for o in orgContributors:
     (cID, cName, cRole) = getContributorData(o)
+    linkedOrganizationNames.add(utils.getNormalizedString(cName))
+    # If no role is set it is an author (confirmed with KBRs cataloging agency)
+    if cRole == '':
+      cRole = 'pbl'
     foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole})
+
+  #
+  # Publishers are also indicated in field 264, but only as text string as it appeared on the book
+  # If we simply map 264 we get doubles because we also map 710
+  # Thus we have to identify publishers which are ONLY encoded in field 264
+  # In the previous step we collected all the names of organizational contributors (field 710) of this record
+  #
+  orgContributorsWithoutLink = elem.findall('./datafield[@tag="264"]', ALL_NS)
+  for ol in orgContributorsWithoutLink:
+    textName = utils.getElementValue(ol.find('./subfield[@code="b"]', ALL_NS))
+    textNameNorm = utils.getNormalizedString(textName)
+    if textName != '':
+      foundMatch = False
+      for linked in linkedOrganizationNames:
+        distance = enchant.utils.levenshtein(textNameNorm, linked)
+        if textNameNorm in linked:
+          utils.count(stats['counter'], 'identified-264-in-710-by-264-in-710')
+          foundMatch = True
+          break
+        elif linked in textNameNorm:
+          utils.count(stats['counter'], 'identified-264-in-710-by-710-in-264')
+          foundMatch = True
+          break
+        else:
+          if utils.smallLevenshteinDistance(stats['counter'], textNameNorm, linked):
+            foundMatch = True
+            break
+
+      if not foundMatch:
+        # this publisher encoded as text does not seem to be already encoded as link in a 710 field
+        # thus create a new contribution and use a hash of the normalized name as ID
+        # alternatively a UUID can be used, but with a hash we may get other links
+        normalizedName = utils.getNormalizedString(textName)
+        nameID = hashlib.md5(normalizedName.encode('utf-8')).hexdigest()
+        utils.count(stats['counter'], 'publishers-without-authority')
+        stats['unique-publishers-without-authority'].add(nameID)
+        foundContributors.append({'contributorID': nameID, 'contributorName': textName, 'contributorRole': 'pbl'})
+       
 
   #
   # write all we found to a file, one row per contribution
@@ -110,8 +160,6 @@ def main():
   #
   # Instead of loading everything to main memory, stream over the XML using iterparse
   #
-  stats = {}
-
   with open(options.output_cont_file, 'w') as outContFile, \
        open(options.output_work_file, 'w') as outWorkFile:
 
@@ -124,6 +172,7 @@ def main():
     workWriter.writeheader()
     contWriter.writeheader()
 
+    stats = {'unique-publishers-without-authority': set(), 'counter': {} }
     # iterate over all XML Files in the given directory and count ISNI statistics
     for event, elem in ET.iterparse(options.input_file, events=('start', 'end')):
 
@@ -131,6 +180,11 @@ def main():
       if  event == 'end' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
 
         addWorkFieldsToWorkCSV(elem, workWriter)
-        addContributorFieldsToContributorCSV(elem, contWriter)
+        addContributorFieldsToContributorCSV(elem, contWriter, stats)
+
+    numberUniquePublishersWithoutAuthorityRecord = len(stats['unique-publishers-without-authority'])
+    print(f'Unique publishers without authority record: {numberUniquePublishersWithoutAuthorityRecord}')
+    for key,val in stats['counter'].items():
+      print(f'{key},{val}')
 
 main()
