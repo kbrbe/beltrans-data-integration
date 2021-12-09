@@ -31,7 +31,6 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
   """This function extracts contributor relevant data from the given XML element 'elem' and writes it to the given CSV file writer."""
 
   kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
-  print(kbrID)
 
   foundContributors = []
   linkedOrganizationNames = set()

@@ -411,7 +411,6 @@ def smallLevenshteinDistance(stats, str1, str2):
   
   distance = enchant.utils.levenshtein(str1, str2)
  
-  print(f'compare "{str1}" and "{str2}"')
   if(longerNameLength > 1 and distance == 1):
     #
     # the levenshtein distance is very small,
@@ -419,14 +418,12 @@ def smallLevenshteinDistance(stats, str1, str2):
     #
     retVal = True
     count(stats, 'levenshtein-distance-match-just-1')
-    print("very possible match, distance is 1")
   elif(distance < (longerNameLength/4)):
     #
     # the levenshtein distance is relatively low (less than a quarter of the length of the string)
     #
     retVal = True
     count(stats, 'levenshtein-distance-match-less-than-a-quarter')
-    print("likely match, distance is less than a quarter of the length")
   #
   # Checking for a too big difference turned out to be to strict
   # "Sven Lieber" and "Lieber, Sven" would have too much of a difference already
@@ -447,7 +444,6 @@ def smallLevenshteinDistance(stats, str1, str2):
     strList1 = str1.split()
     strList2 = str2.split()
 
-    print("distance not too short, but also not too long, check words:")
     if(len(strList1) == 1 and len(strList2) > 1):
       #
       # We only have to check if a misspelled version of the single word first string
@@ -455,7 +451,6 @@ def smallLevenshteinDistance(stats, str1, str2):
       #
       if(smallLevenshteinInList(str1, strList2)):
         count(stats, 'levenshtein-distance-match-word1-in-list2')
-        print("first name appears changed in the second list")
         retVal = True
     elif(len(strList2) == 1 and len(strList1) > 1):
       #
@@ -464,7 +459,6 @@ def smallLevenshteinDistance(stats, str1, str2):
       #
       if(smallLevenshteinInList(str2, strList1)):
         count(stats, 'levenshtein-distance-match-word2-in-list1')
-        print("second name appears changed in the first list")
         retVal = True
     elif(len(strList1) == 1 and len(strList2) == 1):
       # both are just one word and the levenshtein distance was already too big
@@ -473,7 +467,6 @@ def smallLevenshteinDistance(stats, str1, str2):
       # both names consist of many words
       if(smallLevenshteinBetweenLists(strList1, strList2)):
         count(stats, 'levenshtein-distance-match-words-in-lists')
-        print("levenshtein distance between two word lists is not too big")
         retVal = True
 
   return retVal
