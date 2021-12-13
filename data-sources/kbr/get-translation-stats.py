@@ -113,6 +113,13 @@ def countBindingTypes(elem, countDict):
   utils.count(countDict, bindingType)
 
 # -----------------------------------------------------------------------------
+def countMediumTypes(elem, countDict):
+  """This function counts the different variants of medium types in MARC field 245$h."""
+
+  mediumType = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="h"]', ALL_NS))
+  utils.count(countDict, mediumType)
+
+# -----------------------------------------------------------------------------
 def main():
   """This script reads an XML file in MARC slim format and generates statistics about used fields."""
 
@@ -132,7 +139,7 @@ def main():
   #
   # Instead of loading everything to main memory, stream over the XML using iterparse
   #
-  stats = {'totalRecords': 0, 'date': {}, 'translation': {}, 'binding-types': {}}
+  stats = {'totalRecords': 0, 'date': {}, 'translation': {}, 'binding-types': {}, 'medium-types': {} }
   for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
     if  event == 'start' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
       stats['totalRecords'] += 1
@@ -144,6 +151,7 @@ def main():
       foundFields = set()
 
       countBindingTypes(elem, stats['binding-types'])
+      countMediumTypes(elem, stats['medium-types'])
 
       for datafield in elem:
         #print(datafield.tag, datafield.attrib, datafield.text)
