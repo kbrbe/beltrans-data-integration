@@ -5,10 +5,12 @@
 import xml.etree.ElementTree as ET
 import json
 import itertools
+import utils
 import csv
 from optparse import OptionParser
 
 NS_MARCSLIM = 'http://www.loc.gov/MARC21/slim'
+ALL_NS = {'': NS_MARCSLIM}
 
 # -----------------------------------------------------------------------------
 def countDatafields(df, countDict):
@@ -103,27 +105,35 @@ def countTitleVariants(df, countDict):
         else:
           countDict['NO_VARIANT_TYPE'] = 1
       
+# -----------------------------------------------------------------------------
+def countBindingTypes(elem, countDict):
+  """This function counts the different variants of binding types in MARC field 020$q."""
+
+  bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
+  utils.count(countDict, bindingType)
 
 # -----------------------------------------------------------------------------
 def main():
   """This script reads an XML file in MARC slim format and generates statistics about used fields."""
 
   parser = OptionParser(usage="usage: %prog [options]")
-  parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC slim XML records')
+  # commented out because there is no auto completion for bash for options (but for arguments), we anyway only have one parameter
+  #parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC slim XML records')
   (options, args) = parser.parse_args()
 
   #
   # Check if we got all required arguments
   #
-  if( (not options.input_file)):
+  if( len(args) != 1 ):
     parser.print_help()
     exit(1)
 
+  inputFile = args[0]
   #
   # Instead of loading everything to main memory, stream over the XML using iterparse
   #
-  stats = {'totalRecords': 0, 'date': {}, 'translation': {}}
-  for event, elem in ET.iterparse(options.input_file, events=('start', 'end')):
+  stats = {'totalRecords': 0, 'date': {}, 'translation': {}, 'binding-types': {}}
+  for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
     if  event == 'start' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
       stats['totalRecords'] += 1
 
@@ -132,6 +142,9 @@ def main():
     #
     if  event == 'end' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
       foundFields = set()
+
+      countBindingTypes(elem, stats['binding-types'])
+
       for datafield in elem:
         #print(datafield.tag, datafield.attrib, datafield.text)
         countTitleVariants(datafield, stats['translation'])
