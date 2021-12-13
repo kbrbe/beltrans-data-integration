@@ -72,6 +72,13 @@ mappings:
           parameters:
             - [grel:valueParameter, $(countryOfPublication)]
             - [grel:valueParameter2, ""] 
+      - p: schema:bookType
+        o: btid:binding_$(bindingType)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, ""] 
       - p: schema:isbn
         o: $(isbn)
         condition:

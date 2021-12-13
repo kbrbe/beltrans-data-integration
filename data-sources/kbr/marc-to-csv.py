@@ -118,12 +118,13 @@ def addWorkFieldsToWorkCSV(elem, writer):
   #
   kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
   isbn = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="a"]', ALL_NS))
-  title = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="a"]', ALL_NS))
+  bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
   language = utils.getElementValue(elem.find('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
+  countryOfPublication = utils.getElementValue(elem.find('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
+  title = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="a"]', ALL_NS))
+  responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
   placeOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="a"]', ALL_NS))
   yearOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="c"]', ALL_NS))
-  countryOfPublication = utils.getElementValue(elem.find('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
-  responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
 
   newRecord = {
     'KBRID': kbrID,
@@ -133,7 +134,8 @@ def addWorkFieldsToWorkCSV(elem, writer):
     'placeOfPublication': placeOfPublication,
     'countryOfPublication': countryOfPublication,
     'yearOfPublication': yearOfPublication,
-    'responsibilityStatement': responsibilityStatement
+    'responsibilityStatement': responsibilityStatement,
+    'bindingType': bindingType
   }
 
   writer.writerow(newRecord)
@@ -163,7 +165,7 @@ def main():
        open(options.output_work_file, 'w') as outWorkFile:
 
     fields = ['ISNI', 'dataConfidence', 'nationality', 'gender', 'surname', 'forename', 'marcDate', 'sourceName', 'subSourceName', 'sourceID', 'externalInfo', 'externalInfoURI', 'externalInfoID']
-    workFields = ['KBRID', 'isbn', 'title', 'language', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement']
+    workFields = ['KBRID', 'isbn', 'title', 'language', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType']
     contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole']
     workWriter = csv.DictWriter(outWorkFile, fieldnames=workFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     contWriter = csv.DictWriter(outContFile, fieldnames=contFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)

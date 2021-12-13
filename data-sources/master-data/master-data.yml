@@ -99,4 +99,20 @@ mappings:
             - [grel:valueParameter2, ""] 
 
 
+  # ---------------------------------------------------------------------------
+  #
+  bindingTypes:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates multilingual RDF resources for binding types used by the KBR catalog in the MARC field 020$q."
+    sources:
+      - access: "master-data/binding-types.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:binding_$(code)
+    po:
+      - [a, schema:BookFormatType]
+      - [rdfs:label, $(labelEN), en~lang]
+      - [rdfs:label, $(labelNL), nl~lang]
+      - [rdfs:label, $(labelFR), fr~lang]
+
 
