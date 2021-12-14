@@ -47,19 +47,21 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
     # Also persons can publish, thus we should add them for the later check on publishers
     if cRole == 'pbl':
       linkedOrganizationNames.add(utils.getNormalizedString(cName))
-    foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole})
+    foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': 'no'})
 
   #
   # add organizational contributors such as publishers
   #
   orgContributors = elem.findall('./datafield[@tag="710"]', ALL_NS)
   for o in orgContributors:
+    uncertainty = 'no'
     (cID, cName, cRole) = getContributorData(o)
     linkedOrganizationNames.add(utils.getNormalizedString(cName))
-    # If no role is set it is an author (confirmed with KBRs cataloging agency)
+    # If no role is set it likely is an author (confirmed with KBRs cataloging agency)
     if cRole == '':
       cRole = 'pbl'
-    foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole})
+      uncertainty = 'yes'
+    foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': uncertainty})
 
   #
   # Publishers are also indicated in field 264, but only as text string as it appeared on the book
@@ -74,7 +76,8 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
     if textName != '':
       foundMatch = False
       for linked in linkedOrganizationNames:
-        distance = enchant.utils.levenshtein(textNameNorm, linked)
+
+        # check first if the 264 name is part of the 710 name or vice versa
         if textNameNorm in linked:
           utils.count(stats['counter'], 'identified-264-in-710-by-264-in-710')
           foundMatch = True
@@ -84,6 +87,8 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
           foundMatch = True
           break
         else:
+          # if the name is no substring of the other name, do some more sophisticated comparisons
+          # based on the levenshtein distance of (parts of) the name
           if utils.smallLevenshteinDistance(stats['counter'], textNameNorm, linked):
             foundMatch = True
             break
@@ -91,14 +96,14 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
       if not foundMatch:
         # this publisher encoded as text does not seem to be already encoded as link in a 710 field
         # thus create a new contribution and use a hash of the normalized name as ID
-        # alternatively a UUID can be used, but with a hash we may get other links
+        # alternatively a UUID can be used, but with a hash we can identify this publisher also in other records and get other links
 
         if textName != 's. n' and textName != '[s.n.]':
           normalizedName = utils.getNormalizedString(textName)
           nameID = hashlib.md5(normalizedName.encode('utf-8')).hexdigest()
           utils.count(stats['counter'], 'publishers-without-authority')
           stats['unique-publishers-without-authority'].add(nameID)
-          foundContributors.append({'contributorID': nameID, 'contributorName': textName, 'contributorRole': 'pbl'})
+          foundContributors.append({'contributorID': nameID, 'contributorName': textName, 'contributorRole': 'pbl', 'uncertainty': 'no'})
        
 
   #
@@ -168,7 +173,7 @@ def main():
 
     fields = ['ISNI', 'dataConfidence', 'nationality', 'gender', 'surname', 'forename', 'marcDate', 'sourceName', 'subSourceName', 'sourceID', 'externalInfo', 'externalInfoURI', 'externalInfoID']
     workFields = ['KBRID', 'isbn', 'title', 'language', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType']
-    contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole']
+    contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
     workWriter = csv.DictWriter(outWorkFile, fieldnames=workFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     contWriter = csv.DictWriter(outContFile, fieldnames=contFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
