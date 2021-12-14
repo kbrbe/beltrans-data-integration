@@ -92,11 +92,13 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
         # this publisher encoded as text does not seem to be already encoded as link in a 710 field
         # thus create a new contribution and use a hash of the normalized name as ID
         # alternatively a UUID can be used, but with a hash we may get other links
-        normalizedName = utils.getNormalizedString(textName)
-        nameID = hashlib.md5(normalizedName.encode('utf-8')).hexdigest()
-        utils.count(stats['counter'], 'publishers-without-authority')
-        stats['unique-publishers-without-authority'].add(nameID)
-        foundContributors.append({'contributorID': nameID, 'contributorName': textName, 'contributorRole': 'pbl'})
+
+        if textName != 's. n' and textName != '[s.n.]':
+          normalizedName = utils.getNormalizedString(textName)
+          nameID = hashlib.md5(normalizedName.encode('utf-8')).hexdigest()
+          utils.count(stats['counter'], 'publishers-without-authority')
+          stats['unique-publishers-without-authority'].add(nameID)
+          foundContributors.append({'contributorID': nameID, 'contributorName': textName, 'contributorRole': 'pbl'})
        
 
   #
