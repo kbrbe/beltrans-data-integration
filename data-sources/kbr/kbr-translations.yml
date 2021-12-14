@@ -17,6 +17,7 @@ prefixes:
   ex: "http://example.org/ns#"
   countries: "http://id.loc.gov/vocabulary/countries/"
   schema: "http://schema.org/"
+  up: "http://users.ugent.be/~tdenies/up/"
 
 variables:
   sourceWorksFR: &sourceWorksFR ${RML_SOURCE_WORKS_FR}
@@ -180,6 +181,28 @@ mappings:
       - [a, prov:Association]
       - [prov:agent, btid:authority_$(contributorID)~iri]
       - [prov:hadRole, btid:role_$(contributorRole)~iri]
+      - [prov:activity, btid:translationActivity_$(KBRID)~iri]
+      - p: up:assertionConfidence
+        o: 0.5 
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(uncertainty)]
+            - [grel:valueParameter2, "yes"] 
+      - p: up:assertionType
+        o: up:MachineGenerated~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(uncertainty)]
+            - [grel:valueParameter2, "yes"] 
+      - p: rdfs:comment
+        o: "The indicated role is only assumed and was not indicated in the source."
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(uncertainty)]
+            - [grel:valueParameter2, "yes"] 
 
 
   # ---------------------------------------------------------------------------
