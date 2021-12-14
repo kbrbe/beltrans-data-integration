@@ -4,6 +4,7 @@ SCRIPT_CLEAN_TRANSLATIONS="../data-sources/kbr/clean-marc-slim.py"
 SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
 SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
 SCRIPT_NORMALIZE_HEADERS="../data-sources/kbr/replace-headers.py"
+SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-authorities.sh"
 
 # -----------------------------------------------------------------------------
 function main {
@@ -12,6 +13,7 @@ function main {
 
   mkdir -p $integrationName/kbr/translations
   mkdir -p $integrationName/kbr/agents
+  mkdir -p $integrationName/kbr/rdf 
 
   source ../data-sources/py-etl-env/bin/activate
 
@@ -59,8 +61,11 @@ function mapKBRTranslationsAndContributions {
   kbrFrenchTranslationsCSVWorks="$integrationName/kbr/translations/fr-translations-works.csv"
   kbrDutchTranslationsCSVCont="$integrationName/kbr/translations/nl-translations-contributors.csv"
   kbrFrenchTranslationsCSVCont="$integrationName/kbr/translations/fr-translations-contributors.csv"
+  kbrDutchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/nl-translations-identified-authorities.csv"
+  kbrFrenchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/fr-translations-identified-authorities.csv"
   
-  kbrTranslationsTurtle="$integrationName/kbr/translations-and-contributions.ttl"
+  kbrTranslationsTurtle="$integrationName/kbr/rdf/translations-and-contributions.ttl"
+  kbrTranslationsIdentifiedAuthorities="$integrationName/kbr/rdf/identified-authorities.ttl"
 
   echo "Clean Dutch translations ..."
   cleanTranslations $kbrDutchTranslations $kbrDutchTranslationsCleaned
@@ -83,8 +88,23 @@ function mapKBRTranslationsAndContributions {
   export RML_SOURCE_CONT_NL=$kbrDutchTranslationsCSVCont
 
   # 2) execute the mapping
+  echo "Map translations and contributions ..."
   . map.sh ../data-sources/kbr/kbr-translations.yml $kbrTranslationsTurtle
 
+  # extract newly identified publishers
+  echo "Extract newly identified contributors ..."
+  extractIdentifiedAuthorities $kbrDutchTranslationsCSVCont $kbrDutchTranslationsIdentifiedAuthorities
+  extractIdentifiedAuthorities $kbrFrenchTranslationsCSVCont $kbrFrenchTranslationsIdentifiedAuthorities
+
+  # map newly identified publishers
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_KBR_CONT_NL_IDENTIFIED=$kbrDutchTranslationsIdentifiedAuthorities
+  export RML_SOURCE_KBR_CONT_FR_IDENTIFIED=$kbrFrenchTranslationsIdentifiedAuthorities
+
+  # 2) execute the mapping
+  echo "Map newly identified contributors ..."
+  . map.sh ../data-sources/kbr/kbr-identified-authorities.yml $kbrTranslationsIdentifiedAuthorities
 
 
 }
@@ -135,6 +155,15 @@ function normalizeCSVHeaders {
   checkFile $input
   checkFile $headerConversionTable
   python $SCRIPT_NORMALIZE_HEADERS -i $input -o $output -m $headerConversionTable -d ';'
+}
+
+# -----------------------------------------------------------------------------
+function extractIdentifiedAuthorities {
+  local input=$1
+  local output=$2
+
+  checkFile $input
+  . $SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES $input $output
 }
 
 if [ "$#" -ne 1 ];

@@ -1,0 +1,84 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+
+variables:
+  sourceKBRIdentifiedOrgsNL: &sourceKBRIdentifiedOrgsNL ${RML_SOURCE_KBR_CONT_NL_IDENTIFIED}
+  sourceKBRIdentifiedOrgsFR: &sourceKBRIdentifiedOrgsFR ${RML_SOURCE_KBR_CONT_FR_IDENTIFIED}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  identifiedOrgs:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates organizational authority records from previously identified authorities in text strings."
+    sources:
+      - access: *sourceKBRIdentifiedOrgsNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRIdentifiedOrgsFR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:authority_$(contributorID)
+    po:
+      - [a, schema:Organization]
+      - [rdfs:label, $(contributorName)]
+      - [dc:identifier, $(contributorID)]
+      - [prov:wasGeneratedBy, btid:authority_prov_$(contributorID)~iri]
+      - [foaf:isPrimaryTopicOf, btabout:authority_$(contributorID)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  orgsAbout:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates descriptions of authorities represented as schema WebPage."
+    sources:
+      - access: *sourceKBRIdentifiedOrgsNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRIdentifiedOrgsFR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btabout:authority_$(contributorID)
+    po:
+      - [a, schema:WebPage]
+      - [foaf:primaryTopic, btid:authority_$(contributorID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  identifiedOrgsPROV:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates provenance describing how these records were identified (important to query for them when there are also other authority records not identified like this)."
+    sources:
+      - access: *sourceKBRIdentifiedOrgsNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRIdentifiedOrgsFR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:authority_prov_$(contributorID)
+    po:
+      - [a, prov:Activity]
+      - [rdfs:label, "Identification of $(contributorID)", en~lang]
+      - [rdfs:comment, "Identified by checking that a 264 record of a work does not correspond with a 710 authority record of that work. Used the Levenshtein distance https://github.com/SvenLieber/beltrans-data/blob/8a84037e42f1b36eb83ecd9f612adf3003f062c8/data-sources/kbr/marc-to-csv.py#L64-L99", en~lang]
+      - [prov:generated, btid:authority_$(contributorID)~iri]
+
+
