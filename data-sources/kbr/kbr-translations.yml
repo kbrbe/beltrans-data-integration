@@ -33,15 +33,13 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates creative works, currently on the LRM level of manifestations."
     sources:
-#      - access: "kbr/translations/2021-11-24_FR-NL_works.csv"
       - access: *sourceWorksFR
         referenceFormulation: csv
         delimiter: ','
-#      - access: "kbr/translations/2021-11-24_NL-FR_works.csv"
       - access: *sourceWorksNL
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:work_$(KBRID)
+    s: btid:manifestation_$(KBRID)
     po:
       - [a, schema:CreativeWork]
       - [schema:name, $(title) ]
@@ -92,14 +90,14 @@ mappings:
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(language)]
+            - [grel:valueParameter, $(languages)]
             - [grel:valueParameter2, "dut"] 
       - p: schema:inLanguage
         o: "fr-FR"
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(language)]
+            - [grel:valueParameter, $(languages)]
             - [grel:valueParameter2, "fre"] 
 
   # ---------------------------------------------------------------------------
@@ -108,11 +106,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity."
     sources:
-#      - access: "kbr/translations/2021-11-24_FR-NL_works.csv"
       - access: *sourceWorksFR
         referenceFormulation: csv
         delimiter: ','
-#      - access: "kbr/translations/2021-11-24_NL-FR_works.csv"
       - access: *sourceWorksNL
         referenceFormulation: csv
         delimiter: ',' 
@@ -120,7 +116,7 @@ mappings:
     po:
       - [rdfs:label, "Translation context of $(KBRID)", en~lang]
       - [a, prov:Activity]
-      - [prov:generated, btid:work_$(KBRID)~iri]
+      - [prov:generated, btid:manifestation_$(KBRID)~iri]
 
 
   # ---------------------------------------------------------------------------
@@ -137,7 +133,7 @@ mappings:
       - access: *sourceContNL
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:work_$(KBRID)
+    s: btid:manifestation_$(KBRID)
     po:
       - p: schema:translator
         o: btid:authority_$(contributorID)~iri
