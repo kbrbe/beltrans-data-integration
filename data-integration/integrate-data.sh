@@ -49,7 +49,7 @@ function mapKBRTranslationsAndContributions {
   # named graph: <http://kbr-syracuse>
   #
   kbrDutchTranslations=$1
-  kbrFrenchTranslations=$1
+  kbrFrenchTranslations=$2
 
   # document which input was used
   printf "Used input\n* $kbrDutchTranslations\n* $kbrFrenchTranslations" > $integrationName/README.md
