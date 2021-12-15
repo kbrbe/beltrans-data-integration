@@ -42,6 +42,13 @@ mappings:
     s: btid:manifestation_$(KBRID)
     po:
       - [a, schema:CreativeWork]
+      - p: rdf:type
+        o: btm:MultiLingualManifestation~iri
+        condition:
+          function: grel:string_contains
+          parameters:
+            - [grel:valueParameter, $(languages)]
+            - [grel:string_sub, ";"]
       - [schema:name, $(title) ]
       - p: rdfs:comment
         o: $(responsibilityStatement)
@@ -86,19 +93,21 @@ mappings:
             - [grel:valueParameter, $(isbn)]
             - [grel:valueParameter2, ""] 
       - p: schema:inLanguage
-        o: "nl-BE"
-        condition:
-          function: idlab-fn:equal
+        o:  
+          function: grel:string_split
           parameters:
             - [grel:valueParameter, $(languages)]
-            - [grel:valueParameter2, "dut"] 
-      - p: schema:inLanguage
-        o: "fr-FR"
-        condition:
-          function: idlab-fn:equal
-          parameters:
-            - [grel:valueParameter, $(languages)]
-            - [grel:valueParameter2, "fre"] 
+            - [grel:p_string_sep, ";"]    
+          type: iri
+# The split does not seem to work when this condition is applied
+# but the condition does not seem to be needed,
+# also if no semicolon is found, split just returns the string itself
+#        condition:
+#          function: grel:string_contains
+#          parameters:
+#            - [grel:valueParameter, $(languages)]
+#            - [grel:string_sub, ";"]
+
 
   # ---------------------------------------------------------------------------
   #
