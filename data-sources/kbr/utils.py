@@ -265,8 +265,9 @@ def extractIdentifier(rowID, value, pattern):
 
 
 # -----------------------------------------------------------------------------
-def count(stats, counter):
-  """ This function simply adds to the given counter or creates it if not yet existing in 'stats'.
+def count(stats, counter, val=None, valueDict=None):
+  """ This function simply adds to the given counter or creates it if not yet existing in 'stats'
+      If the optional 'val' argument is given, the val is also logged in a set.
 
   >>> stats = {}
   >>> count(stats, 'myCounter')
@@ -278,6 +279,11 @@ def count(stats, counter):
   else:
     stats[counter] = 1
 
+  if val is not None:
+      if counter in valueDict:
+        valueDict[counter].add(val) 
+      else:
+        valueDict[counter] = set([val])
 
 
 
