@@ -126,7 +126,7 @@ def addWorkFieldsToWorkCSV(elem, writer):
   kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
   isbn = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="a"]', ALL_NS))
   bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
-  language = utils.getElementValue(elem.find('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
+  languages = utils.getElementValue(elem.findall('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
   countryOfPublication = utils.getElementValue(elem.find('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
   title = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="a"]', ALL_NS))
   responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
@@ -137,7 +137,7 @@ def addWorkFieldsToWorkCSV(elem, writer):
     'KBRID': kbrID,
     'isbn': isbn,
     'title': title,
-    'language': language,
+    'language': languages,
     'placeOfPublication': placeOfPublication,
     'countryOfPublication': countryOfPublication,
     'yearOfPublication': yearOfPublication,
