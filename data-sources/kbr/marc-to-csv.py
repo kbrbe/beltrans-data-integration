@@ -137,7 +137,7 @@ def addWorkFieldsToWorkCSV(elem, writer):
     'KBRID': kbrID,
     'isbn': isbn,
     'title': title,
-    'language': languages,
+    'languages': languages,
     'placeOfPublication': placeOfPublication,
     'countryOfPublication': countryOfPublication,
     'yearOfPublication': yearOfPublication,
@@ -172,7 +172,7 @@ def main():
        open(options.output_work_file, 'w') as outWorkFile:
 
     fields = ['ISNI', 'dataConfidence', 'nationality', 'gender', 'surname', 'forename', 'marcDate', 'sourceName', 'subSourceName', 'sourceID', 'externalInfo', 'externalInfoURI', 'externalInfoID']
-    workFields = ['KBRID', 'isbn', 'title', 'language', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType']
+    workFields = ['KBRID', 'isbn', 'title', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType']
     contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
     workWriter = csv.DictWriter(outWorkFile, fieldnames=workFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     contWriter = csv.DictWriter(outContFile, fieldnames=contFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
