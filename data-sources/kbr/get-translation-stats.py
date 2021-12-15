@@ -106,18 +106,40 @@ def countTitleVariants(df, countDict):
           countDict['NO_VARIANT_TYPE'] = 1
       
 # -----------------------------------------------------------------------------
-def countBindingTypes(elem, countDict):
+def countBindingTypes(elem, countDict, valuesDict):
   """This function counts the different variants of binding types in MARC field 020$q."""
 
+  kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
   bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
-  utils.count(countDict, bindingType)
+  utils.count(countDict, bindingType, kbrID, valuesDict)
 
 # -----------------------------------------------------------------------------
-def countMediumTypes(elem, countDict):
+def countMediumTypes(elem, countDict, valuesDict):
   """This function counts the different variants of medium types in MARC field 245$h."""
 
+  kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
   mediumType = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="h"]', ALL_NS))
-  utils.count(countDict, mediumType)
+  utils.count(countDict, mediumType, kbrID, valuesDict)
+
+# -----------------------------------------------------------------------------
+def printStatsLog(stats, valueLog, field, fieldName):
+  """This function prints stats of the key 'field' in 'stats' in a certain format for further processing."""
+
+  for key,val in stats[field].items():
+    # we are only interested in non-standard values, e.g. single letter codes such as 'b' or 'd' are not of interest
+    if len(key) > 1:
+      if val < 5:
+        # print the associated logged KBR identifiers
+        identifiers = valueLog[key]
+        print(f'{fieldName} ({field}) records having the value "{key}": {identifiers}')
+        print()
+      else:
+        print(f'### {fieldName} ({field}) records with the value "{val}" ###')
+        print(f'IDENT="', end='')
+        print(f'" AND IDENT="'.join(valueLog[key]), end='')
+        print('"')
+        print()
+
 
 # -----------------------------------------------------------------------------
 def main():
@@ -140,6 +162,8 @@ def main():
   # Instead of loading everything to main memory, stream over the XML using iterparse
   #
   stats = {'totalRecords': 0, 'date': {}, 'translation': {}, 'binding-types': {}, 'medium-types': {} }
+  valueLog = {}
+
   for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
     if  event == 'start' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
       stats['totalRecords'] += 1
@@ -150,8 +174,8 @@ def main():
     if  event == 'end' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
       foundFields = set()
 
-      countBindingTypes(elem, stats['binding-types'])
-      countMediumTypes(elem, stats['medium-types'])
+      countBindingTypes(elem, stats['binding-types'], valueLog)
+      countMediumTypes(elem, stats['medium-types'], valueLog)
 
       for datafield in elem:
         #print(datafield.tag, datafield.attrib, datafield.text)
@@ -163,6 +187,11 @@ def main():
       #countUniqueDatafields(foundFields, stats)
       elem.clear()
 
-  print(json.dumps(stats, indent=4))
+  print(json.dumps(stats['totalRecords'], indent=4))
+  print(json.dumps(stats['date'], indent=4))
+  print(json.dumps(stats['translation'], indent=4))
+
+  printStatsLog(stats, valueLog, 'binding-types', 'Q020')
+  printStatsLog(stats, valueLog, 'medium-types', 'KBRM')
 
 main()
