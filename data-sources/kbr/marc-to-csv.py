@@ -126,18 +126,33 @@ def addWorkFieldsToWorkCSV(elem, writer):
   kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
   isbn = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="a"]', ALL_NS))
   bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
-  languages = utils.getElementValue(elem.findall('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
+  languagesString = utils.getElementValue(elem.findall('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
   countryOfPublication = utils.getElementValue(elem.find('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
   title = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="a"]', ALL_NS))
   responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
   placeOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="a"]', ALL_NS))
   yearOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="c"]', ALL_NS))
 
+  
+  # create a URI for all languages
+  langURIs = []
+  langURIsString = ""
+  languages = languagesString.split(';')
+  vocab = "http://id.loc.gov/vocabulary/languages/"
+  if len(languages) > 1: 
+    for l in languages:
+      langURIs.append(vocab + l) 
+    langURIsString = ';'.join(langURIs)
+  elif len(languages) == 1:
+    langURIsString = vocab + languagesString
+  else:
+    langURIsString = ''
+
   newRecord = {
     'KBRID': kbrID,
     'isbn': isbn,
     'title': title,
-    'languages': languages,
+    'languages': langURIsString,
     'placeOfPublication': placeOfPublication,
     'countryOfPublication': countryOfPublication,
     'yearOfPublication': yearOfPublication,
