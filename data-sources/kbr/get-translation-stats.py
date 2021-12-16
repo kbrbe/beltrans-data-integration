@@ -106,6 +106,13 @@ def countTitleVariants(df, countDict):
           countDict['NO_VARIANT_TYPE'] = 1
       
 # -----------------------------------------------------------------------------
+def countEditions(elem, countDict):
+  """This function counts the different variants of editions in MARC field 250$a."""
+
+  edition = utils.getElementValue(elem.find('./datafield[@tag="250"]/subfield[@code="a"]', ALL_NS))
+  utils.count(countDict, edition)
+
+# -----------------------------------------------------------------------------
 def countBindingTypes(elem, countDict, valuesDict):
   """This function counts the different variants of binding types in MARC field 020$q."""
 
@@ -161,7 +168,7 @@ def main():
   #
   # Instead of loading everything to main memory, stream over the XML using iterparse
   #
-  stats = {'totalRecords': 0, 'date': {}, 'translation': {}, 'binding-types': {}, 'medium-types': {} }
+  stats = {'totalRecords': 0, 'date': {}, 'translation': {}, 'binding-types': {}, 'medium-types': {}, 'edition': {}  }
   valueLog = {}
 
   for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
@@ -176,6 +183,7 @@ def main():
 
       countBindingTypes(elem, stats['binding-types'], valueLog)
       countMediumTypes(elem, stats['medium-types'], valueLog)
+      countEditions(elem, stats['edition'])
 
       for datafield in elem:
         #print(datafield.tag, datafield.attrib, datafield.text)
@@ -187,9 +195,14 @@ def main():
       #countUniqueDatafields(foundFields, stats)
       elem.clear()
 
+  print("Total records")
   print(json.dumps(stats['totalRecords'], indent=4))
+  print("Date")
   print(json.dumps(stats['date'], indent=4))
+  print("Translation")
   print(json.dumps(stats['translation'], indent=4))
+  print("Editions")
+  print(json.dumps(stats['edition'], indent=4))
 
   printStatsLog(stats, valueLog, 'binding-types', 'Q020')
   printStatsLog(stats, valueLog, 'medium-types', 'KBRM')

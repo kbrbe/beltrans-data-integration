@@ -132,6 +132,7 @@ def addWorkFieldsToWorkCSV(elem, writer):
   responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
   placeOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="a"]', ALL_NS))
   yearOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="c"]', ALL_NS))
+  edition = utils.getElementValue(elem.find('./datafield[@tag="250"]/subfield[@code="a"]', ALL_NS))
 
   
   # create a URI for all languages
@@ -157,7 +158,8 @@ def addWorkFieldsToWorkCSV(elem, writer):
     'countryOfPublication': countryOfPublication,
     'yearOfPublication': yearOfPublication,
     'responsibilityStatement': responsibilityStatement,
-    'bindingType': bindingType
+    'bindingType': bindingType,
+    'edition': edition
   }
 
   writer.writerow(newRecord)
@@ -187,7 +189,7 @@ def main():
        open(options.output_work_file, 'w') as outWorkFile:
 
     fields = ['ISNI', 'dataConfidence', 'nationality', 'gender', 'surname', 'forename', 'marcDate', 'sourceName', 'subSourceName', 'sourceID', 'externalInfo', 'externalInfoURI', 'externalInfoID']
-    workFields = ['KBRID', 'isbn', 'title', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType']
+    workFields = ['KBRID', 'isbn', 'title', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition']
     contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
     workWriter = csv.DictWriter(outWorkFile, fieldnames=workFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     contWriter = csv.DictWriter(outContFile, fieldnames=contFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
