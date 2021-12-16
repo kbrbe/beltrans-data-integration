@@ -79,12 +79,131 @@ mappings:
             - [grel:valueParameter, $(countryOfPublication)]
             - [grel:valueParameter2, ""] 
       - p: schema:bookType
-        o: btid:binding_$(bindingType)~iri
+        o: btid:binding_a~iri
         condition:
-          function: idlab-fn:notEqual
+          function: idlab-fn:equal
           parameters:
             - [grel:valueParameter, $(bindingType)]
-            - [grel:valueParameter2, ""] 
+            - [grel:valueParameter2, "a"] 
+      - p: schema:bookType
+        o: btid:binding_b~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "b"] 
+      - p: schema:bookType
+        o: btid:binding_c~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "c"] 
+      - p: schema:bookType
+        o: btid:binding_d~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "d"] 
+      - p: schema:bookType
+        o: btid:binding_e~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "e"] 
+      - p: schema:bookType
+        o: btid:binding_f~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "f"] 
+      - p: schema:bookType
+        o: btid:binding_g~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "g"] 
+      - p: schema:bookType
+        o: btid:binding_h~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "h"] 
+      - p: schema:bookType
+        o: btid:binding_i~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "i"] 
+      - p: schema:bookType
+        o: btid:binding_j~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "j"] 
+      - p: schema:bookType
+        o: btid:binding_k~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "k"] 
+      - p: schema:bookType
+        o: btid:binding_l~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "l"] 
+      - p: schema:bookType
+        o: btid:binding_m~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "m"] 
+      - p: schema:bookType
+        o: btid:binding_n~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "n"] 
+      - p: schema:bookType
+        o: btid:binding_o~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "o"] 
+      - p: schema:bookType
+        o: btid:binding_p~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "p"] 
+      - p: schema:bookType
+        o: btid:binding_q~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "q"] 
+      - p: schema:bookType
+        o: btid:binding_r~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "r"] 
       - p: schema:isbn
         o: $(isbn)
         condition:
