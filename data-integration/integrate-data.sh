@@ -147,6 +147,16 @@ function load {
 }
 
 # -----------------------------------------------------------------------------
+function query {
+  echo"todo: query sparql endpoint"
+}
+
+# -----------------------------------------------------------------------------
+function postprocess {
+  echo "todo: postproces query result of sparql endpoint"
+}
+
+# -----------------------------------------------------------------------------
 function folderHasToExist {
   if [ ! -d "$1" ];
   then
@@ -469,7 +479,23 @@ then
   echo "use 'bash integrate-data.sh <command> <data source> <integration folder name>, whereas command is either 'extract', 'transform' or 'load'"
   exit 1
 else
-  if [ "$1" = "etl" ];
+  if [ "$1" = "etlqp" ];
+  then
+    extract $2 $3
+    transform $2 $3
+    load $2 $3
+    query
+    postprocess
+  elif [ "$1" = "qp" ];
+  then
+    query
+    postprocess
+
+  elif [ "$1" = "q" ];
+  then
+    query
+
+  elif [ "$1" = "etl" ];
   then
     extract $2 $3
     transform $2 $3
