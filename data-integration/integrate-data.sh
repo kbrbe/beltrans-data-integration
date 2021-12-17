@@ -6,11 +6,17 @@ SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
 SCRIPT_NORMALIZE_HEADERS="../data-sources/kbr/replace-headers.py"
 SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-authorities.sh"
 
+SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
+SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
+SCRIPT_QUERY_DATA="../utils/query-data.sh"
+
 KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 
+# #############################################################################
 #
-# Input filenames
+# INPUT FILENAMES
 #
+
 # KBR - translations
 INPUT_KBR_TRL_NL="../data-sources/kbr/translations/ExportSyracuse_20211213_NL-FR_1970-2020_3866records.xml"
 INPUT_KBR_TRL_FR="../data-sources/kbr/translations/ExportSyracuse_20211213_FR-NL_1970-2020_9239records.xml"
@@ -32,6 +38,24 @@ INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
 INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography-en-hierarchy.csv"
 INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl-hierarchy.csv"
 INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography-fr-hierarchy.csv"
+
+
+# #############################################################################
+
+#
+# CONFIGURATION
+#
+#
+
+TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
+TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
+TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
+TRIPLE_STORE_GRAPH_MASTER="http://master-data"
+
+# if it is a blazegraph triple store
+TRIPLE_STORE_NAMESPACE="integration"
+
+FORMAT_TURTLE="text/turtle"
 
 #
 # Filenames used within an integration directory 
@@ -95,11 +119,14 @@ function extract {
   local dataSource=$1
   local integrationFolderName=$2
 
-  if [ -d "$integrationFolderName" ];
-  then
-    echo "the specified integration folder already exists, please provide the name of a new folder"
-    exit 1
-  fi
+  #
+  # If we already integrated data source B, and then want to include data source A it doesn't work
+  # thus we should not check if the folder already exists
+  # if [ -d "$integrationFolderName" ];
+  # then
+  #   echo "the specified integration folder already exists, please provide the name of a new folder"
+  #   exit 1
+  # fi
 
   if [ "$dataSource" = "kbr" ];
   then
@@ -144,6 +171,19 @@ function load {
   local integrationFolderName=$2
 
   folderHasToExist $integrationFolderName
+
+  if [ "$dataSource" = "kbr" ];
+  then
+    loadKBR $integrationFolderName
+  elif [ "$dataSource" = "master-data" ];
+  then
+    loadMasterData $integrationFolderName
+  elif [ "$dataSource" = "all" ];
+  then
+    loadMasterData $integrationFolderName
+    loadKBR $integrationFolderName
+  fi
+
 }
 
 # -----------------------------------------------------------------------------
@@ -412,6 +452,38 @@ function mapMasterData {
 }
 
 # -----------------------------------------------------------------------------
+function loadKBR {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # first delete content of the named graph in case it already exists
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_TRL>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
+
+  local kbrTranslationsAndContributions="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_LD"
+  local kbrIdentifiedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_NEWAUT_LD"
+  local kbrLinkedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_LA_LD"
+
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsAndContributions" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
+
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_LA>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_LA"
+  
+  # upload both linked authorities and newly identified authorities to the linked authorities named graph
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrLinkedAuthorities" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_LA"
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrIdentifiedAuthorities" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_LA"
+
+}
+
+# -----------------------------------------------------------------------------
+function loadMasterData {
+  echo "TODO"
+
+}
+
+# -----------------------------------------------------------------------------
 function checkFile {
   if [ ! -f "$1" ];
   then
@@ -468,6 +540,27 @@ function extractIdentifiedAuthorities {
   . $SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES $input $output
 }
 
+# -----------------------------------------------------------------------------
+function uploadData {
+  local namespace=$1
+  local fileToUpload=$2
+  local format=$3
+  local endpoint=$4
+  local namedGraph=$5
+
+  checkFile $fileToUpload
+
+  . $SCRIPT_UPLOAD_DATA "$namespace" "$fileToUpload" "$format" "$endpoint" "$namedGraph"
+}
+
+# -----------------------------------------------------------------------------
+function deleteNamedGraph {
+  local namespace=$1
+  local endpoint=$2
+  local namedGraph=$3
+
+  . $SCRIPT_DELETE_NAMED_GRAPH "$namespace" "$endpoint" "$namedGraph"
+}
 
 #
 #
