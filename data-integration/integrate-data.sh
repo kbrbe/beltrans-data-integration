@@ -59,6 +59,9 @@ TRIPLE_STORE_NAMESPACE="integration"
 FORMAT_TURTLE="text/turtle"
 FORMAT_NT="text/rdf+n3"
 
+DATA_PROFILE_QUERY_FILE="dataprofile.sparql"
+SUFFIX_DATA_PROFILE_FILE="integrated-data.csv"
+
 #
 # Filenames used within an integration directory 
 # (will be produced by the extraction phase
@@ -191,7 +194,15 @@ function load {
 
 # -----------------------------------------------------------------------------
 function query {
-  echo"todo: query sparql endpoint"
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  queryFile="$DATA_PROFILE_QUERY_FILE"
+  outputFile="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
+
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFile" "$ENV_SPARQL_ENDPOINT" "$outputFile"
 }
 
 # -----------------------------------------------------------------------------
@@ -579,6 +590,16 @@ function deleteNamedGraph {
   . $SCRIPT_DELETE_NAMED_GRAPH "$namespace" "$endpoint" "$namedGraph"
 }
 
+# -----------------------------------------------------------------------------
+function queryData {
+  local namespace=$1
+  local queryFile=$2
+  local endpoint=$3
+  local outputFile=$4
+
+  . $SCRIPT_QUERY_DATA "$namespace" "$queryFile" "$endpoint" "$outputFile"
+}
+
 #
 #
 # BEGIN OF THE SCRIPT: CHECK COMMAND AND EXECUTE RESPECTIVE FUNCTIONS
@@ -594,16 +615,16 @@ else
     extract $2 $3
     transform $2 $3
     load $2 $3
-    query
-    postprocess
+    query $3
+    postprocess $3
   elif [ "$1" = "qp" ];
   then
-    query
-    postprocess
+    query $3
+    postprocess $3
 
   elif [ "$1" = "q" ];
   then
-    query
+    query $3
 
   elif [ "$1" = "etl" ];
   then
