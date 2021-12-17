@@ -25,6 +25,14 @@ INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
 INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 
+# MASTER DATA
+
+INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
+INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
+INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography-en-hierarchy.csv"
+INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl-hierarchy.csv"
+INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography-fr-hierarchy.csv"
+
 #
 # Filenames used within an integration directory 
 # (will be produced by the extraction phase
@@ -57,6 +65,14 @@ SUFFIX_KBR_LA_ORGS_NL_NORM="nl-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NORM="fr-translations-linked-authorities-persons-norm.csv"
 SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 
+# DATA SOURCE - MASTER DATA
+#
+SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
+SUFFIX_MASTER_BINDING_TYPES="binding-types.csv"
+SUFFIX_MASTER_THES_EN="thesaurus-belgian-bibliography-en-hierarchy.csv"
+SUFFIX_MASTER_THES_NL="thesaurus-belgian-bibliography-nl-hierarchy.csv"
+SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
+
 #
 # LINKED DATA - KBR TRANSLATIONS
 #
@@ -68,6 +84,10 @@ SUFFIX_KBR_NEWAUT_LD="translations-identified-authorities.ttl"
 #
 SUFFIX_KBR_LA_LD="linked-authorities.ttl"
 
+#
+# LINKED DATA - MASTER DATA
+#
+SUFFIX_MASTER_LD="master-data.ttl"
 
 # -----------------------------------------------------------------------------
 function extract {
@@ -84,9 +104,13 @@ function extract {
   if [ "$dataSource" = "kbr" ];
   then
     extractKBR $integrationFolderName
+  elif [ "$dataSource" = "master-data" ];
+  then
+    extractMasterData $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
+    extractMasterData $integrationFolderName
   fi
   
 }
@@ -102,9 +126,13 @@ function transform {
   if [ "$dataSource" = "kbr" ];
   then
     transformKBR $integrationFolderName
+  elif [ "$dataSource" = "master-data" ];
+  then
+    transformMasterData $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
+    transformMasterData $integrationFolderName
   fi
   
 }
@@ -148,6 +176,26 @@ function extractKBR {
 }
 
 # -----------------------------------------------------------------------------
+function extractMasterData {
+
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # create the folders to place the extracted translations and agents
+  mkdir -p $integrationName/master-data
+
+  echo "EXTRACTION - Nothing to extract from master data, copying files"
+  cp "$INPUT_MASTER_MARC_ROLES" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
+  cp "$INPUT_MASTER_MARC_BINDING_TYPES" "$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
+  cp "$INPUT_MASTER_THES_EN" "$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
+  cp "$INPUT_MASTER_THES_NL" "$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
+  cp "$INPUT_MASTER_THES_FR" "$integrationName/master-data/$SUFFIX_MASTER_THES_FR"
+
+}
+
+# -----------------------------------------------------------------------------
 function transformKBR {
 
   local integrationName=$1
@@ -160,6 +208,19 @@ function transformKBR {
 
   echo "TRANSFORMATION - Map KBR linked authorities data to RDF"
   mapKBRLinkedAuthorities $integrationName
+}
+
+# -----------------------------------------------------------------------------
+function transformMasterData {
+
+  local integrationName=$1
+
+  # create the folder to place the transformed data
+  mkdir -p $integrationName/master-data/rdf 
+
+  echo "TRANSFORMATION - Map master data to RDF"
+  mapMasterData $integrationName
+
 }
 
 # -----------------------------------------------------------------------------
@@ -320,7 +381,25 @@ function mapKBRLinkedAuthorities {
 
 }
 
+# -----------------------------------------------------------------------------
+function mapMasterData {
 
+  local integrationName=$1
+
+  masterDataTurtle="$integrationName/master-data/rdf/$SUFFIX_MASTER_LD"
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_MASTER_MARC_ROLES="$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
+  export RML_SOURCE_MASTER_BINDING_TYPES="$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
+  export RML_SOURCE_MASTER_THES_EN="$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
+  export RML_SOURCE_MASTER_THES_NL="$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
+  export RML_SOURCE_MASTER_THES_FR="$integrationName/master-data/$SUFFIX_MASTER_THES_FR"
+
+  # 2) execute the mapping
+  echo "Map master data ..."
+  . map.sh ../data-sources/master-data/master-data.yml $masterDataTurtle
+  
+}
 
 # -----------------------------------------------------------------------------
 function checkFile {
