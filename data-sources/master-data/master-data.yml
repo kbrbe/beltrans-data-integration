@@ -18,6 +18,13 @@ prefixes:
   countries: "http://id.loc.gov/vocabulary/countries/"
   schema: "http://schema.org/"
 
+variables:
+  marcRoles: &marcRoles ${RML_SOURCE_MASTER_MARC_ROLES}
+  bindingTypes: &bindingTypes ${RML_SOURCE_MASTER_BINDING_TYPES}
+  thesaurusEN: &thesaurusEN ${RML_SOURCE_MASTER_THES_EN}
+  thesaurusNL: &thesaurusNL ${RML_SOURCE_MASTER_THES_NL}
+  thesaurusFR: &thesaurusFR ${RML_SOURCE_MASTER_THES_FR}
+
 mappings:
 
   # ---------------------------------------------------------------------------
@@ -26,7 +33,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates RDF resources for MARC roles such that we can refer to it and do not have to rely on text. Currently with English labels, but labels in other languages may be added."
     sources:
-      - access: "master-data/marc-roles.csv"
+      - access: *marcRoles
         referenceFormulation: csv
         delimiter: ','
     s: btid:role_$(code)
@@ -41,7 +48,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a SKOS taxonomy for the Belgian bibliography and uses English labels."
     sources:
-      - access: "master-data/thesaurus-belgian-bibliography-en-hierarchy.csv"
+      - access: *thesaurusEN
         referenceFormulation: csv
         delimiter: ';'
     s: btid:$(id)
@@ -63,7 +70,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a SKOS taxonomy for the Belgian bibliography and uses English labels."
     sources:
-      - access: "master-data/thesaurus-belgian-bibliography-nl-hierarchy.csv"
+      - access: *thesaurusNL
         referenceFormulation: csv
         delimiter: ';'
     s: btid:$(id)
@@ -84,7 +91,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a SKOS taxonomy for the Belgian bibliography and uses English labels."
     sources:
-      - access: "master-data/thesaurus-belgian-bibliography-fr-hierarchy.csv"
+      - access: *thesaurusFR
         referenceFormulation: csv
         delimiter: ';'
     s: btid:$(id)
@@ -105,7 +112,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates multilingual RDF resources for binding types used by the KBR catalog in the MARC field 020$q."
     sources:
-      - access: "master-data/binding-types.csv"
+      - access: *bindingTypes
         referenceFormulation: csv
         delimiter: ','
     s: btid:binding_$(code)

@@ -184,7 +184,7 @@ mappings:
       function: idlab-fn:notEqual
       parameters:
         - [grel:valueParameter, $(viaf_id)]
-        - [grel:valueParameter, ""]
+        - [grel:valueParameter2, ""]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "VIAF"]

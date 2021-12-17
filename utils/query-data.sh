@@ -15,7 +15,7 @@ fi;
 export $(cat .env | sed 's/#.*//g' | xargs)
 
 curl -X POST \
-  --user $SPARQL_ENDPOINT_USER:$SPARQL_ENDPOINT_PASSWORD \
+  --user $ENV_SPARQL_ENDPOINT_USER:$ENV_SPARQL_ENDPOINT_PASSWORD \
   --header "Accept: text/csv" \
   --header "Content-Type: application/sparql-query" \
   --upload-file $2 \

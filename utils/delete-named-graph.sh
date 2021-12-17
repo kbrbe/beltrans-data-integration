@@ -9,8 +9,9 @@ fi;
 # get environment variables
 export $(cat .env | sed 's/#.*//g' | xargs)
 
+
 curl -D- -X DELETE \
-  --user $SPARQL_ENDPOINT_USER:$SPARQL_ENDPOINT_PASSWORD \
+  --user $ENV_SPARQL_ENDPOINT_USER:$ENV_SPARQL_ENDPOINT_PASSWORD \
 "$2/namespace/$1/sparql?c=<$3>"
 
 

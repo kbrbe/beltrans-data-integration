@@ -22,7 +22,7 @@ else
 fi
 
 curl -X POST \
-  --user $SPARQL_ENDPOINT_USER:$SPARQL_ENDPOINT_PASSWORD \
+  --user $ENV_SPARQL_ENDPOINT_USER:$ENV_SPARQL_ENDPOINT_PASSWORD \
   --header "Content-Type: $3" \
   --upload-file $2 \
 $url
