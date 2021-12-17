@@ -35,6 +35,7 @@ INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 
 INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
 INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
+INPUT_MASTER_LANGUAGES="../data-sources/master-data/languages.nt"
 INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography-en-hierarchy.csv"
 INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl-hierarchy.csv"
 INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography-fr-hierarchy.csv"
@@ -56,6 +57,7 @@ TRIPLE_STORE_GRAPH_MASTER="http://master-data"
 TRIPLE_STORE_NAMESPACE="integration"
 
 FORMAT_TURTLE="text/turtle"
+FORMAT_NT="text/rdf+n3"
 
 #
 # Filenames used within an integration directory 
@@ -93,6 +95,7 @@ SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 #
 SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
 SUFFIX_MASTER_BINDING_TYPES="binding-types.csv"
+SUFFIX_MASTER_LANGUAGES="languages.nt"
 SUFFIX_MASTER_THES_EN="thesaurus-belgian-bibliography-en-hierarchy.csv"
 SUFFIX_MASTER_THES_NL="thesaurus-belgian-bibliography-nl-hierarchy.csv"
 SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
@@ -239,6 +242,7 @@ function extractMasterData {
   echo "EXTRACTION - Nothing to extract from master data, copying files"
   cp "$INPUT_MASTER_MARC_ROLES" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
   cp "$INPUT_MASTER_MARC_BINDING_TYPES" "$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
+  cp "$INPUT_MASTER_LANGUAGES" "$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   cp "$INPUT_MASTER_THES_EN" "$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
   cp "$INPUT_MASTER_THES_NL" "$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
   cp "$INPUT_MASTER_THES_FR" "$integrationName/master-data/$SUFFIX_MASTER_THES_FR"
@@ -479,7 +483,20 @@ function loadKBR {
 
 # -----------------------------------------------------------------------------
 function loadMasterData {
-  echo "TODO"
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # first delete content of the named graph in case it already exists
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_MASTER>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_MASTER"
+
+  local masterDataTurtle="$integrationName/master-data/rdf/$SUFFIX_MASTER_LD"
+  local masterDataLanguages="$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
+
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$masterDataTurtle" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_MASTER"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$masterDataLanguages" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_MASTER"
 
 }
 
