@@ -9,6 +9,7 @@ SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-author
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
 SCRIPT_QUERY_DATA="../utils/query-data.sh"
+SCRIPT_POSTPROCESS_QUERY_RESULT="post-process-integration-result.py"
 
 KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 
@@ -61,6 +62,7 @@ FORMAT_NT="text/rdf+n3"
 
 DATA_PROFILE_QUERY_FILE="dataprofile.sparql"
 SUFFIX_DATA_PROFILE_FILE="integrated-data.csv"
+SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data-processed.csv"
 
 #
 # Filenames used within an integration directory 
@@ -207,7 +209,14 @@ function query {
 
 # -----------------------------------------------------------------------------
 function postprocess {
-  echo "todo: postproces query result of sparql endpoint"
+  local integrationName=$1
+
+  integratedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
+  processedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
+
+  source ../data-sources/py-etl-env/bin/activate
+
+  postprocessIntegratedData $integratedData $processedData
 }
 
 # -----------------------------------------------------------------------------
@@ -600,6 +609,17 @@ function queryData {
   . $SCRIPT_QUERY_DATA "$namespace" "$queryFile" "$endpoint" "$outputFile"
 }
 
+# -----------------------------------------------------------------------------
+function postprocessIntegratedData {
+
+  local input=$1
+  local output=$2
+
+  checkFile $input
+  python $SCRIPT_POSTPROCESS_QUERY_RESULT -i "$input" -o "$output"
+
+}
+
 #
 #
 # BEGIN OF THE SCRIPT: CHECK COMMAND AND EXECUTE RESPECTIVE FUNCTIONS
@@ -625,6 +645,10 @@ else
   elif [ "$1" = "q" ];
   then
     query $3
+
+  elif [ "$1" = "p" ];
+  then
+    postprocess $3
 
   elif [ "$1" = "etl" ];
   then
