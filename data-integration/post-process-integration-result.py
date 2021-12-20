@@ -34,7 +34,7 @@ def main():
 
     outputWriter.writeheader()
 
-    belgian = 'http://id.loc.gov/vocabulary/countries/be'
+    belgian = 'Belgium'
 
     # write relevant data to output
     for row in inputReader:
