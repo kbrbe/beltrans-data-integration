@@ -668,6 +668,13 @@ else
     load $2 $3
     query $3
 
+  elif [ "$1" = "tlqp" ];
+  then
+    transform $2 $3
+    load $2 $3
+    query $3
+    postprocess $3
+
   elif [ "$1" = "qp" ];
   then
     query $3

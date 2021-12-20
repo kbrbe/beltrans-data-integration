@@ -11,6 +11,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?manifestation AS ?targetTextKBRIdentifier)
     (?manifestationTitle AS ?targetTextTitle)
     (?kbrTargetManifestationEdition AS ?targetTextEdition)
+    (?kbrTargetManifestationBindingTypeLabel AS ?targetTextBindingType)
     (?kbrCountryOfOriginLabel AS ?targetTextCountryOfPublication)
     (?kbrDatePublished AS ?targetTextYearOfPublication)
     (?kbrLocationCreated AS ?targetTextPlaceOfPublication)
@@ -83,6 +84,14 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
 
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation schema:bookFormat ?kbrTargetManifestationBindingType . }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetManifestationBindingType rdfs:label ?kbrTargetManifestationBindingTypeLabel .}
+        FILTER(lang(?kbrTargetManifestationBindingTypeLabel) = 'en')
+      }
+    }
 
     OPTIONAL { 
       graph <http://kbr-syracuse> { ?manifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }
