@@ -1,12 +1,129 @@
+import itertools
+from datetime import datetime
 
+# -----------------------------------------------------------------------------
+def datesMatch(fullDates, yearMonthDates, years):
+  """This function checks if the different provided dates describe the same date,
+     e.g. 1988-04-25, 1988 and 1988-04 would match resulting in True, otherwise False.
+
+  >>> datesMatch(set(['1988-04-25']), set(['1988-04']), set(['1988']))
+  True
+
+  >>> datesMatch(set(['1988-04-25']), [], set(['1988']))
+  True
+
+  >>> datesMatch(set(['1988-04-25']), set([]), set([]))
+  True
+
+  >>> datesMatch(set([]), set(['1988-04']), set([]))
+  True
+
+  >>> datesMatch(set([]), set([]), set(['1988']))
+  True
+
+  >>> datesMatch(set(['1988-04-25']), set(['1988-04']), set(['1988', '1988', '1989']))
+  False
+
+  >>> datesMatch(set(['1988-04-25']), set(['1988-04', '1988-06']), set(['1988', '1988']))
+  False
+
+  >>> datesMatch(set(['1988-04-25', '1988-05-25']), set(['1988-04']), set(['1988', '1988', '1989']))
+  False
+
+  >>> datesMatch([], [], [])
+  False
+  """
+
+  # The given dates are stored in sets, if one set has more than 1 element
+  # there are at least 2 different values
+  if len(fullDates) > 1: return False
+  if len(yearMonthDates) > 1: return False
+  if len(years) > 1: return False
+
+  # compare the differently detailed dates
+  # full date with year month
+  if len(fullDates) > 0 and len(yearMonthDates) > 0:
+    fullDate = datetime.strptime(next(iter(fullDates)), '%Y-%m-%d').date()
+    yearMonth = datetime.strptime(next(iter(yearMonthDates)), '%Y-%m').date()
+    if fullDate.year != yearMonth.year or fullDate.month != yearMonth.month:
+      return False
+
+  # full date with year
+  if len(fullDates) > 0 and len(years) > 0:
+    fullDate = datetime.strptime(next(iter(fullDates)), '%Y-%m-%d').date()
+    year = datetime.strptime(next(iter(years)), '%Y').date().year
+    if fullDate.year != year:
+      return False
+  
+  # year month with year
+  if len(yearMonthDates) > 0 and len(years) > 0:
+    yearMonth = datetime.strptime(next(iter(yearMonthDates)), '%Y-%m').date()
+    year = datetime.strptime(next(iter(years)), '%Y').date().year
+    if yearMonth.year != year:
+      return False
+  
+  if len(fullDates) == 0 and len(yearMonthDates) == 0 and len(years) == 0:
+    return False
+  else:
+    return True
+
+# -----------------------------------------------------------------------------
+def concatenateDates(fullDates, yearMonthDates, years):
+  """This function combines several dates in a human readable fashion.
+
+  >>> concatenateDates(set(['1988-04-25']), set(['1988-05']), set())
+  '1988-04-25 or 1988-05'
+
+  >>> concatenateDates(set(['1988-04-25', '1988-04-24']), set(['1988-05']), set())
+  '1988-04-24 or 1988-04-25 or 1988-05'
+
+  >>> concatenateDates(set(['1988-04-25', '1988-04-24']), set(['1988-05']), set(['1989']))
+  '1988-04-24 or 1988-04-25 or 1988-05 or 1989'
+  """
+
+  elements = [fullDates, yearMonthDates, years]
+  singleList = set().union(*elements)
+
+  return ' or '.join(sorted(singleList))
+
+# -----------------------------------------------------------------------------
 def mostCompleteDate(dates):
   """This function returns the most complete date from the given array, if there is a mismatch both are returned.
 
   """
 
-  # TODO: change to actually compare the dates
+  fullDates = set()
+  yearMonthDates = set()
+  years = set()
+
   if len(dates) > 0:
-    return dates[0]
+    for d in dates:
+      try:
+        fullDate = datetime.strptime(d, '%Y-%m-%d').date()
+        fullDates.add(d)
+      except:
+        try:
+          yearMonth = datetime.strptime(d, '%Y-%m').date()
+          yearMonthDates.add(d)
+        except:
+          try:
+            year = datetime.strptime(d, '%Y').date().year
+            years.add(d)
+          except:
+            pass
+    if datesMatch(fullDates, yearMonthDates, years):
+      # preferably return a full date, thus start with that
+      if len(fullDates) > 0:
+        return fullDates.pop()
+      elif len(yearMonthDates) > 0:
+        return yearMonthDates.pop()
+      elif len(years) > 0:
+        return years.pop()
+      else:
+        # the values match, but technically they are all empty
+        return ''
+    else:
+      return concatenateDates(fullDates, yearMonthDates, years)
   else:
     return ''
 
