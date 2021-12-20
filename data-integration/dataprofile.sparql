@@ -6,6 +6,7 @@ PREFIX btid: <http://kbr.be/id/data/>
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX btisni: <http://kbr.be/isni/>
 PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
   SELECT 
     (?manifestation AS ?targetTextKBRIdentifier)
@@ -38,6 +39,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?isniRDFTranslatorBirthDate AS ?translatorBirthDateISNI)
     (?kbrTranslatorDeathDate AS ?translatorDeathDateKBR)
     (?isniRDFTranslatorDeathDate AS ?translatorDeathDateISNI)
+    (IF(bound(?publisherUncertainty), "uncertain", "certain") AS ?targetTextPublisherCertainty)
     (?kbrPublisher AS ?targetPublisherKBRIdentifier)
     (?kbrPublisherISNI AS ?targetPublisherISNI)
     (?kbrPublisherName AS ?targetPublisherName)
@@ -281,9 +283,26 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 
       graph <http://kbr-syracuse> { ?manifestation schema:publisher ?kbrPublisher . } 
 
+      OPTIONAL {
+        graph <http://kbr-syracuse> { 
+
+        ?publisherAssociation a prov:Association ;
+                                prov:agent ?kbrPublisher ;
+                                prov:hadRole btid:role_pbl .
+
+        ?publisherTranslationActivity a prov:Activity ;
+                  prov:qualifiedAssociation ?publisherAssociation ;
+                  prov:generated ?manifestation .
+        }
+
+        OPTIONAL {
+          graph <http://kbr-syracuse> { ?publisherAssociation up:assertionType ?publisherUncertainty . }
+        }
+      }
 
       # within this optional publisher, check optional attributes from the linked authorities dataset
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisher rdfs:label ?kbrPublisherName . } }
+
       OPTIONAL { 
         graph <http://kbr-linked-authorities> { ?kbrPublisher schema:address ?kbrPublisherAddressEntity . }
         
@@ -417,7 +436,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
       graph <http://kbr-syracuse> { 
         ?scenaristAssociation a prov:Association ;
                                 prov:agent ?kbrScenarist ;
-                                prov:hadRole btid:role_ill .
+                                prov:hadRole btid:role_sce .
 
         ?activity a prov:Activity ;
                   prov:qualifiedAssociation ?scenaristAssociation ;
