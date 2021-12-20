@@ -36,6 +36,7 @@ INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 
 INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
 INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
+INPUT_MASTER_COUNTRIES="../data-sources/master-data/countries.nt"
 INPUT_MASTER_LANGUAGES="../data-sources/master-data/languages.nt"
 INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography-en-hierarchy.csv"
 INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl-hierarchy.csv"
@@ -100,6 +101,7 @@ SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 #
 SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
 SUFFIX_MASTER_BINDING_TYPES="binding-types.csv"
+SUFFIX_MASTER_COUNTRIES="countries.nt"
 SUFFIX_MASTER_LANGUAGES="languages.nt"
 SUFFIX_MASTER_THES_EN="thesaurus-belgian-bibliography-en-hierarchy.csv"
 SUFFIX_MASTER_THES_NL="thesaurus-belgian-bibliography-nl-hierarchy.csv"
@@ -262,6 +264,7 @@ function extractMasterData {
   echo "EXTRACTION - Nothing to extract from master data, copying files"
   cp "$INPUT_MASTER_MARC_ROLES" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
   cp "$INPUT_MASTER_MARC_BINDING_TYPES" "$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
+  cp "$INPUT_MASTER_COUNTRIES" "$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
   cp "$INPUT_MASTER_LANGUAGES" "$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   cp "$INPUT_MASTER_THES_EN" "$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
   cp "$INPUT_MASTER_THES_NL" "$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
@@ -514,8 +517,15 @@ function loadMasterData {
 
   local masterDataTurtle="$integrationName/master-data/rdf/$SUFFIX_MASTER_LD"
   local masterDataLanguages="$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
+  local masterDataCountries="$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
 
+  echo "Load master data - mapped content"
   uploadData "$TRIPLE_STORE_NAMESPACE" "$masterDataTurtle" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_MASTER"
+
+  echo "Load master data - countries"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$masterDataCountries" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_MASTER"
+
+  echo "Load master data - languages"
   uploadData "$TRIPLE_STORE_NAMESPACE" "$masterDataLanguages" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_MASTER"
 
 }
@@ -637,6 +647,20 @@ else
     load $2 $3
     query $3
     postprocess $3
+
+  elif [ "$1" = "etlq" ];
+  then
+    extract $2 $3
+    transform $2 $3
+    load $2 $3
+    query $3
+
+  elif [ "$1" = "tlq" ];
+  then
+    transform $2 $3
+    load $2 $3
+    query $3
+
   elif [ "$1" = "qp" ];
   then
     query $3
@@ -679,7 +703,7 @@ else
     load $3 $3
 
   else
-    echo "uknown command, please use different combinations of extract (e) transform (t) and load (l): 'etl', 'e', 'et', 't', 'l', 'tl'"
+    echo "uknown command, please use different combinations of extract (e) transform (t) load (l) query (q) and postprocess (p): 'etl', 'etlq', 'etlqp', 'e', 'et', 't', 'l', 'tl', 'q' etc"
     exit 1
   fi
 fi

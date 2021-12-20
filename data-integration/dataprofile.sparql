@@ -10,7 +10,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
   SELECT 
     (?manifestation AS ?targetTextKBRIdentifier)
     (?manifestationTitle AS ?targetTextTitle)
-    (?kbrCountryOfOrigin AS ?targetTextCountryOfPublication)
+    (?kbrCountryOfOriginLabel AS ?targetTextCountryOfPublication)
     (?kbrDatePublished AS ?targetTextYearOfPublication)
     (?kbrLocationCreated AS ?targetTextPlaceOfPublication)
     (?kbrResponsibilityStatement AS ?targetTextResponsibilityStatement)
@@ -18,7 +18,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?isbn AS ?targetTextISBN) 
     (?kbrAuthor AS ?authorKBRIdentifier)
     (?kbrAuthorISNI AS ?authorISNI)
-    (?kbrAuthorNationality AS ?authorNationality)
+    (?kbrAuthorNationalityLabel AS ?authorNationality)
     (?isniSRUAuthorGender AS ?authorGenderISNI)
     (?kbrAuthorFamilyName AS ?authorFamilyName)
     (?kbrAuthorGivenName AS ?authorGivenName)
@@ -30,17 +30,17 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?kbrTranslatorFamilyName AS ?translatorFamilyName)
     (?kbrTranslatorGivenName AS ?translatorGivenName)
     (?kbrTranslatorISNI AS ?translatorISNI)
-    (?kbrTranslatorNationality AS ?translatorNationality)
+    (?kbrTranslatorNationalityLabel AS ?translatorNationality)
     (?isniSRUTranslatorGender AS ?translatorGenderISNI)
     (?kbrPublisher AS ?targetPublisherKBRIdentifier)
     (?kbrPublisherISNI AS ?targetPublisherISNI)
     (?kbrPublisherName AS ?targetPublisherName)
     (?kbrPublisherLocation AS ?targetPublisherLocation)
     (?kbrPublisherRegion AS ?targetPublisherRegion)
-    (?kbrPublisherCountry AS ?targetPublisherCountry)
+    (?kbrPublisherCountryLabel AS ?targetPublisherCountry)
     (?kbrIllustrator AS ?illustratorKBRIdentifier)
     (?kbrIllustratorISNI AS ?illustratorISNI)
-    (?kbrIllustratorNationality AS ?illustratorNationality)
+    (?kbrIllustratorNationalityLabel AS ?illustratorNationality)
     (?isniSRUIllustratorGender AS ?illustratorGenderISNI)
     (?kbrIllustratorFamilyName AS ?illustratorFamilyName)
     (?kbrIllustratorGivenName AS ?illustratorGivenName)
@@ -50,7 +50,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?kbrScenaristFamilyName AS ?scenaristFamilyName)
     (?kbrScenraistGivenName AS ?scenaristGivenName)
     (?kbrScenaristISNI AS ?scenaristISNI)
-    (?kbrScenaristNationality AS ?scenaristNationality)
+    (?kbrScenaristNationalityLabel AS ?scenaristNationality)
     (?isniSRUScenaristGender AS ?scenaristGenderISNI)
     (?isniRDFScenaristBirthDate AS ?scenaristBirthDateISNI)
     (?isniRDFScenaristDeathDate AS ?scenaristDeathDateISNI)
@@ -76,6 +76,11 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 
     OPTIONAL { 
       graph <http://kbr-syracuse> { ?manifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrCountryOfOrigin mads:authoritativeLabel ?kbrCountryOfOriginLabel . } 
+        FILTER (lang(?kbrCountryOfOriginLabel) = 'en')
+      }
     }
 
     OPTIONAL { 
@@ -84,7 +89,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
       # within the optional language check optionally for an English label of it (it should exist though)
       OPTIONAL {
         graph <http://master-data> { ?kbrTargetLang mads:authoritativeLabel ?kbrTargetLangLabel . }
-        FILTER (lang(?languageLabel) = 'en')
+        FILTER (lang(?kbrTargetLangLabel) = 'en')
       }
     } 
 
@@ -104,6 +109,12 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
           # There is always a nationality for this dataset, thus not optional
           ?kbrAuthor a schema:Person ;
                      schema:nationality ?kbrAuthorNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrAuthorNationality mads:authoritativeLabel ?kbrAuthorNationalityLabel . }
+          FILTER (lang(?kbrAuthorNationalitylabel) = 'en')
         }
       }
 
@@ -170,6 +181,12 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
           ?kbrTranslator a schema:Person ;
                      schema:nationality ?kbrTranslatorNationality . 
         }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrTranslatorNationality mads:authoritativeLabel ?kbrTranslatorNationalityLabel . }
+          FILTER (lang(?kbrTranslatorNationalityLabel) = 'en')
+        }
       }
 
 
@@ -234,13 +251,21 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 
       # within this optional publisher, check optional attributes from the linked authorities dataset
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisher rdfs:label ?kbrPublisherName . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { 
-        ?kbrPublisher schema:address ?kbrPublisherAddressEntity .
+      OPTIONAL { 
+        graph <http://kbr-linked-authorities> { ?kbrPublisher schema:address ?kbrPublisherAddressEntity . }
         
-        OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisherAddressEntity schema:addressRegion ?kbrPublisherRegion . } }
-        OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisherAddressEntity schema:addressLocality ?kbrPublisherLocation . } }
-        OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisherAddressEntity schema:addressCountry ?kbrPublisherCountry . } }
-       }
+          OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisherAddressEntity schema:addressRegion ?kbrPublisherRegion . } }
+          OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisherAddressEntity schema:addressLocality ?kbrPublisherLocation . } }
+
+          OPTIONAL { 
+            graph <http://kbr-linked-authorities> { ?kbrPublisherAddressEntity schema:addressCountry ?kbrPublisherCountry . } 
+
+            # within this optional nationality check optionally for an English label in the master data
+            OPTIONAL {
+              graph <http://master-data> { ?kbrPublisherCountry mads:authoritativeLabel ?kbrPublisherCountryLabel . }
+              FILTER (lang(?kbrPublisherCountryLabel) = 'en')
+            }
+          }
       }
 
       # within this optional translator, check optionally for Belgians with ISNI
@@ -288,6 +313,12 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
           # There is always a nationality for this dataset, thus not optional
           ?kbrIllustrator a schema:Person ;
                      schema:nationality ?kbrIllustratorNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrIllustratorNationality mads:authoritativeLabel ?kbrIllustratorNationalityLabel . }
+          FILTER (lang(?kbrIllustratorNationalityLabel) = 'en')
         }
       }
 
@@ -362,6 +393,12 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
           # There is always a nationality for this dataset, thus not optional
           ?kbrScenarist a schema:Person ;
                      schema:nationality ?kbrScenaristNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrScenaristNationality mads:authoritativeLabel ?kbrScenaristNationalityLabel . }
+          FILTER (lang(?kbrScenaristNationalityLabel) = 'en')
         }
       }
 
