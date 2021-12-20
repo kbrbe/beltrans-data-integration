@@ -10,6 +10,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
   SELECT 
     (?manifestation AS ?targetTextKBRIdentifier)
     (?manifestationTitle AS ?targetTextTitle)
+    (?kbrTargetManifestationEdition AS ?targetTextEdition)
     (?kbrCountryOfOriginLabel AS ?targetTextCountryOfPublication)
     (?kbrDatePublished AS ?targetTextYearOfPublication)
     (?kbrLocationCreated AS ?targetTextPlaceOfPublication)
@@ -78,6 +79,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     # optional attributes of the translation itself
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:isbn ?isbn . }  }
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?kbrDatePublished . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
 
