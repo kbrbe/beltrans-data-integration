@@ -5,7 +5,7 @@
 import csv
 from optparse import OptionParser
 import utils
-
+import json
 
 # -----------------------------------------------------------------------------
 def main():
@@ -55,24 +55,41 @@ def main():
 
     # used to parse certain columns based on their name, e.g. authorBirthDateKBR and authorBirthDateISNI
     sources = ['KBR', 'ISNI']
+    mismatchLog = {}
 
     # write relevant data to output
     for row in inputReader:
+
+      # This is a relevant row, we process it further before writing it
+      utils.selectDate(row, 'author', 'Birth', sources, mismatchLog)
+      utils.selectDate(row, 'illustrator', 'Birth', sources, mismatchLog)
+      utils.selectDate(row, 'translator', 'Birth', sources, mismatchLog)
+      utils.selectDate(row, 'scenarist', 'Birth', sources, mismatchLog)
+
+      utils.selectDate(row, 'author', 'Death', sources, mismatchLog)
+      utils.selectDate(row, 'illustrator', 'Death', sources, mismatchLog)
+      utils.selectDate(row, 'translator', 'Death', sources, mismatchLog)
+      utils.selectDate(row, 'scenarist', 'Death', sources, mismatchLog)
+
       if( row['authorNationality'] == belgian or row['illustratorNationality'] == belgian or row['scenaristNationality'] == belgian):
-
-        # This is a relevant row, we process it further before writing it
-        utils.selectDate(row, 'author', 'Birth', sources)
-        utils.selectDate(row, 'illustrator', 'Birth', sources)
-        utils.selectDate(row, 'translator', 'Birth', sources)
-        utils.selectDate(row, 'scenarist', 'Birth', sources)
-
-        utils.selectDate(row, 'author', 'Death', sources)
-        utils.selectDate(row, 'illustrator', 'Death', sources)
-        utils.selectDate(row, 'translator', 'Death', sources)
-        utils.selectDate(row, 'scenarist', 'Death', sources)
-
         outputWriter.writerow(row)
 
 
+  # print statistics
+  for dateType in mismatchLog:
+    for contributorType in mismatchLog[dateType]:
+      numberMismatches = len(mismatchLog[dateType][contributorType])
+      print(f'{dateType}, {contributorType} = {numberMismatches} mismatches')
+
+  # print mismatch log
+  print(f'dateType, contributorType, contributor, KBR, ISNI')
+  for dateType in mismatchLog:
+    for contributorType in mismatchLog[dateType]:
+      for c in mismatchLog[dateType][contributorType]:
+        d = mismatchLog[dateType][contributorType][c]
+        kbrValue = next(iter(d['KBR'])) if 'KBR' in d else ''
+        isniValue = next(iter(d['ISNI'])) if 'ISNI' in d else ''
+        print(f'{dateType}, {contributorType}, {c}, {kbrValue}, {isniValue}')
+      
 
 main()

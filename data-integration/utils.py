@@ -2,6 +2,36 @@ import itertools
 from datetime import datetime
 
 # -----------------------------------------------------------------------------
+def addToMismatchLog(mismatchLog, dateType, roleType, contributorURI, s, value):
+  """This function logs mismatching dates in the given data structure.
+
+  >>> log = {}
+  >>> addToMismatchLog(log, 'Birth', 'author', '123', 'KBR', '1988')
+  >>> log['Birth']['author']['123']['KBR'] == ['1988']
+  True
+
+  A log is added also if there is already a log entry for another source of that contributor
+  >>> log = { 'Birth': {'author': {'123': {'ISNI': ['1989']}}}}
+  >>> addToMismatchLog(log, 'Birth', 'author', '123', 'KBR', '1988')
+  >>> log['Birth']['author']['123']['KBR'] == ['1988'] and log['Birth']['author']['123']['ISNI'] == ['1989']
+  True
+  """
+
+  if dateType in mismatchLog:
+    if roleType in mismatchLog[dateType]:
+      if contributorURI in mismatchLog[dateType][roleType]:
+        if s in mismatchLog[dateType][roleType][contributorURI]:
+          mismatchLog[dateType][roleType][contributorURI][s].add(value)
+        else:
+          mismatchLog[dateType][roleType][contributorURI][s] = set([value])
+      else:
+        mismatchLog[dateType][roleType][contributorURI] = { s: set([value]) }
+    else:
+      mismatchLog[dateType][roleType] = {contributorURI: { s: set([value]) } }
+  else:
+    mismatchLog[dateType] = {roleType: {contributorURI: { s: set([value]) } }}
+
+# -----------------------------------------------------------------------------
 def datesMatch(fullDates, yearMonthDates, years):
   """This function checks if the different provided dates describe the same date,
      e.g. 1988-04-25, 1988 and 1988-04 would match resulting in True, otherwise False.
@@ -90,6 +120,17 @@ def concatenateDates(fullDates, yearMonthDates, years):
 def mostCompleteDate(dates):
   """This function returns the most complete date from the given array, if there is a mismatch both are returned.
 
+  >>> mostCompleteDate(['1988-04-25', '1988'])
+  '1988-04-25'
+
+  >>> mostCompleteDate(['1988-04-25'])
+  '1988-04-25'
+
+  >>> mostCompleteDate(['1988', '1988-04'])
+  '1988-04'
+
+  >>> mostCompleteDate(['1988'])
+  '1988'
   """
 
   fullDates = set()
@@ -128,51 +169,51 @@ def mostCompleteDate(dates):
     return ''
 
 # -----------------------------------------------------------------------------
-def selectDate(row, role, dateType, sources):
+def selectDate(row, role, dateType, sources, mismatchLog):
   """This function chooses the most complete date for the given role and row, possible dateTypes are 'Birth' and 'Death'.
 
   Select the most complete date betwen the sources
   >>> row = {'authorBirthDateKBR': '1988-04-25', 'authorBirthDateISNI': '1988'}
-  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'])
+  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], {})
   >>> row['authorBirthDate'] == '1988-04-25'
   True
 
   >>> row = {'authorBirthDateKBR': '', 'authorBirthDateISNI': '1988'}
-  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'])
+  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], {})
   >>> row['authorBirthDate'] == '1988'
   True
 
   Keep it empty if none of the sources provide a date
   >>> row = {'authorBirthDateKBR': '', 'authorBirthDateISNI': ''}
-  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'])
+  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], {})
   >>> row['authorBirthDate'] == ''
   True
 
   It also works for other roles than author
   >>> row = {'translatorBirthDateKBR': '1988-04-25', 'translatorBirthDateISNI': '1988'}
-  >>> selectDate(row, 'translator', 'Birth', ['KBR', 'ISNI'])
+  >>> selectDate(row, 'translator', 'Birth', ['KBR', 'ISNI'], {})
   >>> row['translatorBirthDate'] == '1988-04-25'
   True
 
   >>> row = {'illustratorBirthDateKBR': '1988-04-25', 'illustratorBirthDateISNI': '1988'}
-  >>> selectDate(row, 'illustrator', 'Birth', ['KBR', 'ISNI'])
+  >>> selectDate(row, 'illustrator', 'Birth', ['KBR', 'ISNI'], {})
   >>> row['illustratorBirthDate'] == '1988-04-25'
   True
 
   >>> row = {'scenaristBirthDateKBR': '1988-04-25', 'scenaristBirthDateISNI': '1988'}
-  >>> selectDate(row, 'scenarist', 'Birth', ['KBR', 'ISNI'])
+  >>> selectDate(row, 'scenarist', 'Birth', ['KBR', 'ISNI'], {})
   >>> row['scenaristBirthDate'] == '1988-04-25'
   True
 
   Log an error if a mismatch was found and keep both in the output
-  >>> row = {'authorBirthDateKBR': '1988-04-25', 'authorBirthDateISNI': '1989'}
-  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'])
+  >>> row = {'authorKBRIdentifier': '1234', 'authorBirthDateKBR': '1988-04-25', 'authorBirthDateISNI': '1989'}
+  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], {})
   >>> row['authorBirthDate'] == '1988-04-25 or 1989'
   True
 
   The same works also for death dates
   >>> row = {'authorDeathDateKBR': '1988-04-25', 'authorDeathDateISNI': '1988'}
-  >>> selectDate(row, 'author', 'Death', ['KBR', 'ISNI'])
+  >>> selectDate(row, 'author', 'Death', ['KBR', 'ISNI'], {})
   >>> row['authorDeathDate'] == '1988-04-25'
   True
   """
@@ -188,10 +229,24 @@ def selectDate(row, role, dateType, sources):
   # set the selected value
   row[outputColName] = mostCompleteDate(dates)
 
-  # remove the initial sources
-  for s in sources:
-    colName = f'{role}{dateType}Date{s}'
-    row.pop(colName)
+  # In case the different dates do not match log it
+  # the date should then be e.g. "1972-04 or 1970"
+  if 'or' in row[outputColName]:
+
+    rowIDCol = f'{role}KBRIdentifier'
+    contributorURI = row[rowIDCol]
+    # log the mismatching data and then remove the initial sources
+    for s in sources:
+      colName = f'{role}{dateType}Date{s}'
+      value = row[colName]
+      addToMismatchLog(mismatchLog, dateType, role, contributorURI, s, value)
+      row.pop(colName)
+
+  else:
+    # only remove the initial sources
+    for s in sources:
+      colName = f'{role}{dateType}Date{s}'
+      row.pop(colName)
   
 
 # -----------------------------------------------------------------------------
