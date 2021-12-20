@@ -5,6 +5,7 @@ prefix schema: <http://schema.org/>
 PREFIX btid: <http://kbr.be/id/data/> 
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 
   SELECT 
     (?manifestation AS ?targetTextKBRIdentifier)
@@ -13,7 +14,7 @@ PREFIX btisni: <http://kbr.be/isni/>
     (?kbrDatePublished AS ?targetTextYearOfPublication)
     (?kbrLocationCreated AS ?targetTextPlaceOfPublication)
     (?kbrResponsibilityStatement AS ?targetTextResponsibilityStatement)
-    (?kbrTargetLang AS ?targetTextLanguage)
+    (?kbrTargetLangLabel AS ?targetTextLanguage)
     (?isbn AS ?targetTextISBN) 
     (?kbrAuthor AS ?authorKBRIdentifier)
     (?kbrAuthorISNI AS ?authorISNI)
@@ -57,6 +58,7 @@ PREFIX btisni: <http://kbr.be/isni/>
   FROM <http://isni-sru>
   FROM <http://kbr-belgians>
   FROM <http://isni-rdf>
+  FROM <http://master-data>
   FROM <http://kbr-linked-authorities>
   WHERE {
 
@@ -67,11 +69,24 @@ PREFIX btisni: <http://kbr.be/isni/>
 
     # optional attributes of the translation itself
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:isbn ?isbn . }  }
-    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:inLanguage ?kbrTargetLang . } } 
-    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?kbrDatePublished . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
+
+
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }
+    }
+
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:inLanguage ?kbrTargetLang . } 
+
+      # within the optional language check optionally for an English label of it (it should exist though)
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetLang mads:authoritativeLabel ?kbrTargetLangLabel . }
+        FILTER (lang(?languageLabel) = 'en')
+      }
+    } 
 
 
     # ---------------------------------------------------------------------------
