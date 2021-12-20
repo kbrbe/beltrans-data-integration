@@ -38,6 +38,7 @@ INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
 INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
 INPUT_MASTER_COUNTRIES="../data-sources/master-data/countries.nt"
 INPUT_MASTER_LANGUAGES="../data-sources/master-data/languages.nt"
+INPUT_MASTER_GENDER="../data-sources/master-data/gender.ttl"
 INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography-en-hierarchy.csv"
 INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl-hierarchy.csv"
 INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography-fr-hierarchy.csv"
@@ -103,6 +104,7 @@ SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
 SUFFIX_MASTER_BINDING_TYPES="binding-types.csv"
 SUFFIX_MASTER_COUNTRIES="countries.nt"
 SUFFIX_MASTER_LANGUAGES="languages.nt"
+SUFFIX_MASTER_GENDER="gender.ttl"
 SUFFIX_MASTER_THES_EN="thesaurus-belgian-bibliography-en-hierarchy.csv"
 SUFFIX_MASTER_THES_NL="thesaurus-belgian-bibliography-nl-hierarchy.csv"
 SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
@@ -266,6 +268,7 @@ function extractMasterData {
   cp "$INPUT_MASTER_MARC_BINDING_TYPES" "$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
   cp "$INPUT_MASTER_COUNTRIES" "$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
   cp "$INPUT_MASTER_LANGUAGES" "$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
+  cp "$INPUT_MASTER_GENDER" "$integrationName/master-data/$SUFFIX_MASTER_GENDER"
   cp "$INPUT_MASTER_THES_EN" "$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
   cp "$INPUT_MASTER_THES_NL" "$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
   cp "$INPUT_MASTER_THES_FR" "$integrationName/master-data/$SUFFIX_MASTER_THES_FR"
@@ -518,6 +521,7 @@ function loadMasterData {
   local masterDataTurtle="$integrationName/master-data/rdf/$SUFFIX_MASTER_LD"
   local masterDataLanguages="$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   local masterDataCountries="$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
+  local masterDataGender="$integrationName/master-data/$SUFFIX_MASTER_GENDER"
 
   echo "Load master data - mapped content"
   uploadData "$TRIPLE_STORE_NAMESPACE" "$masterDataTurtle" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_MASTER"
@@ -527,6 +531,9 @@ function loadMasterData {
 
   echo "Load master data - languages"
   uploadData "$TRIPLE_STORE_NAMESPACE" "$masterDataLanguages" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_MASTER"
+
+  echo "Load master data - gender"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$masterDataGender" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_MASTER"
 
 }
 

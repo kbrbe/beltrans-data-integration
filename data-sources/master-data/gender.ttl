@@ -1,0 +1,25 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+
+# From schema.org
+schema:Male a schema:GenderType ;
+    rdfs:label "Male"@en ;
+    rdfs:comment "The male gender."@en .
+
+# From schema.org
+schema:Female a schema:GenderType ;
+    rdfs:label "Female"@en ;
+    rdfs:comment "The female gender."@en .
+
+
+# additional labels
+schema:Male
+  rdfs:label "Mannelijk"@nl ;
+  rdfs:label "Mâle"@fr ;
+  rdfs:label "Männlich"@de .
+
+schema:Female
+  rdfs:label "Vrouwelijk"@nl ;
+  rdfs:label "Femelle"@fr ;
+  rdfs:label "Weiblich"@de .

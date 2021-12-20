@@ -19,7 +19,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?kbrAuthor AS ?authorKBRIdentifier)
     (?kbrAuthorISNI AS ?authorISNI)
     (?kbrAuthorNationalityLabel AS ?authorNationality)
-    (?isniSRUAuthorGender AS ?authorGenderISNI)
+    (?isniSRUAuthorGenderLabel AS ?authorGenderISNI)
     (?kbrAuthorFamilyName AS ?authorFamilyName)
     (?kbrAuthorGivenName AS ?authorGivenName)
     (?kbrAuthorBirthDate AS ?authorBirthDateKBR)
@@ -31,7 +31,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?kbrTranslatorGivenName AS ?translatorGivenName)
     (?kbrTranslatorISNI AS ?translatorISNI)
     (?kbrTranslatorNationalityLabel AS ?translatorNationality)
-    (?isniSRUTranslatorGender AS ?translatorGenderISNI)
+    (?isniSRUTranslatorGenderLabel AS ?translatorGenderISNI)
     (?kbrPublisher AS ?targetPublisherKBRIdentifier)
     (?kbrPublisherISNI AS ?targetPublisherISNI)
     (?kbrPublisherName AS ?targetPublisherName)
@@ -41,7 +41,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?kbrIllustrator AS ?illustratorKBRIdentifier)
     (?kbrIllustratorISNI AS ?illustratorISNI)
     (?kbrIllustratorNationalityLabel AS ?illustratorNationality)
-    (?isniSRUIllustratorGender AS ?illustratorGenderISNI)
+    (?isniSRUIllustratorGenderLabel AS ?illustratorGenderISNI)
     (?kbrIllustratorFamilyName AS ?illustratorFamilyName)
     (?kbrIllustratorGivenName AS ?illustratorGivenName)
     (?isniRDFIllustratorBirthDate AS ?illustratorBirthDateISNI)
@@ -51,7 +51,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?kbrScenraistGivenName AS ?scenaristGivenName)
     (?kbrScenaristISNI AS ?scenaristISNI)
     (?kbrScenaristNationalityLabel AS ?scenaristNationality)
-    (?isniSRUScenaristGender AS ?scenaristGenderISNI)
+    (?isniSRUScenaristGenderLabel AS ?scenaristGenderISNI)
     (?isniRDFScenaristBirthDate AS ?scenaristBirthDateISNI)
     (?isniRDFScenaristDeathDate AS ?scenaristDeathDateISNI)
   FROM  <http://kbr-syracuse>
@@ -143,7 +143,14 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
           }
 
           # optional attributes of the ISNI SRU dump
-          OPTIONAL { graph <http://isni-sru> { ?isniSRUAuthor schema:gender ?isniSRUAuthorGender . } }
+          OPTIONAL { graph <http://isni-sru> { ?isniSRUAuthor schema:gender ?isniSRUAuthorGender . } 
+
+            # within the optional gender check for an optional gender label (it should exist though)
+            OPTIONAL {
+              graph <http://master-data> { ?isniSRUAuthorGender rdfs:label ?isniSRUAuthorGenderLabel . }
+              FILTER (lang(?isniSRUAuthorGenderLabel) = 'en')
+            }
+          }
         }
 
         # if there is an optional ISNI we look it up in the ISNI RDF dump
@@ -216,7 +223,14 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
           }
 
           # optional attributes of the ISNI SRU dump
-          OPTIONAL { graph <http://isni-sru> { ?isniSRUTranslator schema:gender ?isniSRUTranslatorGender . } }
+          OPTIONAL { graph <http://isni-sru> { ?isniSRUTranslator schema:gender ?isniSRUTranslatorGender . }
+
+            # within the optional gender check for an optional gender label (it should exist though)
+            OPTIONAL {
+              graph <http://master-data> { ?isniSRUTranslatorGender rdfs:label ?isniSRUTranslatorGenderLabel . }
+              FILTER (lang(?isniSRUTranslatorGenderLabel) = 'en')
+            }
+          }
         }
 
         # if there is an optional ISNI we look it up in the ISNI RDF dump
@@ -342,7 +356,14 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
           }
 
           # optional attributes of the ISNI SRU dump
-          OPTIONAL { graph <http://isni-sru> { ?isniSRUIllustrator schema:gender ?isniSRUIllustratorGender . } }
+          OPTIONAL { graph <http://isni-sru> { ?isniSRUIllustrator schema:gender ?isniSRUIllustratorGender . }
+
+            # within the optional gender check for an optional gender label (it should exist though)
+            OPTIONAL {
+              graph <http://master-data> { ?isniSRUIllustratorGender rdfs:label ?isniSRUIllustratorGenderLabel . }
+              FILTER (lang(?isniSRUIllustratorGenderLabel) = 'en')
+            }
+          }
         }
 
         # if there is an optional ISNI we look it up in the ISNI RDF dump
@@ -422,7 +443,14 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
           }
 
           # optional attributes of the ISNI SRU dump
-          OPTIONAL { graph <http://isni-sru> { ?isniSRUScenarist schema:gender ?isniSRUScenaristGender . } }
+          OPTIONAL { graph <http://isni-sru> { ?isniSRUScenarist schema:gender ?isniSRUScenaristGender . }
+
+            # within the optional gender check for an optional gender label (it should exist though)
+            OPTIONAL {
+              graph <http://master-data> { ?isniSRUScenaristGender rdfs:label ?isniSRUScenaristGenderLabel . }
+              FILTER (lang(?isniSRUScenaristGenderLabel) = 'en')
+            }
+          }
         }
 
         # if there is an optional ISNI we look it up in the ISNI RDF dump
