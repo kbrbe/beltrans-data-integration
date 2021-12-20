@@ -32,6 +32,10 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?kbrTranslatorISNI AS ?translatorISNI)
     (?kbrTranslatorNationalityLabel AS ?translatorNationality)
     (?isniSRUTranslatorGenderLabel AS ?translatorGenderISNI)
+    (?kbrTranslatorBirthDate AS ?translatorBirthDateKBR)
+    (?isniRDFTranslatorBirthDate AS ?translatorBirthDateISNI)
+    (?kbrTranslatorDeathDate AS ?translatorDeathDateKBR)
+    (?isniRDFTranslatorDeathDate AS ?translatorDeathDateISNI)
     (?kbrPublisher AS ?targetPublisherKBRIdentifier)
     (?kbrPublisherISNI AS ?targetPublisherISNI)
     (?kbrPublisherName AS ?targetPublisherName)
@@ -44,7 +48,9 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?isniSRUIllustratorGenderLabel AS ?illustratorGenderISNI)
     (?kbrIllustratorFamilyName AS ?illustratorFamilyName)
     (?kbrIllustratorGivenName AS ?illustratorGivenName)
+    (?kbrIllustratorBirthDate AS ?illustratorBithDateKBR)
     (?isniRDFIllustratorBirthDate AS ?illustratorBirthDateISNI)
+    (?kbrIllustratorDeathDate AS ?illustratorDeathDateKBR)
     (?isniRDFIllustratorDeathDate AS ?illustratorDeathDateISNI)
     (?kbrScenarist AS ?scenaristKBRIdentifier)
     (?kbrScenaristFamilyName AS ?scenaristFamilyName)
@@ -52,7 +58,9 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
     (?kbrScenaristISNI AS ?scenaristISNI)
     (?kbrScenaristNationalityLabel AS ?scenaristNationality)
     (?isniSRUScenaristGenderLabel AS ?scenaristGenderISNI)
+    (?kbrScenaristBithDate AS ?scenaristBirthDateKBR)
     (?isniRDFScenaristBirthDate AS ?scenaristBirthDateISNI)
+    (?kbrScenaristDeathDate AS ?scenaristDeathDateKBR)
     (?isniRDFScenaristDeathDate AS ?scenaristDeathDateISNI)
   FROM  <http://kbr-syracuse>
   FROM <http://isni-sru>
@@ -320,6 +328,8 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
       # within this optional illustrator, check optional attributes from the linked authorities dataset
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:familyName ?kbrIllustratorFamilyName . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:givenName ?kbrIllustratorGivenName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:birthDate ?kbrIllustratorBirthDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:deathDate ?kbrIllustratorDeathDate . } }
 
       # within this optional illustrator check optionally for Belgians from KBR (it could be the illustrator from kbr-syracuse is not in kbr-belgians
       OPTIONAL {
@@ -407,6 +417,8 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
       # within this optional scenarist, check optional attributes from the linked authorities dataset
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:familyName ?kbrScenaristFamilyName . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:givenName ?kbrScenaristGivenName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:birthDate ?kbrScenaristBirthDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:deathDate ?kbrScenaristDeathDate . } }
 
       # within this optional scenarist check optionally for Belgians from KBR (it could be the scenarist from kbr-syracuse is not in kbr-belgians
       OPTIONAL {
