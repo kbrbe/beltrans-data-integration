@@ -2,6 +2,7 @@ prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix prov: <http://www.w3.org/ns/prov#>
 prefix schema: <http://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX btid: <http://kbr.be/id/data/> 
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX btisni: <http://kbr.be/isni/>
@@ -10,6 +11,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
   SELECT 
     (?manifestation AS ?targetTextKBRIdentifier)
+    (?kbrTargetManifestationBBLabel AS ?targetTextThesaurusBB)
     (?manifestationTitle AS ?targetTextTitle)
     (?kbrTargetManifestationEdition AS ?targetTextEdition)
     (?kbrTargetManifestationBindingTypeLabel AS ?targetTextBindingType)
@@ -85,6 +87,16 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
+
+
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:about ?kbrTargetManifestationBB . }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetManifestationBB skos:prefLabel ?kbrTargetManifestationBBLabel . }
+        FILTER(lang(?kbrTargetManifestationBBLabel) = 'en')
+      }
+    }
 
     OPTIONAL {
       graph <http://kbr-syracuse> { ?manifestation schema:bookFormat ?kbrTargetManifestationBindingType . }
