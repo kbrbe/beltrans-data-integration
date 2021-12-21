@@ -127,7 +127,7 @@ def addWorkFieldsToWorkCSV(elem, writer):
   isbn = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="a"]', ALL_NS))
   bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
   languagesString = utils.getElementValue(elem.findall('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
-  countryOfPublication = utils.getElementValue(elem.find('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
+  countryOfPublicationString = utils.getElementValue(elem.findall('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
   title = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="a"]', ALL_NS))
   responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
   placeOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="a"]', ALL_NS))
@@ -139,6 +139,9 @@ def addWorkFieldsToWorkCSV(elem, writer):
   # create a URI for all languages
   langURIsString = utils.createURIString(languagesString, ';', 'http://id.loc.gov/vocabulary/languages/')
 
+  # create a URI for all countries
+  countryURIsString = utils.createURIString(countryOfPublicationString, ';', 'http://id.loc.gov/vocabulary/countries/')
+
   # create a URI for all belgian bibliographic classifications
   bbURIsString = utils.createURIString(belgianBibliographyClassificationsString, ';', 'http://kbr.be/id/data/')
 
@@ -148,7 +151,7 @@ def addWorkFieldsToWorkCSV(elem, writer):
     'title': title,
     'languages': langURIsString,
     'placeOfPublication': placeOfPublication,
-    'countryOfPublication': countryOfPublication,
+    'countryOfPublication': countryURIsString,
     'yearOfPublication': yearOfPublication,
     'responsibilityStatement': responsibilityStatement,
     'bindingType': bindingType,

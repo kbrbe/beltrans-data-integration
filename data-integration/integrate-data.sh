@@ -6,6 +6,7 @@ SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
 SCRIPT_NORMALIZE_HEADERS="../data-sources/kbr/replace-headers.py"
 SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-authorities.sh"
 SCRIPT_EXTRACT_BB="../data-sources/kbr/extract-belgian-bibliography.py"
+SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.py"
 
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
@@ -79,11 +80,13 @@ SUFFIX_KBR_TRL_NL_WORKS="nl-translations-works.csv"
 SUFFIX_KBR_TRL_NL_CONT="nl-translations-contributors.csv"
 SUFFIX_KBR_TRL_NL_NEWAUT="nl-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_NL_BB="nl-translations-bb.csv"
+SUFFIX_KBR_TRL_NL_PUB_COUNTRY="nl-translations-pub-country.csv"
 SUFFIX_KBR_TRL_FR_CLEANED="fr-translations-cleaned.xml"
 SUFFIX_KBR_TRL_FR_WORKS="fr-translations-works.csv"
 SUFFIX_KBR_TRL_FR_CONT="fr-translations-contributors.csv"
 SUFFIX_KBR_TRL_FR_NEWAUT="fr-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_FR_BB="fr-translations-bb.csv"
+SUFFIX_KBR_TRL_FR_PUB_COUNTRY="fr-translations-pub-country.csv"
 
 SUFFIX_KBR_LA_PLACES_VLG="publisher-places-VLG.csv"
 SUFFIX_KBR_LA_PLACES_WAL="publisher-places-WAL.csv"
@@ -118,6 +121,7 @@ SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
 SUFFIX_KBR_TRL_LD="translations-and-contributions.ttl"
 SUFFIX_KBR_NEWAUT_LD="translations-identified-authorities.ttl"
 SUFFIX_KBR_TRL_BB_LD="translations-bb.ttl"
+SUFFIX_KBR_TRL_PUB_COUNTRY_LD="translations-publication-countries.ttl"
 
 #
 # LINKED DATA - KBR LINKED AUTHORITIES
@@ -337,6 +341,8 @@ function extractKBRTranslationsAndContributions {
   kbrFrenchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_NEWAUT"
   kbrDutchTranslationsCSVBB="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_BB"
   kbrFrenchTranslationsCSVBB="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_BB"
+  kbrDutchTranslationsPubCountries="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
+  kbrFrenchTranslationsPubCountries="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
   
   source ../data-sources/py-etl-env/bin/activate
 
@@ -357,6 +363,12 @@ function extractKBRTranslationsAndContributions {
 
   echo "Extract BB assignments for French translations ..."
   extractBBEntries "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsCSVBB"
+
+  echo "Extract publication countries from Dutch translations ..."
+  extractPubCountries "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsPubCountries"
+
+  echo "Extract publication countries from French translations ..."
+  extractPubCountries "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsPubCountries"
 
   echo "Extract newly identified contributors ..."
   extractIdentifiedAuthorities "$kbrDutchTranslationsCSVCont" "$kbrDutchTranslationsIdentifiedAuthorities"
@@ -422,6 +434,7 @@ function mapKBRTranslationsAndContributions {
   kbrTranslationsTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_LD"
   kbrTranslationsIdentifiedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_NEWAUT_LD"
   kbrTranslationsBBTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_BB_LD"
+  kbrTranslationsPubCountriesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
 
   # map the translations
 
@@ -455,6 +468,16 @@ function mapKBRTranslationsAndContributions {
   # 2) execute the mapping
   echo "Map KBR BB assignments ..."
   . map.sh ../data-sources/kbr/kbr-belgian-bibliography.yml $kbrTranslationsBBTurtle
+
+  # map publication countries
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_KBR_PUB_COUNTRIES_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
+  export RML_SOURCE_KBR_PUB_COUNTRIES_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
+
+  # 2) execute the mapping
+  echo "Map KBR publication countries ..."
+  . map.sh ../data-sources/kbr/kbr-publication-countries.yml $kbrTranslationsPubCountriesTurtle
 
 }
 
@@ -518,6 +541,7 @@ function loadKBR {
   local kbrIdentifiedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_NEWAUT_LD"
   local kbrLinkedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_LA_LD"
   local kbrTranslationsBB="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_BB_LD"
+  local kbrTranslationsPubCountries="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
 
   echo "Load KBR translations and contributions ..."
   uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsAndContributions" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
@@ -534,6 +558,9 @@ function loadKBR {
 
   echo "Load KBR BB assignments ..."
   uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsBB" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
+
+  echo "Load KBR publication countries ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsPubCountries" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
 }
 
 # -----------------------------------------------------------------------------
@@ -633,6 +660,15 @@ function extractBBEntries {
 }
 
 # -----------------------------------------------------------------------------
+function extractPubCountries {
+  local input=$1
+  local output=$2
+
+  checkFile $input
+  python $SCRIPT_EXTRACT_PUB_COUNTRIES -i $input -o $output
+}
+
+# -----------------------------------------------------------------------------
 function uploadData {
   local namespace=$1
   local fileToUpload=$2
@@ -709,6 +745,17 @@ else
   elif [ "$1" = "tlqp" ];
   then
     transform $2 $3
+    load $2 $3
+    query $3
+    postprocess $3
+
+  elif [ "$1" = "lq" ];
+  then
+    load $2 $3
+    query $3
+
+  elif [ "$1" = "lqp" ];
+  then
     load $2 $3
     query $3
     postprocess $3

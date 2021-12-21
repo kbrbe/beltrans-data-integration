@@ -71,13 +71,6 @@ mappings:
           parameters:
             - [grel:valueParameter, $(placeOfPublication)]
             - [grel:valueParameter2, ""] 
-      - p: schema:countryOfOrigin
-        o: countries:$(countryOfPublication)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(countryOfPublication)]
-            - [grel:valueParameter2, ""] 
       - p: schema:bookEdition
         o: $(edition)
         condition:
