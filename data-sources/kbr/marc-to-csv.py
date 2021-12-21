@@ -133,21 +133,14 @@ def addWorkFieldsToWorkCSV(elem, writer):
   placeOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="a"]', ALL_NS))
   yearOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="c"]', ALL_NS))
   edition = utils.getElementValue(elem.find('./datafield[@tag="250"]/subfield[@code="a"]', ALL_NS))
+  belgianBibliographyClassificationsString = utils.getElementValue(elem.findall('./datafield[@tag="911"]/subfield[@code="a"]', ALL_NS))
 
   
   # create a URI for all languages
-  langURIs = []
-  langURIsString = ""
-  languages = languagesString.split(';')
-  vocab = "http://id.loc.gov/vocabulary/languages/"
-  if len(languages) > 1: 
-    for l in languages:
-      langURIs.append(vocab + l) 
-    langURIsString = ';'.join(langURIs)
-  elif len(languages) == 1:
-    langURIsString = vocab + languagesString
-  else:
-    langURIsString = ''
+  langURIsString = utils.createURIString(languagesString, ';', 'http://id.loc.gov/vocabulary/languages/')
+
+  # create a URI for all belgian bibliographic classifications
+  bbURIsString = utils.createURIString(belgianBibliographyClassificationsString, ';', 'http://kbr.be/id/data/')
 
   newRecord = {
     'KBRID': kbrID,
@@ -159,7 +152,8 @@ def addWorkFieldsToWorkCSV(elem, writer):
     'yearOfPublication': yearOfPublication,
     'responsibilityStatement': responsibilityStatement,
     'bindingType': bindingType,
-    'edition': edition
+    'edition': edition,
+    'belgianBibliography': bbURIsString
   }
 
   writer.writerow(newRecord)
@@ -189,7 +183,7 @@ def main():
        open(options.output_work_file, 'w') as outWorkFile:
 
     fields = ['ISNI', 'dataConfidence', 'nationality', 'gender', 'surname', 'forename', 'marcDate', 'sourceName', 'subSourceName', 'sourceID', 'externalInfo', 'externalInfoURI', 'externalInfoID']
-    workFields = ['KBRID', 'isbn', 'title', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition']
+    workFields = ['KBRID', 'isbn', 'title', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
     contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
     workWriter = csv.DictWriter(outWorkFile, fieldnames=workFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     contWriter = csv.DictWriter(outContFile, fieldnames=contFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)

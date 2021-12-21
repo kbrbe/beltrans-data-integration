@@ -218,6 +218,19 @@ mappings:
           parameters:
             - [grel:valueParameter, $(isbn)]
             - [grel:valueParameter2, ""] 
+      # due to a bug the following only maps the first found split result because there is a condition
+      - p: schema:about
+        o:  
+          function: grel:string_split
+          parameters:
+            - [grel:valueParameter, $(belgianBibliography)]
+            - [grel:p_string_sep, ";"]    
+          type: iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(belgianBibliography)]
+            - [grel:valueParameter2, ""] 
       - p: schema:inLanguage
         o:  
           function: grel:string_split

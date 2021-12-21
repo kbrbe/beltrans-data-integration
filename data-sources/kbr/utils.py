@@ -478,6 +478,40 @@ def smallLevenshteinDistance(stats, str1, str2):
   return retVal
 
 # -----------------------------------------------------------------------------
+def createURIString(valueString, delimiter, vocab):
+  """This function takes a delimiter separted string of values and returns a string
+     in which every of these values is prefixed with the specified vocab URI.
+
+  >>> createURIString('nl;fr;de', ';', 'http://id.loc.gov/vocabulary/languages/')
+  'http://id.loc.gov/vocabulary/languages/nl;http://id.loc.gov/vocabulary/languages/fr;http://id.loc.gov/vocabulary/languages/de'
+
+  An empty input string results in an empty output string
+  >>> createURIString('', ';', 'http://id.loc.gov/vocabulary/languages/')
+  ''
+
+  Only a delimiter results in an empty string
+  >>> createURIString(';', ';', 'http://id.loc.gov/vocabulary/languages/')
+  ''
+
+  """
+
+  uris = []
+  urisString = ""
+  values = valueString.split(delimiter)
+  if len(values) > 1: 
+    for v in values:
+      if len(v) > 0:
+        uris.append(vocab + v) 
+    urisString = ';'.join(uris)
+  elif len(values) == 1:
+    if len(values[0]) > 0:
+      urisString = vocab + valueString
+  else:
+    urisString = ''
+
+  return urisString
+
+# -----------------------------------------------------------------------------
 if __name__ == "__main__":
   import doctest
   doctest.testmod()
