@@ -3,6 +3,7 @@ prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix prov: <http://www.w3.org/ns/prov#>
 prefix schema: <http://schema.org/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
 PREFIX btid: <http://kbr.be/id/data/> 
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX btisni: <http://kbr.be/isni/>
@@ -12,6 +13,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
   SELECT 
     (?manifestation AS ?targetTextKBRIdentifier)
     (?kbrTargetManifestationBBLabel AS ?targetTextThesaurusBB)
+    (?translationType AS ?translationType)
     (?manifestationTitle AS ?targetTextTitle)
     (?kbrTargetManifestationEdition AS ?targetTextEdition)
     (?kbrTargetManifestationBindingTypeLabel AS ?targetTextBindingType)
@@ -23,6 +25,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?isbn AS ?targetTextISBN) 
     (?kbrAuthor AS ?authorKBRIdentifier)
     (?kbrAuthorISNI AS ?authorISNI)
+    (?kbrAuthorNationality AS ?authorNationalityURI)
     (?kbrAuthorNationalityLabel AS ?authorNationality)
     (?isniSRUAuthorGenderLabel AS ?authorGenderISNI)
     (?kbrAuthorFamilyName AS ?authorFamilyName)
@@ -80,6 +83,10 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       ?manifestation a schema:CreativeWork ;
                      schema:name ?manifestationTitle .
     }
+        
+    # determine if this manifestation is a multilingual work
+    BIND(exists{ graph <http://kbr-syracuse> { ?manifestation a btm:MultiLingualManifestation . } } AS ?classExists)
+    BIND(IF(?classExists, "multilingual", "translation") AS ?translationType)
 
     # optional attributes of the translation itself
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:isbn ?isbn . }  }
@@ -147,7 +154,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         # within this optional nationality check optionally for an English label in the master data
         OPTIONAL {
           graph <http://master-data> { ?kbrAuthorNationality mads:authoritativeLabel ?kbrAuthorNationalityLabel . }
-          FILTER (lang(?kbrAuthorNationalitylabel) = 'en')
+          FILTER (lang(?kbrAuthorNationalityLabel) = 'en')
         }
       }
 
