@@ -30,7 +30,7 @@ OPTIONAL {
   {
   SELECT
     ?datePublished 
-    (COUNT(?manifestation) AS ?numberPublishedManifestationsPerYear)
+    (COUNT(DISTINCT ?manifestation) AS ?numberPublishedManifestationsPerYear)
   WHERE {
 
     graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?datePublished . }
@@ -88,7 +88,7 @@ OPTIONAL {
       graph <http://kbr-syracuse> {
         ?scenaristAssociation a prov:Association ;
                            prov:agent ?scenarist ;
-                           prov:hadRole btid:role_ill .
+                           prov:hadRole btid:role_sce .
 
         ?scenaristTranslationActivity a prov:Activity ;
                                         prov:qualifiedAssociation ?scenaristAssociation ;
@@ -123,7 +123,7 @@ OPTIONAL {
   {
   SELECT
     ?datePublished 
-    (COUNT(?manifestation) AS ?numberPublishedFromFrenchPerYear)
+    (COUNT(DISTINCT ?manifestation) AS ?numberPublishedFromFrenchPerYear)
   WHERE {
 
     graph <http://kbr-syracuse> {
@@ -186,7 +186,7 @@ OPTIONAL {
       graph <http://kbr-syracuse> {
         ?scenaristAssociation a prov:Association ;
                            prov:agent ?scenarist ;
-                           prov:hadRole btid:role_ill .
+                           prov:hadRole btid:role_sce .
 
         ?scenaristTranslationActivity a prov:Activity ;
                                         prov:qualifiedAssociation ?scenaristAssociation ;
@@ -221,7 +221,7 @@ OPTIONAL {
   {
   SELECT
     ?datePublished 
-    (COUNT(?manifestation) AS ?numberPublishedFromDutchPerYear)
+    (COUNT(DISTINCT ?manifestation) AS ?numberPublishedFromDutchPerYear)
   WHERE {
 
     graph <http://kbr-syracuse> {
@@ -284,7 +284,7 @@ OPTIONAL {
       graph <http://kbr-syracuse> {
         ?scenaristAssociation a prov:Association ;
                            prov:agent ?scenarist ;
-                           prov:hadRole btid:role_ill .
+                           prov:hadRole btid:role_sce .
 
         ?scenaristTranslationActivity a prov:Activity ;
                                         prov:qualifiedAssociation ?scenaristAssociation ;
