@@ -1,6 +1,7 @@
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
 prefix schema: <http://schema.org/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX btm: <http://kbr.be/ns/beltrans/model#>
@@ -11,23 +12,23 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
   SELECT DISTINCT
-    (?manifestation AS ?targetTextKBRIdentifier)
-    (group_concat(?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetTextThesaurusBB)
-    (group_concat(?translationType;SEPARATOR=';') AS ?translationType)
-    (group_concat(?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
-    (group_concat(?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetTextEdition)
-    (group_concat(?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetTextBindingType)
-    (group_concat(?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
-    (group_concat(?kbrDatePublished;SEPARATOR=';') AS ?targetTextYearOfPublication)
-    (group_concat(?kbrLocationCreated;SEPARATOR=';') AS ?targetTextPlaceOfPublication)
-    (group_concat(?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetTextResponsibilityStatement)
-    (group_concat(?kbrTargetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
-    (group_concat(?isbn;SEPARATOR=';') AS ?targetTextISBN) 
-    (group_concat(?kbrAuthor;SEPARATOR=';') AS ?authorKBRIdentifier)
-    (group_concat(?kbrTranslator;SEPARATOR=';') AS ?translatorKBRIdentifier)
-    (group_concat(?kbrPublisher;SEPARATOR=';') AS ?targetPublisherKBRIdentifier)
-    (group_concat(?kbrIllustrator;SEPARATOR=';') AS ?illustratorKBRIdentifier)
-    (group_concat(?kbrScenarist;SEPARATOR=';') AS ?scenaristKBRIdentifier)
+    (?manifestationID AS ?targetTextKBRIdentifier)
+    (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetTextThesaurusBB)
+    (group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
+    (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
+    (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetTextEdition)
+    (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetTextBindingType)
+    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
+    (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetTextYearOfPublication)
+    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetTextPlaceOfPublication)
+    (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetTextResponsibilityStatement)
+    (group_concat(distinct ?kbrTargetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
+    (group_concat(distinct ?isbn;SEPARATOR=';') AS ?targetTextISBN) 
+    (group_concat(distinct ?kbrAuthorID;SEPARATOR=';') AS ?authorKBRIdentifier)
+    (group_concat(distinct ?kbrTranslatorID;SEPARATOR=';') AS ?translatorKBRIdentifier)
+    (group_concat(distinct ?kbrPublisherID;SEPARATOR=';') AS ?targetPublisherKBRIdentifier)
+    (group_concat(distinct ?kbrIllustratorID;SEPARATOR=';') AS ?illustratorKBRIdentifier)
+    (group_concat(distinct ?kbrScenaristID;SEPARATOR=';') AS ?scenaristKBRIdentifier)
   FROM <http://kbr-syracuse>
   FROM <http://isni-sru>
   FROM <http://kbr-belgians>
@@ -38,6 +39,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
     graph <http://kbr-syracuse> { 
       ?manifestation a schema:CreativeWork ;
+                     dc:identifier ?manifestationID ;
                      schema:name ?manifestationTitle .
     }
         
@@ -105,6 +107,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrAuthor a schema:Person ;
+                     dc:identifier ?kbrAuthorID ;
                      schema:nationality ?kbrAuthorNationality . 
         }
 
@@ -131,7 +134,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrTranslator a schema:Person ;
-                     schema:nationality ?kbrTranslatorNationality . 
+                         dc:identifier ?kbrTranslatorID ;
+                         schema:nationality ?kbrTranslatorNationality . 
         }
 
         # within this optional nationality check optionally for an English label in the master data
@@ -166,6 +170,10 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         }
 
         OPTIONAL {
+          graph <http://kbr-linked-authorities> { ?kbrPublisher dc:identifier ?kbrPublisherID . }
+        }
+
+        OPTIONAL {
           graph <http://kbr-syracuse> { ?publisherAssociation up:assertionType ?publisherUncertainty . }
         }
       }
@@ -194,7 +202,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrIllustrator a schema:Person ;
-                     schema:nationality ?kbrIllustratorNationality . 
+                          dc:identifier ?kbrIllustratorID ;
+                          schema:nationality ?kbrIllustratorNationality . 
         }
 
         # within this optional nationality check optionally for an English label in the master data
@@ -230,7 +239,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrScenarist a schema:Person ;
-                     schema:nationality ?kbrScenaristNationality . 
+                        dc:identifier ?kbrScenaristID ;
+                        schema:nationality ?kbrScenaristNationality . 
         }
 
         # within this optional nationality check optionally for an English label in the master data
@@ -246,4 +256,4 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
    FILTER( str(?kbrAuthorNationalityLabel) = 'Belgium' || str(?kbrIllustratorNationalityLabel) = 'Belgium' || str(?kbrScenaristNationalityLabel) = 'Belgium')
 
 }
-GROUP BY ?manifestation
+GROUP BY ?manifestationID
