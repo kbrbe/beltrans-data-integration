@@ -12,6 +12,7 @@ SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
 SCRIPT_QUERY_DATA="../utils/query-data.sh"
 SCRIPT_POSTPROCESS_QUERY_RESULT="post-process-integration-result.py"
+SCRIPT_POSTPROCESS_QUERY_CONT_RESULT="post-process-contributors.py"
 
 KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 
@@ -74,6 +75,7 @@ SUFFIX_DATA_PROFILE_FILE="integrated-data.csv"
 SUFFIX_DATA_PROFILE_CONT_FILE="integrated-data-contributors.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data-processed.csv"
+SUFFIX_DATA_PROFILE_CONT_FILE_PROCESSED="integrated-data-contributors-processed.csv"
 
 #
 # Filenames used within an integration directory 
@@ -255,9 +257,16 @@ function postprocess {
   integratedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
   processedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
 
+  contributorData="$integrationName/$SUFFIX_DATA_PROFILE_CONT_FILE"
+  processedContributors="$integrationName/$SUFFIX_DATA_PROFILE_CONT_FILE_PROCESSED"
+
   source ../data-sources/py-etl-env/bin/activate
 
+  echo "Postprocess integrated data ..."
   postprocessIntegratedData $integratedData $processedData
+
+  echo "Postprocess contributor data ..."
+  postprocessContributorData $contributorData $processedContributors
 }
 
 # -----------------------------------------------------------------------------
@@ -790,6 +799,17 @@ function postprocessIntegratedData {
 
   checkFile $input
   python $SCRIPT_POSTPROCESS_QUERY_RESULT -i "$input" -o "$output"
+
+}
+
+# -----------------------------------------------------------------------------
+function postprocessContributorData {
+
+  local input=$1
+  local output=$2
+
+  checkFile $input
+  python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -i "$input" -o "$output"
 
 }
 

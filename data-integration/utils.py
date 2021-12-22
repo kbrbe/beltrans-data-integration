@@ -7,13 +7,13 @@ def addToMismatchLog(mismatchLog, dateType, roleType, contributorURI, s, value):
 
   >>> log = {}
   >>> addToMismatchLog(log, 'Birth', 'author', '123', 'KBR', '1988')
-  >>> log['Birth']['author']['123']['KBR'] == ['1988']
+  >>> log['Birth']['author']['123']['KBR'] == {'1988'}
   True
 
   A log is added also if there is already a log entry for another source of that contributor
-  >>> log = { 'Birth': {'author': {'123': {'ISNI': ['1989']}}}}
+  >>> log = { 'Birth': {'author': {'123': {'ISNI': {'1989'}}}}}
   >>> addToMismatchLog(log, 'Birth', 'author', '123', 'KBR', '1988')
-  >>> log['Birth']['author']['123']['KBR'] == ['1988'] and log['Birth']['author']['123']['ISNI'] == ['1989']
+  >>> log['Birth']['author']['123']['KBR'] == {'1988'} and log['Birth']['author']['123']['ISNI'] == {'1989'}
   True
   """
 
@@ -169,51 +169,51 @@ def mostCompleteDate(dates):
     return ''
 
 # -----------------------------------------------------------------------------
-def selectDate(row, role, dateType, sources, mismatchLog):
+def selectDate(row, role, dateType, sources, rowIDCol, mismatchLog):
   """This function chooses the most complete date for the given role and row, possible dateTypes are 'Birth' and 'Death'.
 
   Select the most complete date betwen the sources
   >>> row = {'authorBirthDateKBR': '1988-04-25', 'authorBirthDateISNI': '1988'}
-  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], {})
+  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['authorBirthDate'] == '1988-04-25'
   True
 
   >>> row = {'authorBirthDateKBR': '', 'authorBirthDateISNI': '1988'}
-  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], {})
+  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['authorBirthDate'] == '1988'
   True
 
   Keep it empty if none of the sources provide a date
   >>> row = {'authorBirthDateKBR': '', 'authorBirthDateISNI': ''}
-  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], {})
+  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['authorBirthDate'] == ''
   True
 
   It also works for other roles than author
   >>> row = {'translatorBirthDateKBR': '1988-04-25', 'translatorBirthDateISNI': '1988'}
-  >>> selectDate(row, 'translator', 'Birth', ['KBR', 'ISNI'], {})
+  >>> selectDate(row, 'translator', 'Birth', ['KBR', 'ISNI'], 'translatorKBRIdentifier', {})
   >>> row['translatorBirthDate'] == '1988-04-25'
   True
 
   >>> row = {'illustratorBirthDateKBR': '1988-04-25', 'illustratorBirthDateISNI': '1988'}
-  >>> selectDate(row, 'illustrator', 'Birth', ['KBR', 'ISNI'], {})
+  >>> selectDate(row, 'illustrator', 'Birth', ['KBR', 'ISNI'], 'illustratorKBRIdentifier', {})
   >>> row['illustratorBirthDate'] == '1988-04-25'
   True
 
   >>> row = {'scenaristBirthDateKBR': '1988-04-25', 'scenaristBirthDateISNI': '1988'}
-  >>> selectDate(row, 'scenarist', 'Birth', ['KBR', 'ISNI'], {})
+  >>> selectDate(row, 'scenarist', 'Birth', ['KBR', 'ISNI'], 'scenaristKBRIdentifier', {})
   >>> row['scenaristBirthDate'] == '1988-04-25'
   True
 
   Log an error if a mismatch was found and keep both in the output
   >>> row = {'authorKBRIdentifier': '1234', 'authorBirthDateKBR': '1988-04-25', 'authorBirthDateISNI': '1989'}
-  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], {})
+  >>> selectDate(row, 'author', 'Birth', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['authorBirthDate'] == '1988-04-25 or 1989'
   True
 
   The same works also for death dates
   >>> row = {'authorDeathDateKBR': '1988-04-25', 'authorDeathDateISNI': '1988'}
-  >>> selectDate(row, 'author', 'Death', ['KBR', 'ISNI'], {})
+  >>> selectDate(row, 'author', 'Death', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['authorDeathDate'] == '1988-04-25'
   True
   """
@@ -233,7 +233,6 @@ def selectDate(row, role, dateType, sources, mismatchLog):
   # the date should then be e.g. "1972-04 or 1970"
   if 'or' in row[outputColName]:
 
-    rowIDCol = f'{role}KBRIdentifier'
     contributorURI = row[rowIDCol]
     # log the mismatching data and then remove the initial sources
     for s in sources:

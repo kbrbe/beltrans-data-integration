@@ -9,7 +9,7 @@ import json
 
 # -----------------------------------------------------------------------------
 def main():
-  """This script filters the SPARQL query result of the integrated data."""
+  """This script filters the SPARQL query result fetching contributor information of translations."""
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-i', '--input-file', action='store', help='The input file containing CSV data')
@@ -34,24 +34,17 @@ def main():
 
     # In the output we only want a single birth date and a single death date column
     # thus first remove the respective columns from different data sources
-    headersToRemove = ['authorBirthDateKBR', 'authorDeathDateKBR', 'authorBirthDateISNI', 'authorDeathDateISNI',
-                       'translatorBirthDateKBR', 'translatorDeathDateKBR', 'translatorBirthDateISNI', 'translatorDeathDateISNI',
-                       'illustratorBirthDateKBR', 'illustratorDeathDateKBR', 'illustratorBirthDateISNI', 'illustratorDeathDateISNI',
-                       'scenaristBirthDateKBR', 'scenaristDeathDateKBR', 'scenaristBirthDateISNI', 'scenaristDeathDateISNI']
+    headersToRemove = ['contributorBirthDateKBR', 'contributorBirthDateISNI', 'contributorDeathDateKBR', 'contributorDeathDateISNI']
+
     for r in headersToRemove:
       headers.remove(r)
 
     # and then add the single columns we want
-    headers.extend(['authorBirthDate', 'authorDeathDate', 
-                   'translatorBirthDate', 'translatorDeathDate',
-                   'illustratorBirthDate', 'illustratorDeathDate',
-                   'scenaristBirthDate', 'scenaristDeathDate'])
+    headers.extend(['contributorBirthDate', 'contributorDeathDate'])
 
     outputWriter = csv.DictWriter(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, fieldnames=headers)
 
     outputWriter.writeheader()
-
-    belgian = 'Belgium'
 
     # used to parse certain columns based on their name, e.g. authorBirthDateKBR and authorBirthDateISNI
     sources = ['KBR', 'ISNI']
@@ -61,19 +54,10 @@ def main():
     for row in inputReader:
 
       # This is a relevant row, we process it further before writing it
-      utils.selectDate(row, 'author', 'Birth', sources, 'authorKBRIdentifier', mismatchLog)
-      utils.selectDate(row, 'illustrator', 'Birth', sources, 'illustratorKBRIdentifier', mismatchLog)
-      utils.selectDate(row, 'translator', 'Birth', sources, 'translatorKBRIdentifier', mismatchLog)
-      utils.selectDate(row, 'scenarist', 'Birth', sources, 'scenaristKBRIdentifier', mismatchLog)
+      utils.selectDate(row, 'contributor', 'Birth', sources, 'contributorID', mismatchLog)
+      utils.selectDate(row, 'contributor', 'Death', sources, 'contributorID', mismatchLog)
 
-      utils.selectDate(row, 'author', 'Death', sources, 'authorKBRIdentifier', mismatchLog)
-      utils.selectDate(row, 'illustrator', 'Death', sources, 'illustratorKBRIdentifier', mismatchLog)
-      utils.selectDate(row, 'translator', 'Death', sources, 'translatorKBRIdentifier', mismatchLog)
-      utils.selectDate(row, 'scenarist', 'Death', sources, 'scenaristKBRIdentifier', mismatchLog)
-
-      if( row['authorNationality'] == belgian or row['illustratorNationality'] == belgian or row['scenaristNationality'] == belgian):
-        outputWriter.writerow(row)
-
+      outputWriter.writerow(row)
 
   # print statistics
   for dateType in mismatchLog:
