@@ -69,7 +69,9 @@ FORMAT_NT="text/rdf+n3"
 
 DATA_PROFILE_QUERY_FILE="dataprofile.sparql"
 DATA_PROFILE_AGG_QUERY_FILE="dataprofile-aggregated.sparql"
+DATA_PROFILE_CONT_QUERY_FILE="contributors.sparql"
 SUFFIX_DATA_PROFILE_FILE="integrated-data.csv"
+SUFFIX_DATA_PROFILE_CONT_FILE="integrated-data-contributors.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data-processed.csv"
 
@@ -230,12 +232,20 @@ function query {
 
   queryFile="$DATA_PROFILE_QUERY_FILE"
   queryFileAgg="$DATA_PROFILE_AGG_QUERY_FILE"
+  queryFileCont="$DATA_PROFILE_CONT_QUERY_FILE"
 
   outputFile="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
   outputFileAgg="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE"
+  outputFileCont="$integrationName/$SUFFIX_DATA_PROFILE_CONT_FILE"
 
+  echo "Creating the dataprofile CSV file ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFile" "$ENV_SPARQL_ENDPOINT" "$outputFile"
+
+  echo "Creating the dataprofile CSV file with aggregated values ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
+
+  echo "Creating the dataprofile CSV accompanying contributor file ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileCont" "$ENV_SPARQL_ENDPOINT" "$outputFileCont"
 }
 
 # -----------------------------------------------------------------------------
