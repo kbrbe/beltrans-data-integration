@@ -1,0 +1,315 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+
+SELECT 
+  ?datePublished
+  (?numberPublishedManifestationsPerYear AS ?total)
+  (?numberPublishedFromFrenchPerYear AS ?fromFrench)
+  (( ?numberPublishedFromFrenchPerYear * 100 / ?numberPublishedManifestationsPerYear) AS ?fromFrenchPercentage)
+  (?numberPublishedFromDutchPerYear AS ?fromDutch)
+  (( ?numberPublishedFromDutchPerYear * 100 / ?numberPublishedManifestationsPerYear) AS ?fromDutchPercentage)
+FROM <http://kbr-syracuse>
+FROM <http://kbr-linked-authorities>
+WHERE {
+
+OPTIONAL {
+  #
+  # GET TOTAL NUMBER OF TRANSLATIONS
+  #
+  {
+  SELECT
+    ?datePublished 
+    (COUNT(?manifestation) AS ?numberPublishedManifestationsPerYear)
+  WHERE {
+
+    graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?datePublished . }
+
+    # #####################################################################
+    #
+    # retrieve author information necessary for filtering
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation schema:author ?author .} 
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?author a schema:Person ;
+                  schema:nationality ?authorNationality .
+        } 
+
+        graph <http://master-data> { ?authorNationality mads:authoritativeLabel ?authorNationalityLabel . }
+        FILTER (lang(?authorNationalityLabel) = 'en')
+      }
+    }
+
+    # #####################################################################
+    #
+    # retrieve illustrator information necessary for filtering
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> {
+        ?illustratorAssociation a prov:Association ;
+                           prov:agent ?illustrator ;
+                           prov:hadRole btid:role_ill .
+
+        ?illustratorTranslationActivity a prov:Activity ;
+                                        prov:qualifiedAssociation ?illustratorAssociation ;
+                                        prov:generated ?manifestation .
+      } 
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?illustrator a schema:Person ;
+                       schema:nationality ?illustratorNationality .
+        } 
+
+        graph <http://master-data> { ?illustratorNationality mads:authoritativeLabel ?illustratorNationalityLabel . }
+        FILTER (lang(?illustratorNationalityLabel) = 'en')
+      }
+    }
+
+
+    # #####################################################################
+    #
+    # retrieve scenarist information necessary for filtering
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> {
+        ?scenaristAssociation a prov:Association ;
+                           prov:agent ?scenarist ;
+                           prov:hadRole btid:role_ill .
+
+        ?scenaristTranslationActivity a prov:Activity ;
+                                        prov:qualifiedAssociation ?scenaristAssociation ;
+                                        prov:generated ?manifestation .
+      } 
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?scenarist a schema:Person ;
+                       schema:nationality ?scenaristNationality .
+        } 
+
+        graph <http://master-data> { ?scenaristNationality mads:authoritativeLabel ?scenaristNationalityLabel . }
+        FILTER (lang(?scenaristNationalityLabel) = 'en')
+      }
+    }
+
+    FILTER( str(?authorNationalityLabel) = 'Belgium' || str(?illustratorNationalityLabel) = 'Belgium' || str(?scenaristNationalityLabel) = 'Belgium')
+
+  }
+  GROUP BY ?datePublished
+  ORDER BY DESC(?numberPublishedManifestationsPerYear)
+  }
+}
+
+OPTIONAL {
+
+  # ###########################################################################
+  #
+  # GET THE NUMBER OF TRANSLATIONS FROM FRENCH
+  #
+  {
+  SELECT
+    ?datePublished 
+    (COUNT(?manifestation) AS ?numberPublishedFromFrenchPerYear)
+  WHERE {
+
+    graph <http://kbr-syracuse> {
+      ?manifestation schema:datePublished ?datePublished ;
+                     schema:translationOfWork ?source .
+
+      ?source schema:inLanguage lang:fr .
+    }
+
+    # #########################################################################
+    #
+    # retrieve author information necessary for filtering
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation schema:author ?author .} 
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?author a schema:Person ;
+                  schema:nationality ?authorNationality .
+        } 
+
+        graph <http://master-data> { ?authorNationality mads:authoritativeLabel ?authorNationalityLabel . }
+        FILTER (lang(?authorNationalityLabel) = 'en')
+      }
+    }
+
+    # #########################################################################
+    #
+    # retrieve illustrator information necessary for filtering
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> {
+        ?illustratorAssociation a prov:Association ;
+                           prov:agent ?illustrator ;
+                           prov:hadRole btid:role_ill .
+
+        ?illustratorTranslationActivity a prov:Activity ;
+                                        prov:qualifiedAssociation ?illustratorAssociation ;
+                                        prov:generated ?manifestation .
+      } 
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?illustrator a schema:Person ;
+                       schema:nationality ?illustratorNationality .
+        } 
+
+        graph <http://master-data> { ?illustratorNationality mads:authoritativeLabel ?illustratorNationalityLabel . }
+        FILTER (lang(?illustratorNationalityLabel) = 'en')
+      }
+    }
+
+
+    # #########################################################################
+    #
+    # retrieve scenarist information necessary for filtering
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> {
+        ?scenaristAssociation a prov:Association ;
+                           prov:agent ?scenarist ;
+                           prov:hadRole btid:role_ill .
+
+        ?scenaristTranslationActivity a prov:Activity ;
+                                        prov:qualifiedAssociation ?scenaristAssociation ;
+                                        prov:generated ?manifestation .
+      } 
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?scenarist a schema:Person ;
+                       schema:nationality ?scenaristNationality .
+        } 
+
+        graph <http://master-data> { ?scenaristNationality mads:authoritativeLabel ?scenaristNationalityLabel . }
+        FILTER (lang(?scenaristNationalityLabel) = 'en')
+      }
+    }
+
+    FILTER( str(?authorNationalityLabel) = 'Belgium' || str(?illustratorNationalityLabel) = 'Belgium' || str(?scenaristNationalityLabel) = 'Belgium')
+
+  }
+  GROUP BY ?datePublished
+  ORDER BY DESC(?numberPublishedManifestationsPerYear)
+  }
+}
+
+OPTIONAL {
+
+  # ###########################################################################
+  #
+  # GET THE NUMBER OF TRANSLATIONS FROM DUTCH
+  #
+  {
+  SELECT
+    ?datePublished 
+    (COUNT(?manifestation) AS ?numberPublishedFromDutchPerYear)
+  WHERE {
+
+    graph <http://kbr-syracuse> {
+      ?manifestation schema:datePublished ?datePublished ;
+                     schema:translationOfWork ?source .
+
+      ?source schema:inLanguage lang:nl .
+    }
+
+    # #########################################################################
+    #
+    # retrieve author information necessary for filtering
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation schema:author ?author .} 
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?author a schema:Person ;
+                  schema:nationality ?authorNationality .
+        } 
+
+        graph <http://master-data> { ?authorNationality mads:authoritativeLabel ?authorNationalityLabel . }
+        FILTER (lang(?authorNationalityLabel) = 'en')
+      }
+    }
+
+    # #########################################################################
+    #
+    # retrieve illustrator information necessary for filtering
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> {
+        ?illustratorAssociation a prov:Association ;
+                           prov:agent ?illustrator ;
+                           prov:hadRole btid:role_ill .
+
+        ?illustratorTranslationActivity a prov:Activity ;
+                                        prov:qualifiedAssociation ?illustratorAssociation ;
+                                        prov:generated ?manifestation .
+      } 
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?illustrator a schema:Person ;
+                       schema:nationality ?illustratorNationality .
+        } 
+
+        graph <http://master-data> { ?illustratorNationality mads:authoritativeLabel ?illustratorNationalityLabel . }
+        FILTER (lang(?illustratorNationalityLabel) = 'en')
+      }
+    }
+
+
+    # #########################################################################
+    #
+    # retrieve scenarist information necessary for filtering
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> {
+        ?scenaristAssociation a prov:Association ;
+                           prov:agent ?scenarist ;
+                           prov:hadRole btid:role_ill .
+
+        ?scenaristTranslationActivity a prov:Activity ;
+                                        prov:qualifiedAssociation ?scenaristAssociation ;
+                                        prov:generated ?manifestation .
+      } 
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?scenarist a schema:Person ;
+                       schema:nationality ?scenaristNationality .
+        } 
+
+        graph <http://master-data> { ?scenaristNationality mads:authoritativeLabel ?scenaristNationalityLabel . }
+        FILTER (lang(?scenaristNationalityLabel) = 'en')
+      }
+    }
+
+    FILTER( str(?authorNationalityLabel) = 'Belgium' || str(?illustratorNationalityLabel) = 'Belgium' || str(?scenaristNationalityLabel) = 'Belgium')
+
+  }
+  GROUP BY ?datePublished
+  ORDER BY DESC(?numberPublishedManifestationsPerYear)
+  }
+}
+
+
+}
+

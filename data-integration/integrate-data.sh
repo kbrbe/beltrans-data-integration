@@ -71,9 +71,13 @@ FORMAT_NT="text/rdf+n3"
 DATA_PROFILE_QUERY_FILE="dataprofile.sparql"
 DATA_PROFILE_AGG_QUERY_FILE="dataprofile-aggregated.sparql"
 DATA_PROFILE_CONT_QUERY_FILE="contributors.sparql"
+DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE="translations-per-year.sparql"
+
 SUFFIX_DATA_PROFILE_FILE="integrated-data.csv"
 SUFFIX_DATA_PROFILE_CONT_FILE="integrated-data-contributors.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE="integrated-data-aggregated.csv"
+SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE="translations-per-year.csv"
+
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data-processed.csv"
 SUFFIX_DATA_PROFILE_CONT_FILE_PROCESSED="integrated-data-contributors-processed.csv"
 
@@ -235,10 +239,12 @@ function query {
   queryFile="$DATA_PROFILE_QUERY_FILE"
   queryFileAgg="$DATA_PROFILE_AGG_QUERY_FILE"
   queryFileCont="$DATA_PROFILE_CONT_QUERY_FILE"
+  queryFilePubsPerYear="$DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE"
 
   outputFile="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
   outputFileAgg="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE"
   outputFileCont="$integrationName/$SUFFIX_DATA_PROFILE_CONT_FILE"
+  outputFilePubsPerYear="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
 
   echo "Creating the dataprofile CSV file ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFile" "$ENV_SPARQL_ENDPOINT" "$outputFile"
@@ -248,6 +254,9 @@ function query {
 
   echo "Creating the dataprofile CSV accompanying contributor file ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileCont" "$ENV_SPARQL_ENDPOINT" "$outputFileCont"
+
+  echo "Creating statistics about publications per language and year ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFilePubsPerYear" "$ENV_SPARQL_ENDPOINT" "$outputFilePubsPerYear"
 }
 
 # -----------------------------------------------------------------------------
