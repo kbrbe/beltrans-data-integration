@@ -261,6 +261,7 @@ mappings:
       - [rdfs:label, "Translation context of $(KBRID)", en~lang]
       - [a, prov:Activity]
       - [prov:generated, btid:manifestation_$(KBRID)~iri]
+      - [prov:used, btid:manifestation_source_$(KBRID)~iri]
 
 
   # ---------------------------------------------------------------------------
