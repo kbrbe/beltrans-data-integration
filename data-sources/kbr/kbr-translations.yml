@@ -16,6 +16,7 @@ prefixes:
   btabout: "http://kbr.be/about/data/"
   ex: "http://example.org/ns#"
   countries: "http://id.loc.gov/vocabulary/countries/"
+  lang: "http://id.loc.gov/vocabulary/languages/"
   schema: "http://schema.org/"
   up: "http://users.ugent.be/~tdenies/up/"
 
@@ -43,6 +44,7 @@ mappings:
     po:
       - [a, schema:CreativeWork]
       - [dc:identifier, $(KBRID)]
+      - [schema:translationOfWork, btid:manifestation_source_$(KBRID)~iri]
       - p: rdf:type
         o: btm:MultiLingualManifestation~iri
         condition:
@@ -361,4 +363,34 @@ mappings:
     po:
       - [prov:qualifiedAssociation, btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)~iri]
 
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsSourcesFR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates creative works representing the French source text of a translation, currently on the LRM level of manifestations."
+    sources:
+      - access: *sourceWorksFR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:manifestation_source_$(KBRID)
+    po:
+      - [a, schema:CreativeWork]
+      - [schema:inLanguage, lang:fr~iri]
+      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsSourcesNL:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates creative works representing the Dutch source text of a translation, currently on the LRM level of manifestations."
+    sources:
+      - access: *sourceWorksNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_source_$(KBRID)
+    po:
+      - [a, schema:CreativeWork]
+      - [schema:inLanguage, lang:nl~iri]
+      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
 
