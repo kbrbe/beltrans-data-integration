@@ -37,6 +37,7 @@ mappings:
     s: btid:authority_$(IDNO)
     po:
       - [a, schema:Person]
+      - [dc:identifier, $(IDNO)]
       - [rdfs:label, $(REFA)]
       - [schema:nationality, countries:be~iri] 
       - [schema:givenName, $(given_name)]

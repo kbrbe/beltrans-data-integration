@@ -1,6 +1,7 @@
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
 prefix schema: <http://schema.org/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX btm: <http://kbr.be/ns/beltrans/model#>
@@ -11,7 +12,7 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
   SELECT 
-    (?manifestation AS ?targetTextKBRIdentifier)
+    (?manifestationID AS ?targetTextKBRIdentifier)
     (?kbrTargetManifestationBBLabel AS ?targetTextThesaurusBB)
     (?translationType AS ?translationType)
     (?manifestationTitle AS ?targetTextTitle)
@@ -23,9 +24,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?kbrResponsibilityStatement AS ?targetTextResponsibilityStatement)
     (?kbrTargetLangLabel AS ?targetTextLanguage)
     (?isbn AS ?targetTextISBN) 
-    (?kbrAuthor AS ?authorKBRIdentifier)
+    (?kbrAuthorID AS ?authorKBRIdentifier)
     (?kbrAuthorISNI AS ?authorISNI)
-    (?kbrAuthorNationality AS ?authorNationalityURI)
     (?kbrAuthorNationalityLabel AS ?authorNationality)
     (?isniSRUAuthorGenderLabel AS ?authorGenderISNI)
     (?kbrAuthorFamilyName AS ?authorFamilyName)
@@ -34,7 +34,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?isniRDFAuthorBirthDate AS ?authorBirthDateISNI)
     (?kbrAuthorDeathDate AS ?authorDeathDateKBR)
     (?isniRDFAuthorDeathDate AS ?authorDeathDateISNI)
-    (?kbrTranslator AS ?translatorKBRIdentifier)
+    (?kbrTranslatorID AS ?translatorKBRIdentifier)
     (?kbrTranslatorFamilyName AS ?translatorFamilyName)
     (?kbrTranslatorGivenName AS ?translatorGivenName)
     (?kbrTranslatorISNI AS ?translatorISNI)
@@ -45,13 +45,13 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?kbrTranslatorDeathDate AS ?translatorDeathDateKBR)
     (?isniRDFTranslatorDeathDate AS ?translatorDeathDateISNI)
     (IF(bound(?publisherUncertainty), "uncertain", "certain") AS ?targetTextPublisherCertainty)
-    (?kbrPublisher AS ?targetPublisherKBRIdentifier)
+    (?kbrPublisherID AS ?targetPublisherKBRIdentifier)
     (?kbrPublisherISNI AS ?targetPublisherISNI)
     (?kbrPublisherName AS ?targetPublisherName)
     (?kbrPublisherLocation AS ?targetPublisherLocation)
     (?kbrPublisherRegion AS ?targetPublisherRegion)
     (?kbrPublisherCountryLabel AS ?targetPublisherCountry)
-    (?kbrIllustrator AS ?illustratorKBRIdentifier)
+    (?kbrIllustratorID AS ?illustratorKBRIdentifier)
     (?kbrIllustratorISNI AS ?illustratorISNI)
     (?kbrIllustratorNationalityLabel AS ?illustratorNationality)
     (?isniSRUIllustratorGenderLabel AS ?illustratorGenderISNI)
@@ -61,7 +61,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?isniRDFIllustratorBirthDate AS ?illustratorBirthDateISNI)
     (?kbrIllustratorDeathDate AS ?illustratorDeathDateKBR)
     (?isniRDFIllustratorDeathDate AS ?illustratorDeathDateISNI)
-    (?kbrScenarist AS ?scenaristKBRIdentifier)
+    (?kbrScenaristID AS ?scenaristKBRIdentifier)
     (?kbrScenaristFamilyName AS ?scenaristFamilyName)
     (?kbrScenraistGivenName AS ?scenaristGivenName)
     (?kbrScenaristISNI AS ?scenaristISNI)
@@ -81,6 +81,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
     graph <http://kbr-syracuse> { 
       ?manifestation a schema:CreativeWork ;
+                     dc:identifier ?manifestationID ;
                      schema:name ?manifestationTitle .
     }
         
@@ -148,6 +149,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrAuthor a schema:Person ;
+                     dc:identifier ?kbrAuthorID ;
                      schema:nationality ?kbrAuthorNationality . 
         }
 
@@ -226,7 +228,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrTranslator a schema:Person ;
-                     schema:nationality ?kbrTranslatorNationality . 
+                         dc:identifier ?kbrTranslatorID ;
+                         schema:nationality ?kbrTranslatorNationality . 
         }
 
         # within this optional nationality check optionally for an English label in the master data
@@ -320,7 +323,12 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       }
 
       # within this optional publisher, check optional attributes from the linked authorities dataset
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisher rdfs:label ?kbrPublisherName . } }
+      OPTIONAL { 
+        graph <http://kbr-linked-authorities> {
+          ?kbrPublisher rdfs:label ?kbrPublisherName ;
+                        dc:identifier ?kbrPublisherID .
+        } 
+      }
 
       OPTIONAL { 
         graph <http://kbr-linked-authorities> { ?kbrPublisher schema:address ?kbrPublisherAddressEntity . }
@@ -385,7 +393,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrIllustrator a schema:Person ;
-                     schema:nationality ?kbrIllustratorNationality . 
+                          dc:identifier ?kbrIllustratorID ;
+                          schema:nationality ?kbrIllustratorNationality . 
         }
 
         # within this optional nationality check optionally for an English label in the master data
@@ -474,7 +483,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrScenarist a schema:Person ;
-                     schema:nationality ?kbrScenaristNationality . 
+                        dc:identifier ?kbrScenaristID ;
+                        schema:nationality ?kbrScenaristNationality . 
         }
 
         # within this optional nationality check optionally for an English label in the master data

@@ -42,6 +42,7 @@ mappings:
     s: btid:manifestation_$(KBRID)
     po:
       - [a, schema:CreativeWork]
+      - [dc:identifier, $(KBRID)]
       - p: rdf:type
         o: btm:MultiLingualManifestation~iri
         condition:

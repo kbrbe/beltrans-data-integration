@@ -34,6 +34,9 @@ INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
 INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 
+# KBR - Belgians
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/2021-11-29-kbr-belgians.csv"
+
 # MASTER DATA
 
 INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
@@ -65,7 +68,9 @@ FORMAT_TURTLE="text/turtle"
 FORMAT_NT="text/rdf+n3"
 
 DATA_PROFILE_QUERY_FILE="dataprofile.sparql"
+DATA_PROFILE_AGG_QUERY_FILE="dataprofile-aggregated.sparql"
 SUFFIX_DATA_PROFILE_FILE="integrated-data.csv"
+SUFFIX_DATA_PROFILE_AGG_FILE="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data-processed.csv"
 
 #
@@ -104,6 +109,11 @@ SUFFIX_KBR_LA_ORGS_NL_NORM="nl-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NORM="fr-translations-linked-authorities-persons-norm.csv"
 SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 
+# DATA SOURCE - KBR BELGIANS
+#
+SUFFIX_KBR_BELGIANS_CLEANED="belgians-cleaned.csv"
+SUFFIX_KBR_BELGIANS_NORM="belgians-norm.csv"
+
 # DATA SOURCE - MASTER DATA
 #
 SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
@@ -127,6 +137,11 @@ SUFFIX_KBR_TRL_PUB_COUNTRY_LD="translations-publication-countries.ttl"
 # LINKED DATA - KBR LINKED AUTHORITIES
 #
 SUFFIX_KBR_LA_LD="linked-authorities.ttl"
+
+#
+# LINKED DATA - KBR BELGIANS
+#
+SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
 
 #
 # LINKED DATA - MASTER DATA
@@ -214,9 +229,13 @@ function query {
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   queryFile="$DATA_PROFILE_QUERY_FILE"
+  queryFileAgg="$DATA_PROFILE_AGG_QUERY_FILE"
+
   outputFile="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
+  outputFileAgg="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE"
 
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFile" "$ENV_SPARQL_ENDPOINT" "$outputFile"
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
 }
 
 # -----------------------------------------------------------------------------
@@ -258,6 +277,8 @@ function extractKBR {
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
   extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR"
 
+  echo "EXTRACTION - Extract and clean KBR Belgians"
+  extractKBRBelgians "$integrationName" "$INPUT_KBR_BELGIANS"
 }
 
 # -----------------------------------------------------------------------------
@@ -296,6 +317,9 @@ function transformKBR {
 
   echo "TRANSFORMATION - Map KBR linked authorities data to RDF"
   mapKBRLinkedAuthorities $integrationName
+
+  echo "TRANSFORMATION - Map KBR Belgians data to RDF"
+  mapKBRBelgians $integrationName
 }
 
 # -----------------------------------------------------------------------------
@@ -427,6 +451,29 @@ function extractKBRLinkedAuthorities {
 }
 
 # -----------------------------------------------------------------------------
+function extractKBRBelgians {
+
+  local integrationName=$1
+  local kbrBelgians=$2
+
+  # document which input was used
+  printf "Used input\n* $kbrBelgians" >> "$integrationName/kbr/README.md"
+
+  #
+  # Define file names based on current integration directory and file name patterns
+  #
+  kbrBelgiansNorm="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NORM"
+  kbrBelgiansCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CLEANED"
+
+  source ../data-sources/py-etl-env/bin/activate
+
+  echo "Clean Belgians ..."
+  # currently this input has already normalized headers
+  #normalizeCSVHeaders "$kbrBelgians" "$kbrBelgiansNorm" "$KBR_CSV_HEADER_CONVERSION"
+  cleanAgents "$kbrBelgians" "$kbrBelgiansCleaned"
+}
+
+# -----------------------------------------------------------------------------
 function mapKBRTranslationsAndContributions {
 
   local integrationName=$1
@@ -507,6 +554,23 @@ function mapKBRLinkedAuthorities {
 }
 
 # -----------------------------------------------------------------------------
+function mapKBRBelgians {
+
+  local integrationName=$1
+
+  kbrBelgiansTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
+
+  # map the authorities
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_KBR_BELGIANS="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CLEANED"
+
+  # 2) execute the mapping
+  echo "Map KBR Belgians ..."
+  . map.sh ../data-sources/kbr/kbr-belgians.yml $kbrBelgiansTurtle
+}
+
+# -----------------------------------------------------------------------------
 function mapMasterData {
 
   local integrationName=$1
@@ -542,9 +606,16 @@ function loadKBR {
   local kbrLinkedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_LA_LD"
   local kbrTranslationsBB="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_BB_LD"
   local kbrTranslationsPubCountries="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
+  local kbrBelgians="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
 
   echo "Load KBR translations and contributions ..."
   uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsAndContributions" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
+
+  echo "Load KBR BB assignments ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsBB" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
+
+  echo "Load KBR publication countries ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsPubCountries" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
 
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_LA>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_LA"
@@ -556,11 +627,12 @@ function loadKBR {
   echo "Load KBR newly identified authorities ..."
   uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrIdentifiedAuthorities" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_LA"
 
-  echo "Load KBR BB assignments ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsBB" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_BELGIANS>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_BELGIANS"
 
-  echo "Load KBR publication countries ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsPubCountries" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
+  echo "Load KBR Belgians ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrBelgians" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_BELGIANS"
+
 }
 
 # -----------------------------------------------------------------------------
