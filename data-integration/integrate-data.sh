@@ -74,6 +74,7 @@ DATA_PROFILE_CONT_QUERY_FILE="contributors.sparql"
 DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE="translations-per-year.sparql"
 DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE="translations-per-location.sparql"
 DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE="translations-per-country.sparql"
+DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 
 SUFFIX_DATA_PROFILE_FILE="integrated-data.csv"
 SUFFIX_DATA_PROFILE_CONT_FILE="integrated-data-contributors.csv"
@@ -81,6 +82,7 @@ SUFFIX_DATA_PROFILE_AGG_FILE="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE="translations-per-year.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE="translations-per-location.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE="translations-per-country.csv"
+SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data-processed.csv"
 SUFFIX_DATA_PROFILE_CONT_FILE_PROCESSED="integrated-data-contributors-processed.csv"
@@ -246,6 +248,7 @@ function query {
   queryFilePubsPerYear="$DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE"
   queryFilePubsPerCountry="$DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE"
   queryFilePubsPerLoc="$DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE"
+  queryFilePubsPerPbl="$DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE"
 
   outputFile="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
   outputFileAgg="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE"
@@ -253,6 +256,7 @@ function query {
   outputFilePubsPerYear="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
   outputFilePubsPerCountry="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE"
   outputFilePubsPerLoc="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE"
+  outputFilePubsPerPbl="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE"
 
   echo "Creating the dataprofile CSV file ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFile" "$ENV_SPARQL_ENDPOINT" "$outputFile"
@@ -271,6 +275,9 @@ function query {
 
   echo "Creating statistics about publications per language and location ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFilePubsPerLoc" "$ENV_SPARQL_ENDPOINT" "$outputFilePubsPerLoc"
+
+  echo "Creating statistics about publications per language and publisher ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFilePubsPerPbl" "$ENV_SPARQL_ENDPOINT" "$outputFilePubsPerPbl"
 }
 
 # -----------------------------------------------------------------------------
@@ -392,7 +399,7 @@ function extractKBRTranslationsAndContributions {
 
 
   # document which input was used
-  printf "Used input\n* $kbrDutchTranslations\n* $kbrFrenchTranslations" >> "$integrationName/kbr/README.md"
+  printf "\nUsed input (KBR translations and contributors)\n* $kbrDutchTranslations\n* $kbrFrenchTranslations" >> "$integrationName/kbr/README.md"
 
   #
   # Define file names based on current integration directory and file name patterns
@@ -452,7 +459,7 @@ function extractKBRLinkedAuthorities {
   local kbrFROrgs=$5
 
   # document which input was used
-  printf "Used input\n* $kbrNLPersons\n* $kbrNLOrgs\n* $kbrFRPersons\n*$kbrFROrgs" >> "$integrationName/kbr/README.md"
+  printf "\nUsed input (KBR linked authorities) \n* $kbrNLPersons\n* $kbrNLOrgs\n* $kbrFRPersons\n* $kbrFROrgs" >> "$integrationName/kbr/README.md"
 
   #
   # Define file names based on current integration directory and file name patterns
@@ -499,7 +506,7 @@ function extractKBRBelgians {
   local kbrBelgians=$2
 
   # document which input was used
-  printf "Used input\n* $kbrBelgians" >> "$integrationName/kbr/README.md"
+  printf "\nUsed input (KBR Belgians)\n* $kbrBelgians" >> "$integrationName/kbr/README.md"
 
   #
   # Define file names based on current integration directory and file name patterns
