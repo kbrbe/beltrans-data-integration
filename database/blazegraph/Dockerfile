@@ -1,5 +1,5 @@
 FROM lyrasis/blazegraph:2.1.5
-ARG BLAZEGRAPH_GID=888
+ARG BLAZEGRAPH_GID=1001
 EXPOSE 8080
 VOLUME /data
 
@@ -9,8 +9,8 @@ ENV BLAZEGRAPH_NAME=bigdata \
     BLAZEGRAPH_VERSION=CANDIDATE_2_1_5 \
     JAVA_OPTS=$JAVA_OPTS \
     JETTY_WEBAPPS=/var/lib/jetty/webapps \
-    BLAZEGRAPH_UID=1000 \
-    BLAZEGRAPH_GID=1000
+    BLAZEGRAPH_UID=1001 \
+    BLAZEGRAPH_GID=1001
 # Create blazegraph user
 ADD RWStore.properties /RWStore.properties 
 RUN addgroup -S -g $BLAZEGRAPH_GID blazegraph
