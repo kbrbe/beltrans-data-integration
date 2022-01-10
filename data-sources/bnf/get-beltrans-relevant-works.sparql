@@ -1,0 +1,61 @@
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX bnfroles: <http://data.bnf.fr/vocabulary/roles/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX rdarelationships: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX frbr-rda: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX country: <http://id.loc.gov/vocabulary/countries/>
+
+SELECT *
+WHERE {
+
+  ?manifestation a frbr-rda:Manifestation ;
+  rdarelationships:expressionManifested ?expression .
+  
+  #
+  # The publication year needs to be between 1970 and 2020 (there also must be a publication date)
+  #
+  ?manifestation rdagroup1elements:dateOfPublicationManifestation/rdfs:label ?pubDateLabel . 
+  FILTER ( ?pubDateLabel > 1969 && ?pubDateLabel < 2021 )
+  
+  #
+  # The author needs to be Belgian
+  # For Belgium the Library of Congress vocab is used (as example, for Germans prior 1945 a BnF vocabulary is used)
+  #
+  OPTIONAL {
+    ?expression marcrel:aut ?authorMARC .
+    ?authorMARC rdagroup2elements:countryAssociatedWithThePerson ?authorCountry .
+  }
+  
+  
+  OPTIONAL { ?expression dcterms:language ?lang . } 
+  OPTIONAL { ?expression dcterms:type ?type . } 
+  
+  
+  #OPTIONAL { ?expression dcterms:contributor ?contributor . } 
+  
+  OPTIONAL { ?expression bnfroles:r370 ?orginator . } 
+  
+  OPTIONAL { ?expression bnfroles:r4020 ?authorBnf . } 
+  
+  OPTIONAl { 
+    ?expression marcrel:ill ?illustratorMARC .
+    ?illustratorMARC rdagroup2elements:countryAssociatedWithThePerson ?illustratorCountry .
+  } 
+  
+  OPTIONAL { ?expression marcrel:pbl ?publisherMARC . } 
+  OPTIONAL { ?expression bnfroles:r3100 ?publisherBnf . } 
+  
+  OPTIONAL { 
+    ?expression marcrel:sce ?scenaristMARC . 
+    ?scenaristMARC rdagroup2elements:countryAssociatedWithThePerson ?scenaristCountry .
+  } 
+  
+  OPTIONAL { ?expression bnfroles:sce ?scenaristBnf . } 
+  
+  FILTER (?authorCountry = country:be || ?illustratorCountry = country:be || ?scenaristCountry = country:be)
+}
