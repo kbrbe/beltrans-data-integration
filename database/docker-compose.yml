@@ -9,7 +9,7 @@ services:
   blazegraph:
     build: ./blazegraph
     environment:
-      - JAVA_OPTS=-Xmx2g
+      - JAVA_OPTS=-Xmx3g
     volumes:
       - "./data/blazegraph:/data"
 

@@ -1,0 +1,259 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix schema: <http://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+
+  SELECT DISTINCT
+    (?manifestationID AS ?targetTextKBRIdentifier)
+    (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetTextThesaurusBB)
+    (group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
+    (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
+    (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetTextEdition)
+    (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetTextBindingType)
+    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
+    (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetTextYearOfPublication)
+    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetTextPlaceOfPublication)
+    (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetTextResponsibilityStatement)
+    (group_concat(distinct ?kbrTargetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
+    (group_concat(distinct ?isbn;SEPARATOR=';') AS ?targetTextISBN) 
+    (group_concat(distinct ?kbrAuthorID;SEPARATOR=';') AS ?authorKBRIdentifier)
+    (group_concat(distinct ?kbrTranslatorID;SEPARATOR=';') AS ?translatorKBRIdentifier)
+    (group_concat(distinct ?kbrPublisherID;SEPARATOR=';') AS ?targetPublisherKBRIdentifier)
+    (group_concat(distinct ?kbrIllustratorID;SEPARATOR=';') AS ?illustratorKBRIdentifier)
+    (group_concat(distinct ?kbrScenaristID;SEPARATOR=';') AS ?scenaristKBRIdentifier)
+  FROM <http://kbr-syracuse>
+  FROM <http://isni-sru>
+  FROM <http://kbr-belgians>
+  FROM <http://isni-rdf>
+  FROM <http://master-data>
+  FROM <http://kbr-linked-authorities>
+  WHERE {
+
+    graph <http://kbr-syracuse> { 
+      ?manifestation a schema:CreativeWork ;
+                     dc:identifier ?manifestationID ;
+                     schema:name ?manifestationTitle .
+    }
+        
+    # determine if this manifestation is a multilingual work
+    BIND(exists{ graph <http://kbr-syracuse> { ?manifestation a btm:MultiLingualManifestation . } } AS ?classExists)
+    BIND(IF(?classExists, "multilingual", "translation") AS ?translationType)
+
+    # optional attributes of the translation itself
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:isbn ?isbn . }  }
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?kbrDatePublished . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
+
+
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:about ?kbrTargetManifestationBB . }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetManifestationBB skos:prefLabel ?kbrTargetManifestationBBLabel . }
+        FILTER(lang(?kbrTargetManifestationBBLabel) = 'en')
+      }
+    }
+
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation schema:bookFormat ?kbrTargetManifestationBindingType . }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetManifestationBindingType rdfs:label ?kbrTargetManifestationBindingTypeLabel .}
+        FILTER(lang(?kbrTargetManifestationBindingTypeLabel) = 'en')
+      }
+    }
+
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrCountryOfOrigin mads:authoritativeLabel ?kbrCountryOfOriginLabel . } 
+        FILTER (lang(?kbrCountryOfOriginLabel) = 'en')
+      }
+    }
+
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:inLanguage ?kbrTargetLang . } 
+
+      # within the optional language check optionally for an English label of it (it should exist though)
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetLang mads:authoritativeLabel ?kbrTargetLangLabel . }
+        FILTER (lang(?kbrTargetLangLabel) = 'en')
+      }
+    } 
+
+
+    # ---------------------------------------------------------------------------
+    #
+    # (1) AUTHOR
+    #
+    # if there is an author we optionally check this data source and other data sources for other optional attributes of the author
+    #
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:author ?kbrAuthor . } 
+
+      # within this optional author check optionally for Belgians from KBR (it could be the author from kbr-syracuse is not in kbr-belgians
+      OPTIONAL {
+        graph <http://kbr-belgians> { 
+          # There is always a nationality for this dataset, thus not optional
+          ?kbrAuthor a schema:Person ;
+                     dc:identifier ?kbrAuthorID ;
+                     schema:nationality ?kbrAuthorNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrAuthorNationality mads:authoritativeLabel ?kbrAuthorNationalityLabel . }
+          FILTER (lang(?kbrAuthorNationalityLabel) = 'en')
+        }
+      }
+    }
+
+    # ---------------------------------------------------------------------------
+    #
+    # (2) TRANSLATOR
+    #
+    # if there is a translator we optionally check this data source and other data sources for other optional attributes of the translator
+    #
+    OPTIONAL { 
+
+      graph <http://kbr-syracuse> { ?manifestation schema:translator ?kbrTranslator . } 
+
+      # within this optional translator check optionally for Belgians from KBR (it could be the translator from kbr-syracuse is not in kbr-belgians
+      OPTIONAL {
+        graph <http://kbr-belgians> { 
+          # There is always a nationality for this dataset, thus not optional
+          ?kbrTranslator a schema:Person ;
+                         dc:identifier ?kbrTranslatorID ;
+                         schema:nationality ?kbrTranslatorNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrTranslatorNationality mads:authoritativeLabel ?kbrTranslatorNationalityLabel . }
+          FILTER (lang(?kbrTranslatorNationalityLabel) = 'en')
+        }
+      }
+    }
+
+
+    # ---------------------------------------------------------------------------
+    #
+    # (3) PUBLISHER
+    #
+    # if there is a publisher we optionally check this data source and other data sources for other optional attributes of the publisher
+    #
+    OPTIONAL { 
+
+      graph <http://kbr-syracuse> { ?manifestation schema:publisher ?kbrPublisher . } 
+
+      OPTIONAL {
+        graph <http://kbr-syracuse> { 
+
+        ?publisherAssociation a prov:Association ;
+                                prov:agent ?kbrPublisher ;
+                                prov:hadRole btid:role_pbl .
+
+        ?publisherTranslationActivity a prov:Activity ;
+                  prov:qualifiedAssociation ?publisherAssociation ;
+                  prov:generated ?manifestation .
+        }
+
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> { ?kbrPublisher dc:identifier ?kbrPublisherID . }
+        }
+
+        OPTIONAL {
+          graph <http://kbr-syracuse> { ?publisherAssociation up:assertionType ?publisherUncertainty . }
+        }
+      }
+    }
+
+    # ---------------------------------------------------------------------------
+    #
+    # (4) ILLUSTRATOR
+    #
+    # if there is a illustrator we optionally check this data source and other data sources for other optional attributes of the illustrator
+    #
+    OPTIONAL { 
+
+      graph <http://kbr-syracuse> { 
+        ?illustratorAssociation a prov:Association ;
+                                prov:agent ?kbrIllustrator ;
+                                prov:hadRole btid:role_ill .
+
+        ?activity a prov:Activity ;
+                  prov:qualifiedAssociation ?illustratorAssociation ;
+                  prov:generated ?manifestation .
+      } 
+
+      # within this optional illustrator check optionally for Belgians from KBR (it could be the illustrator from kbr-syracuse is not in kbr-belgians
+      OPTIONAL {
+        graph <http://kbr-belgians> { 
+          # There is always a nationality for this dataset, thus not optional
+          ?kbrIllustrator a schema:Person ;
+                          dc:identifier ?kbrIllustratorID ;
+                          schema:nationality ?kbrIllustratorNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrIllustratorNationality mads:authoritativeLabel ?kbrIllustratorNationalityLabel . }
+          FILTER (lang(?kbrIllustratorNationalityLabel) = 'en')
+        }
+      }
+
+
+    }
+
+    # ---------------------------------------------------------------------------
+    #
+    # (5) SCENARIST
+    #
+    # if there is a scenarist we optionally check this data source and other data sources for other optional attributes of the scenarist
+    #
+    OPTIONAL { 
+
+      graph <http://kbr-syracuse> { 
+        ?scenaristAssociation a prov:Association ;
+                                prov:agent ?kbrScenarist ;
+                                prov:hadRole btid:role_sce .
+
+        ?activity a prov:Activity ;
+                  prov:qualifiedAssociation ?scenaristAssociation ;
+                  prov:generated ?manifestation .
+      } 
+
+      # within this optional scenarist check optionally for Belgians from KBR (it could be the scenarist from kbr-syracuse is not in kbr-belgians
+      OPTIONAL {
+        graph <http://kbr-belgians> { 
+          # There is always a nationality for this dataset, thus not optional
+          ?kbrScenarist a schema:Person ;
+                        dc:identifier ?kbrScenaristID ;
+                        schema:nationality ?kbrScenaristNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrScenaristNationality mads:authoritativeLabel ?kbrScenaristNationalityLabel . }
+          FILTER (lang(?kbrScenaristNationalityLabel) = 'en')
+        }
+      }
+
+
+    }
+
+   FILTER( str(?kbrAuthorNationalityLabel) = 'Belgium' || str(?kbrIllustratorNationalityLabel) = 'Belgium' || str(?kbrScenaristNationalityLabel) = 'Belgium')
+
+}
+GROUP BY ?manifestationID

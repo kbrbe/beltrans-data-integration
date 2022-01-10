@@ -5,67 +5,10 @@
 from optparse import OptionParser
 import pandas as pd
 import math
+import utils
+import csv
 from datetime import datetime
 
-
-# -----------------------------------------------------------------------------
-def getNormalizedDate(row, sourceColumn):
-  """This function takes a data frame containing a date in 'sourceColumn', normalizes the date value and returns it."""
-
-  value = row[sourceColumn]
-
-  if( isinstance(value, str) ):
-
-    # Ignore rows in which dashes are used to indicate 'empty'
-    if(str.startswith(value, '--')):
-      pass
-    else:
-
-      # Try to parse the date either as '2021-08-11' or '20210811'
-      try:
-        return datetime.strptime(value, '%Y-%m-%d').date()
-      except:
-
-        try:
-          return datetime.strptime(value, '%Y%m%d').date()
-
-        except ValueError:
-          if( '..' in value):
-            print("Incomplete date (" + sourceColumn + ") for '" + row['AFAE'] + "': '" + value + "'")
-          elif( str.endswith(value, '--')):
-            print("Incomplete date (" + sourceColumn + ") for '" + row['AFAE'] + "': '" + value + "'")
-          else:
-            print("Unknown format (" + sourceColumn + ") for '" + row['AFAE'] + "': '" + value + "'")
-  else:
-    pass
-
-
-# -----------------------------------------------------------------------------
-def extractIdentifier(row, col, pattern):
-  """Extracts the digits of an identifier in column 'col' if it starts with 'pattern'."""
-
-  value = row[col]
-  identifier = ''
-
-  if( isinstance(value, str) ):
-
-    if(str.startswith(value, pattern) and not str.endswith(value, '-') and not '?' in value):
-      # remove the prefix (e.g. VIAF or ISNI) and replace spaces (e.g. '0000 0000 1234')
-      tmp = value.replace(pattern, '')
-      #identifier = value.replace(pattern, '').replace(' ', '')
-      identifier = tmp.replace(' ', '')
-
-      if(pattern == 'ISNI' and len(identifier) > 16):
-        print("Several ISNI numbers (?) for '" + row['AFAE'] + ": '" + identifier + "'")
-        identifier = identifier[0:16]
-  return str(identifier)
-
-
-# -----------------------------------------------------------------------------
-def getNonEmptyRowPercentage(df, column):
-  """This function counts the number of non empty cells of df[column] and returns the percentage based on the total number of rows."""
-  notEmpty = df[column].notnull().sum()
-  return (notEmpty*100)/len(df.index)
 
 
 # -----------------------------------------------------------------------------
@@ -85,29 +28,35 @@ def main():
     parser.print_help()
     exit(1)
 
-  inputCSV = pd.read_csv(options.input_file, sep=options.delimiter, encoding="utf-8-sig");
+  with open(options.input_file, 'r', encoding="utf-8") as inFile, \
+       open(options.output_file, 'w', encoding="utf-8") as outFile:
 
-  #
-  # create new given name and family name columns based on a split on the full name column
-  #
-  inputCSV['family_name'] = inputCSV['AFAE'].str.split(',').apply(lambda x: [ e.strip() for e in x]).str[0]
-  inputCSV['given_name'] = inputCSV['AFAE'].str.split(',').apply(lambda x: [ e.strip() for e in x]).str[1]
+    inputReader = csv.DictReader(inFile, delimiter=options.delimiter)
+    headers = inputReader.fieldnames
 
-  #
-  # extract VIAF/ISNI identifiers
-  #
-  inputCSV['isni_id'] = inputCSV.apply(lambda row: extractIdentifier(row, col='ISNI', pattern='ISNI'), axis=1)
-  inputCSV['viaf_id'] = inputCSV.apply(lambda row: extractIdentifier(row, col='ISNI', pattern='VIAF'), axis=1)
+    # while cleaning we will add the following additional columns to the output
+    headers.extend(['family_name', 'given_name', 'isni_id', 'viaf_id', 'birth_date', 'death_date'])
+    outputWriter = csv.DictWriter(outFile, fieldnames=headers, delimiter=options.delimiter)
 
-  #
-  # clean birth/death date column
-  #
-  inputCSV['birth_date'] = inputCSV.apply(lambda row: getNormalizedDate(row, 'F046'), axis=1)
-  inputCSV['death_date'] = inputCSV.apply(lambda row: getNormalizedDate(row, 'G046'), axis=1)
+    outputWriter.writeheader()
+    for row in inputReader:
+      (familyName, givenName) = utils.extractNameComponents(row['AFAE'])
+      row['family_name'] = familyName
+      row['given_name'] = givenName
 
-  print("parsed birth dates (F046): " + str( getNonEmptyRowPercentage(inputCSV, 'birth_date') ) + "%")
-  print("parsed death dates (G046): " + str( getNonEmptyRowPercentage(inputCSV, 'death_date') ) + "%")
+      row['isni_id'] = utils.extractIdentifier(row['AFAE'], row['ISNI'], pattern='ISNI')
+      row['viaf_id'] = utils.extractIdentifier(row['AFAE'], row['ISNI'], pattern='VIAF')
 
-  inputCSV.to_csv(options.output_file, sep=options.delimiter, encoding="utf-8", index=False)
+      # The following two fields are only available for person data
+      datePatterns = ['%Y', '(%Y)', '[%Y]', '%Y-%m-%d', '%d/%m/%Y', '%Y%m%d']
+      if 'F046' in row:
+        row['birth_date'] = utils.parseDate(row['F046'], datePatterns)
+
+      if 'G046' in row:
+        row['death_date'] = utils.parseDate(row['G046'], datePatterns)
+
+      outputWriter.writerow(row)
+
+  print("Finished without errors")
 
 main()

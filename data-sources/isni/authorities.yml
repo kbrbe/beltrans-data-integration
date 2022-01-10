@@ -38,6 +38,20 @@ mappings:
       - [schema:familyName, $(surname)]
       - [foaf:isPrimaryTopicOf, btisni:authority_$(ISNI)~iri]
       - [bf:identifiedBy, btisni:identifier_isni_$(ISNI)~iri]
+      - p: schema:gender
+        o: schema:Female~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(gender)]
+            - [grel:valueParameter2, "female"]
+      - p: schema:gender
+        o: schema:Male~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(gender)]
+            - [grel:valueParameter2, "male"]
       - p: schema:givenName
         o: $(forename)
         condition:
@@ -150,6 +164,21 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
+  authorsISNI:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for ISNI identifiers according to BIBFRAME."
+    sources:
+      - access: "isni/2021-11-25-isni-authorities-belgian.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btisni:identifier_isni_$(ISNI)
+    po:
+      - [a, bf:Isni]
+      - [rdf:value, $(ISNI)]
+
+
+  # ---------------------------------------------------------------------------
+  #
   authorsVIAF:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
@@ -157,7 +186,7 @@ mappings:
       - access: "isni/2021-11-25-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_viaf_$(ISNI)
+    s: btisni:identifier_viaf_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -178,7 +207,7 @@ mappings:
       - access: "isni/2021-11-25-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_bnf_$(ISNI)
+    s: btisni:identifier_bnf_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -199,7 +228,7 @@ mappings:
       - access: "isni/2021-11-25-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_nta_$(ISNI)
+    s: btisni:identifier_nta_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -220,7 +249,7 @@ mappings:
       - access: "isni/2021-11-25-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_dnb_$(ISNI)
+    s: btisni:identifier_dnb_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:

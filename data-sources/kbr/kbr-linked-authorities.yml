@@ -1,0 +1,285 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+
+variables:
+  sourceKBRLinkedAuthoritiesPersonsNL: &sourceKBRLinkedAuthoritiesPersonsNL ${RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_NL}
+  sourceKBRLinkedAuthoritiesPersonsFR: &sourceKBRLinkedAuthoritiesPersonsFR ${RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_FR}
+  sourceKBRLinkedAuthoritiesOrgsNL: &sourceKBRLinkedAuthoritiesOrgsNL ${RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_NL}
+  sourceKBRLinkedAuthoritiesOrgsFR: &sourceKBRLinkedAuthoritiesOrgsFR ${RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_FR}
+  sourceKBRPublisherPlacesFlanders: &sourceKBRPublisherPlacesFlanders ${RML_SOURCE_KBR_PUBLISHER_PLACES_FLANDERS}
+  sourceKBRPublisherPlacesWallonia: &sourceKBRPublisherPlacesWallonia ${RML_SOURCE_KBR_PUBLISHER_PLACES_WALLONIA}
+  sourceKBRPublisherPlacesBrussels: &sourceKBRPublisherPlacesBrussels ${RML_SOURCE_KBR_PUBLISHER_PLACES_BRUSSELS}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  persons:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates person authorities represented as schema Person from KBR linked authorities."
+    sources:
+#      - [kbr/belgian-authors-enriched.csv~csv]
+#      - access: "kbr/2021-10-25-clean-isni-data.csv"
+      - access: *sourceKBRLinkedAuthoritiesPersonsNL
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesPersonsFR
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:authority_$(IDNO)
+    po:
+      - [a, schema:Person]
+      - [dc:identifier, $(IDNO)]
+      - [rdfs:label, $(REFA)]
+      - [schema:givenName, $(given_name)]
+      - [schema:familyName, $(family_name)]
+      - [foaf:isPrimaryTopicOf, btabout:authority_$(IDNO)~iri]
+      - p: schema:nationality
+        o: countries:be~iri
+        condition:
+          function: grel:string_startsWith
+          parameters:
+            - [grel:valueParameter, $(ANAT)]
+            - [grel:string_sub, "Belg"]
+      - p: schema:gender
+        o: schema:Female~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(GENDER)]
+            - [grel:valueParameter2, "F"]
+      - p: schema:gender
+        o: schema:Male~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(GENDER)]
+            - [grel:valueParameter2, "M"]
+      - p: schema:birthDate
+        o:
+          value: $(birth_date)
+          datatype: xsd:date
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(birth_date)]
+            - [grel:valueParameter2, ""]
+      - p: schema:deathDate
+        o:
+          value: $(death_date)
+          datatype: xsd:date
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(death_date)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_isni_$(IDNO)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isni_id)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_viaf_$(IDNO)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(viaf_id)]
+            - [grel:valueParameter2, ""]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsAbout:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates descriptions of authorities represented as schema WebPage."
+    sources:
+#      - access: "kbr/2021-10-25-clean-isni-data.csv"
+      - access: *sourceKBRLinkedAuthoritiesPersonsNL
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesPersonsFR
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesOrgsNL
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesOrgsFR
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btabout:authority_$(IDNO)
+    po:
+      - [a, schema:WebPage]
+      - [foaf:primaryTopic, btid:authority_$(IDNO)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsISNI:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
+    sources:
+#      - access: "kbr/2021-10-25-clean-isni-data.csv"
+      - access: *sourceKBRLinkedAuthoritiesPersonsNL
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesPersonsFR
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesOrgsNL
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesOrgsFR
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:identifier_isni_$(IDNO)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(isni_id)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Isni]
+      - [rdf:value, $(isni_id)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsVIAF:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
+    sources:
+#      - access: "kbr/2021-10-25-clean-isni-data.csv"
+      - access: *sourceKBRLinkedAuthoritiesPersonsNL
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesPersonsFR
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesOrgsNL
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesOrgsFR
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:identifier_viaf_$(IDNO)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(viaf_id)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "VIAF"]
+      - [rdf:value, $(viaf_id)]
+
+  # ---------------------------------------------------------------------------
+  #
+  orgs:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates organizational authorities represented as schema Organization from KBR linked authorities."
+    sources:
+#      - [kbr/belgian-authors-enriched.csv~csv]
+#      - access: "kbr/2021-10-25-clean-isni-data.csv"
+      - access: *sourceKBRLinkedAuthoritiesOrgsNL
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesOrgsFR
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:authority_$(IDNO)
+    po:
+      - [a, schema:Organization]
+      - [dc:identifier, $(IDNO)]
+      - [rdfs:label, $(REFA)]
+      - [foaf:isPrimaryTopicOf, btabout:authority_$(IDNO)~iri]
+      - p: schema:address
+        o: btid:address_$(IDNO)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(C043)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_isni_$(IDNO)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isni_id)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_viaf_$(IDNO)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(viaf_id)]
+            - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  addressOrgs:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates an address resource for an organizational authority such that the country can be stored according to schema.org"
+    sources:
+      - access: *sourceKBRLinkedAuthoritiesOrgsNL
+        referenceFormulation: csv
+        delimiter: ';'
+      - access: *sourceKBRLinkedAuthoritiesOrgsFR
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:address_$(IDNO)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(C043)]
+        - [grel:valueParameter, ""]
+    po:
+      - [a, schema:PostalAddress]
+      - [rdfs:label, "Address of authority $(IDNO)"]
+      - p: schema:addressCountry
+        o: countries:be~iri
+        condition:
+          function: grel:string_startsWith
+          parameters:
+            - [grel:valueParameter, $(C043)]
+            - [grel:string_sub, "BE"]
+
+  # ---------------------------------------------------------------------------
+  #
+  regionOrgs:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates an address resource for an organizational authority such that the country can be stored according to schema.org"
+    sources:
+      - access: *sourceKBRPublisherPlacesFlanders
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRPublisherPlacesWallonia
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRPublisherPlacesBrussels
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:address_$(IDN)
+    po:
+      - [a, schema:PostalAddress]
+      - [rdfs:label, "Address of authority $(IDN)"]
+      - [schema:addressRegion, $(REGION)]
+      - [schema:addressLocality, $(place)]

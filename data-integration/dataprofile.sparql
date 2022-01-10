@@ -1,0 +1,547 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix schema: <http://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+
+  SELECT 
+    (?manifestationID AS ?targetTextKBRIdentifier)
+    (?kbrTargetManifestationBBLabel AS ?targetTextThesaurusBB)
+    (?translationType AS ?translationType)
+    (?manifestationTitle AS ?targetTextTitle)
+    (?kbrTargetManifestationEdition AS ?targetTextEdition)
+    (?kbrTargetManifestationBindingTypeLabel AS ?targetTextBindingType)
+    (?kbrCountryOfOriginLabel AS ?targetTextCountryOfPublication)
+    (?kbrDatePublished AS ?targetTextYearOfPublication)
+    (?kbrLocationCreated AS ?targetTextPlaceOfPublication)
+    (?kbrResponsibilityStatement AS ?targetTextResponsibilityStatement)
+    (?kbrTargetLangLabel AS ?targetTextLanguage)
+    (?isbn AS ?targetTextISBN) 
+    (?kbrAuthorID AS ?authorKBRIdentifier)
+    (?kbrAuthorISNI AS ?authorISNI)
+    (?kbrAuthorNationalityLabel AS ?authorNationality)
+    (?isniSRUAuthorGenderLabel AS ?authorGenderISNI)
+    (?kbrAuthorFamilyName AS ?authorFamilyName)
+    (?kbrAuthorGivenName AS ?authorGivenName)
+    (?kbrAuthorBirthDate AS ?authorBirthDateKBR)
+    (?isniRDFAuthorBirthDate AS ?authorBirthDateISNI)
+    (?kbrAuthorDeathDate AS ?authorDeathDateKBR)
+    (?isniRDFAuthorDeathDate AS ?authorDeathDateISNI)
+    (?kbrTranslatorID AS ?translatorKBRIdentifier)
+    (?kbrTranslatorFamilyName AS ?translatorFamilyName)
+    (?kbrTranslatorGivenName AS ?translatorGivenName)
+    (?kbrTranslatorISNI AS ?translatorISNI)
+    (?kbrTranslatorNationalityLabel AS ?translatorNationality)
+    (?isniSRUTranslatorGenderLabel AS ?translatorGenderISNI)
+    (?kbrTranslatorBirthDate AS ?translatorBirthDateKBR)
+    (?isniRDFTranslatorBirthDate AS ?translatorBirthDateISNI)
+    (?kbrTranslatorDeathDate AS ?translatorDeathDateKBR)
+    (?isniRDFTranslatorDeathDate AS ?translatorDeathDateISNI)
+    (IF(bound(?publisherUncertainty), "uncertain", "certain") AS ?targetTextPublisherCertainty)
+    (?kbrPublisherID AS ?targetPublisherKBRIdentifier)
+    (?kbrPublisherISNI AS ?targetPublisherISNI)
+    (?kbrPublisherName AS ?targetPublisherName)
+    (?kbrPublisherLocation AS ?targetPublisherLocation)
+    (?kbrPublisherRegion AS ?targetPublisherRegion)
+    (?kbrPublisherCountryLabel AS ?targetPublisherCountry)
+    (?kbrIllustratorID AS ?illustratorKBRIdentifier)
+    (?kbrIllustratorISNI AS ?illustratorISNI)
+    (?kbrIllustratorNationalityLabel AS ?illustratorNationality)
+    (?isniSRUIllustratorGenderLabel AS ?illustratorGenderISNI)
+    (?kbrIllustratorFamilyName AS ?illustratorFamilyName)
+    (?kbrIllustratorGivenName AS ?illustratorGivenName)
+    (?kbrIllustratorBirthDate AS ?illustratorBirthDateKBR)
+    (?isniRDFIllustratorBirthDate AS ?illustratorBirthDateISNI)
+    (?kbrIllustratorDeathDate AS ?illustratorDeathDateKBR)
+    (?isniRDFIllustratorDeathDate AS ?illustratorDeathDateISNI)
+    (?kbrScenaristID AS ?scenaristKBRIdentifier)
+    (?kbrScenaristFamilyName AS ?scenaristFamilyName)
+    (?kbrScenraistGivenName AS ?scenaristGivenName)
+    (?kbrScenaristISNI AS ?scenaristISNI)
+    (?kbrScenaristNationalityLabel AS ?scenaristNationality)
+    (?isniSRUScenaristGenderLabel AS ?scenaristGenderISNI)
+    (?kbrScenaristBithDate AS ?scenaristBirthDateKBR)
+    (?isniRDFScenaristBirthDate AS ?scenaristBirthDateISNI)
+    (?kbrScenaristDeathDate AS ?scenaristDeathDateKBR)
+    (?isniRDFScenaristDeathDate AS ?scenaristDeathDateISNI)
+  FROM  <http://kbr-syracuse>
+  FROM <http://isni-sru>
+  FROM <http://kbr-belgians>
+  FROM <http://isni-rdf>
+  FROM <http://master-data>
+  FROM <http://kbr-linked-authorities>
+  WHERE {
+
+    graph <http://kbr-syracuse> { 
+      ?manifestation a schema:CreativeWork ;
+                     dc:identifier ?manifestationID ;
+                     schema:name ?manifestationTitle .
+    }
+        
+    # determine if this manifestation is a multilingual work
+    BIND(exists{ graph <http://kbr-syracuse> { ?manifestation a btm:MultiLingualManifestation . } } AS ?classExists)
+    BIND(IF(?classExists, "multilingual", "translation") AS ?translationType)
+
+    # optional attributes of the translation itself
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:isbn ?isbn . }  }
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?kbrDatePublished . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
+
+
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:about ?kbrTargetManifestationBB . }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetManifestationBB skos:prefLabel ?kbrTargetManifestationBBLabel . }
+        FILTER(lang(?kbrTargetManifestationBBLabel) = 'en')
+      }
+    }
+
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation schema:bookFormat ?kbrTargetManifestationBindingType . }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetManifestationBindingType rdfs:label ?kbrTargetManifestationBindingTypeLabel .}
+        FILTER(lang(?kbrTargetManifestationBindingTypeLabel) = 'en')
+      }
+    }
+
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrCountryOfOrigin mads:authoritativeLabel ?kbrCountryOfOriginLabel . } 
+        FILTER (lang(?kbrCountryOfOriginLabel) = 'en')
+      }
+    }
+
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:inLanguage ?kbrTargetLang . } 
+
+      # within the optional language check optionally for an English label of it (it should exist though)
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetLang mads:authoritativeLabel ?kbrTargetLangLabel . }
+        FILTER (lang(?kbrTargetLangLabel) = 'en')
+      }
+    } 
+
+
+    # ---------------------------------------------------------------------------
+    #
+    # (1) AUTHOR
+    #
+    # if there is an author we optionally check this data source and other data sources for other optional attributes of the author
+    #
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?manifestation schema:author ?kbrAuthor . } 
+
+      # within this optional author check optionally for Belgians from KBR (it could be the author from kbr-syracuse is not in kbr-belgians
+      OPTIONAL {
+        graph <http://kbr-belgians> { 
+          # There is always a nationality for this dataset, thus not optional
+          ?kbrAuthor a schema:Person ;
+                     dc:identifier ?kbrAuthorID ;
+                     schema:nationality ?kbrAuthorNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrAuthorNationality mads:authoritativeLabel ?kbrAuthorNationalityLabel . }
+          FILTER (lang(?kbrAuthorNationalityLabel) = 'en')
+        }
+      }
+
+      # within this optional author, check optional attributes
+      OPTIONAL { graph <http://kbr-belgians> { ?kbrAuthor schema:birthDate ?kbrAuthorBirthDate . } }
+      OPTIONAL { graph <http://kbr-belgians> { ?kbrAuthor schema:deathDate ?kbrAuthorDeathDate . } }
+      OPTIONAL { graph <http://kbr-belgians> { ?kbrAuthor schema:familyName ?kbrAuthorFamilyName . } }
+      OPTIONAL { graph <http://kbr-belgians> { ?kbrAuthor schema:givenName ?kbrAuthorGivenName . } }
+      # within this optional author, check optionally for Belgians with ISNI
+      OPTIONAL {
+        graph <http://kbr-belgians> { 
+          ?kbrAuthor bf:identifiedBy ?isniAuthorEntity . 
+          ?isniAuthorEntity a bf:Isni ;
+                      rdf:value ?kbrAuthorISNI . 
+        }
+
+        # if there is an optional ISNI we look it up in Belgians from ISNI SRU
+        # optional in case it is not a person marked as Belgian in ISNI SRU
+        OPTIONAL {
+          graph <http://isni-sru> {
+            ?isniSRUAuthor a schema:Person ;
+                           bf:identifiedBy ?isniSRUEntity . 
+
+            ?isniSRUEntity a bf:Isni ;
+                           rdf:value ?kbrAuthorISNI .
+          }
+
+          # optional attributes of the ISNI SRU dump
+          OPTIONAL { graph <http://isni-sru> { ?isniSRUAuthor schema:gender ?isniSRUAuthorGender . } 
+
+            # within the optional gender check for an optional gender label (it should exist though)
+            OPTIONAL {
+              graph <http://master-data> { ?isniSRUAuthorGender rdfs:label ?isniSRUAuthorGenderLabel . }
+              FILTER (lang(?isniSRUAuthorGenderLabel) = 'en')
+            }
+          }
+        }
+
+        # if there is an optional ISNI we look it up in the ISNI RDF dump
+        # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+        OPTIONAL {
+          graph <http://isni-rdf> {
+            ?isniRDFAuthor a schema:Person ;
+                           schema:identifier [ schema:value ?kbrAuthorISNI ] .
+
+          }
+
+          # optional attributes of the ISNI RDF dump
+          OPTIONAL { graph <http://isni-rdf> { ?isniRDFAuthor schema:birthDate ?isniRDFAuthorBirthDate . } }
+          OPTIONAL { graph <http://isni-rdf> { ?isniRDFAuthor schema:deathDate ?isniRDFAuthorDeathDate . } }
+        }
+      }
+
+
+    }
+
+    # ---------------------------------------------------------------------------
+    #
+    # (2) TRANSLATOR
+    #
+    # if there is a translator we optionally check this data source and other data sources for other optional attributes of the translator
+    #
+    OPTIONAL { 
+
+      graph <http://kbr-syracuse> { ?manifestation schema:translator ?kbrTranslator . } 
+
+      # within this optional translator check optionally for Belgians from KBR (it could be the translator from kbr-syracuse is not in kbr-belgians
+      OPTIONAL {
+        graph <http://kbr-belgians> { 
+          # There is always a nationality for this dataset, thus not optional
+          ?kbrTranslator a schema:Person ;
+                         dc:identifier ?kbrTranslatorID ;
+                         schema:nationality ?kbrTranslatorNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrTranslatorNationality mads:authoritativeLabel ?kbrTranslatorNationalityLabel . }
+          FILTER (lang(?kbrTranslatorNationalityLabel) = 'en')
+        }
+      }
+
+
+      # within this optional translator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:birthDate ?kbrTranslatorBirthDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:deathDate ?kbrTranslatorDeathDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:familyName ?kbrTranslatorFamilyName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:givenName ?kbrTranslatorGivenName . } }
+
+      # within this optional translator, check optionally for Belgians with ISNI
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> { 
+          ?kbrTranslator bf:identifiedBy ?isniTranslatorEntity . 
+          ?isniTranslatorEntity a bf:Isni ;
+                      rdf:value ?kbrTranslatorISNI . 
+        }
+
+        # if there is an optional ISNI we look it up in Belgians from ISNI SRU
+        # optional in case it is not a person marked as Belgian in ISNI SRU
+        OPTIONAL {
+          graph <http://isni-sru> {
+            ?isniSRUTranslator a schema:Person ;
+                           bf:identifiedBy ?isniSRUTranslatorEntity . 
+
+            ?isniSRUTranslatorEntity a bf:Isni ;
+                           rdf:value ?kbrTranslatorISNI .
+          }
+
+          # optional attributes of the ISNI SRU dump
+          OPTIONAL { graph <http://isni-sru> { ?isniSRUTranslator schema:gender ?isniSRUTranslatorGender . }
+
+            # within the optional gender check for an optional gender label (it should exist though)
+            OPTIONAL {
+              graph <http://master-data> { ?isniSRUTranslatorGender rdfs:label ?isniSRUTranslatorGenderLabel . }
+              FILTER (lang(?isniSRUTranslatorGenderLabel) = 'en')
+            }
+          }
+        }
+
+        # if there is an optional ISNI we look it up in the ISNI RDF dump
+        # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+        OPTIONAL {
+          graph <http://isni-rdf> {
+            ?isniRDFTranslator a schema:Person ;
+                           schema:identifier [ schema:value ?kbrTranslatorISNI ] .
+
+          }
+
+          # optional attributes of the ISNI RDF dump
+          OPTIONAL { graph <http://isni-rdf> { ?isniRDFTranslator schema:birthDate ?isniRDFTranslatorBirthDate . } }
+          OPTIONAL { graph <http://isni-rdf> { ?isniRDFTranslator schema:deathDate ?isniRDFTraslatorDeathDate . } }
+        }
+      }
+
+
+    }
+
+
+    # ---------------------------------------------------------------------------
+    #
+    # (3) PUBLISHER
+    #
+    # if there is a publisher we optionally check this data source and other data sources for other optional attributes of the publisher
+    #
+    OPTIONAL { 
+
+      graph <http://kbr-syracuse> { ?manifestation schema:publisher ?kbrPublisher . } 
+
+      OPTIONAL {
+        graph <http://kbr-syracuse> { 
+
+        ?publisherAssociation a prov:Association ;
+                                prov:agent ?kbrPublisher ;
+                                prov:hadRole btid:role_pbl .
+
+        ?publisherTranslationActivity a prov:Activity ;
+                  prov:qualifiedAssociation ?publisherAssociation ;
+                  prov:generated ?manifestation .
+        }
+
+        OPTIONAL {
+          graph <http://kbr-syracuse> { ?publisherAssociation up:assertionType ?publisherUncertainty . }
+        }
+      }
+
+      # within this optional publisher, check optional attributes from the linked authorities dataset
+      OPTIONAL { 
+        graph <http://kbr-linked-authorities> {
+          ?kbrPublisher rdfs:label ?kbrPublisherName ;
+                        dc:identifier ?kbrPublisherID .
+        } 
+      }
+
+      OPTIONAL { 
+        graph <http://kbr-linked-authorities> { ?kbrPublisher schema:address ?kbrPublisherAddressEntity . }
+        
+          OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisherAddressEntity schema:addressRegion ?kbrPublisherRegion . } }
+          OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrPublisherAddressEntity schema:addressLocality ?kbrPublisherLocation . } }
+
+          OPTIONAL { 
+            graph <http://kbr-linked-authorities> { ?kbrPublisherAddressEntity schema:addressCountry ?kbrPublisherCountry . } 
+
+            # within this optional nationality check optionally for an English label in the master data
+            OPTIONAL {
+              graph <http://master-data> { ?kbrPublisherCountry mads:authoritativeLabel ?kbrPublisherCountryLabel . }
+              FILTER (lang(?kbrPublisherCountryLabel) = 'en')
+            }
+          }
+      }
+
+      # within this optional translator, check optionally for Belgians with ISNI
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> { 
+          ?kbrPublisher bf:identifiedBy ?isniPublisherEntity . 
+          ?isniPublisherEntity a bf:Isni ;
+                      rdf:value ?kbrPublisherISNI . 
+        }
+
+        # todo lookup attributes from ISNI SRU when we have the organizational dump
+
+        # todo lookup attributes from the ISNI RDF dump when we have the organizational dump  
+
+
+      }
+    }
+
+    # ---------------------------------------------------------------------------
+    #
+    # (4) ILLUSTRATOR
+    #
+    # if there is a illustrator we optionally check this data source and other data sources for other optional attributes of the illustrator
+    #
+    OPTIONAL { 
+
+      graph <http://kbr-syracuse> { 
+        ?illustratorAssociation a prov:Association ;
+                                prov:agent ?kbrIllustrator ;
+                                prov:hadRole btid:role_ill .
+
+        ?activity a prov:Activity ;
+                  prov:qualifiedAssociation ?illustratorAssociation ;
+                  prov:generated ?manifestation .
+      } 
+
+
+      # within this optional illustrator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:familyName ?kbrIllustratorFamilyName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:givenName ?kbrIllustratorGivenName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:birthDate ?kbrIllustratorBirthDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:deathDate ?kbrIllustratorDeathDate . } }
+
+      # within this optional illustrator check optionally for Belgians from KBR (it could be the illustrator from kbr-syracuse is not in kbr-belgians
+      OPTIONAL {
+        graph <http://kbr-belgians> { 
+          # There is always a nationality for this dataset, thus not optional
+          ?kbrIllustrator a schema:Person ;
+                          dc:identifier ?kbrIllustratorID ;
+                          schema:nationality ?kbrIllustratorNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrIllustratorNationality mads:authoritativeLabel ?kbrIllustratorNationalityLabel . }
+          FILTER (lang(?kbrIllustratorNationalityLabel) = 'en')
+        }
+      }
+
+      # within this optional illustrator, check optionally for Belgians with ISNI
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> { 
+          ?kbrIllustrator bf:identifiedBy ?isniIllustratorEntity . 
+          ?isniIllustratorEntity a bf:Isni ;
+                      rdf:value ?kbrIllustratorISNI . 
+        }
+
+        # if there is an optional ISNI we look it up in Belgians from ISNI SRU
+        # optional in case it is not a person marked as Belgian in ISNI SRU
+        OPTIONAL {
+          graph <http://isni-sru> {
+            ?isniSRUIllustrator a schema:Person ;
+                           bf:identifiedBy ?isniSRUIllustratorEntity . 
+
+            ?isniSRUIllustratorEntity a bf:Isni ;
+                           rdf:value ?kbrIllustratorISNI .
+          }
+
+          # optional attributes of the ISNI SRU dump
+          OPTIONAL { graph <http://isni-sru> { ?isniSRUIllustrator schema:gender ?isniSRUIllustratorGender . }
+
+            # within the optional gender check for an optional gender label (it should exist though)
+            OPTIONAL {
+              graph <http://master-data> { ?isniSRUIllustratorGender rdfs:label ?isniSRUIllustratorGenderLabel . }
+              FILTER (lang(?isniSRUIllustratorGenderLabel) = 'en')
+            }
+          }
+        }
+
+        # if there is an optional ISNI we look it up in the ISNI RDF dump
+        # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+        OPTIONAL {
+          graph <http://isni-rdf> {
+            ?isniRDFIllustrator a schema:Person ;
+                           schema:identifier [ schema:value ?kbrIllustratorISNI ] .
+
+          }
+
+          # optional attributes of the ISNI RDF dump
+          OPTIONAL { graph <http://isni-rdf> { ?isniRDFIllustrator schema:birthDate ?isniRDFIllustratorBirthDate . } }
+          OPTIONAL { graph <http://isni-rdf> { ?isniRDFIllustrator schema:deathDate ?isniRDFIllustratorDeathDate . } }
+
+        }
+
+
+      }
+    }
+
+    # ---------------------------------------------------------------------------
+    #
+    # (5) SCENARIST
+    #
+    # if there is a scenarist we optionally check this data source and other data sources for other optional attributes of the scenarist
+    #
+    OPTIONAL { 
+
+      graph <http://kbr-syracuse> { 
+        ?scenaristAssociation a prov:Association ;
+                                prov:agent ?kbrScenarist ;
+                                prov:hadRole btid:role_sce .
+
+        ?activity a prov:Activity ;
+                  prov:qualifiedAssociation ?scenaristAssociation ;
+                  prov:generated ?manifestation .
+      } 
+
+
+      # within this optional scenarist, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:familyName ?kbrScenaristFamilyName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:givenName ?kbrScenaristGivenName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:birthDate ?kbrScenaristBirthDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:deathDate ?kbrScenaristDeathDate . } }
+
+      # within this optional scenarist check optionally for Belgians from KBR (it could be the scenarist from kbr-syracuse is not in kbr-belgians
+      OPTIONAL {
+        graph <http://kbr-belgians> { 
+          # There is always a nationality for this dataset, thus not optional
+          ?kbrScenarist a schema:Person ;
+                        dc:identifier ?kbrScenaristID ;
+                        schema:nationality ?kbrScenaristNationality . 
+        }
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrScenaristNationality mads:authoritativeLabel ?kbrScenaristNationalityLabel . }
+          FILTER (lang(?kbrScenaristNationalityLabel) = 'en')
+        }
+      }
+
+      # within this optional scenarist, check optionally for Belgians with ISNI
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> { 
+          ?kbrScenarist bf:identifiedBy ?isniScenaristEntity . 
+          ?isniScenaristEntity a bf:Isni ;
+                      rdf:value ?kbrScenaristISNI . 
+        }
+
+        # if there is an optional ISNI we look it up in Belgians from ISNI SRU
+        # optional in case it is not a person marked as Belgian in ISNI SRU
+        OPTIONAL {
+          graph <http://isni-sru> {
+            ?isniSRUScenarist a schema:Person ;
+                           bf:identifiedBy ?isniSRUScenaristEntity . 
+
+            ?isniSRUScenaristEntity a bf:Isni ;
+                           rdf:value ?kbrScenaristISNI .
+          }
+
+          # optional attributes of the ISNI SRU dump
+          OPTIONAL { graph <http://isni-sru> { ?isniSRUScenarist schema:gender ?isniSRUScenaristGender . }
+
+            # within the optional gender check for an optional gender label (it should exist though)
+            OPTIONAL {
+              graph <http://master-data> { ?isniSRUScenaristGender rdfs:label ?isniSRUScenaristGenderLabel . }
+              FILTER (lang(?isniSRUScenaristGenderLabel) = 'en')
+            }
+          }
+        }
+
+        # if there is an optional ISNI we look it up in the ISNI RDF dump
+        # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+        OPTIONAL {
+          graph <http://isni-rdf> {
+            ?isniRDFScenarist a schema:Person ;
+                           schema:identifier [ schema:value ?kbrScenaristISNI ] .
+
+          }
+
+          # optional attributes of the ISNI RDF dump
+          OPTIONAL { graph <http://isni-rdf> { ?isniRDFScenarist schema:birthDate ?isniRDFScenaristBirthDate . } }
+          OPTIONAL { graph <http://isni-rdf> { ?isniRDFScenarist schema:deathDate ?isniRDFScenaristDeathDate . } }
+        }
+
+
+      }
+    }
+
+}
+
+

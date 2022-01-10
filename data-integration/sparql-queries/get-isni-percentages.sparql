@@ -1,0 +1,48 @@
+# This query returns different percentages to gain insights, it should be executed against the integrated model
+prefix schema: <http://schema.org/>
+
+SELECT
+  ?nationality 
+  (( ?nationalityCount * 100  / ?personsTotal) AS ?nationalityPercentage)
+WHERE {
+  
+  # Get the number of persons with a nationality and isni number
+  {
+    SELECT ?nationality (COUNT(?nationality) AS ?nationalityCount) (COUNT(?isni))
+    WHERE {
+      ?p a schema:Person ;
+         schema:nationality ?nationality ;
+         schema:sameAs ?isni .
+
+      FILTER(regex(str(?isni), 'isni', 'i'))
+    }
+    GROUP BY ?nationality
+    ORDER BY DESC(?nationalityCount)
+    LIMIT 10
+
+  }
+
+  # Get the number of persons with ISNI number
+  {}
+
+  # This sub query gets the total number of authors with ISNI numbers
+  {
+    SELECT (COUNT(?personISNI) AS ?personISNITotal)
+    WHERE {
+      ?personISNI a schema:Person ;
+        schema:sameAs ?isni .
+        FILTER(regex(str(?isni), 'isni', 'i'))
+    }
+  }
+
+  # This sub query gets the total number of authors and is used to calculate percentages
+  {
+    SELECT (COUNT(?person) AS ?personsTotal)
+    WHERE {
+      ?person a schema:Person .
+    }   
+  }
+
+}
+#ORDER BY DESC(?nationalityPercentage)
+

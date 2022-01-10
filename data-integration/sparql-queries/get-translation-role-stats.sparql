@@ -1,0 +1,41 @@
+# This query returns some simple stats to gain insights, it should be executed against the integrated model
+# The dollar variables need to be replaced by the calling script
+
+prefix schema: <http://schema.org/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix btid: <http://kbr.be/id/data/>
+
+SELECT
+  ?countWith
+  ?total
+  (( ?total - ?countWith) AS ?countWithout)
+  (ROUND(( ?countWith * 100  / ?total)) AS ?percentageWith)
+FROM <$namedGraph>
+WHERE {
+  
+  # Get the number of works with at least one of the specified property
+  {
+    SELECT (COUNT(distinct ?s) AS ?countWith)
+    WHERE {
+      graph <$namedGraph> {
+        ?a a prov:Activity ;
+           prov:qualifiedAssociation ?assoc ;
+           prov:generated ?s .
+
+        ?s a schema:CreativeWork .
+
+        ?assoc a prov:Association ;
+               prov:hadRole $role .
+      }
+    }
+  }
+
+  # This sub query gets the total number of works
+  {
+    SELECT (COUNT(distinct ?work) AS ?total)
+    WHERE {
+      graph <$namedGraph> { ?work a schema:CreativeWork . }
+    }
+  }
+}
+

@@ -7,6 +7,11 @@
 
 * Syracuse export of 8435 translations from French to Dutch: `ExportSyracuse_Document_20211019_FR-NL.xml`
 
+## Translations
+
+Translations are exported from Syracuse using the following query `todo`.
+The resulting XML data should be cleaned first using the script `todo`.
+
 ## Extracting contributors from MARC XML data
 
 Within a MARC XML record of a translation the person contributors are in MARC field 700 and organizational contributors (such as publishers) in field 710.

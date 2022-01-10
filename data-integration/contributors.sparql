@@ -1,0 +1,187 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix schema: <http://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+
+  SELECT 
+    ?contributorID
+    ?contributorISNI
+    ?contributorNationalityLabel
+    ?contributorGenderISNILabel
+    ?contributorFamilyName
+    ?contributorGivenName
+    ?contributorBirthDateKBR
+    ?contributorBirthDateISNI
+    ?contributorDeathDateKBR
+    ?contributorDeathDateISNI
+    ?numberAuthored
+    ?numberTranslations
+    ?numberIllustrations
+    ?numberScened
+  FROM  <http://kbr-syracuse>
+  FROM <http://isni-sru>
+  FROM <http://kbr-belgians>
+  FROM <http://isni-rdf>
+  FROM <http://master-data>
+  FROM <http://kbr-linked-authorities>
+  WHERE {
+
+    graph <http://kbr-linked-authorities> { 
+      ?contributor a schema:Person ;
+                   dc:identifier ?contributorID .
+    }
+
+    # within this optional author, check optional attributes
+    OPTIONAL { graph <http://kbr-linked-authorities> { ?contributor schema:birthDate ?contributorBirthDateKBR . } }
+    OPTIONAL { graph <http://kbr-linked-authorities> { ?contributor schema:deathDate ?contributorDeathDateKBR . } }
+    OPTIONAL { graph <http://kbr-linked-authorities> { ?contributor schema:familyName ?contributorFamilyName . } }
+    OPTIONAL { graph <http://kbr-linked-authorities> { ?contributor schema:givenName ?contributorGivenName . } }
+
+    OPTIONAL {
+      graph <http://kbr-linked-authorities> { ?contributor schema:nationality ?contributorNationality . }
+
+      # within this optional nationality check optionally for an English label in the master data
+      OPTIONAL {
+        graph <http://master-data> { ?contributorNationality mads:authoritativeLabel ?contributorNationalityLabel . }
+        FILTER (lang(?contributorNationalityLabel) = 'en')
+      }
+    }
+
+    # within this optional author, check optionally for Belgians with ISNI
+    OPTIONAL {
+      graph <http://kbr-belgians> { 
+        ?contributor bf:identifiedBy ?isniContributorEntity . 
+        ?isniContributorEntity a bf:Isni ;
+                    rdf:value ?contributorISNI . 
+      }
+
+      # if there is an optional ISNI we look it up in Belgians from ISNI SRU
+      # optional in case it is not a person marked as Belgian in ISNI SRU
+      OPTIONAL {
+        graph <http://isni-sru> {
+          ?isniSRUContributor a schema:Person ;
+                         bf:identifiedBy ?isniSRUEntity . 
+
+          ?isniSRUEntity a bf:Isni ;
+                         rdf:value ?contributorISNI .
+        }
+
+        # optional attributes of the ISNI SRU dump
+        OPTIONAL { graph <http://isni-sru> { ?isniSRUContributor schema:gender ?contributorGenderISNI . } 
+
+          # within the optional gender check for an optional gender label (it should exist though)
+          OPTIONAL {
+            graph <http://master-data> { ?contributorGenderISNI rdfs:label ?contributorGenderISNILabel . }
+            FILTER (lang(?contributorGenderISNILabel) = 'en')
+          }
+        }
+      }
+
+      # if there is an optional ISNI we look it up in the ISNI RDF dump
+      # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+      OPTIONAL {
+        graph <http://isni-rdf> {
+          ?isniRDFContributor a schema:Person ;
+                         schema:identifier [ schema:value ?contributorISNI ] .
+
+        }
+
+        # optional attributes of the ISNI RDF dump
+        OPTIONAL { graph <http://isni-rdf> { ?isniRDFContributor schema:birthDate ?contributorBirthDateISNI . } }
+        OPTIONAL { graph <http://isni-rdf> { ?isniRDFContributor schema:deathDate ?contributorDeathDateISNI . } }
+      }
+    }
+
+  # ###########################################################################
+  #
+  # NUMBER OF MANIFESTATIONS THIS CONTRIBUTOR WAS AN AUTHOR
+  #
+  OPTIONAL {
+    {
+      SELECT ?contributor (COUNT(?manifestation) as ?numberAuthored)
+      WHERE {
+        graph <http://kbr-linked-authorities> { ?contributor a schema:Person . }
+
+        graph <http://kbr-syracuse> { ?manifestation schema:author ?contributor . }
+      }
+      GROUP BY ?contributor
+    }
+  }
+
+  # ###########################################################################
+  #
+  # NUMBER OF MANIFESTATIONS THIS CONTRIBUTOR WAS A TRANSLATOR
+  #
+  {
+    SELECT ?contributor (COUNT(?manifestation) as ?numberTranslations)
+    WHERE {
+      graph <http://kbr-linked-authorities> { ?contributor a schema:Person . }
+
+      graph <http://kbr-syracuse> { ?manifestation schema:translator ?contributor . }
+    }
+    GROUP BY ?contributor
+  }
+
+  # ###########################################################################
+  #
+  # NUMBER OF MANIFESTATIONS THIS CONTRIBUTOR WAS AN ILLUSTRATOR
+  #
+  OPTIONAL {
+    {
+      SELECT ?contributor (COUNT(?manifestation) as ?numberIllustrations)
+      WHERE {
+        graph <http://kbr-linked-authorities> { ?contributor a schema:Person . }
+
+        graph <http://kbr-syracuse> {
+          ?illustratorAssociation a prov:Association ;
+                                  prov:agent ?contributor ;
+                                  prov:hadRole btid:role_ill .
+
+          ?illustratorTranslationActivity a prov:Activity ;
+                                          prov:qualifiedAssociation ?illustratorAssociation ;
+                                          prov:generated ?manifestation .
+        }
+      }
+      GROUP BY ?contributor
+    }
+  }
+
+
+  # ###########################################################################
+  #
+  # NUMBER OF MANIFESTATIONS THIS CONTRIBUTOR WAS A SCENARIST
+  #
+  OPTIONAL {
+    {
+      SELECT ?contributor (COUNT(?manifestation) as ?numberScened)
+      WHERE {
+        graph <http://kbr-linked-authorities> { ?contributor a schema:Person . }
+
+        graph <http://kbr-syracuse> {
+          ?scenaristAssociation a prov:Association ;
+                                prov:agent ?contributor ;
+                                prov:hadRole btid:role_sce .
+
+          ?scenaristTranslationActivity a prov:Activity ;
+                                        prov:qualifiedAssociation ?scenaristAssociation ;
+                                        prov:generated ?manifestation .
+        }
+      }
+      GROUP BY ?contributor
+    }
+  }
+
+ FILTER( str(?contributorNationalityLabel) = 'Belgium')
+
+
+}
+ORDER BY DESC(?numberAuthored) DESC(?numberTranslated) DESC(?numberIllustrations) DESC(?numberScened)
+

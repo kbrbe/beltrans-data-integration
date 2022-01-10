@@ -1,0 +1,397 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  lang: "http://id.loc.gov/vocabulary/languages/"
+  schema: "http://schema.org/"
+  up: "http://users.ugent.be/~tdenies/up/"
+
+variables:
+  sourceWorksFR: &sourceWorksFR ${RML_SOURCE_WORKS_FR}
+  sourceContFR: &sourceContFR ${RML_SOURCE_CONT_FR}
+  sourceWorksNL: &sourceWorksNL ${RML_SOURCE_WORKS_NL}
+  sourceContNL: &sourceContNL ${RML_SOURCE_CONT_NL}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestations:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates creative works, currently on the LRM level of manifestations."
+    sources:
+      - access: *sourceWorksFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceWorksNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(KBRID)
+    po:
+      - [a, schema:CreativeWork]
+      - [dc:identifier, $(KBRID)]
+      - [schema:translationOfWork, btid:manifestation_source_$(KBRID)~iri]
+      - p: rdf:type
+        o: btm:MultiLingualManifestation~iri
+        condition:
+          function: grel:string_contains
+          parameters:
+            - [grel:valueParameter, $(languages)]
+            - [grel:string_sub, ";"]
+      - [schema:name, $(title) ]
+      - p: rdfs:comment
+        o: $(responsibilityStatement)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(responsibilityStatement)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:datePublished
+        o: $(yearOfPublication)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(yearOfPublication)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:locationCreated
+        o: $(placeOfPublication)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(placeOfPublication)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:bookEdition
+        o: $(edition)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(edition)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:bookFormat
+        o: btid:binding_a~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "a"] 
+      - p: schema:bookFormat
+        o: btid:binding_b~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "b"] 
+      - p: schema:bookFormat
+        o: btid:binding_c~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "c"] 
+      - p: schema:bookFormat
+        o: btid:binding_d~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "d"] 
+      - p: schema:bookFormat
+        o: btid:binding_e~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "e"] 
+      - p: schema:bookFormat
+        o: btid:binding_f~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "f"] 
+      - p: schema:bookFormat
+        o: btid:binding_g~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "g"] 
+      - p: schema:bookFormat
+        o: btid:binding_h~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "h"] 
+      - p: schema:bookFormat
+        o: btid:binding_i~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "i"] 
+      - p: schema:bookFormat
+        o: btid:binding_j~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "j"] 
+      - p: schema:bookFormat
+        o: btid:binding_k~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "k"] 
+      - p: schema:bookFormat
+        o: btid:binding_l~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "l"] 
+      - p: schema:bookFormat
+        o: btid:binding_m~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "m"] 
+      - p: schema:bookFormat
+        o: btid:binding_n~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "n"] 
+      - p: schema:bookFormat
+        o: btid:binding_o~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "o"] 
+      - p: schema:bookFormat
+        o: btid:binding_p~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "p"] 
+      - p: schema:bookFormat
+        o: btid:binding_q~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "q"] 
+      - p: schema:bookFormat
+        o: btid:binding_r~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(bindingType)]
+            - [grel:valueParameter2, "r"] 
+      - p: schema:isbn
+        o: $(isbn)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isbn)]
+            - [grel:valueParameter2, ""] 
+      # due to a bug the following only maps the first found split result because there is a condition
+      - p: schema:about
+        o:  
+          function: grel:string_split
+          parameters:
+            - [grel:valueParameter, $(belgianBibliography)]
+            - [grel:p_string_sep, ";"]    
+          type: iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(belgianBibliography)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:inLanguage
+        o:  
+          function: grel:string_split
+          parameters:
+            - [grel:valueParameter, $(languages)]
+            - [grel:p_string_sep, ";"]    
+          type: iri
+# The split does not seem to work when this condition is applied
+# but the condition does not seem to be needed,
+# also if no semicolon is found, split just returns the string itself
+#        condition:
+#          function: grel:string_contains
+#          parameters:
+#            - [grel:valueParameter, $(languages)]
+#            - [grel:string_sub, ";"]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  creationActivity:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity."
+    sources:
+      - access: *sourceWorksFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceWorksNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    po:
+      - [rdfs:label, "Translation context of $(KBRID)", en~lang]
+      - [a, prov:Activity]
+      - [prov:generated, btid:manifestation_$(KBRID)~iri]
+      - [prov:used, btid:manifestation_source_$(KBRID)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  directContributions:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates direct schema.org links for authors, translators and publishers from the translated manifestation."
+    sources:
+#      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+      - access: *sourceContFR
+        referenceFormulation: csv
+        delimiter: ','
+#      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+      - access: *sourceContNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(KBRID)
+    po:
+      - p: schema:translator
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "trl"] 
+      - p: schema:publisher
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "pbl"] 
+      - p: schema:author
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "aut"] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  contributionAssocations:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates qualified associations between contributors and the creation activity of a translated work (according to W3C PROV)."
+    sources:
+#      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+      - access: *sourceContFR
+        referenceFormulation: csv
+        delimiter: ','
+#      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+      - access: *sourceContNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)
+    po:
+      - [a, prov:Association]
+      - [prov:agent, btid:authority_$(contributorID)~iri]
+      - [prov:hadRole, btid:role_$(contributorRole)~iri]
+      - [prov:activity, btid:translationActivity_$(KBRID)~iri]
+      - p: up:assertionConfidence
+        o: 0.5 
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(uncertainty)]
+            - [grel:valueParameter2, "yes"] 
+      - p: up:assertionType
+        o: up:MachineGenerated~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(uncertainty)]
+            - [grel:valueParameter2, "yes"] 
+      - p: rdfs:comment
+        o: "The indicated role is only assumed and was not indicated in the source."
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(uncertainty)]
+            - [grel:valueParameter2, "yes"] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  contributionAssocationsLinks:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links between translation activities and qualified associations."
+    sources:
+#      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
+      - access: *sourceContFR
+        referenceFormulation: csv
+        delimiter: ','
+#      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
+      - access: *sourceContNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    po:
+      - [prov:qualifiedAssociation, btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsSourcesFR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates creative works representing the French source text of a translation, currently on the LRM level of manifestations."
+    sources:
+      - access: *sourceWorksFR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:manifestation_source_$(KBRID)
+    po:
+      - [a, schema:CreativeWork]
+      - [schema:inLanguage, lang:fr~iri]
+      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsSourcesNL:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates creative works representing the Dutch source text of a translation, currently on the LRM level of manifestations."
+    sources:
+      - access: *sourceWorksNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_source_$(KBRID)
+    po:
+      - [a, schema:CreativeWork]
+      - [schema:inLanguage, lang:nl~iri]
+      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
+

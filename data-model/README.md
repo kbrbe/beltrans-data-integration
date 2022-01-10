@@ -76,7 +76,7 @@ such as translators or illustrators.
 For the BELTRANS project the nationality of authors is important
 as we only consider Belgian authors.
 
-According to a LRM to schema.org mapping performed by the Royal Library of the Netherlands (KB),
+According to a [LRM to schema.org mapping](https://k3.digitopia.nl/downloads/LRM2schema.pdf) performed by the Royal Library of the Netherlands (KB),
 the *LRM Agent* concept is not fully compatible with a `schema:Agent`,
 because *LRM agents* are non-fictive persons who are alive or have lived.
 Different personas (or pseudonyms of authors) are represented as different instances of `schema:Person`,
@@ -86,5 +86,7 @@ which are linked together with `schema:sameAs`.
 > :books: *As a researcher, I want to get all information related to an author.*
 
 ## Translations
+
+For a translation we have titles, languages, contributors
 
 According to the LRM to schema.org mapping the property `schema:translationOfWork` can be used between two expressions.

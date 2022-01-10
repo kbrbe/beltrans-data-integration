@@ -1,0 +1,125 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+
+variables:
+  marcRoles: &marcRoles ${RML_SOURCE_MASTER_MARC_ROLES}
+  bindingTypes: &bindingTypes ${RML_SOURCE_MASTER_BINDING_TYPES}
+  thesaurusEN: &thesaurusEN ${RML_SOURCE_MASTER_THES_EN}
+  thesaurusNL: &thesaurusNL ${RML_SOURCE_MASTER_THES_NL}
+  thesaurusFR: &thesaurusFR ${RML_SOURCE_MASTER_THES_FR}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  marcRoles:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates RDF resources for MARC roles such that we can refer to it and do not have to rely on text. Currently with English labels, but labels in other languages may be added."
+    sources:
+      - access: *marcRoles
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:role_$(code)
+    po:
+      - [a, prov:Role]
+      - [rdfs:label, $(title), en~lang]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  belgianBibliographyEN:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a SKOS taxonomy for the Belgian bibliography and uses English labels."
+    sources:
+      - access: *thesaurusEN
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:$(id)
+    po:
+      - [a, skos:Concept]
+      - [skos:prefLabel, $(name), en~lang]
+      - p: skos:broaderTransitive
+        o: btid:$(parentID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(parentID)]
+            - [grel:valueParameter2, ""] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  belgianBibliographyNL:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a SKOS taxonomy for the Belgian bibliography and uses English labels."
+    sources:
+      - access: *thesaurusNL
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:$(id)
+    po:
+      - [skos:prefLabel, $(name), nl~lang]
+      - p: skos:broaderTransitive
+        o: btid:$(parentID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(parentID)]
+            - [grel:valueParameter2, ""] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  belgianBibliographyFR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a SKOS taxonomy for the Belgian bibliography and uses English labels."
+    sources:
+      - access: *thesaurusFR
+        referenceFormulation: csv
+        delimiter: ';'
+    s: btid:$(id)
+    po:
+      - [skos:prefLabel, $(name), fr~lang]
+      - p: skos:broaderTransitive
+        o: btid:$(parentID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(parentID)]
+            - [grel:valueParameter2, ""] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  bindingTypes:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates multilingual RDF resources for binding types used by the KBR catalog in the MARC field 020$q."
+    sources:
+      - access: *bindingTypes
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:binding_$(code)
+    po:
+      - [a, schema:BookFormatType]
+      - [rdfs:label, $(labelEN), en~lang]
+      - [rdfs:label, $(labelNL), nl~lang]
+      - [rdfs:label, $(labelFR), fr~lang]
+
+

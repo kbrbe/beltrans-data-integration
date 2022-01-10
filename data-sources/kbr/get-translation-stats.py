@@ -5,10 +5,12 @@
 import xml.etree.ElementTree as ET
 import json
 import itertools
+import utils
 import csv
 from optparse import OptionParser
 
 NS_MARCSLIM = 'http://www.loc.gov/MARC21/slim'
+ALL_NS = {'': NS_MARCSLIM}
 
 # -----------------------------------------------------------------------------
 def countDatafields(df, countDict):
@@ -103,27 +105,73 @@ def countTitleVariants(df, countDict):
         else:
           countDict['NO_VARIANT_TYPE'] = 1
       
+# -----------------------------------------------------------------------------
+def countEditions(elem, countDict):
+  """This function counts the different variants of editions in MARC field 250$a."""
+
+  edition = utils.getElementValue(elem.find('./datafield[@tag="250"]/subfield[@code="a"]', ALL_NS))
+  utils.count(countDict, edition)
+
+# -----------------------------------------------------------------------------
+def countBindingTypes(elem, countDict, valuesDict):
+  """This function counts the different variants of binding types in MARC field 020$q."""
+
+  kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
+  bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
+  utils.count(countDict, bindingType, kbrID, valuesDict)
+
+# -----------------------------------------------------------------------------
+def countMediumTypes(elem, countDict, valuesDict):
+  """This function counts the different variants of medium types in MARC field 245$h."""
+
+  kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
+  mediumType = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="h"]', ALL_NS))
+  utils.count(countDict, mediumType, kbrID, valuesDict)
+
+# -----------------------------------------------------------------------------
+def printStatsLog(stats, valueLog, field, fieldName):
+  """This function prints stats of the key 'field' in 'stats' in a certain format for further processing."""
+
+  for key,val in stats[field].items():
+    # we are only interested in non-standard values, e.g. single letter codes such as 'b' or 'd' are not of interest
+    if len(key) > 1:
+      if val < 5:
+        # print the associated logged KBR identifiers
+        identifiers = valueLog[key]
+        print(f'{fieldName} ({field}) records having the value "{key}": {identifiers}')
+        print()
+      else:
+        print(f'### {fieldName} ({field}) records with the value "{val}" ###')
+        print(f'IDENT="', end='')
+        print(f'" AND IDENT="'.join(valueLog[key]), end='')
+        print('"')
+        print()
+
 
 # -----------------------------------------------------------------------------
 def main():
   """This script reads an XML file in MARC slim format and generates statistics about used fields."""
 
   parser = OptionParser(usage="usage: %prog [options]")
-  parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC slim XML records')
+  # commented out because there is no auto completion for bash for options (but for arguments), we anyway only have one parameter
+  #parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC slim XML records')
   (options, args) = parser.parse_args()
 
   #
   # Check if we got all required arguments
   #
-  if( (not options.input_file)):
+  if( len(args) != 1 ):
     parser.print_help()
     exit(1)
 
+  inputFile = args[0]
   #
   # Instead of loading everything to main memory, stream over the XML using iterparse
   #
-  stats = {'totalRecords': 0, 'date': {}, 'translation': {}}
-  for event, elem in ET.iterparse(options.input_file, events=('start', 'end')):
+  stats = {'totalRecords': 0, 'date': {}, 'translation': {}, 'binding-types': {}, 'medium-types': {}, 'edition': {}  }
+  valueLog = {}
+
+  for event, elem in ET.iterparse(inputFile, events=('start', 'end')):
     if  event == 'start' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
       stats['totalRecords'] += 1
 
@@ -132,6 +180,11 @@ def main():
     #
     if  event == 'end' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
       foundFields = set()
+
+      countBindingTypes(elem, stats['binding-types'], valueLog)
+      countMediumTypes(elem, stats['medium-types'], valueLog)
+      countEditions(elem, stats['edition'])
+
       for datafield in elem:
         #print(datafield.tag, datafield.attrib, datafield.text)
         countTitleVariants(datafield, stats['translation'])
@@ -142,6 +195,16 @@ def main():
       #countUniqueDatafields(foundFields, stats)
       elem.clear()
 
-  print(json.dumps(stats, indent=4))
+  print("Total records")
+  print(json.dumps(stats['totalRecords'], indent=4))
+  print("Date")
+  print(json.dumps(stats['date'], indent=4))
+  print("Translation")
+  print(json.dumps(stats['translation'], indent=4))
+  print("Editions")
+  print(json.dumps(stats['edition'], indent=4))
+
+  printStatsLog(stats, valueLog, 'binding-types', 'Q020')
+  printStatsLog(stats, valueLog, 'medium-types', 'KBRM')
 
 main()
