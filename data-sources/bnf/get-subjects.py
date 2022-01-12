@@ -10,6 +10,7 @@ import csv
 from optparse import OptionParser
 import utils
 from predicate_object_filter import PredicateObjectConfigFilter
+from predicate_object_filter import PredicateObjectLookupFilter
 
 NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 NS_RDFS = "http://www.w3.org/2000/01/rdf-schema#"
@@ -23,8 +24,9 @@ NS_FOAF = "http://xmlns.com/foaf/0.1/"
 NS_VOID = "http://rdfs.org/ns/void#"
 NS_RDAGROUP1 = "http://rdvocab.info/Elements/"
 NS_RDAGROUP2 = "http://rdvocab.info/ElementsGr2/"
+NS_MARCREL = "http://id.loc.gov/vocabulary/relators/"
 
-ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1, 'rdagroup2elements': NS_RDAGROUP2}
+ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1, 'rdagroup2elements': NS_RDAGROUP2, 'marcrel': NS_MARCREL}
 
 
 RDF_ABOUT = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about'
@@ -85,7 +87,14 @@ def main():
       predicates = f.getPredicates()
 
   elif options.lookup_file and options.predicate:
-    print("todo: lookup file filter")
+
+    with open(options.lookup_file, 'r') as lookupFile:
+      lookupFileReader = csv.reader(lookupFile, delimiter=',')
+      lookupValues = set()
+      for row in lookupFileReader:
+        lookupValues.add(row[0])
+      f = PredicateObjectLookupFilter(lookupValues)
+      predicates = options.predicate
   else:
     print("Error: unsupported combination of options!")
 
