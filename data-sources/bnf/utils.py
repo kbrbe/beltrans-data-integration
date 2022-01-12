@@ -77,10 +77,19 @@ def getElementValue(elem, sep=';'):
   return ''
 
 # -----------------------------------------------------------------------------
-def readConditions(filename):
-  """This function reads predicate/object filter conditions from a CSV file.
+def extractBnFIdentifier(uri):
+  """This function extracts the numerical identifier of a BnF URI.
+  >>> extractBnFIdentifier("http://data.bnf.fr/ark:/12148/cb39863687h#Expression")
+  'cb39863687h'
+
+  >>> extractBnFIdentifier("http://data.bnf.fr/ark:/12148/cb39863687h#about")
+  'cb39863687h'
+
+  >>> extractBnFIdentifier("http://data.bnf.fr/ark:/12148/cb39863687h")
+  'cb39863687h'
   """
-  pass
+  lastPart = uri.split('/')[-1]
+  return lastPart.split('#')[0]
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
