@@ -9,6 +9,7 @@ import itertools
 import csv
 from optparse import OptionParser
 import utils
+from predicate_object_filter import PredicateObjectConfigFilter
 
 NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 NS_RDFS = "http://www.w3.org/2000/01/rdf-schema#"
@@ -21,9 +22,30 @@ NS_XSD = "http://www.w3.org/2001/XMLSchema#"
 NS_FOAF = "http://xmlns.com/foaf/0.1/"
 NS_VOID = "http://rdfs.org/ns/void#"
 NS_RDAGROUP1 = "http://rdvocab.info/Elements/"
+NS_RDAGROUP2 = "http://rdvocab.info/ElementsGr2/"
 
-ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1}
+ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1, 'rdagroup2elements': NS_RDAGROUP2}
 
+
+RDF_ABOUT = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about'
+RDF_RESOURCE = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource'
+
+# -----------------------------------------------------------------------------
+def checkArguments(parser, options, args):
+
+  # An input an output file are needed in any case
+  if( (not options.input_folder) or (not options.output_file) ):
+    print("Input and output needed!\n")
+    parser.print_help()
+    exit(1)
+
+  # Either a filter config file or a lookup file and one or more predicates need to be given
+  if (not options.filter_file):
+
+    if (not options.predicate) or (not options.lookup_file):
+      print("Either a filter file or a lookup file and predicates are needed!\n")
+      parser.print_help()
+      exit(1)
 
 
 # -----------------------------------------------------------------------------
@@ -34,14 +56,12 @@ def main():
   parser.add_option('-i', '--input-folder', action='store', help='The input folder containing RDF/XML files which should be filtered')
   parser.add_option('-o', '--output-file', action='store', help='The name of the CSV file in which the found subjects should be stored')
   parser.add_option('-f', '--filter-file', action='store', help='The name of a CSV file which contains predicate/object filter conditions, used to filter the input')
+  parser.add_option('-l', '--lookup-file', action='store', help='The name of a CSV file which contains one column with subjects used to filter the predicates given with -p')
+  parser.add_option('-p', '--predicate', action='append', help='The name of a CSV file which contains one column with subjects used to filter the predicates given with -p')
   (options, args) = parser.parse_args()
 
-  #
-  # Check if we got all required arguments
-  #
-  if( (not options.input_folder) or (not options.output_file) or (not options.filter_file) ):
-    parser.print_help()
-    exit(1)
+  # check that we got all necessary options
+  checkArguments(parser, options, args)
 
   uniqueISNIIdentifiers = set()
   processedRecords = 0
@@ -51,37 +71,39 @@ def main():
   for (prefix, uri) in ALL_NS.items():
     ET.register_namespace(prefix, uri)
 
-  with open(options.filter_file, 'r') as filterFile, \
-       open(options.output_file, 'w') as outFile:
+  # Initialize the filter which will be used
+  f = None
+  predicates = []
+  if options.filter_file:
 
-    #
-    # read the filter criteria
-    #
-    filterReader = csv.reader(filterFile, delimiter=',')
-    filterCriteria = []
-    for row in filterReader:
-      if ';' in row[2]:
-        filterCriteria.append((row[0], row[1], row[2].split(';')))
-      else:
-        filterCriteria.append((row[0], row[1], row[2]))
+    with open(options.filter_file, 'r') as filterFile:
+      filterFileReader = csv.reader(filterFile, delimiter=',')
+      filterCriteria = []
+      for row in filterFileReader:
+        filterCriteria.append([row[0], row[1], row[2]])
+      f = PredicateObjectConfigFilter(filterCriteria)
+      predicates = f.getPredicates()
 
+  elif options.lookup_file and options.predicate:
+    print("todo: lookup file filter")
+  else:
+    print("Error: unsupported combination of options!")
 
-    rdfAbout = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about'
-    rdfResource = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource'
+  with open(options.output_file, 'w') as outFile:
 
     # open the output file
     outputWriter = csv.writer(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
 
     #
     # read ISNI RDF records from input RDF/XML
     #
     inputFiles = os.listdir(options.input_folder)
+
     numberParsedFiles = 0
     numberXMLFiles = 0
     numberRecords = 0
-    numberFilterPass = 0
     filteredRecordIDs = set()
+
     for inputFile in inputFiles:
       numberParsedFiles += 1
       if inputFile.endswith('.xml'):
@@ -94,10 +116,9 @@ def main():
           if  event == 'end' and elem.tag == ET.QName(NS_RDF, 'Description'):
 
             numberRecords += 1
-            subject = elem.attrib[rdfAbout]
+            subject = elem.attrib[RDF_ABOUT]
 
-            for (predicate, operator, filterValue) in filterCriteria:
-
+            for predicate in predicates:
               # check if the currently read subject contains the predicate
               foundTriples = elem.findall(predicate, ALL_NS)
 
@@ -105,35 +126,19 @@ def main():
               for po in foundTriples:
 
                 # get the object value which is either an RDF resource or a literal value
-                objectValue = po.attrib[rdfResource] if rdfResource in po.attrib else utils.getElementValue(po)
+                objectValue = po.attrib[RDF_RESOURCE] if RDF_RESOURCE in po.attrib else utils.getElementValue(po)
 
-                # perform filter check
-                filterPass = False
-                if operator == '=':
-                  if objectValue == filterValue:
-                    filterPass = True
-                elif operator == 'in':
-                  if objectValue in filterValue:
-                    filterPass = True
-                elif operator == '>':
-                  if objectValue > filterValue:
-                    filterPass = True
-                elif operator == '<':
-                  if objectValue < filterValue:
-                    filterPass = True
-                else:
-                  print(f'Error: unknown operator {operator}')
-
-                if filterPass:
-                  numberFilterPass += 1
+                if f.passFilter(objectValue):
                   filteredRecordIDs.add(subject)
                   outputWriter.writerow([subject])
 
-            # discard record to keep space in main memory
-            processedRecords += 1
-            elem.clear()
+              # discard record to keep space in main memory
+              processedRecords += 1
+              elem.clear()
 
+    numberFilterPass = f.getNumberPassed()
     numberFilterPassUnique = len(filteredRecordIDs)
     print(f'{numberXMLFiles} XML files with {numberRecords} records read. {numberFilterPass} records ({numberFilterPassUnique} unique) matched filter criteria.')
  
+
 main()
