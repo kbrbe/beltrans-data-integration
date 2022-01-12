@@ -10,9 +10,40 @@ from an `7.5 GB` n-triples dump
 * took *54 minutes* on a local Blazegraph instance in a VM on a laptop with SSD and less than 4 GB of RAM
 * took *3.3 hours* on a Blazegraph instance on a server given 2 GB of RAM
 
-## Belgian authors
+We follow a 4-step process
+
+1. Obtain BnF IDs of persons with Belgian nationality (used to filter later)
+2. Obtain BnF publication IDs of publications between 1970 and 2020 (used to filter later)\*
+3. Obtain BnF publication IDs of French/Dutch, Dutch/French tanslations from an advanced search in the BnF catalog (used to filter later)
+4. Obtain BELTRANS-relevant BnF publication data by filtering the BnF editions dump with IDs obtained in step 1-3
+
+\*this filter can also be applied as part of the advanced catalog search of step 3
+
+## 1. BnF IDs of Belgians
 
 We assume the property `http://rdfvoab.info/ElementsGr2/countryAssociatedWithThePerson` refers to the nationality of a person.
+Then we use the script `get-subjects.py` to filter the RDF/XML dump of person authors.
+
+```bash
+
+# configuration to filter for Belgian nationality (filter-config-beltrans-contributor-nationality.csv)
+"rdagroup2elements:countryAssociatedWithThePerson","=","http://id.loc.gov/vocabulary/countries/be"
+
+# execution of the script with the config CSV (containing only one line see above)
+time python get-subjects.py -i person-authors -o belgian-contributors.csv -f filter-config-beltrans-contributor-nationality.csv
+202 XML files with 5425148 records read. 23075 records (23075 unique) matched filter criteria.
+
+real    5m27.330s
+user    4m34.378s
+sys     0m3.564s
+```
+
+## 2. BnF IDs of publications 1970-2020
+
+## 3. BnF IDs of translations FR-NL and NL-FR
+
+## 4. BELTRANS-relevant translations
+
 
 # Edition data dump
 
