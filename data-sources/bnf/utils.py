@@ -87,8 +87,15 @@ def extractBnFIdentifier(uri):
 
   >>> extractBnFIdentifier("http://data.bnf.fr/ark:/12148/cb39863687h")
   'cb39863687h'
+
+  >>> extractBnFIdentifier("cb39863687h")
+  'cb39863687h'
+
+  >>> extractBnFIdentifier("http://catalogue.bnf.fr/ark:/12148/cb41449389q | ISBN 9782092523636 | ")
+  'cb41449389q'
   """
-  lastPart = uri.split('/')[-1]
+  uriPart = uri.split(' ')[0]
+  lastPart = uriPart.split('/')[-1]
   return lastPart.split('#')[0]
 
 # -----------------------------------------------------------------------------
