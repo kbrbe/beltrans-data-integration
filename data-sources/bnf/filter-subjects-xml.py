@@ -8,6 +8,7 @@ import json
 import itertools
 import csv
 from optparse import OptionParser
+from tqdm import tqdm
 import utils
 
 NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -79,16 +80,21 @@ def main():
         filterFileCounter += 1
       numFilterIdentifiers = len(currentLookupSet)
       lookupSets.append(currentLookupSet)
-      print(f'Successfully read {numFilterIdentifiers} unique ISNI identifiers from {filterFileCounter} records in given CSV file {filterFile}')
+      print(f'Successfully read {numFilterIdentifiers} identifiers from {filterFileCounter} records in given CSV file {filterFile}')
 
 
+  relevantTranslations = set.intersection(*lookupSets)
+  numberTrl = len(relevantTranslations)
+  print(f'The intersection between the filters are {numberTrl} unique identifiers')
 
   with open(options.output_file, 'wb') as outFile:
 
     outFile.write(b'<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:madsrdf="http://www.loc.gov/mads/rdf/v1#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="http://schema.org/" xmlns:void="http://rdfs.org/ns/void#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">')
 
     inputFiles = os.listdir(options.input_folder)
-    for inputFile in inputFiles:
+    numberFiles = len(inputFiles)
+    print(f'Start processing {numberFiles} files')
+    for inputFile in tqdm(inputFiles):
       numberParsedFiles += 1
       if inputFile.endswith('.xml'):
         numberXMLFiles += 1
@@ -111,7 +117,7 @@ def main():
             #
 
             subjectID = utils.extractBnFIdentifier(subject)
-            if all(subjectID in s for s in lookupSets):
+            if subjectID in relevantTranslations:
               numberFilterPass += 1
               filteredRecordIDs.add(subjectID)
               outFile.write(ET.tostring(elem, encoding='utf-8'))
