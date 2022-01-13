@@ -2,15 +2,10 @@
 
 The National Library of France (BnF) provides information via a SPARQL endpoint or RDF dumps.
 
-* **source**:
+* **source**: data dumps or catalog
 * **URL**: https://data.bnf.fr/
 
-The import of all author information (`58,390,749 triples` from both skos and foaf dump)
-from an `7.5 GB` n-triples dump
-* took *54 minutes* on a local Blazegraph instance in a VM on a laptop with SSD and less than 4 GB of RAM
-* took *3.3 hours* on a Blazegraph instance on a server given 2 GB of RAM
-
-We follow a 4-step process
+We follow a 5-step process to integrate BELTRANS-relevant translations from BnF:
 
 1. Obtain BnF IDs of persons with Belgian nationality (used to filter later)
 2. Obtain BnF publication IDs of publications between 1970 and 2020 (used to filter later)\*
@@ -83,8 +78,10 @@ The advanced search of the BnF catalog is used to look for translations between 
 ## 5. BELTRANS-relevant translations
 
 In this final step relevant BnF publication records are extracted from the editions dump by applying a filter using the publication IDs of the previous steps.
+We are not only interested in the IDs of the publication but also data related to them.
+Therefore, we have to extract other related information from the publication IDs in other dumps such as the "external links" dump or the "contributions" dump.
 
-### Dutch to French translations
+### 5.1 NL-FR translations from editions
 
 * input
   * BnF editions dump `39GB`
@@ -106,13 +103,13 @@ user    29m45.683s
 sys     0m30.882s
 ```
 
-### French to Dutch translations
+### 5.2 FR-NL translations from editions
 
 * input
   * BnF editions dump `39GB`
   * BnF publication IDs of French to Dutch translations from 1970 onwards `0.05MB`
   * BnF publication IDs of publications with Belgian authors, illustrators or scenarists `5.1MB`
-output: RDF/XML data of BELTRANS-relevant publications, `bnf-translations-1970-belgian-nl-fr.xml` `4.6MB`
+output: RDF/XML data of BELTRANS-relevant publications, `bnf-translations-1970-belgian-nl-fr.xml` `0.3MB`
 
 ```bash
 
@@ -130,6 +127,9 @@ sys     0m32.044s
 
 
 ```
+
+### 5.3 
+
 
 # Edition data dump
 
@@ -183,3 +183,13 @@ find . -type f -exec grep -rnw "12148/cb398622399" {} +
 ./databnf_editions__expr_036070.xml:769:  <rdf:Description rdf:about="http://data.bnf.fr/ark:/12148/cb398622399">
 ./databnf_editions__expr_036070.xml:771:    <foaf:focus rdf:resource="http://data.bnf.fr/ark:/12148/cb398622399#about"/>
 ```
+
+
+# Alternative BnF data import
+
+The import of all author information (`58,390,749 triples` from both skos and foaf dump)
+from an `7.5 GB` n-triples dump
+* took *54 minutes* on a local Blazegraph instance in a VM on a laptop with SSD and less than 4 GB of RAM
+* took *3.3 hours* on a Blazegraph instance on a server given 2 GB of RAM
+
+
