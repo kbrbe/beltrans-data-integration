@@ -1,7 +1,7 @@
 
-if [ $# -ne 4 ];
+if [ $# -ne 3 ];
 then
-  echo "Please provide a namespace, the file with the query, the SPARQL endpoint you would like to query, and the name of the output file."
+  echo "Please provide a SPARQL endpoint, the file with the query, and the name of the output file."
   exit 1
 fi;
 
@@ -19,8 +19,9 @@ curl -X POST \
   --header "Accept: text/csv" \
   --header "Content-Type: application/sparql-query" \
   --upload-file $2 \
-  -o $4 \
-$3/namespace/$1/sparql
+  -o $3 \
+$1
+#$3/namespace/$1/sparql
 
 # if in quad mode a named graph could be specified by attaching the following to the namespace/<ns>/sparql?context-uri=https://my-namespace
 
