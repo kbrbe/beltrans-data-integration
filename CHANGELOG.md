@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
-## [2021-12-13] - 2021-12-23
+## [20211213] - 2021-12-23
 
 This version contains fixes and improvements based on received corpus feedback.
 It corresponds to the milestone https://github.com/SvenLieber/beltrans-data/milestone/2.
@@ -34,7 +34,7 @@ It corresponds to the milestone https://github.com/SvenLieber/beltrans-data/mile
 - Instead of an authority linked to a publication, a publisher might be indicated only textual and thus was missing in our corpus. Also textual publisher information was taken into account when linking publications to publishers in RDF ([#34](https://github.com/SvenLieber/beltrans-data/issues/34), [#35](https://github.com/SvenLieber/beltrans-data/issues/35))
 - In case several "countries of publication" exist in the KBR source data, we also create links for *all* of them and not just the first ([#51](https://github.com/SvenLieber/beltrans-data/issues/51))
 
-## [2021-11-29] - 2021-11-29
+## [20211129] - 2021-11-29
 
 This is a first version of the corpus created by the code of this repository.
 The main data source are exports of the library management system from KBR. Additionally, data from ISNI are used (a XML dump containing among others gender information and a Linked Data dump containing dates and Wikidata links).
@@ -55,6 +55,6 @@ This version corresponds to the milestone https://github.com/SvenLieber/beltrans
   - Make data queryable via SPARQL endpoint ([#23](https://github.com/SvenLieber/beltrans-data/issues/23))
   - A SPARQL query to obtain the data ([#22](https://github.com/SvenLieber/beltrans-data/issues/22))
 
-[2021-11-29]: https://github.com/SvenLieber/beltrans-data/releases/tag/2021-11-29
-[2021-12-23]: https://github.com/SvenLieber/beltrans-data/compare/2021-11-29...2021-12-23
+[20211129]: https://github.com/SvenLieber/beltrans-data/releases/tag/2021-11-29
+[20211223]: https://github.com/SvenLieber/beltrans-data/compare/2021-11-29...2021-12-23
 
