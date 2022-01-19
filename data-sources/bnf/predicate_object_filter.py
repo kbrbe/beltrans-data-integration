@@ -99,6 +99,9 @@ class PredicateObjectConfigFilter(PredicateObjectFilter):
     >>> f = PredicateObjectConfigFilter([["ex:year","in","1970;1971"]])
     >>> f.passFilter("1972")
     False
+    >>> f = PredicateObjectConfigFilter([["ex:note","stringContains","trad"]])
+    >>> f.passFilter("traduction de")
+    True
     """
 
     filterPass = False
@@ -118,6 +121,9 @@ class PredicateObjectConfigFilter(PredicateObjectFilter):
           filterPass = True
       elif operator == '<':
         if value < filterValue:
+          filterPass = True
+      elif operator == 'stringContains':
+        if filterValue in value:
           filterPass = True
       else:
         print(f'Error: unknown operator {operator}')
