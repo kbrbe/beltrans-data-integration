@@ -11,6 +11,7 @@ SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.
 SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
 SCRIPT_EXTRACT_COLUMN="../data-sources/bnf/extractColumn.py" 
 SCRIPT_FILTER_RDF_XML_SUBJECTS="../data-sources/bnf/filter-subjects-xml.py" 
+SCRIPT_UNION_IDS="../data-sources/bnf/union.py"
 
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
@@ -46,8 +47,12 @@ INPUT_KBR_BELGIANS="../data-sources/kbr/agents/2021-11-29-kbr-belgians.csv"
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
 INPUT_BNF_EDITIONS="../data-sources/bnf/editions"
+INPUT_BNF_CONTRIBUTIONS="../data-sources/bnf/contributions"
 INPUT_BNF_TRL_FR="../data-sources/bnf/BnF_FR-NL_1970-2020_584notices.csv"
 INPUT_BNF_TRL_NL="../data-sources/bnf/BnF_NL-FR_1970-2020_3762notices.csv"
+INPUT_BNF_CONT_ISNI="../data-sources/bnf/external/dump_extref-isni_exact_match.xml"
+INPUT_BNF_CONT_VIAF="../data-sources/bnf/external/dump_extref-viaf_exact_match.xml"
+INPUT_BNF_CONT_WIKIDATA="../data-sources/bnf/external/dump_extref-wikidata_exact_match.xml"
 
 # MASTER DATA
 
@@ -148,11 +153,8 @@ SUFFIX_BNF_BELGIANS_IDS="bnf-belgian-contributor-ids.csv"
 SUFFIX_BNF_BELGIAN_PUBS_IDS="bnf-belgian-contributor-publication-ids.csv"
 SUFFIX_BNF_TRL_IDS_FR="bnf-translation-ids-fr-nl.csv"
 SUFFIX_BNF_TRL_IDS_NL="bnf-translation-ids-nl-fr.csv"
+SUFFIX_BNF_TRL_IDS="bnf-translation-ids.csv"
   
-SUFFIX_BNF_TRL_DATA_FR="fr-translations.xml"
-SUFFIX_BNF_TRL_DATA_NL="nl-translations.xml"
-
-
 # DATA SOURCE - MASTER DATA
 #
 SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
@@ -181,6 +183,19 @@ SUFFIX_KBR_LA_LD="linked-authorities.ttl"
 # LINKED DATA - KBR BELGIANS
 #
 SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
+
+#
+# LINKED DATA - BNF
+#
+SUFFIX_BNF_TRL_FR_LD="fr-translations.xml"
+SUFFIX_BNF_TRL_NL_LD="nl-translations.xml"
+
+SUFFIX_BNF_CONT_LD="bnf-contributors.xml"
+SUFFIX_BNF_TRL_CONT_LINKS_LD="bnf-editions-contributor-links.xml"
+SUFFIX_BNF_CONT_ISNI_LD="bnf-contributor-isni.xml"
+SUFFIX_BNF_CONT_VIAF_LD="bnf-contributor-viaf.xml"
+SUFFIX_BNF_CONT_WIKIDATA_LD="bnf-contributor-wikidata.xml"
+
 
 #
 # LINKED DATA - MASTER DATA
@@ -380,15 +395,21 @@ function extractBnF {
   bnfNLTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_NL"
   bnfFRTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_FR"
   bnfBelgianPublications="$integrationName/bnf/translations/$SUFFIX_BNF_BELGIAN_PUBS_IDS"
+  bnfTranslationIDs="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS"
 
-  bnfFRRelevantTranslationData="$integrationName/rdf/$SUFFIX_BNF_TRL_DATA_FR"
-  bnfNLRelevantTranslationData="$integrationName/rdf/$SUFFIX_BNF_TRL_DATA_NL"
+  bnfFRRelevantTranslationData="$integrationName/rdf/$SUFFIX_BNF_TRL_FR_LD"
+  bnfNLRelevantTranslationData="$integrationName/rdf/$SUFFIX_BNF_TRL_NL_LD"
+  bnfContributorData="$integrationName/rdf/$SUFFIX_BNF_CONT_LD"
+  bnfContributionLinksData="$integrationName/rdf/$SUFFIX_BNF_TRL_CONT_LINKS_LD"
+  bnfContributorIsniData="$integrationName/rdf/$SUFFIX_BNF_CONT_ISNI_LD"
+  bnfContributorVIAFData="$integrationName/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
+  bnfContributorWikidataData="$integrationName/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
 
-  echo "EXTRACTION - Extract Belgian contributors from BnF data"
+  echo "EXTRACTION - Extract Belgian contributor IDs from BnF data"
   extractBnFBelgianContributors "$integrationName" "$INPUT_BNF_PERSON_AUTHORS" "$bnfBelgians"
 
   echo "EXTRACTION - Extract publication IDs of publications with Belgian contributors from BnF data"
-  extractBnFBelgianPublications "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfBelgians" "$bnfBelgianPublications"
+  extractBnFBelgianPublications "$integrationName" "$INPUT_BNF_CONTRIBUTIONS" "$bnfBelgians" "$bnfBelgianPublications"
 
   echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - NL-FR"
   extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_NL" "$bnfNLTranslations"
@@ -396,11 +417,32 @@ function extractBnF {
   echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - FR-NL"
   extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_FR" "$bnfFRTranslations"
 
+
   echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
   extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfNLTranslations" "$bnfBelgianPublications" "$bnfNLRelevantTranslationData"
 
   echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
   extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfFRTranslations" "$bnfBelgianPublications" "$bnfFRRelevantTranslationData"
+
+  source ../data-sources/py-etl-env/bin/activate
+
+  echo "EXTRACTION - Extract BnF contributor data"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_PERSON_AUTHORS -o $bnfContributorData -f $bnfBelgians
+  
+  echo "EXTRACTION - Create list of both NL and FR BnF translation IDs"
+  time python $SCRIPT_UNION_IDS $bnfNLTranslations $bnfFRTranslations -o $bnfTranslationIDs
+
+  echo "EXTRACTION - Extract links between BELTRANS relevant BnF publications and BnF contributors"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONTRIBUTIONS -o $bnfContributionLinksData -f $bnfBelgianPublications -f $bnfTranslationIDs
+
+  echo "EXTRACTION - Extract links between BnF contributors and ISNI"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfBelgians
+
+  echo "EXTRACTION - Extract links between BnF contributors and VIAF"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfBelgians
+
+  echo "EXTRACTION - Extract links between BnF contributors and Wikidata"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfBelgians
 }
 
 # -----------------------------------------------------------------------------
@@ -620,15 +662,15 @@ function extractBnFBelgianContributors {
 # -----------------------------------------------------------------------------
 function extractBnFBelgianPublications {
   local integrationName=$1
-  local bnfEditions=$2
+  local bnfEditionContributions=$2
   local bnfBelgians=$3
   local bnfBelgianPublicationIDs=$4
 
   # document which input was used
-  printf "\nUsed input (BnF editions used to filter publication IDs from Belgian contributors)\n* $bnfEditions\n* $bnfBelgians\n" >> "$integrationName/bnf/README.md"
+  printf "\nUsed input (BnF editions used to filter publication IDs from Belgian contributors)\n* $bnfEditionContributions\n* $bnfBelgians\n" >> "$integrationName/bnf/README.md"
 
   source ../data-sources/py-etl-env/bin/activate
-  time python $SCRIPT_GET_RDF_XML_SUBJECTS -i $bnfEditions -o $bnfBelgianPublicationIDs -p "marcrel:aut" -p "marcrel:ill" -p "marcrel:sce" -l $bnfBelgians
+  time python $SCRIPT_GET_RDF_XML_SUBJECTS -i $bnfEditionContributions -o $bnfBelgianPublicationIDs -p "marcrel:aut" -p "marcrel:ill" -p "marcrel:sce" -l $bnfBelgians
 }
 
 # -----------------------------------------------------------------------------
@@ -835,8 +877,8 @@ function loadBnF {
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_NL>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL"
 
-  local kbrTranslationsFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_DATA_FR"
-  local kbrTranslationsNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_DATA_NL"
+  local kbrTranslationsFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_LD"
+  local kbrTranslationsNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_LD"
 
   echo "Load BNF translations FR-NL ..."
   uploadData "$TRIPLE_STORE_NAMESPACE" "$kbrTranslationsFR" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR"
