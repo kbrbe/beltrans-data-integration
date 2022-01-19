@@ -8,12 +8,17 @@ SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-author
 SCRIPT_EXTRACT_BB="../data-sources/kbr/extract-belgian-bibliography.py"
 SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.py"
 
+SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
+SCRIPT_EXTRACT_COLUMN="../data-sources/bnf/extractColumn.py" 
+SCRIPT_FILTER_RDF_XML_SUBJECTS="../data-sources/bnf/filter-subjects-xml.py" 
+
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
 SCRIPT_QUERY_DATA="../utils/query-data.sh"
 SCRIPT_POSTPROCESS_QUERY_RESULT="post-process-integration-result.py"
 SCRIPT_POSTPROCESS_QUERY_CONT_RESULT="post-process-contributors.py"
 
+BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
 KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 
 # #############################################################################
@@ -38,6 +43,12 @@ INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 # KBR - Belgians
 INPUT_KBR_BELGIANS="../data-sources/kbr/agents/2021-11-29-kbr-belgians.csv"
 
+# BNF
+INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
+INPUT_BNF_EDITIONS="../data-sources/bnf/editions"
+INPUT_BNF_TRL_FR="../data-sources/bnf/BnF_FR-NL_1970-2020_584notices.csv"
+INPUT_BNF_TRL_NL="../data-sources/bnf/BnF_NL-FR_1970-2020_3762notices.csv"
+
 # MASTER DATA
 
 INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
@@ -58,6 +69,8 @@ INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography
 #
 
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
+TRIPLE_STORE_GRAPH_BNF_TRL_FR="http://bnf-fr"
+TRIPLE_STORE_GRAPH_BNF_TRL_NL="http://bnf-nl"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
@@ -65,6 +78,7 @@ TRIPLE_STORE_GRAPH_MASTER="http://master-data"
 # if it is a blazegraph triple store
 TRIPLE_STORE_NAMESPACE="integration"
 
+FORMAT_RDF_XML="application/rdf+xml"
 FORMAT_TURTLE="text/turtle"
 FORMAT_NT="text/rdf+n3"
 
@@ -128,6 +142,17 @@ SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_BELGIANS_CLEANED="belgians-cleaned.csv"
 SUFFIX_KBR_BELGIANS_NORM="belgians-norm.csv"
 
+# DATA SOURCE - BNF
+#
+SUFFIX_BNF_BELGIANS_IDS="bnf-belgian-contributor-ids.csv"
+SUFFIX_BNF_BELGIAN_PUBS_IDS="bnf-belgian-contributor-publication-ids.csv"
+SUFFIX_BNF_TRL_IDS_FR="bnf-translation-ids-fr-nl.csv"
+SUFFIX_BNF_TRL_IDS_NL="bnf-translation-ids-nl-fr.csv"
+  
+SUFFIX_BNF_TRL_DATA_FR="fr-translations.xml"
+SUFFIX_BNF_TRL_DATA_NL="nl-translations.xml"
+
+
 # DATA SOURCE - MASTER DATA
 #
 SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
@@ -183,9 +208,13 @@ function extract {
   elif [ "$dataSource" = "master-data" ];
   then
     extractMasterData $integrationFolderName
+  elif [ "$dataSource" = "bnf" ];
+  then
+    extractBnF $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
+    extractBnF $integrationFolderName
     extractMasterData $integrationFolderName
   fi
   
@@ -205,9 +234,13 @@ function transform {
   elif [ "$dataSource" = "master-data" ];
   then
     transformMasterData $integrationFolderName
+  elif [ "$dataSource" = "bnf" ];
+  then
+    transformBnF $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
+    transformBnF $integrationFolderName
     transformMasterData $integrationFolderName
   fi
   
@@ -227,9 +260,13 @@ function load {
   elif [ "$dataSource" = "master-data" ];
   then
     loadMasterData $integrationFolderName
+  elif [ "$dataSource" = "bnf" ];
+  then
+    loadBnF $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
+    loadBnF $integrationFolderName
     loadKBR $integrationFolderName
   fi
 
@@ -331,6 +368,42 @@ function extractKBR {
 }
 
 # -----------------------------------------------------------------------------
+function extractBnF {
+
+  local integrationName=$1
+
+  mkdir -p $integrationName/bnf/translations
+  mkdir -p $integrationName/bnf/agents
+  mkdir -p $integrationName/bnf/rdf
+
+  bnfBelgians="$integrationName/bnf/agents/$SUFFIX_BNF_BELGIANS_IDS"
+  bnfNLTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_NL"
+  bnfFRTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_FR"
+  bnfBelgianPublications="$integrationName/bnf/translations/$SUFFIX_BNF_BELGIAN_PUBS_IDS"
+
+  bnfFRRelevantTranslationData="$integrationName/rdf/$SUFFIX_BNF_TRL_DATA_FR"
+  bnfNLRelevantTranslationData="$integrationName/rdf/$SUFFIX_BNF_TRL_DATA_NL"
+
+  echo "EXTRACTION - Extract Belgian contributors from BnF data"
+  extractBnFBelgianContributors "$integrationName" "$INPUT_BNF_PERSON_AUTHORS" "$bnfBelgians"
+
+  echo "EXTRACTION - Extract publication IDs of publications with Belgian contributors from BnF data"
+  extractBnFBelgianPublications "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfBelgians" "$bnfBelgianPublications"
+
+  echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - NL-FR"
+  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_NL" "$bnfNLTranslations"
+
+  echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - FR-NL"
+  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_FR" "$bnfFRTranslations"
+
+  echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
+  extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfNLTranslations" "$bnfBelgianPublications" "$bnfNLRelevantTranslationData"
+
+  echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
+  extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfFRTranslations" "$bnfBelgianPublications" "$bnfFRRelevantTranslationData"
+}
+
+# -----------------------------------------------------------------------------
 function extractMasterData {
 
   local integrationName=$1
@@ -369,6 +442,13 @@ function transformKBR {
 
   echo "TRANSFORMATION - Map KBR Belgians data to RDF"
   mapKBRBelgians $integrationName
+}
+
+# -----------------------------------------------------------------------------
+function transformBnF {
+  local integrationName=$1
+
+  echo "TRANSFORMATION - Map BnF translation data to RDF (nothing to do, the extraction step already produced RDF)"
 }
 
 # -----------------------------------------------------------------------------
@@ -520,6 +600,63 @@ function extractKBRBelgians {
   # currently this input has already normalized headers
   #normalizeCSVHeaders "$kbrBelgians" "$kbrBelgiansNorm" "$KBR_CSV_HEADER_CONVERSION"
   cleanAgents "$kbrBelgians" "$kbrBelgiansCleaned"
+}
+
+# -----------------------------------------------------------------------------
+function extractBnFBelgianContributors {
+
+  local integrationName=$1
+  local bnfPersonAuthors=$2
+  local bnfBelgianContributorIDs=$3
+
+  # document which input was used
+  printf "\nUsed input (BnF Belgian contributors)\n* $bnfPersonAuthors" >> "$integrationName/bnf/README.md"
+
+  source ../data-sources/py-etl-env/bin/activate
+
+  getSubjects "$bnfPersonAuthors" "$BNF_FILTER_CONFIG_CONTRIBUTORS" "$bnfBelgianContributorIDs"
+}
+
+# -----------------------------------------------------------------------------
+function extractBnFBelgianPublications {
+  local integrationName=$1
+  local bnfEditions=$2
+  local bnfBelgians=$3
+  local bnfBelgianPublicationIDs=$4
+
+  # document which input was used
+  printf "\nUsed input (BnF editions used to filter publication IDs from Belgian contributors)\n* $bnfEditions\n* $bnfBelgians\n" >> "$integrationName/bnf/README.md"
+
+  source ../data-sources/py-etl-env/bin/activate
+  time python $SCRIPT_GET_RDF_XML_SUBJECTS -i $bnfEditions -o $bnfBelgianPublicationIDs -p "marcrel:aut" -p "marcrel:ill" -p "marcrel:sce" -l $bnfBelgians
+}
+
+# -----------------------------------------------------------------------------
+function extractBnFTranslations {
+  local integrationName=$1
+  local bnfTranslations=$2
+  local bnfTranslationIDs=$3
+ 
+  # document which input was used
+  printf "\nUsed input (BnF translations used to extract relevant publication IDs)\n* $bnfTranslations\n" >> "$integrationName/bnf/README.md"
+
+  source ../data-sources/py-etl-env/bin/activate
+  time python $SCRIPT_EXTRACT_COLUMN -i $bnfTranslations -o $bnfTranslationIDs -d ';' -c 0
+}  
+
+# -----------------------------------------------------------------------------
+function extractBnFRelevantPublicationData {
+  local integrationName=$1
+  local bnfEditions=$2
+  local bnfTranslationIDs=$3
+  local bnfBelgianPubs=$4
+  local bnfRelevantData=$5
+
+  # document which input was used
+  printf "\nUsed input (BnF editions used to extract relevant publication data)\n* $bnfEditions" >> "$integrationName/bnf/README.md"
+
+  source ../data-sources/py-etl-env/bin/activate
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $bnfEditions  -o $bnfRelevantData -f $bnfTranslationIDs -f $bnfBelgianPubs
 }
 
 # -----------------------------------------------------------------------------
@@ -685,6 +822,31 @@ function loadKBR {
 }
 
 # -----------------------------------------------------------------------------
+function loadBnF {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # first delete content of the named graph in case it already exists
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_FR>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR"
+
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_NL>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL"
+
+  local kbrTranslationsFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_DATA_FR"
+  local kbrTranslationsNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_DATA_NL"
+
+  echo "Load BNF translations FR-NL ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$kbrTranslationsFR" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR"
+
+  echo "Load BNF translations NL-FR ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$kbrTranslationsNL" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR"
+
+}
+
+# -----------------------------------------------------------------------------
 function loadMasterData {
   local integrationName=$1
 
@@ -787,6 +949,16 @@ function extractPubCountries {
 
   checkFile $input
   python $SCRIPT_EXTRACT_PUB_COUNTRIES -i $input -o $output
+}
+
+# -----------------------------------------------------------------------------
+function getSubjects {
+  local input=$1
+  local config=$2
+  local output=$3
+
+  #python $SCRIPT_GET_RDF_XML_SUBJECTS -i $input -o $output -f $config
+  echo "python $SCRIPT_GET_RDF_XML_SUBJECTS -i $input -o $output -f $config"
 }
 
 # -----------------------------------------------------------------------------
