@@ -1,6 +1,6 @@
 # BnF
 
-The National Library of France (BnF) provides information via a SPARQL endpoint or RDF dumps.
+The National Library of France (BnF) provides information via a catalog, a SPARQL endpoint or RDF dumps.
 
 * **source**: data dumps or catalog
 * **URL**: https://data.bnf.fr/
@@ -11,7 +11,7 @@ We follow a 5-step process to integrate BELTRANS-relevant translations from BnF:
 2. Obtain BnF publication IDs of publications between 1970 and 2020 (used to filter later)\*
 3. Obtain BnF publication IDs of publications with Belgian author, illustrator or scenarist
 4. Obtain BnF publication IDs of French/Dutch, Dutch/French tanslations from an advanced search in the BnF catalog (used to filter later)
-5. Obtain BELTRANS-relevant BnF publication data by filtering the BnF editions dump with IDs obtained in step 1-3
+5. Obtain BELTRANS-relevant BnF publication data by filtering the BnF editions dump with IDs obtained in step 1-4
 
 \*this filter can also be applied as part of the advanced catalog search of step 4
 
@@ -73,7 +73,16 @@ sys     0m5.276s
 
 ## 4. BnF IDs of translations FR-NL and NL-FR
 
-The advanced search of the BnF catalog is used to look for translations between dutch and french and french and dutch: https://catalogue.bnf.fr/recherche-avancee.do?pageRech=rav
+The advanced search of the BnF catalog is used to look for translations between Dutch and French and French and Dutch: https://catalogue.bnf.fr/recherche-avancee.do?pageRech=rav
+The following search filters were applied (using an `AND` condition):
+
+* *Par nature de document*, *type de document*: Texte imprimé et livre numérique 
+* *Par langue*, *Langue du document*: français
+* *Par langue*, *Langue de l'oeuvre originale*: néerlandais
+* *Par date de publication*: de 1970 a 2020
+
+This resulted in `3762` translations from Dutch to French. When switching the language of the document with language of the original we obtained `584` translations from French to Dutch.
+These results were exported as CSV, afterwards the column with the URI was extracted for further processing.
 
 ## 5. BELTRANS-relevant translations
 
@@ -90,13 +99,14 @@ Therefore, we have to extract other related information from the publication IDs
 output: RDF/XML data of BELTRANS-relevant publications, `bnf-translations-1970-belgian-nl-fr.xml` `4.6MB`
 
 ```bash
-time python filter-subjects-xml.py -i editions -o bnf-translations-1970-belgian-nl-fr.xml -f belgian-contributors-pubs.csv -f BnF_NL-FR_vanaf1970_3815notices_export-public-fullids.csv
+time python filter-subjects-xml.py -i editions -o bnf-translations-1970-belgian-nl-fr.xml -f belgian-contributors-pubs.csv -f bnf_nl-fr_translations.csv
 Successfully read 94899 identifiers from 102227 records in given CSV file belgian-contributors-pubs.csv
-Successfully read 3815 identifiers from 5991 records in given CSV file BnF_NL-FR_vanaf1970_3815notices_export-public-fullids.csv
-The intersection between the filters are 1195 unique identifiers
+Successfully read 3763 identifiers from 3763 records in given CSV file bnf_nl-fr_translations.csv
+The intersection between the filters are 1177 unique identifiers
 Start processing 62611 files
-100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 62611/62611 [1:06:02<00:00, 15.80it/s]
-62610 XML files with 64321802 records read. 5975 records (1195 unique) matched filter criteria.
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 62611/62611 [1:07:08<00:00, 15.54it/s]
+62610 XML files with 64321802 records read. 5885 records (1177 unique) matched filter criteria.
+
 
 real    66m2.864s
 user    29m45.683s
