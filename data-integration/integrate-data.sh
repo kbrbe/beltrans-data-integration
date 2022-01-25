@@ -9,6 +9,7 @@ SCRIPT_EXTRACT_BB="../data-sources/kbr/extract-belgian-bibliography.py"
 SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.py"
 
 SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
+SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
 SCRIPT_EXTRACT_COLUMN="../data-sources/bnf/extractColumn.py" 
 SCRIPT_FILTER_RDF_XML_SUBJECTS="../data-sources/bnf/filter-subjects-xml.py" 
 SCRIPT_UNION_IDS="../data-sources/bnf/union.py"
@@ -151,6 +152,7 @@ SUFFIX_KBR_BELGIANS_NORM="belgians-norm.csv"
 #
 SUFFIX_BNF_BELGIANS_IDS="bnf-belgian-contributor-ids.csv"
 SUFFIX_BNF_BELGIAN_PUBS_IDS="bnf-belgian-contributor-publication-ids.csv"
+SUFFIX_BNF_TRL_CONT_IDS="bnf-translation-contributor-ids.csv"
 SUFFIX_BNF_TRL_IDS_FR="bnf-translation-ids-fr-nl.csv"
 SUFFIX_BNF_TRL_IDS_NL="bnf-translation-ids-nl-fr.csv"
 SUFFIX_BNF_TRL_IDS="bnf-translation-ids.csv"
@@ -391,7 +393,8 @@ function extractBnF {
   mkdir -p $integrationName/bnf/agents
   mkdir -p $integrationName/bnf/rdf
 
-  bnfBelgians="$integrationName/bnf/agents/$SUFFIX_BNF_BELGIANS_IDS"
+  bnfBelgiansBELTRANS="$integrationName/bnf/agents/$SUFFIX_BNF_BELGIANS_IDS"
+  bnfPersonsBELTRANS="$integrationName/bnf/agents/$SUFFIX_BNF_TRL_CONT_IDS"
   bnfNLTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_NL"
   bnfFRTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_FR"
   bnfBelgianPublications="$integrationName/bnf/translations/$SUFFIX_BNF_BELGIAN_PUBS_IDS"
@@ -405,44 +408,55 @@ function extractBnF {
   bnfContributorVIAFData="$integrationName/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
   bnfContributorWikidataData="$integrationName/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
 
+  # get the IDs of BnF Belgians
   echo "EXTRACTION - Extract Belgian contributor IDs from BnF data"
-  extractBnFBelgianContributors "$integrationName" "$INPUT_BNF_PERSON_AUTHORS" "$bnfBelgians"
+  extractBnFBelgianContributors "$integrationName" "$INPUT_BNF_PERSON_AUTHORS" "$bnfBelgiansBELTRANS"
 
+  # use the IDs of Belgians to get publication IDs with Belgian authors, illustrators or scenarists
   echo "EXTRACTION - Extract publication IDs of publications with Belgian contributors from BnF data"
-  extractBnFBelgianPublications "$integrationName" "$INPUT_BNF_CONTRIBUTIONS" "$bnfBelgians" "$bnfBelgianPublications"
+  extractBnFBelgianPublications "$integrationName" "$INPUT_BNF_CONTRIBUTIONS" "$bnfBelgiansBELTRANS" "$bnfBelgianPublications"
 
+  # get publicationIDs of a dump of publications which are known to be translations
   echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - NL-FR"
-  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_NL" "$bnfNLTranslations"
-
+  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_NL" "$bnfNLTranslations" 
   echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - FR-NL"
   extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_FR" "$bnfFRTranslations"
 
 
+  # extract the actual data of translations with relevant Belgian contributors
   echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
   extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfNLTranslations" "$bnfBelgianPublications" "$bnfNLRelevantTranslationData"
-
   echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
   extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfFRTranslations" "$bnfBelgianPublications" "$bnfFRRelevantTranslationData"
 
+  #
+  # we also need related information of the identified publications from other data dumps
+  #
   source ../data-sources/py-etl-env/bin/activate
 
-  echo "EXTRACTION - Extract BnF contributor data"
-  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_PERSON_AUTHORS -o $bnfContributorData -f $bnfBelgians
-  
   echo "EXTRACTION - Create list of both NL and FR BnF translation IDs"
   time python $SCRIPT_UNION_IDS $bnfNLTranslations $bnfFRTranslations -o $bnfTranslationIDs
 
+  # extract contributor IDs of all translation contributors (also non-Belgian contributors)
+  echo "EXTRACTION - Extract all BnF contributor IDs of BELTRANS translations (despite the nationality)"
+  time python $SCRIPT_GET_RDF_XML_OBJECTS -i $INPUT_BNF_CONTRIBUTIONS -o $bnfPersonsBELTRANS -l $bnfTranslationIDs -p "dcterms:contributor"
+
+  # extract the actual data of all BELTRANS translations contributors
+  echo "EXTRACTION - Extract BnF contributor data"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_PERSON_AUTHORS -o $bnfContributorData -f $bnfPersonsBELTRANS
+  
+  # extract the actual links between publications and contributors (not just looking up things)
   echo "EXTRACTION - Extract links between BELTRANS relevant BnF publications and BnF contributors"
   time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONTRIBUTIONS -o $bnfContributionLinksData -f $bnfBelgianPublications -f $bnfTranslationIDs
 
   echo "EXTRACTION - Extract links between BnF contributors and ISNI"
-  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfBelgians
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfPersonsBELTRANS
 
   echo "EXTRACTION - Extract links between BnF contributors and VIAF"
-  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfBelgians
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfPersonsBELTRANS
 
   echo "EXTRACTION - Extract links between BnF contributors and Wikidata"
-  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfBelgians
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfPersonsBELTRANS
 }
 
 # -----------------------------------------------------------------------------
