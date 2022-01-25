@@ -59,7 +59,7 @@ def main():
   parser.add_option('-o', '--output-file', action='store', help='The name of the CSV file in which the found subjects should be stored')
   parser.add_option('-f', '--filter-file', action='store', help='The name of a CSV file which contains predicate/object filter conditions, used to filter the input')
   parser.add_option('-l', '--lookup-file', action='store', help='The name of a CSV file which contains one column with subjects used to filter the predicates given with -p')
-  parser.add_option('-p', '--predicate', action='append', help='The name of a CSV file which contains one column with subjects used to filter the predicates given with -p')
+  parser.add_option('-p', '--predicate', action='append', help='The name of a predicate which should contain subjects from the lookup file')
   (options, args) = parser.parse_args()
 
   # check that we got all necessary options
