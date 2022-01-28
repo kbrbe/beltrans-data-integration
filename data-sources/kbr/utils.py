@@ -317,9 +317,18 @@ def getNormalizedString(s):
   'judaisme islam christianisme et sectes apparentees'
   >>> getNormalizedString("chamanisme, de l’Antiquité…)")
   'chamanisme de lantiquite...)'
+
+  >>> getNormalizedString("Abe Ce De ?")
+  'abe ce de'
+  >>> getNormalizedString("Abe Ce De !")
+  'abe ce de'
+  >>> getNormalizedString("Abe Ce De :")
+  'abe ce de'
   """
   noComma = s.replace(',', '')
-  noColon = noComma.replace(':', '')
+  noQuestionMark = noComma.replace('?', '')
+  noExclamationMark = noQuestionMark.replace('!', '')
+  noColon = noExclamationMark.replace(':', '')
   return ud.normalize('NFKD', noColon).encode('ASCII', 'ignore').lower().strip().decode("utf-8")
 
 
@@ -370,25 +379,68 @@ def smallLevenshteinBetweenLists(wordList1, wordList2):
   #
   # check which list is smaller
   # so we know for how many 0 or 1 levenshtein numbers we have to look
-  smallerListLen = min(len(wordList1), len(wordList2))
+  #smallerListLen = min(len(wordList1), len(wordList2))
 
-  distances = list()
-  for w1 in wordList1:
-    for w2 in wordList2:
-      distances.append(enchant.utils.levenshtein(w1, w2))
+  #distances = list()
+  #for w1 in wordList1:
+  #  for w2 in wordList2:
+  #    distances.append(enchant.utils.levenshtein(w1, w2))
 
-  smallDistanceCounter = 0
-  for d in distances:
-    if d < 2:
-      smallDistanceCounter += 1
+  #smallDistanceCounter = 0
+  #for d in distances:
+  #  if d < 2:
+  #    smallDistanceCounter += 1
 
   #
   # If the items of the smaller list occured one or more times in the longer list (with slight variation)
   # we consider it a match
-  if(smallDistanceCounter >= smallerListLen):
-    return True
+  #if(smallDistanceCounter >= smallerListLen):
+  #  return True
+  #else:
+  #  return False
+
+  smallerList = None
+  biggerList = None
+
+
+  (smallerList, biggerList) = getSmallerAndBiggerElement(wordList1, wordList2)
+
+  for w1 in smallerList:
+    similarMatchFound = False
+    for w2 in biggerList:
+      # at least one of the shorter list's words is not part of the larger list
+      if enchant.utils.levenshtein(w1,w2) < 2:
+        similarMatchFound = True
+    if not similarMatchFound:
+      return False
+  
+  return True
+
+# -----------------------------------------------------------------------------
+def getSmallerAndBiggerElement(element1, element2):
+  """Returning a tuple of smaller and bigger element, if the same length the first is listed first.
+  >>> getSmallerAndBiggerElement([1,2], [3,4])
+  ([1, 2], [3, 4])
+
+  >>> getSmallerAndBiggerElement([1,2,3], [3,4])
+  ([3, 4], [1, 2, 3])
+
+  >>> getSmallerAndBiggerElement([1,2], [3,4,5])
+  ([1, 2], [3, 4, 5])
+  """
+  smallerList = None
+  biggerList = None
+  if len(element1) == len(element2):
+    smallerList = element1
+    biggerList = element2
+  elif len(element1) > len(element2):
+    smallerList = element2
+    biggerList = element1
   else:
-    return False
+    smallerList = element1
+    biggerList = element2
+
+  return (smallerList, biggerList)
 
 # -----------------------------------------------------------------------------
 def smallLevenshteinDistance(stats, str1, str2):
@@ -476,6 +528,107 @@ def smallLevenshteinDistance(stats, str1, str2):
         retVal = True
 
   return retVal
+
+# -----------------------------------------------------------------------------
+def smallLevenshteinDistanceImproved(stats, str1, str2):
+  """This function checks both strings with respect to their levenshtein distance, checking also substrings.
+
+  >>> smallLevenshteinDistance({}, 'koninklijke bibliotheek albert i', 'koninklijke bibliotheek van belgie')
+  True
+  >>> smallLevenshteinDistance({}, 'athenaeum-polak & van gennep', 'athenaeum  polak & van gennep')
+  True
+  >>> smallLevenshteinDistance({}, 'publieboek : baart', 'publiboek')
+  True
+  >>> smallLevenshteinDistance({}, 'blake en mortimer', 'blake & mortimer')
+  True
+  >>> smallLevenshteinDistance({}, 'nomonkeybooks', 'no monkey business')
+  False
+  """
+
+  retVal = False
+
+  #
+  # check which string is longer
+  # needed to compare levenshtein distance relative to string length
+  #
+  longerNameLength = max([len(str1), len(str2)])
+  halfLongerNameLength = longerNameLength/2
+  
+  distance = enchant.utils.levenshtein(str1, str2)
+ 
+  if(longerNameLength > 1 and distance == 1):
+    #
+    # the levenshtein distance is very small,
+    # very likely it was just a typo or there is a special character like a hyphen
+    #
+    retVal = True
+    count(stats, 'levenshtein-distance-match-just-1')
+  elif(distance < (longerNameLength/4)):
+    #
+    # the levenshtein distance is relatively low (less than a quarter of the length of the string)
+    #
+    retVal = True
+    count(stats, 'levenshtein-distance-match-less-than-a-quarter')
+  #
+  # Checking for a too big difference turned out to be to strict
+  # "Sven Lieber" and "Lieber, Sven" would have too much of a difference already
+  # thus going to the else condition where the words are checked separately
+  #
+  #elif(distance > halfLongerNameLength ):
+    #
+    # The distance is quite big
+    #
+    #count(stats, 'levenshtein-distance-no-match-too-big')
+    #retVal = False
+    #print("definitely no match, distance too long")
+  else:
+    #
+    # The levenshtein distance is not too small but also not too big
+    # check the distance for different words
+    #
+    strList1 = str1.split()
+    strList2 = str2.split()
+
+    maxLenDiff = 2
+    lenDiff = abs(len(strList1)-len(strList2))
+
+    if(lenDiff >= maxLenDiff):
+      return False
+    elif(lenDiff < maxLenDiff and len(strList1) == 1 and len(strList2) > 1):
+      # even though maxLen is not exceeded, one of the lists has just 1 element
+      return False
+    elif(lenDiff < maxLenDiff and len(strList2) == 1 and len(strList1) > 1):
+      # even though maxLen is not exceeded, one of the lists has just 1 element
+      return False
+    elif(len(strList1) == 1 and len(strList2) > 1):
+      #
+      # We only have to check if a misspelled version of the single word first string
+      # matches with one of the words of the second string
+      # If the second is a large list of words we likely get a mismatch, thus make the max=3
+      #
+      if(smallLevenshteinInList(str1, strList2)):
+        count(stats, 'levenshtein-distance-match-word1-in-list2')
+        retVal = True
+    elif(len(strList2) == 1 and len(strList1) > 1):
+      #
+      # We only have to check if a misspelled version of the single word second string
+      # matches with one of the words of the first string
+      #
+      if(smallLevenshteinInList(str2, strList1)):
+        count(stats, 'levenshtein-distance-match-word2-in-list1')
+        retVal = True
+    elif(len(strList1) == 1 and len(strList2) == 1):
+      # both are just one word and the levenshtein distance was already too big
+      retVal = False
+    else:
+      # both names consist of many words
+      if(smallLevenshteinBetweenLists(strList1, strList2)):
+        count(stats, 'levenshtein-distance-match-words-in-lists')
+        retVal = True
+
+  return retVal
+
+
 
 # -----------------------------------------------------------------------------
 def createURIString(valueString, delimiter, vocab):
