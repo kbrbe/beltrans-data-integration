@@ -98,7 +98,7 @@ def main():
           if  event == 'end' and elem.tag == ET.QName(NS_RDF, 'Description'):
 
             numberRecords += 1
-            subject = elem.attrib[RDF_ABOUT]
+            subject = utils.extractBnFIdentifier(elem.attrib[RDF_ABOUT])
 
             # the predicates provided by the commandline arguments are stored in an array, because there can be more than one
             for predicate in options.predicate:

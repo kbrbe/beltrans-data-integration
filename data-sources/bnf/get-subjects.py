@@ -135,7 +135,7 @@ def main():
               for po in foundTriples:
 
                 # get the object value which is either an RDF resource or a literal value
-                objectValue = po.attrib[RDF_RESOURCE] if RDF_RESOURCE in po.attrib else utils.getElementValue(po)
+                objectValue = utils.extractBnFIdentifier(po.attrib[RDF_RESOURCE] if RDF_RESOURCE in po.attrib else utils.getElementValue(po))
 
                 if f.passFilter(objectValue):
                   filteredRecordIDs.add(subject)

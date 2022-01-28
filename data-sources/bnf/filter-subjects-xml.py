@@ -24,8 +24,14 @@ NS_VOID = "http://rdfs.org/ns/void#"
 NS_RDAGROUP1 = "http://rdvocab.info/Elements/"
 NS_RDAGROUP2 = "http://rdvocab.info/ElementsGr2/"
 NS_MARCREL = "http://id.loc.gov/vocabulary/relators/"
+NS_SKOS = "http://www.w3.org/2004/02/skos/core#"
+NS_BNF = "http://data.bnf.fr/ontology/bnf-onto/"
+NS_RDAA = "http://rdaregistry.info/Elements/a/" 
+NS_RDAU = "http://rdaregistry.info/Elements/u/"
+NS_BNF_ROLES = "http://data.bnf.fr/vocabulary/roles/"
+NS_BIO = "http://vocab.org/bio/0.1/"
 
-ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1, 'rdagroup2elements': NS_RDAGROUP2, 'marcrel': NS_MARCREL}
+ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1, 'rdagroup2elements': NS_RDAGROUP2, 'marcrel': NS_MARCREL, 'skos': NS_SKOS, 'bnf-onto': NS_BNF, 'bnfroles': NS_BNF_ROLES, 'rdau': NS_RDAU, 'rdaa': NS_RDAA, 'bio': NS_BIO}
 
 
 RDF_ABOUT = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about'
@@ -33,43 +39,44 @@ RDF_RESOURCE = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource'
 
 
 # -----------------------------------------------------------------------------
-def main():
-  """This script reads an XML file in MARC slim format and generates statistics about used fields."""
-
-  parser = OptionParser(usage="usage: %prog [options]")
-  parser.add_option('-i', '--input-folder', action='store', help='The input folder containing RDF/XML files which should be filtered')
-  parser.add_option('-o', '--output-file', action='store', help='The name of the file in which the filtered RDF/XML should be stored')
-  parser.add_option('-f', '--filter-file', action='append', help='The name of a CSV file which contains relevant subject identifiers in one column, used to filter the input. If several files are provided a subject of the input needs to exist in all of the filter files (AND condition)')
-  (options, args) = parser.parse_args()
+def processFile(xmlFilename, relevantTranslations, filteredRecordIDs, outFile, stats):
 
   #
-  # Check if we got all required arguments
+  # read ISNI RDF records from input RDF/XML
   #
-  if( (not options.input_folder) or (not options.output_file) or (not options.filter_file) ):
-    parser.print_help()
-    exit(1)
+  for event, elem in ET.iterparse(xmlFilename, events=('start', 'end')):
 
-  #
-  # Instead of loading everything to main memory, stream over the XML using iterparse
-  #
-  filteredRecordIDs = set()
-  processedRecords = 0
-  recordsWithoutID = 0
-  numRecordsTaken = 0
-  numberParsedFiles = 0
-  numberFilterPass = 0
-  numberRecords = 0
-  numberXMLFiles = 0
+    #
+    # The parser finished reading one RDF ISNI entity
+    #
+    if  event == 'end' and elem.tag == ET.QName(NS_RDF, 'Description'):
 
-  for (prefix, uri) in ALL_NS.items():
-    ET.register_namespace(prefix, uri)
+      stats['numberRecords'] += 1
+      subject = elem.attrib[RDF_ABOUT]
+      #
+      # add record to output if it fits the filter criteria
+      #
+
+      subjectID = utils.extractBnFIdentifier(subject)
+      if subjectID in relevantTranslations:
+        stats['numberFilterPass'] += 1
+        filteredRecordIDs.add(subjectID)
+        outFile.write(ET.tostring(elem, encoding='utf-8'))
+
+      # discard record to keep space in main memory
+      elem.clear()
+
+
+
+# -----------------------------------------------------------------------------
+def readLookupIdentifiers(filenames):
 
   #
   # read relevant identifiers and store them for lookup
   # read all given files and store the identifiers in different sets
   #
   lookupSets = []
-  for filterFile in options.filter_file:
+  for filterFile in filenames:
     currentLookupSet = set()
     filterFileCounter = 0
     with open(filterFile, 'r') as fIn:
@@ -86,48 +93,63 @@ def main():
   relevantTranslations = set.intersection(*lookupSets)
   numberTrl = len(relevantTranslations)
   print(f'The intersection between the filters are {numberTrl} unique identifiers')
+  return relevantTranslations
 
+
+
+# -----------------------------------------------------------------------------
+def main():
+  """This script reads an XML file in MARC slim format and generates statistics about used fields."""
+
+  parser = OptionParser(usage="usage: %prog [options]")
+  parser.add_option('-i', '--input', action='store', help='The input file or folder containing RDF/XML files which should be filtered')
+  parser.add_option('-o', '--output-file', action='store', help='The name of the file in which the filtered RDF/XML should be stored')
+  parser.add_option('-f', '--filter-file', action='append', help='The name of a CSV file which contains relevant subject identifiers in one column, used to filter the input. If several files are provided a subject of the input needs to exist in all of the filter files (AND condition)')
+  (options, args) = parser.parse_args()
+
+  #
+  # Check if we got all required arguments
+  #
+  if( (not options.input) or (not options.output_file) or (not options.filter_file) ):
+    parser.print_help()
+    exit(1)
+
+
+  for (prefix, uri) in ALL_NS.items():
+    ET.register_namespace(prefix, uri)
+
+  relevantTranslations = readLookupIdentifiers(options.filter_file)
+
+  filteredRecordIDs = set()
+  processedRecords = 0
+  numberXMLFiles = 0
+
+  print(f'Opening output file {options.output_file}')
   with open(options.output_file, 'wb') as outFile:
 
     outFile.write(b'<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:madsrdf="http://www.loc.gov/mads/rdf/v1#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="http://schema.org/" xmlns:void="http://rdfs.org/ns/void#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">')
 
-    inputFiles = os.listdir(options.input_folder)
-    numberFiles = len(inputFiles)
-    print(f'Start processing {numberFiles} files')
-    for inputFile in tqdm(inputFiles):
-      numberParsedFiles += 1
-      if inputFile.endswith('.xml'):
-        numberXMLFiles += 1
+    stats = {'numberFilterPass': 0, 'numberRecords': 0}
 
-       
+    if os.path.isfile(options.input) and options.input.endswith('.xml'):
+      numberXMLFiles += 1
+      processFile(options.input, relevantTranslations, filteredRecordIDs, outFile, stats)
+    elif os.path.isdir(options.input):
+      inputFiles = os.listdir(options.input)
+      numberFiles = len(inputFiles)
+      print(f'Start processing {numberFiles} files')
+      for inputFile in tqdm(inputFiles):
+        if inputFile.endswith('.xml'):
+          numberXMLFiles += 1
+          processFile(os.path.join(options.input, inputFile), relevantTranslations, filteredRecordIDs, outFile, stats)
+    else:
+      print(f'Error: the input {options.input} is not a folder nor a file!')
 
-        #
-        # read ISNI RDF records from input RDF/XML
-        for event, elem in ET.iterparse(os.path.join(options.input_folder, inputFile), events=('start', 'end')):
-
-          #
-          # The parser finished reading one RDF ISNI entity
-          #
-          if  event == 'end' and elem.tag == ET.QName(NS_RDF, 'Description'):
-
-            numberRecords += 1
-            subject = elem.attrib[RDF_ABOUT]
-            #
-            # add record to output if it fits the filter criteria
-            #
-
-            subjectID = utils.extractBnFIdentifier(subject)
-            if subjectID in relevantTranslations:
-              numberFilterPass += 1
-              filteredRecordIDs.add(subjectID)
-              outFile.write(ET.tostring(elem, encoding='utf-8'))
-
-            # discard record to keep space in main memory
-            processedRecords += 1
-            elem.clear()
     outFile.write(b'</rdf:RDF>')
 
     numberFilterPassUnique = len(filteredRecordIDs)
+    numberFilterPass = stats['numberFilterPass']
+    numberRecords = stats['numberRecords']
     print(f'{numberXMLFiles} XML files with {numberRecords} records read. {numberFilterPass} records ({numberFilterPassUnique} unique) matched filter criteria.')
      
 main()

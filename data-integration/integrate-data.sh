@@ -400,13 +400,13 @@ function extractBnF {
   bnfBelgianPublications="$integrationName/bnf/translations/$SUFFIX_BNF_BELGIAN_PUBS_IDS"
   bnfTranslationIDs="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS"
 
-  bnfFRRelevantTranslationData="$integrationName/rdf/$SUFFIX_BNF_TRL_FR_LD"
-  bnfNLRelevantTranslationData="$integrationName/rdf/$SUFFIX_BNF_TRL_NL_LD"
-  bnfContributorData="$integrationName/rdf/$SUFFIX_BNF_CONT_LD"
-  bnfContributionLinksData="$integrationName/rdf/$SUFFIX_BNF_TRL_CONT_LINKS_LD"
-  bnfContributorIsniData="$integrationName/rdf/$SUFFIX_BNF_CONT_ISNI_LD"
-  bnfContributorVIAFData="$integrationName/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
-  bnfContributorWikidataData="$integrationName/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
+  bnfFRRelevantTranslationData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_LD"
+  bnfNLRelevantTranslationData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_LD"
+  bnfContributorData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_LD"
+  bnfContributionLinksData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_CONT_LINKS_LD"
+  bnfContributorIsniData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_ISNI_LD"
+  bnfContributorVIAFData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
+  bnfContributorWikidataData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
 
   # get the IDs of BnF Belgians
   echo "EXTRACTION - Extract Belgian contributor IDs from BnF data"
@@ -1013,8 +1013,8 @@ function getSubjects {
   local config=$2
   local output=$3
 
-  #python $SCRIPT_GET_RDF_XML_SUBJECTS -i $input -o $output -f $config
-  echo "python $SCRIPT_GET_RDF_XML_SUBJECTS -i $input -o $output -f $config"
+  python $SCRIPT_GET_RDF_XML_SUBJECTS -i $input -o $output -f $config
+  #echo "python $SCRIPT_GET_RDF_XML_SUBJECTS -i $input -o $output -f $config"
 }
 
 # -----------------------------------------------------------------------------

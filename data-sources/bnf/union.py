@@ -44,7 +44,8 @@ def main():
   if(options.output_file):
     with open(options.output_file, 'w') as outFile:
       outputWriter = csv.writer(outFile, delimiter=',')
-      outputWriter.writerow(list(unionIDs))
+      for identifier in unionIDs:
+        outputWriter.writerow([identifier])
       print(f'Successfully wrote {numberUnion} identifiers to {options.output_file}')
 
 
