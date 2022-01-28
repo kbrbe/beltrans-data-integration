@@ -77,6 +77,11 @@ INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
 TRIPLE_STORE_GRAPH_BNF_TRL_FR="http://bnf-fr"
 TRIPLE_STORE_GRAPH_BNF_TRL_NL="http://bnf-nl"
+TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS="http://bnf-trl-contributor-links"
+TRIPLE_STORE_GRAPH_BNF_CONT="http://bnf-contributors"
+TRIPLE_STORE_GRAPH_BNF_CONT_ISNI="http://bnf-contributors-isni"
+TRIPLE_STORE_GRAPH_BNF_CONT_VIAF="http://bnf-contributors-viaf"
+TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA="http://bnf-contributors-wikidata"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
@@ -891,14 +896,49 @@ function loadBnF {
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_NL>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL"
 
-  local kbrTranslationsFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_LD"
-  local kbrTranslationsNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_LD"
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_CONT>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT"
+
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS"
+
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI"
+
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF"
+
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA"
+
+  local bnfTranslationsFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_LD"
+  local bnfTranslationsNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_LD"
+  local bnfContributorData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_LD"
+  local bnfContributionLinksData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_CONT_LINKS_LD"
+  local bnfContributorIsniData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_ISNI_LD"
+  local bnfContributorVIAFData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
+  local bnfContributorWikidataData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
 
   echo "Load BNF translations FR-NL ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$kbrTranslationsFR" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfTranslationsFR" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR"
 
   echo "Load BNF translations NL-FR ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$kbrTranslationsNL" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfTranslationsNL" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL"
+
+  echo "Load BnF contributors ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT"
+
+  echo "Load BnF publication-contributor links ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributionLinksData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS"
+
+  echo "Load external links of BnF contributors - ISNI ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorIsniData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI"
+
+  echo "Load external links of BnF contributors - VIAF ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorIsniData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF"
+
+  echo "Load external links of BnF contributors - WIKIDATA ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorIsniData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA"
 
 }
 
