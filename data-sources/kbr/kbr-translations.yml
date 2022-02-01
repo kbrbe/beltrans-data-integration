@@ -25,6 +25,8 @@ variables:
   sourceContFR: &sourceContFR ${RML_SOURCE_CONT_FR}
   sourceWorksNL: &sourceWorksNL ${RML_SOURCE_WORKS_NL}
   sourceContNL: &sourceContNL ${RML_SOURCE_CONT_NL}
+  sourceCollectionLinksNL: &sourceCollectionLinksNL ${RML_SOURCE_COLLECTION_LINKS_NL}
+  sourceCollectionLinksFR: &sourceCollectionLinksFR ${RML_SOURCE_COLLECTION_LINKS_FR}
 
 mappings:
 
@@ -394,4 +396,61 @@ mappings:
       - [a, schema:CreativeWork]
       - [schema:inLanguage, lang:nl~iri]
       - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  collectionLinksNL:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links between creative works and their collections (in case they are part of one or more collections)."
+    sources:
+      - access: *sourceCollectionLinksNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(KBRID)
+    po:
+      - [schema:isPartOf, btid:collection_$(collectionID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  collectionLinksFR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links between creative works and their collections (in case they are part of one or more collections)."
+    sources:
+      - access: *sourceCollectionLinksFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(KBRID)
+    po:
+      - [schema:isPartOf, btid:collection_$(collectionID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  collectionInfoNL:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates collections (solely based on linking information, thus not all metadata of the collection is available in the source)."
+    sources:
+      - access: *sourceCollectionLinksNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:collection_$(collectionID)
+    po:
+      - [dcterms:identifier, $(collectionID)]
+      - [schema:name, $(collection-name)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  collectionInfoFR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates collections (solely based on linking information, thus not all metadata of the collection is available in the source)."
+    sources:
+      - access: *sourceCollectionLinksFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:collection_$(collectionID)
+    po:
+      - [dcterms:identifier, $(collectionID)]
+      - [schema:name, $(collection-name)]
+
 

@@ -747,6 +747,8 @@ function mapKBRTranslationsAndContributions {
   export RML_SOURCE_WORKS_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_WORKS"
   export RML_SOURCE_CONT_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT"
   export RML_SOURCE_CONT_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT"
+  export RML_SOURCE_COLLECTION_LINKS_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
+  export RML_SOURCE_COLLECTION_LINKS_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
 
   # 2) execute the mapping
   echo "Map KBR translations and contributions ..."
