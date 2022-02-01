@@ -379,7 +379,7 @@ mappings:
     s: btid:manifestation_source_$(KBRID)
     po:
       - [a, schema:CreativeWork]
-      - [schema:inLanguage, lang:fr~iri]
+      - [schema:inLanguage, lang:fre~iri]
       - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
 
   # ---------------------------------------------------------------------------
@@ -394,7 +394,7 @@ mappings:
     s: btid:manifestation_source_$(KBRID)
     po:
       - [a, schema:CreativeWork]
-      - [schema:inLanguage, lang:nl~iri]
+      - [schema:inLanguage, lang:dut~iri]
       - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
 
 

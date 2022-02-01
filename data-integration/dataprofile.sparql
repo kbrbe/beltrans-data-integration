@@ -22,6 +22,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?kbrDatePublished AS ?targetTextYearOfPublication)
     (?kbrLocationCreated AS ?targetTextPlaceOfPublication)
     (?kbrResponsibilityStatement AS ?targetTextResponsibilityStatement)
+    (?kbrSourceLangLabel AS ?sourceTextLanguage)
     (?kbrTargetLangLabel AS ?targetTextLanguage)
     (?isbn AS ?targetTextISBN) 
     (?kbrAuthorID AS ?authorKBRIdentifier)
@@ -133,6 +134,18 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         FILTER (lang(?kbrTargetLangLabel) = 'en')
       }
     } 
+
+    OPTIONAL {
+      graph <http://kbr-syracuse> {
+        ?manifestation schema:translationOfWork ?manifestationSource .
+        ?manifestationSource schema:inLanguage ?kbrSourceLang .
+      }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrSourceLang mads:authoritativeLabel ?kbrSourceLangLabel . }
+        FILTER (lang(?kbrSourceLangLabel) = 'en')
+      }
+    }
 
 
     # ---------------------------------------------------------------------------

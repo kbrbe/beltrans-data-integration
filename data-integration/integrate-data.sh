@@ -1099,7 +1099,8 @@ function queryData {
   local endpoint=$3
   local outputFile=$4
 
-  . $SCRIPT_QUERY_DATA "$namespace" "$queryFile" "$endpoint" "$outputFile"
+#  . $SCRIPT_QUERY_DATA "$namespace" "$queryFile" "$endpoint" "$outputFile"
+  . $SCRIPT_QUERY_DATA "$endpoint/namespace/$namespace/sparql" "$queryFile" "$outputFile"
 }
 
 # -----------------------------------------------------------------------------
@@ -1131,7 +1132,8 @@ function postprocessContributorData {
 #
 if [ "$#" -ne 3 ];
 then
-  echo "use 'bash integrate-data.sh <command> <data source> <integration folder name>, whereas command is either 'extract', 'transform' or 'load'"
+  echo "use 'bash integrate-data.sh <command> <data source> <integration folder name>, whereas command are combinations of"
+  echo "extract (e) transform (t) load (l) query (q) and postprocess (p): 'etl', 'etlq', 'etlqp', 'e', 'et', 't', 'l', 'tl', 'q' etc"
   exit 1
 else
   if [ "$1" = "etlqp" ];

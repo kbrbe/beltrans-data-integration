@@ -22,6 +22,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetTextYearOfPublication)
     (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetTextPlaceOfPublication)
     (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetTextResponsibilityStatement)
+    (group_concat(distinct ?kbrSourceLangLabel;SEPARATOR=';') AS ?sourceTextLanguage)
     (group_concat(distinct ?kbrTargetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
     (group_concat(distinct ?isbn;SEPARATOR=';') AS ?targetTextISBN) 
     (group_concat(distinct ?kbrAuthorID;SEPARATOR=';') AS ?authorKBRIdentifier)
@@ -82,6 +83,9 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       }
     }
 
+    #
+    # TARGET LANGUAGE
+    #
     OPTIONAL { 
       graph <http://kbr-syracuse> { ?manifestation schema:inLanguage ?kbrTargetLang . } 
 
@@ -91,6 +95,22 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         FILTER (lang(?kbrTargetLangLabel) = 'en')
       }
     } 
+
+    #
+    # SOURCE LANGUAGE
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> {
+        ?manifestation schema:translationOfWork ?manifestationSource .
+        ?manifestationSource schema:inLanguage ?kbrSourceLang .
+      }
+
+      OPTIONAL {
+        graph <http://master-data> { ?kbrSourceLang mads:authoritativeLabel ?kbrSourceLangLabel . }
+        FILTER (lang(?kbrSourceLangLabel) = 'en')
+      }
+    }
+
 
 
     # ---------------------------------------------------------------------------
