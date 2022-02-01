@@ -125,12 +125,14 @@ SUFFIX_KBR_TRL_NL_CONT="nl-translations-contributors.csv"
 SUFFIX_KBR_TRL_NL_NEWAUT="nl-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_NL_BB="nl-translations-bb.csv"
 SUFFIX_KBR_TRL_NL_PUB_COUNTRY="nl-translations-pub-country.csv"
+SUFFIX_KBR_TRL_NL_COL_LINKS="nl-collection-links.csv"
 SUFFIX_KBR_TRL_FR_CLEANED="fr-translations-cleaned.xml"
 SUFFIX_KBR_TRL_FR_WORKS="fr-translations-works.csv"
 SUFFIX_KBR_TRL_FR_CONT="fr-translations-contributors.csv"
 SUFFIX_KBR_TRL_FR_NEWAUT="fr-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_FR_BB="fr-translations-bb.csv"
 SUFFIX_KBR_TRL_FR_PUB_COUNTRY="fr-translations-pub-country.csv"
+SUFFIX_KBR_TRL_FR_COL_LINKS="fr-collection-links.csv"
 
 SUFFIX_KBR_LA_PLACES_VLG="publisher-places-VLG.csv"
 SUFFIX_KBR_LA_PLACES_WAL="publisher-places-WAL.csv"
@@ -547,16 +549,24 @@ function extractKBRTranslationsAndContributions {
   #
   kbrDutchTranslationsCleaned="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CLEANED"
   kbrFrenchTranslationsCleaned="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CLEANED"
+
   kbrDutchTranslationsCSVWorks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_WORKS"
   kbrFrenchTranslationsCSVWorks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+
   kbrDutchTranslationsCSVCont="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT"
   kbrFrenchTranslationsCSVCont="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT"
+
   kbrDutchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_NEWAUT"
   kbrFrenchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_NEWAUT"
+
   kbrDutchTranslationsCSVBB="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_BB"
   kbrFrenchTranslationsCSVBB="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_BB"
+
   kbrDutchTranslationsPubCountries="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
   kbrFrenchTranslationsPubCountries="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
+
+  kbrDutchTranslationsCollectionLinks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
+  kbrFrenchTranslationsCollectionLinks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
   
   source ../data-sources/py-etl-env/bin/activate
 
@@ -567,10 +577,10 @@ function extractKBRTranslationsAndContributions {
   cleanTranslations "$kbrFrenchTranslations" "$kbrFrenchTranslationsCleaned"
 
   echo "Extract CSV from Dutch translations XML..."
-  extractCSVFromXMLTranslations "$kbrDutchTranslationsCleaned" "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVCont"
+  extractCSVFromXMLTranslations "$kbrDutchTranslationsCleaned" "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVCont" "$kbrDutchTranslationsCollectionLinks"
 
   echo "Extract CSV from French translations XML..."
-  extractCSVFromXMLTranslations "$kbrFrenchTranslationsCleaned" "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsCSVCont"
+  extractCSVFromXMLTranslations "$kbrFrenchTranslationsCleaned" "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsCSVCont" "$kbrFrenchTranslationsCollectionLinks"
 
   echo "Extract BB assignments for Dutch translations ..."
   extractBBEntries "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVBB"
@@ -1004,9 +1014,10 @@ function extractCSVFromXMLTranslations {
   local inputXML=$1
   local outputCSVWorks=$2
   local outputCSVContributors=$3
+  local outputCollectionLinks=$4
 
   checkFile $inputXML
-  python $SCRIPT_TRANSFORM_TRANSLATIONS -i $inputXML -w $outputCSVWorks -c $outputCSVContributors
+  python $SCRIPT_TRANSFORM_TRANSLATIONS -i $inputXML -w $outputCSVWorks -c $outputCSVContributors -l $outputCollectionLinks
 }
 
 # -----------------------------------------------------------------------------

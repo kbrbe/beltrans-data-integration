@@ -119,20 +119,20 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
 def addWorkFieldsToWorkCSV(elem, writer):
   """This function extracts work relevant data from the given XML element 'elem' and writes it to the given CSV file writer."""
 
-
   #
   # extract relevant data from the current record
   #
   kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
   isbn = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="a"]', ALL_NS))
   bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
-  languagesString = utils.getElementValue(elem.findall('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
-  countryOfPublicationString = utils.getElementValue(elem.findall('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
   title = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="a"]', ALL_NS))
   responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
   placeOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="a"]', ALL_NS))
   yearOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="c"]', ALL_NS))
   edition = utils.getElementValue(elem.find('./datafield[@tag="250"]/subfield[@code="a"]', ALL_NS))
+
+  languagesString = utils.getElementValue(elem.findall('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
+  countryOfPublicationString = utils.getElementValue(elem.findall('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
   belgianBibliographyClassificationsString = utils.getElementValue(elem.findall('./datafield[@tag="911"]/subfield[@code="a"]', ALL_NS))
 
   
@@ -163,19 +163,40 @@ def addWorkFieldsToWorkCSV(elem, writer):
      
 
 # -----------------------------------------------------------------------------
+def addCollectionLinksToCSV(elem, writer, stats):
+  """This function extracts links to collections and writes the id of the publication, the id of the collection and name of the collection to the given CSV file writer."""
+
+  
+  kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
+  collectionLinks = elem.findall('./datafield[@tag="773"]', ALL_NS)
+
+  for cl in collectionLinks:
+    collectionID = utils.getElementValue(cl.find('./subfield[@code="*"]', ALL_NS))
+    collectionName = utils.getElementValue(cl.find('./subfield[@code="t"]', ALL_NS))
+
+    newRecord = {
+      'KBRID': kbrID,
+      'collectionID': collectionID,
+      'collection-name': collectionName
+    }
+
+    writer.writerow(newRecord)
+
+# -----------------------------------------------------------------------------
 def main():
   """This script reads an XML file in MARC slim format and generates statistics about used fields."""
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC SLIM XML records')
   parser.add_option('-c', '--output-cont-file', action='store', help='The output contributor CSV file containing selected MARC fields (one contribution per row)')
+  parser.add_option('-l', '--output-collection-links-file', action='store', help='The output work CSV file containing containing a link between publication and collections (one link per row)')
   parser.add_option('-w', '--output-work-file', action='store', help='The output work CSV file containing selected MARC fields (one work per row)')
   (options, args) = parser.parse_args()
 
   #
   # Check if we got all required arguments
   #
-  if( (not options.input_file) or (not options.output_work_file) or (not options.output_cont_file) ):
+  if( (not options.input_file) or (not options.output_work_file) or (not options.output_cont_file) or (not options.output_collection_links_file) ):
     parser.print_help()
     exit(1)
 
@@ -183,16 +204,20 @@ def main():
   # Instead of loading everything to main memory, stream over the XML using iterparse
   #
   with open(options.output_cont_file, 'w') as outContFile, \
+       open(options.output_collection_links_file, 'w') as outCollectionLinksFile, \
        open(options.output_work_file, 'w') as outWorkFile:
 
-    fields = ['ISNI', 'dataConfidence', 'nationality', 'gender', 'surname', 'forename', 'marcDate', 'sourceName', 'subSourceName', 'sourceID', 'externalInfo', 'externalInfoURI', 'externalInfoID']
-    workFields = ['KBRID', 'isbn', 'title', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
+    workFields = ['KBRID', 'isbn', 'title', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
     contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
+    collectionLinksFields = ['KBRID', 'collectionID', 'collection-name']
+
     workWriter = csv.DictWriter(outWorkFile, fieldnames=workFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     contWriter = csv.DictWriter(outContFile, fieldnames=contFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    collectionLinksWriter = csv.DictWriter(outCollectionLinksFile, fieldnames=collectionLinksFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
     workWriter.writeheader()
     contWriter.writeheader()
+    collectionLinksWriter.writeheader()
 
     stats = {'unique-publishers-without-authority': set(), 'counter': {} }
     # iterate over all XML Files in the given directory and count ISNI statistics
@@ -203,6 +228,7 @@ def main():
 
         addWorkFieldsToWorkCSV(elem, workWriter)
         addContributorFieldsToContributorCSV(elem, contWriter, stats)
+        addCollectionLinksToCSV(elem, collectionLinksWriter, stats)
 
     numberUniquePublishersWithoutAuthorityRecord = len(stats['unique-publishers-without-authority'])
     print(f'Unique publishers without authority record: {numberUniquePublishersWithoutAuthorityRecord}')
