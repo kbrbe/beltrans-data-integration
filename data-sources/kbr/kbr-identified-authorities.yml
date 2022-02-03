@@ -40,7 +40,7 @@ mappings:
     po:
       - [a, schema:Organization]
       - [rdfs:label, $(contributorName)]
-      - [dc:identifier, $(contributorID)]
+      - [dcterms:identifier, $(contributorID)]
       - [prov:wasGeneratedBy, btid:authority_prov_$(contributorID)~iri]
       - [foaf:isPrimaryTopicOf, btabout:authority_$(contributorID)~iri]
 

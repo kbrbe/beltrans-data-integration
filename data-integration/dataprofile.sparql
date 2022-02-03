@@ -84,7 +84,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
     graph <http://kbr-syracuse> { 
       ?manifestation a schema:CreativeWork ;
-                     dc:identifier ?manifestationID ;
+                     dcterms:identifier ?manifestationID ;
                      schema:name ?manifestationTitle .
     }
         
@@ -169,7 +169,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrAuthor a schema:Person ;
-                     dc:identifier ?kbrAuthorID ;
+                     dcterms:identifier ?kbrAuthorID ;
                      schema:nationality ?kbrAuthorNationality . 
         }
 
@@ -248,7 +248,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrTranslator a schema:Person ;
-                         dc:identifier ?kbrTranslatorID ;
+                         dcterms:identifier ?kbrTranslatorID ;
                          schema:nationality ?kbrTranslatorNationality . 
         }
 
@@ -346,7 +346,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       OPTIONAL { 
         graph <http://kbr-linked-authorities> {
           ?kbrPublisher rdfs:label ?kbrPublisherName ;
-                        dc:identifier ?kbrPublisherID .
+                        dcterms:identifier ?kbrPublisherID .
         } 
       }
 
@@ -413,7 +413,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrIllustrator a schema:Person ;
-                          dc:identifier ?kbrIllustratorID ;
+                          dcterms:identifier ?kbrIllustratorID ;
                           schema:nationality ?kbrIllustratorNationality . 
         }
 
@@ -503,7 +503,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         graph <http://kbr-belgians> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrScenarist a schema:Person ;
-                        dc:identifier ?kbrScenaristID ;
+                        dcterms:identifier ?kbrScenaristID ;
                         schema:nationality ?kbrScenaristNationality . 
         }
 

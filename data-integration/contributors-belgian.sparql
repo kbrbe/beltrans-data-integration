@@ -36,7 +36,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
     graph <http://kbr-linked-authorities> { 
       ?contributor a schema:Person ;
-                   dc:identifier ?contributorID .
+                   dcterms:identifier ?contributorID .
     }
 
     # within this optional author, check optional attributes

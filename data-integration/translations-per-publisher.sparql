@@ -42,7 +42,7 @@ OPTIONAL {
 
     OPTIONAL {
       graph <http://kbr-linked-authorities> {
-        ?publisher dc:identifier ?publisherID ;
+        ?publisher dcterms:identifier ?publisherID ;
                    rdfs:label ?publisherLabel . 
       }
     }
@@ -148,7 +148,7 @@ OPTIONAL {
 
     OPTIONAL {
       graph <http://kbr-linked-authorities> {
-        ?publisher dc:identifier ?publisherID ;
+        ?publisher dcterms:identifier ?publisherID ;
                    rdfs:label ?publisherLabel . 
       }
     }
@@ -254,7 +254,7 @@ OPTIONAL {
 
     OPTIONAL {
       graph <http://kbr-linked-authorities> {
-        ?publisher dc:identifier ?publisherID ;
+        ?publisher dcterms:identifier ?publisherID ;
                    rdfs:label ?publisherLabel . }
     }
 
