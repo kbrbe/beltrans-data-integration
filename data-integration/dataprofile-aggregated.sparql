@@ -18,6 +18,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
     (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetTextEdition)
     (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetTextBindingType)
+    (group_concat(distinct ?kbrTargetManifestationCollectionID;SEPARATOR=';') AS ?targetTextCollectionKBRIdentifier)
     (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
     (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetTextYearOfPublication)
     (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetTextPlaceOfPublication)
@@ -54,6 +55,11 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
+
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation schema:isPartOf ?kbrTargetManifestationCollectionID . }
+    }
+
 
 
     OPTIONAL { 

@@ -134,7 +134,7 @@ OPTIONAL {
       ?manifestation schema:countryOfOrigin ?countryPublished ;
                      schema:translationOfWork ?source .
 
-      ?source schema:inLanguage lang:fr .
+      ?source schema:inLanguage lang:fre .
     }
 
     graph <http://master-data> { ?countryPublished mads:authoritativeLabel ?countryPublishedLabel . }
@@ -235,7 +235,7 @@ OPTIONAL {
       ?manifestation schema:countryOfOrigin ?countryPublished ;
                      schema:translationOfWork ?source .
 
-      ?source schema:inLanguage lang:nl .
+      ?source schema:inLanguage lang:dut .
     }
 
     graph <http://master-data> { ?countryPublished mads:authoritativeLabel ?countryPublishedLabel . }

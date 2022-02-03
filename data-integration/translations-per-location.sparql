@@ -130,7 +130,7 @@ OPTIONAL {
       ?manifestation schema:locationCreated ?locationPublished ;
                      schema:translationOfWork ?source .
 
-      ?source schema:inLanguage lang:fr .
+      ?source schema:inLanguage lang:fre .
     }
 
     # #########################################################################
@@ -228,7 +228,7 @@ OPTIONAL {
       ?manifestation schema:locationCreated ?locationPublished ;
                      schema:translationOfWork ?source .
 
-      ?source schema:inLanguage lang:nl .
+      ?source schema:inLanguage lang:dut .
     }
 
     # #########################################################################

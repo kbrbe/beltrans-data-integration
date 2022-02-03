@@ -17,6 +17,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?translationType AS ?translationType)
     (?manifestationTitle AS ?targetTextTitle)
     (?kbrTargetManifestationEdition AS ?targetTextEdition)
+    (?kbrTargetManifestationCollectionID AS ?targetTextCollectionKBRIdentifier)
+    (?kbrTargetManifestationCollectionName AS ?targetTextCollectionKBRName)
     (?kbrTargetManifestationBindingTypeLabel AS ?targetTextBindingType)
     (?kbrCountryOfOriginLabel AS ?targetTextCountryOfPublication)
     (?kbrDatePublished AS ?targetTextYearOfPublication)
@@ -97,6 +99,11 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
 
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation schema:isPartOf ?kbrTargetManifestationCollectionID . }
+
+      OPTIONAL { graph <http://kbr-syracuse> { ?kbrTargetManifestationCollectionID schema:name ?kbrTargetManifestationCollectionName . } }
+    }
 
     OPTIONAL { 
       graph <http://kbr-syracuse> { ?manifestation schema:about ?kbrTargetManifestationBB . }
