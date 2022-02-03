@@ -132,6 +132,10 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
   yearOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="c"]', ALL_NS))
   edition = utils.getElementValue(elem.find('./datafield[@tag="250"]/subfield[@code="a"]', ALL_NS))
 
+  sourceKBRID = utils.getElementValue(elem.find('./datafield[@tag="765"]/subfield[@code="*"]', ALL_NS))
+  sourceTitle = utils.getElementValue(elem.find('./datafield[@tag="765"]/subfield[@code="t"]', ALL_NS))
+  sourceISBN = utils.getElementValue(elem.find('./datafield[@tag="765"]/subfield[@code="z"]', ALL_NS))
+
   languagesString = utils.getElementValue(elem.findall('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
   countryOfPublicationString = utils.getElementValue(elem.findall('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
   belgianBibliographyClassificationsString = utils.getElementValue(elem.findall('./datafield[@tag="911"]/subfield[@code="a"]', ALL_NS))
@@ -158,6 +162,20 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
   except:
     stats['erroneous-isbn'][isbn] = kbrID
 
+  sourceISBN10 = ''
+  sourceISBN13 = ''
+  try:
+    sourceISBN10 = utils.getNormalizedISBN10(sourceISBN)
+  except:
+    stats['not-convertable-isbn'][sourceISBN] = kbrID
+
+  try:
+    sourceISBN13 = utils.getNormalizedISBN13(sourceISBN)
+  except:
+    stats['erroneous-isbn'][sourceISBN] = kbrID
+
+
+
   newRecord = {
     'KBRID': kbrID,
     'isbn10': isbn10,
@@ -170,7 +188,11 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
     'responsibilityStatement': responsibilityStatement,
     'bindingType': bindingType,
     'edition': edition,
-    'belgianBibliography': bbURIsString
+    'belgianBibliography': bbURIsString,
+    'sourceKBRID': sourceKBRID,
+    'sourceISBN10': sourceISBN10,
+    'sourceISBN13': sourceISBN13,
+    'sourceTitle': sourceTitle
   }
 
   writer.writerow(newRecord)
@@ -221,7 +243,7 @@ def main():
        open(options.output_collection_links_file, 'w') as outCollectionLinksFile, \
        open(options.output_work_file, 'w') as outWorkFile:
 
-    workFields = ['KBRID', 'isbn10', 'isbn13', 'title', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
+    workFields = ['KBRID', 'sourceKBRID', 'isbn10', 'isbn13', 'sourceISBN10', 'sourceISBN13', 'title', 'sourceTitle', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
     contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
     collectionLinksFields = ['KBRID', 'collectionID', 'collection-name']
 
