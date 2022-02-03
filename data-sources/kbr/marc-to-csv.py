@@ -11,6 +11,7 @@ import hashlib
 import csv
 from optparse import OptionParser
 import utils
+import stdnum
 
 NS_MARCSLIM = 'http://www.loc.gov/MARC21/slim'
 
@@ -116,7 +117,7 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
  
 
 # -----------------------------------------------------------------------------
-def addWorkFieldsToWorkCSV(elem, writer):
+def addWorkFieldsToWorkCSV(elem, writer, stats):
   """This function extracts work relevant data from the given XML element 'elem' and writes it to the given CSV file writer."""
 
   #
@@ -145,9 +146,22 @@ def addWorkFieldsToWorkCSV(elem, writer):
   # create a URI for all belgian bibliographic classifications
   bbURIsString = utils.createURIString(belgianBibliographyClassificationsString, ';', 'http://kbr.be/id/data/')
 
+  isbn10 = ''
+  isbn13 = ''
+  try:
+    isbn10 = utils.getNormalizedISBN10(isbn)
+  except:
+    stats['not-convertable-isbn'][isbn] = kbrID
+
+  try:
+    isbn13 = utils.getNormalizedISBN13(isbn)
+  except:
+    stats['erroneous-isbn'][isbn] = kbrID
+
   newRecord = {
     'KBRID': kbrID,
-    'isbn': isbn,
+    'isbn10': isbn10,
+    'isbn13': isbn13,
     'title': title,
     'languages': langURIsString,
     'placeOfPublication': placeOfPublication,
@@ -207,7 +221,7 @@ def main():
        open(options.output_collection_links_file, 'w') as outCollectionLinksFile, \
        open(options.output_work_file, 'w') as outWorkFile:
 
-    workFields = ['KBRID', 'isbn', 'title', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
+    workFields = ['KBRID', 'isbn10', 'isbn13', 'title', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
     contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
     collectionLinksFields = ['KBRID', 'collectionID', 'collection-name']
 
@@ -219,14 +233,14 @@ def main():
     contWriter.writeheader()
     collectionLinksWriter.writeheader()
 
-    stats = {'unique-publishers-without-authority': set(), 'counter': {} }
+    stats = {'unique-publishers-without-authority': set(), 'erroneous-isbn': {}, 'not-convertable-isbn': {}, 'counter': {} }
     # iterate over all XML Files in the given directory and count ISNI statistics
     for event, elem in ET.iterparse(options.input_file, events=('start', 'end')):
 
       # The parser finished reading one responseRecord, get information and then discard the record
       if  event == 'end' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
 
-        addWorkFieldsToWorkCSV(elem, workWriter)
+        addWorkFieldsToWorkCSV(elem, workWriter, stats)
         addContributorFieldsToContributorCSV(elem, contWriter, stats)
         addCollectionLinksToCSV(elem, collectionLinksWriter, stats)
 
@@ -235,4 +249,13 @@ def main():
     for key,val in stats['counter'].items():
       print(f'{key},{val}')
 
+    numberInvalidISBNNumbers = len(stats['erroneous-isbn'])
+    print(f'Invalid ISBN numbers: {numberInvalidISBNNumbers}')
+    for key,val in stats['erroneous-isbn'].items():
+      print(f'{key},{val}')
+
+    numberNotConvertableISBNNumbers = len(stats['not-convertable-isbn'])
+    print(f'ISBN numbers which could not be converted to ISBN 10: {numberNotConvertableISBNNumbers}')
+    for key,val in stats['not-convertable-isbn'].items():
+      print(f'{key},{val}')
 main()

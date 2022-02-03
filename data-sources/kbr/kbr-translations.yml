@@ -10,6 +10,7 @@ prefixes:
   edm: "http://www.europeana.eu/schemas/edm/"
   foaf: "http://xmlns.com/foaf/0.1/"
   prov: "http://www.w3.org/ns/prov#"
+  bibo: "http://purl.org/ontology/bibo/"
   btm: "http://kbr.be/ns/beltrans/model#"
   bts: "http://kbr.be/ns/beltrans/shapes#"
   btid: "http://kbr.be/id/data/"
@@ -209,12 +210,26 @@ mappings:
           parameters:
             - [grel:valueParameter, $(bindingType)]
             - [grel:valueParameter2, "r"] 
-      - p: schema:isbn
-        o: $(isbn)
+      - p: bibo:isbn10
+        o: $(isbn10)
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(isbn)]
+            - [grel:valueParameter, $(isbn10)]
+            - [grel:valueParameter2, ""] 
+      - p: bibo:isbn13
+        o: $(isbn13)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isbn13)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:isbn
+        o: $(isbn13)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isbn13)]
             - [grel:valueParameter2, ""] 
       # due to a bug the following only maps the first found split result because there is a condition
       - p: schema:about
@@ -435,6 +450,7 @@ mappings:
         delimiter: ',' 
     s: btid:collection_$(collectionID)
     po:
+      - [a, schema:CreativeWorkSeries]
       - [dcterms:identifier, $(collectionID)]
       - [schema:name, $(collection-name)]
 
@@ -450,6 +466,7 @@ mappings:
         delimiter: ',' 
     s: btid:collection_$(collectionID)
     po:
+      - [a, schema:CreativeWorkSeries]
       - [dcterms:identifier, $(collectionID)]
       - [schema:name, $(collection-name)]
 
