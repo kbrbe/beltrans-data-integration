@@ -23,9 +23,6 @@ def main():
     parser.print_help()
     exit(1)
 
-  #
-  # Open input file with encoding 'utf-8-sig' (instead of 'utf-8') because the Syracuse export contains Byte Order marks (BOM)
-  #
   with open(options.input_file, 'r', encoding="utf-8") as inFile, \
        open(options.output_file, 'w', encoding="utf-8") as outFile:
 

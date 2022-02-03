@@ -97,14 +97,16 @@ FORMAT_NT="text/rdf+n3"
 
 DATA_PROFILE_QUERY_FILE="dataprofile.sparql"
 DATA_PROFILE_AGG_QUERY_FILE="dataprofile-aggregated.sparql"
-DATA_PROFILE_CONT_QUERY_FILE="contributors.sparql"
+DATA_PROFILE_CONT_BE_QUERY_FILE="contributors-belgian.sparql"
+DATA_PROFILE_CONT_ALL_QUERY_FILE="contributors-all.sparql"
 DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE="translations-per-year.sparql"
 DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE="translations-per-location.sparql"
 DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE="translations-per-country.sparql"
 DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 
 SUFFIX_DATA_PROFILE_FILE="integrated-data-not-filtered.csv"
-SUFFIX_DATA_PROFILE_CONT_FILE="integrated-data-contributors-not-filtered.csv"
+SUFFIX_DATA_PROFILE_CONT_BE_FILE="integrated-data-contributors-belgian-not-filtered.csv"
+SUFFIX_DATA_PROFILE_CONT_ALL_FILE="integrated-data-contributors-all-not-filtered.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE="translations-per-year.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE="translations-per-location.csv"
@@ -112,7 +114,8 @@ SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE="translations-per-country.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
-SUFFIX_DATA_PROFILE_CONT_FILE_PROCESSED="integrated-data-contributors.csv"
+SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED="integrated-data-contributors-belgian.csv"
+SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.csv"
 
 #
 # Filenames used within an integration directory 
@@ -307,7 +310,8 @@ function query {
 
   queryFile="$DATA_PROFILE_QUERY_FILE"
   queryFileAgg="$DATA_PROFILE_AGG_QUERY_FILE"
-  queryFileCont="$DATA_PROFILE_CONT_QUERY_FILE"
+  queryFileContBE="$DATA_PROFILE_CONT_BE_QUERY_FILE"
+  queryFileContAll="$DATA_PROFILE_CONT_ALL_QUERY_FILE"
   queryFilePubsPerYear="$DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE"
   queryFilePubsPerCountry="$DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE"
   queryFilePubsPerLoc="$DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE"
@@ -315,7 +319,8 @@ function query {
 
   outputFile="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
   outputFileAgg="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE"
-  outputFileCont="$integrationName/$SUFFIX_DATA_PROFILE_CONT_FILE"
+  outputFileContBE="$integrationName/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
+  outputFileContAll="$integrationName/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
   outputFilePubsPerYear="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
   outputFilePubsPerCountry="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE"
   outputFilePubsPerLoc="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE"
@@ -327,8 +332,11 @@ function query {
   echo "Creating the dataprofile CSV file with aggregated values ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
 
-  echo "Creating the dataprofile CSV accompanying contributor file ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileCont" "$ENV_SPARQL_ENDPOINT" "$outputFileCont"
+  echo "Creating the dataprofile CSV accompanying contributor file (Belgians) ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContBE" "$ENV_SPARQL_ENDPOINT" "$outputFileContBE"
+
+  echo "Creating the dataprofile CSV accompanying contributor file (all nationalities) ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContAll" "$ENV_SPARQL_ENDPOINT" "$outputFileContAll"
 
   echo "Creating statistics about publications per language and year ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFilePubsPerYear" "$ENV_SPARQL_ENDPOINT" "$outputFilePubsPerYear"
@@ -350,16 +358,21 @@ function postprocess {
   integratedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
   processedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
 
-  contributorData="$integrationName/$SUFFIX_DATA_PROFILE_CONT_FILE"
-  processedContributors="$integrationName/$SUFFIX_DATA_PROFILE_CONT_FILE_PROCESSED"
+  contributorDataBE="$integrationName/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
+  contributorDataAll="$integrationName/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
+  processedContributorsBE="$integrationName/$SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED"
+  processedContributorsAll="$integrationName/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED"
 
   source ../data-sources/py-etl-env/bin/activate
 
   echo "Postprocess integrated data ..."
   postprocessIntegratedData $integratedData $processedData
 
-  echo "Postprocess contributor data ..."
-  postprocessContributorData $contributorData $processedContributors
+  echo "Postprocess contributor data (Belgians)..."
+  postprocessContributorData $contributorDataBE $processedContributorsBE
+
+  echo "Postprocess contributor data (all nationalities)..."
+  postprocessContributorData $contributorDataAll $processedContributorsAll
 }
 
 # -----------------------------------------------------------------------------
