@@ -5,6 +5,8 @@ The National Library of France (BnF) provides information via a catalog, a SPARQ
 * **source**: data dumps or catalog
 * **URL**: https://data.bnf.fr/
 
+
+## Integration process
 We follow a 5-step process to integrate BELTRANS-relevant translations from BnF:
 
 1. Obtain BnF IDs of persons with Belgian nationality (used to filter later)
@@ -15,7 +17,7 @@ We follow a 5-step process to integrate BELTRANS-relevant translations from BnF:
 
 \*this filter can also be applied as part of the advanced catalog search of step 4
 
-## 1. BnF IDs of Belgians
+### 1. BnF IDs of Belgians
 
 We assume the property `http://rdfvoab.info/ElementsGr2/countryAssociatedWithThePerson` refers to the nationality of a person.
 Then we use the script `get-subjects.py` to filter the RDF/XML dump of person authors (`person-authors` folder containing the BnF contributions dump `5.1GB`)
@@ -37,7 +39,7 @@ user    4m34.378s
 sys     0m3.564s
 ```
 
-## 2. BnF IDs of publications 1970-2020
+### 2. BnF IDs of publications 1970-2020
 
 Please note that this step is not necessary if a date filter is already applied for translations in the BnF catalog (see step 5)
 
@@ -53,7 +55,7 @@ user    40m25.168s
 sys     0m35.828s
 ```
 
-## 3. BnF IDs of publications with Belgian contributors
+### 3. BnF IDs of publications with Belgian contributors
 
 The directory `contributions` contains the BnF contributions dump, uncompressed size `6.2GB`.
 
@@ -71,7 +73,7 @@ user    8m23.466s
 sys     0m5.276s
 ```
 
-## 4. BnF IDs of translations FR-NL and NL-FR
+### 4. BnF IDs of translations FR-NL and NL-FR
 
 The advanced search of the BnF catalog is used to look for translations between Dutch and French and French and Dutch: https://catalogue.bnf.fr/recherche-avancee.do?pageRech=rav
 The following search filters were applied (using an `AND` condition):
@@ -84,13 +86,13 @@ The following search filters were applied (using an `AND` condition):
 This resulted in `3762` translations from Dutch to French. When switching the language of the document with language of the original we obtained `584` translations from French to Dutch.
 These results were exported as CSV, afterwards the column with the URI was extracted for further processing.
 
-## 5. BELTRANS-relevant translations
+### 5. BELTRANS-relevant translations
 
 In this final step relevant BnF publication records are extracted from the editions dump by applying a filter using the publication IDs of the previous steps.
 We are not only interested in the IDs of the publication but also data related to them.
 Therefore, we have to extract other related information from the publication IDs in other dumps such as the "external links" dump or the "contributions" dump.
 
-### 5.1 NL-FR translations from editions
+#### 5.1 NL-FR translations from editions
 
 * input
   * BnF editions dump `39GB`
@@ -113,7 +115,7 @@ user    29m45.683s
 sys     0m30.882s
 ```
 
-### 5.2 FR-NL translations from editions
+#### 5.2 FR-NL translations from editions
 
 * input
   * BnF editions dump `39GB`
@@ -138,10 +140,30 @@ sys     0m32.044s
 
 ```
 
-### 5.3 
+#### 5.3 Related information 
 
+todo: complete this paragraph based on what we already do in `integrate-data.sh`
 
-# Edition data dump
+## ISBN information
+
+ISBN numbers are always represented using the `bnf-onto:isbn` property and either `bibo:isbn10` or `bibo:isbn13`. Thus, based on `bnf-onto:isbn` it is not clear what type of ISBN it is and one should use the more detailed `bibo:isbn10` or `bibo:isbn13` values.
+
+## Publisher information
+
+The BnF edition dumps denote relationships to publishers via an explicit `marcrel:pbl` property to a resource representing the publisher, but also as text.
+The BnF edition dumps use the following elements to store information regarding the publishing as text
+
+* `rdagroup1elements:publishersName` for the name of the publisher
+* `rdam:P30088` (has place of publication) for the place of publication
+* `dcterms:date` for the publising year
+
+These information seem to be used to build the value of `dcterms:publisher` based on the following pattern: `publishing place : publisher name , publishing year`.
+
+Sometimes not all values will be available which may result in `dcterms:publisher` values such as `[S.l.] : [s.n.] , 1971`
+
+At least for the Belgian works of our corpus the publisher information is mainly given in text only.
+
+## Information about edition data dump
 
 
 Data about expressions and manifestations is scattered throughout `62611` XML files (`39 GB`), in the following a simple text search for the ID of one manifestation.
@@ -195,7 +217,7 @@ find . -type f -exec grep -rnw "12148/cb398622399" {} +
 ```
 
 
-# Alternative BnF data import
+## Alternative BnF data import
 
 The import of all author information (`58,390,749 triples` from both skos and foaf dump)
 from an `7.5 GB` n-triples dump
