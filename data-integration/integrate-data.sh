@@ -437,24 +437,24 @@ function extractBnF {
 
   # get the IDs of BnF Belgians
   echo "EXTRACTION - Extract Belgian contributor IDs from BnF data"
-  #extractBnFBelgianContributors "$integrationName" "$INPUT_BNF_PERSON_AUTHORS" "$bnfBelgiansBELTRANS"
+  extractBnFBelgianContributors "$integrationName" "$INPUT_BNF_PERSON_AUTHORS" "$bnfBelgiansBELTRANS"
 
   # use the IDs of Belgians to get publication IDs with Belgian authors, illustrators or scenarists
   echo "EXTRACTION - Extract publication IDs of publications with Belgian contributors from BnF data"
-  #extractBnFBelgianPublications "$integrationName" "$INPUT_BNF_CONTRIBUTIONS" "$bnfBelgiansBELTRANS" "$bnfBelgianPublications"
+  extractBnFBelgianPublications "$integrationName" "$INPUT_BNF_CONTRIBUTIONS" "$bnfBelgiansBELTRANS" "$bnfBelgianPublications"
 
   # get publicationIDs of a dump of publications which are known to be translations
   echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - NL-FR"
-  #extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_NL" "$bnfNLTranslations" 
+  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_NL" "$bnfNLTranslations" 
   echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - FR-NL"
-  #extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_FR" "$bnfFRTranslations"
+  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_FR" "$bnfFRTranslations"
 
 
   # extract the actual data of translations with relevant Belgian contributors
   echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
-  #extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfNLTranslations" "$bnfBelgianPublications" "$bnfNLRelevantTranslationData"
+  extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfNLTranslations" "$bnfBelgianPublications" "$bnfNLRelevantTranslationData"
   echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
-  #extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfFRTranslations" "$bnfBelgianPublications" "$bnfFRRelevantTranslationData"
+  extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfFRTranslations" "$bnfBelgianPublications" "$bnfFRRelevantTranslationData"
 
   #
   # we also need related information of the identified publications from other data dumps
@@ -462,19 +462,19 @@ function extractBnF {
   source ../data-sources/py-etl-env/bin/activate
 
   echo "EXTRACTION - Create list of both NL and FR BnF translation IDs"
-  #time python $SCRIPT_UNION_IDS $bnfNLTranslations $bnfFRTranslations -o $bnfTranslationIDs
+  time python $SCRIPT_UNION_IDS $bnfNLTranslations $bnfFRTranslations -o $bnfTranslationIDs
 
   # extract contributor IDs of all translation contributors (also non-Belgian contributors)
   echo "EXTRACTION - Extract all BnF contributor IDs of BELTRANS translations (despite the nationality)"
-  #time python $SCRIPT_GET_RDF_XML_OBJECTS -i $INPUT_BNF_CONTRIBUTIONS -o $bnfPersonsBELTRANS -l $bnfTranslationIDs -p "dcterms:contributor"
+  time python $SCRIPT_GET_RDF_XML_OBJECTS -i $INPUT_BNF_CONTRIBUTIONS -o $bnfPersonsBELTRANS -l $bnfTranslationIDs -p "dcterms:contributor"
 
   # extract contributor IDs of all translation contributors (orgs)
   echo "EXTRACTION - Extract all BnF contributor IDs of organizations"
-  #time python $SCRIPT_GET_RDF_XML_OBJECTS -i $INPUT_BNF_CONTRIBUTIONS -o $bnfOrgsBELTRANS -l $bnfTranslationIDs -p "marcrel:pbl"
+  time python $SCRIPT_GET_RDF_XML_OBJECTS -i $INPUT_BNF_CONTRIBUTIONS -o $bnfOrgsBELTRANS -l $bnfTranslationIDs -p "marcrel:pbl"
 
   # extract the actual data of all BELTRANS translations contributors - persons
   echo "EXTRACTION - Extract BnF contributor data (persons)"
-  #time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_PERSON_AUTHORS -o $bnfContributorDataPersons -f $bnfPersonsBELTRANS
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_PERSON_AUTHORS -o $bnfContributorDataPersons -f $bnfPersonsBELTRANS
 
   # extract the actual data of all BELTRANS translations contributors - orgs
   echo "EXTRACTION - Extract BnF contributor data (orgs)"
