@@ -29,8 +29,10 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 #
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/ExportSyracuse_20211213_NL-FR_1970-2020_3866records.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/ExportSyracuse_20211213_FR-NL_1970-2020_9239records.xml"
+#INPUT_KBR_TRL_NL="../data-sources/kbr/translations/ExportSyracuse_20211213_NL-FR_1970-2020_3866records.xml"
+#INPUT_KBR_TRL_FR="../data-sources/kbr/translations/ExportSyracuse_20211213_FR-NL_1970-2020_9239records.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_4597records.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_12962records.xml"
 
 # KBR - linked authorities
 INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_AUT-lies_APEP_3769records-all-fields.csv"
@@ -101,16 +103,16 @@ DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE="translations-per-location.sparql"
 DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE="translations-per-country.sparql"
 DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 
-SUFFIX_DATA_PROFILE_FILE="integrated-data.csv"
-SUFFIX_DATA_PROFILE_CONT_FILE="integrated-data-contributors.csv"
+SUFFIX_DATA_PROFILE_FILE="integrated-data-not-filtered.csv"
+SUFFIX_DATA_PROFILE_CONT_FILE="integrated-data-contributors-not-filtered.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE="translations-per-year.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE="translations-per-location.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE="translations-per-country.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 
-SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data-processed.csv"
-SUFFIX_DATA_PROFILE_CONT_FILE_PROCESSED="integrated-data-contributors-processed.csv"
+SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
+SUFFIX_DATA_PROFILE_CONT_FILE_PROCESSED="integrated-data-contributors.csv"
 
 #
 # Filenames used within an integration directory 
