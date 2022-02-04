@@ -4,6 +4,7 @@ prefix prov: <http://www.w3.org/ns/prov#>
 prefix dc: <http://purl.org/dc/elements/1.1/>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix schema: <http://schema.org/>
+prefix bibo: <http://purl.org/ontology/bibo/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX btm: <http://kbr.be/ns/beltrans/model#>
 PREFIX btid: <http://kbr.be/id/data/> 
@@ -14,9 +15,11 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
   SELECT 
     (?manifestationID AS ?targetTextKBRIdentifier)
+    (?kbrSourceManifestationID AS ?sourceTextKBRIdentifier)
     (?kbrTargetManifestationBBLabel AS ?targetTextThesaurusBB)
     (?translationType AS ?translationType)
     (?manifestationTitle AS ?targetTextTitle)
+    (?kbrSourceManifestationTtitle AS ?sourceTextTitle)
     (?kbrTargetManifestationEdition AS ?targetTextEdition)
     (?kbrTargetManifestationCollectionID AS ?targetTextCollectionKBRIdentifier)
     (?kbrTargetManifestationCollectionName AS ?targetTextCollectionKBRName)
@@ -27,6 +30,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?kbrResponsibilityStatement AS ?targetTextResponsibilityStatement)
     (?kbrSourceLangLabel AS ?sourceTextLanguage)
     (?kbrTargetLangLabel AS ?targetTextLanguage)
+    (?kbrSourceManifestationISBN13 AS ?sourceTextISBN)
     (?isbn AS ?targetTextISBN) 
     (?kbrAuthorID AS ?authorKBRIdentifier)
     (?kbrAuthorISNI AS ?authorISNI)
@@ -94,7 +98,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     BIND(IF(?classExists, "multilingual", "translation") AS ?translationType)
 
     # optional attributes of the translation itself
-    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:isbn ?isbn . }  }
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation bibo:isbn13 ?isbn . }  }
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?kbrDatePublished . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
@@ -143,6 +147,9 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       }
     } 
 
+    #
+    # Usually all translations link to source (it might be just a dummy source indicating the source language)
+    #
     OPTIONAL {
       graph <http://kbr-syracuse> {
         ?manifestation schema:translationOfWork ?manifestationSource .
@@ -152,6 +159,19 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       OPTIONAL {
         graph <http://master-data> { ?kbrSourceLang mads:authoritativeLabel ?kbrSourceLangLabel . }
         FILTER (lang(?kbrSourceLangLabel) = 'en')
+      }
+
+      #
+      # In case it is not a dummy source entry just with the language, there is an identifier and a title
+      #
+      OPTIONAL {
+        graph <http://kbr-syracuse> {
+          ?manifestationSource dcterms:identifier ?kbrSourceManifestationID ;
+                               schema:name ?kbrSourceManifestationTitle .
+        }
+
+       # Optionally there is also an ISBN for the source
+       OPTIONAL { graph <http://kbr-syracuse> { ?manifestationSource bibo:isbn13 ?kbrSourceManifestationISBN13 . } }
       }
     }
 
