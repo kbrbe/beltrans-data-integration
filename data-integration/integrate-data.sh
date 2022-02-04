@@ -95,6 +95,10 @@ TRIPLE_STORE_NAMESPACE="integration"
 FORMAT_RDF_XML="application/rdf+xml"
 FORMAT_TURTLE="text/turtle"
 FORMAT_NT="text/rdf+n3"
+FORMAT_SPARQL_UPDATE="application/sparql-update"
+
+TRANSFORM_QUERY_BNF_TRL_NL="sparql-queries/transform-bnf-data-nl.sparql"
+TRANSFORM_QUERY_BNF_TRL_FR="sparql-queries/transform-bnf-data-fr.sparql"
 
 DATA_PROFILE_QUERY_FILE="dataprofile.sparql"
 DATA_PROFILE_AGG_QUERY_FILE="dataprofile-aggregated.sparql"
@@ -104,6 +108,7 @@ DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE="translations-per-year.sparql"
 DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE="translations-per-location.sparql"
 DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE="translations-per-country.sparql"
 DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
+DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 
 SUFFIX_DATA_PROFILE_FILE="integrated-data-not-filtered.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE="integrated-data-contributors-belgian-not-filtered.csv"
@@ -117,6 +122,7 @@ SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED="integrated-data-contributors-belgian.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.csv"
+SUFFIX_DATA_PROFILE_SOURCE_STATS="source-translation-stats.csv"
 
 #
 # Filenames used within an integration directory 
@@ -308,6 +314,7 @@ function load {
 function query {
   local integrationName=$1
 
+  mkdir -p $integrationName
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
@@ -328,6 +335,7 @@ function query {
   outputFilePubsPerCountry="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE"
   outputFilePubsPerLoc="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE"
   outputFilePubsPerPbl="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE"
+  outputFileSourceStats="$integrationName/$SUFFIX_DATA_PROFILE_SOURCE_STATS"
 
   echo "Creating the dataprofile CSV file ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFile" "$ENV_SPARQL_ENDPOINT" "$outputFile"
@@ -352,6 +360,9 @@ function query {
 
   echo "Creating statistics about publications per language and publisher ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFilePubsPerPbl" "$ENV_SPARQL_ENDPOINT" "$outputFilePubsPerPbl"
+
+  echo "Creating statistics about translations from sources ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$DATA_PROFILE_SOURCE_STATS_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileSourceStats"
 }
 
 # -----------------------------------------------------------------------------
@@ -980,6 +991,11 @@ function loadBnF {
   echo "Load external links of BnF contributors - WIKIDATA ..."
   uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorIsniData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA"
 
+  echo "Load BnF publication data to a single named graph - FR-NL"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$TRANSFORM_QUERY_BNF_TRL_FR" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Load BnF publication data to a single named graph - NL-FR"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$TRANSFORM_QUERY_BNF_TRL_NL" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 }
 
 # -----------------------------------------------------------------------------
