@@ -12,6 +12,7 @@ def main():
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-o', '--output-file', action='store', help='The name of the file in which the found intersection IDs should be stored')
+  parser.add_option('-d', '--delimiter', action='store', help='The name of the file in which the found union IDs should be stored')
   (options, args) = parser.parse_args()
 
   #
@@ -21,13 +22,14 @@ def main():
     parser.print_help()
     exit(1)
 
+  delimiter = options.delimiter if options.delimiter else ','
   identifierSets = []
   fileCounter = 0
   for a in args:
     with open(a, 'r') as fIn:
       currentSet = set()
       currentFileIDCounter = 0
-      reader = csv.reader(fIn, delimiter=';')
+      reader = csv.reader(fIn, delimiter=delimiter)
       for row in reader:
         identifier = utils.extractBnFIdentifier(row[0])
         currentSet.add(identifier)

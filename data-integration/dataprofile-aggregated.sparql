@@ -299,7 +299,14 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
     }
 
-   FILTER( str(?kbrAuthorNationalityLabel) = 'Belgium' || str(?kbrIllustratorNationalityLabel) = 'Belgium' || str(?kbrScenaristNationalityLabel) = 'Belgium')
+   #FILTER( !bound(?kbrAuthorNationalityLabel) || str(?kbrAuthorNationalityLabel) = 'Belgium')
+   #FILTER( !bound(?kbrIllustratorNationalityLabel) || str(?kbrIllustratorNationalityLabel) = 'Belgium')
+   #FILTER( !bound(?kbrScenaristNationalityLabel) || str(?kbrScenaristNationalityLabel) = 'Belgium')
+
+   FILTER(
+     ( !bound(?kbrAuthorNationalityLabel) || str(?kbrAuthorNationalityLabel) = 'Belgium') ||
+     ( !bound(?kbrIllustratorNationalityLabel) || str(?kbrIllustratorNationalityLabel) = 'Belgium') ||
+     ( !bound(?kbrScenaristNationalityLabel) || str(?kbrScenaristNationalityLabel) = 'Belgium') )
 
 }
 GROUP BY ?manifestationID
