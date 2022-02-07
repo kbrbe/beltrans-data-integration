@@ -473,7 +473,7 @@ function extractBnF {
   source ../data-sources/py-etl-env/bin/activate
 
   echo "EXTRACTION - Create list of both NL and FR BnF translation IDs"
-  time python $SCRIPT_UNION_IDS $bnfNLTranslations $bnfFRTranslations -o $bnfTranslationIDs
+  time python $SCRIPT_UNION_IDS $bnfNLTranslations $bnfFRTranslations -o $bnfTranslationIDs -d ';'
 
   # extract contributor IDs of all translation contributors (also non-Belgian contributors)
   echo "EXTRACTION - Extract all BnF contributor IDs of BELTRANS translations (despite the nationality)"
