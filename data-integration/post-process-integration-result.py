@@ -71,7 +71,23 @@ def main():
       utils.selectDate(row, 'translator', 'Death', sources, 'translatorKBRIdentifier', mismatchLog)
       utils.selectDate(row, 'scenarist', 'Death', sources, 'scenaristKBRIdentifier', mismatchLog)
 
-      if( row['authorNationality'] == belgian or row['illustratorNationality'] == belgian or row['scenaristNationality'] == belgian):
+      hasAuthor = True if row['authorKBRIdentifier'] else False
+      hasIllustrator = True if row['illustratorKBRIdentifier'] else False
+      hasScenarist = True if row['scenaristKBRIdentifier'] else False
+
+      authorNationalityFilter = True
+      if hasAuthor:
+        authorNationalityFilter = True if row['authorNationality'] == belgian else False
+
+      illustratorNationalityFilter = True
+      if hasIllustrator:
+        illustratorNationalityFilter = True if row['illustratorNationality'] == belgian else False
+      
+      scenaristNationalityFilter = True
+      if hasScenarist:
+        scenaristNationalityFilter = True if row['scenaristNationality'] == belgian else False
+      
+      if( authorNationalityFilter or illustratorNationalityFilter or scenaristNationalityFilter):
         outputWriter.writerow(row)
 
 
