@@ -16,6 +16,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
   SELECT 
     (?manifestationID AS ?targetTextKBRIdentifier)
     (?kbrSourceManifestationID AS ?sourceTextKBRIdentifier)
+    (?bnfManifestation AS ?sourceTextBnFIdentifier)
     (?kbrTargetManifestationBBLabel AS ?targetTextThesaurusBB)
     (?translationType AS ?translationType)
     (?manifestationTitle AS ?targetTextTitle)
@@ -31,7 +32,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?kbrSourceLangLabel AS ?sourceTextLanguage)
     (?kbrTargetLangLabel AS ?targetTextLanguage)
     (?kbrSourceManifestationISBN13 AS ?sourceTextISBN)
-    (?isbn AS ?targetTextISBN) 
+    (?isbn13 AS ?targetTextISBN) 
     (?kbrAuthorID AS ?authorKBRIdentifier)
     (?kbrAuthorISNI AS ?authorISNI)
     (?kbrAuthorNationalityLabel AS ?authorNationality)
@@ -85,6 +86,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
   FROM <http://isni-rdf>
   FROM <http://master-data>
   FROM <http://kbr-linked-authorities>
+  FROM <http://bnf-publications>
   WHERE {
 
     graph <http://kbr-syracuse> { 
@@ -97,8 +99,9 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     BIND(exists{ graph <http://kbr-syracuse> { ?manifestation a btm:MultiLingualManifestation . } } AS ?classExists)
     BIND(IF(?classExists, "multilingual", "translation") AS ?translationType)
 
-    # optional attributes of the translation itself
-    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation bibo:isbn13 ?isbn . }  }
+    #
+    # optional attributes of the KBR translation itself
+    #
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?kbrDatePublished . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
@@ -147,6 +150,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       }
     } 
 
+    
+
     #
     # Usually all translations link to source (it might be just a dummy source indicating the source language)
     #
@@ -173,6 +178,19 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
        # Optionally there is also an ISBN for the source
        OPTIONAL { graph <http://kbr-syracuse> { ?manifestationSource bibo:isbn13 ?kbrSourceManifestationISBN13 . } }
       }
+    }
+
+
+    #
+    # find the manifestation in other data sources based on ISBN
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation bibo:isbn13 ?isbn13 . }  
+
+      OPTIONAL {
+        graph <http://bnf-publications> { ?bnfManifestation bibo:isbn13 ?isbn13 . }
+      }
+      
     }
 
 

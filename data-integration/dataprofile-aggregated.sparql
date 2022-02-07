@@ -16,6 +16,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
   SELECT DISTINCT
     (?manifestationID AS ?targetTextKBRIdentifier)
     (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceTextKBRIdentifier)
+    (group_concat(distinct ?bnfManifestation;SEPARATOR=';') AS ?sourceTextBnFIdentifier)
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetTextThesaurusBB)
     (group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
     (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
@@ -30,7 +31,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (group_concat(distinct ?kbrSourceLangLabel;SEPARATOR=';') AS ?sourceTextLanguage)
     (group_concat(distinct ?kbrTargetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
     (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceTextISBN)
-    (group_concat(distinct ?isbn;SEPARATOR=';') AS ?targetTextISBN) 
+    (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetTextISBN) 
     (group_concat(distinct ?kbrAuthorID;SEPARATOR=';') AS ?authorKBRIdentifier)
     (group_concat(distinct ?kbrTranslatorID;SEPARATOR=';') AS ?translatorKBRIdentifier)
     (group_concat(distinct ?kbrPublisherID;SEPARATOR=';') AS ?targetPublisherKBRIdentifier)
@@ -55,7 +56,6 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     BIND(IF(?classExists, "multilingual", "translation") AS ?translationType)
 
     # optional attributes of the translation itself
-    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation bibo:isbn13 ?isbn . }  }
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?kbrDatePublished . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
@@ -135,6 +135,18 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       }
 
 
+    }
+
+    #
+    # find the manifestation in other data sources based on ISBN
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation bibo:isbn13 ?isbn13 . }  
+
+      OPTIONAL {
+        graph <http://bnf-publications> { ?bnfManifestation bibo:isbn13 ?isbn13 . }
+      }
+      
     }
 
 
@@ -299,14 +311,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
     }
 
-   #FILTER( !bound(?kbrAuthorNationalityLabel) || str(?kbrAuthorNationalityLabel) = 'Belgium')
-   #FILTER( !bound(?kbrIllustratorNationalityLabel) || str(?kbrIllustratorNationalityLabel) = 'Belgium')
-   #FILTER( !bound(?kbrScenaristNationalityLabel) || str(?kbrScenaristNationalityLabel) = 'Belgium')
-
-   FILTER(
-     ( !bound(?kbrAuthorNationalityLabel) || str(?kbrAuthorNationalityLabel) = 'Belgium') ||
-     ( !bound(?kbrIllustratorNationalityLabel) || str(?kbrIllustratorNationalityLabel) = 'Belgium') ||
-     ( !bound(?kbrScenaristNationalityLabel) || str(?kbrScenaristNationalityLabel) = 'Belgium') )
+   FILTER( str(?kbrAuthorNationalityLabel) = 'Belgium' || str(?kbrIllustratorNationalityLabel) = 'Belgium' || str(?kbrScenaristNationalityLabel) = 'Belgium' )
 
 }
 GROUP BY ?manifestationID
