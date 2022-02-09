@@ -8,6 +8,9 @@ SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-author
 SCRIPT_EXTRACT_BB="../data-sources/kbr/extract-belgian-bibliography.py"
 SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.py"
 
+SCRIPT_FIX_ISBN="../data-sources/bnf/formatISBN13.py"
+SCRIPT_CREATE_ISBN_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
+
 SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
 SCRIPT_EXTRACT_COLUMN="../data-sources/bnf/extractColumn.py" 
@@ -78,6 +81,7 @@ INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography
 #
 
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
+TRIPLE_STORE_GRAPH_BNF_TRL="http://bnf-publications"
 TRIPLE_STORE_GRAPH_BNF_TRL_FR="http://bnf-fr"
 TRIPLE_STORE_GRAPH_BNF_TRL_NL="http://bnf-nl"
 TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS="http://bnf-trl-contributor-links"
@@ -97,6 +101,8 @@ FORMAT_TURTLE="text/turtle"
 FORMAT_NT="text/rdf+n3"
 FORMAT_SPARQL_UPDATE="application/sparql-update"
 
+GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn-without-hyphen.sparql"
+DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn-without-hyphen.sparql"
 TRANSFORM_QUERY_BNF_TRL_NL="sparql-queries/transform-bnf-data-nl.sparql"
 TRANSFORM_QUERY_BNF_TRL_FR="sparql-queries/transform-bnf-data-fr.sparql"
 
@@ -176,6 +182,10 @@ SUFFIX_BNF_TRL_CONT_IDS="bnf-translation-contributor-persons-ids.csv"
 SUFFIX_BNF_TRL_IDS_FR="bnf-translation-ids-fr-nl.csv"
 SUFFIX_BNF_TRL_IDS_NL="bnf-translation-ids-nl-fr.csv"
 SUFFIX_BNF_TRL_IDS="bnf-translation-ids.csv"
+
+SUFFIX_BNF_ISBN_NO_HYPHEN_CSV="bnf-records-no-isbn-hyphen.csv"
+SUFFIX_BNF_ISBN_FIXED_CSV="bnf-records-fixed-isbn.csv"
+SUFFIX_BNF_ISBN_HYPHEN_NT="bnf-fixed-isbn13.nt"
   
 # DATA SOURCE - MASTER DATA
 #
@@ -962,6 +972,9 @@ function loadBnF {
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA"
 
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL"
+
   local bnfTranslationsFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_LD"
   local bnfTranslationsNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_LD"
   local bnfContributorData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_LD"
@@ -996,6 +1009,25 @@ function loadBnF {
 
   echo "Load BnF publication data to a single named graph - NL-FR"
   uploadData "$TRIPLE_STORE_NAMESPACE" "$TRANSFORM_QUERY_BNF_TRL_NL" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Fix BnF ISBN13 identifiers without hyphen - get malformed ISBN identifiers"
+  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBNMissingHyphen"
+
+  bnfISBNMissingHyphen="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN_NO_HYPHEN_CSV"
+  bnfCleanedISBN="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN_FIXED_CSV"
+  bnfCleanedISBNTriples="$integrationName/bnf/rdf/$SUFFIX_BNF_ISBN_HYPHEN_NT"
+
+  echo "Fix BnF ISBN13 identifiers without hyphen - normalize ISBN identifiers"
+  source ../data-sources/py-etl-env/bin/activate
+  time python $SCRIPT_FIX_ISBN -i $bnfISBNMissingHyphen -o $bnfCleanedISBN
+
+  echo "Fix BnF ISBN13 identifiers without hyphen - upload normalized ISBN identifiers"
+  time python $SCRIPT_CREATE_ISBN_TRIPLES -i $bnfCleanedISBN -o $bnfCleanedISBNTriples
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfcleanedISBNTriples" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Fix BnF ISBN13 identifiers without hyphen - delete malformed ISBN identifiers"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT"
+
 }
 
 # -----------------------------------------------------------------------------

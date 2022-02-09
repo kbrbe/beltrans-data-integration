@@ -1,0 +1,7 @@
+PREFIX bibo: <http://purl.org/ontology/bibo/>
+
+SELECT ?manifestation ?isbn13
+WHERE {
+  graph <http://bnf-publications> { ?manifestation bibo:isbn13 ?isbn13 . } 
+  FILTER (!regex(?isbn13, "-", "i"))
+}
