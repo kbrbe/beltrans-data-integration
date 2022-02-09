@@ -30,11 +30,15 @@ INSERT {
                   bibo:isbn10 ?isbn10 ;
                   bibo:isbn13 ?isbn13 ;
                   schema:author ?author ;
+                  schema:translator ?translator ;
+                  marcrel:ill ?illustrator ;
+                  marcrel:sce ?scenarist ;
                   schema:locationCreated ?manifestationLocation ;
                   schema:inLanguage lang:dut ;
+                  rdagroup1elements:publishersName ?publisherName ;
                   schema:publisher ?publisher ;
-                  rdfs:comment ?note ;
-                  schema:translator ?translator .
+                  rdfs:comment ?note .
+
   }
 }
 WHERE {
@@ -46,6 +50,7 @@ WHERE {
                       
     OPTIONAL { graph <http://bnf-nl> { ?manifestation dcterms:title ?manifestationTitle . } } 
     OPTIONAL { graph <http://bnf-nl> { ?manifestation dcterms:date ?manifestationPublishingDate . } } 
+    OPTIONAL { graph <http://bnf-nl> { ?manifestation rdagroup1elements:placeOfPublication ?manifestationLocation . } } 
     OPTIONAL { graph <http://bnf-nl> { ?manifestation bibo:isbn10 ?isbn10 . } } 
     OPTIONAL { graph <http://bnf-nl> { ?manifestation bibo:isbn13 ?isbn13 . } } 
     OPTIONAL { graph <http://bnf-nl> { ?manifestation rdagroup1elements:note ?note . } } 
@@ -54,6 +59,7 @@ WHERE {
     OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:trl ?translator . } } 
     OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:ill ?illustrator . } } 
     OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:sce ?scenarist . } } 
-    OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression rdagroup1elements:publishersName ?publisher . } } 
+    OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:pbl ?publisher . } } 
+    OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression rdagroup1elements:publishersName ?publisherName . } } 
          
 }
