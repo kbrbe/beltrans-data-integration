@@ -10,6 +10,7 @@ SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.
 
 SCRIPT_FIX_ISBN="../data-sources/bnf/formatISBN13.py"
 SCRIPT_CREATE_ISBN_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
+SCRIPT_CSV_TO_EXCEL="csv-to-excel.py"
 
 SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
@@ -135,6 +136,8 @@ SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED="integrated-data-contributors-belgian.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.csv"
 SUFFIX_DATA_PROFILE_SOURCE_STATS="source-translation-stats.csv"
+SUFFIX_DATA_PROFILE_EXCEL_DATA="corpus-data.xlsx"
+SUFFIX_DATA_PROFILE_EXCEL_STATS="corpus-stats.xlsx"
 
 #
 # Filenames used within an integration directory 
@@ -330,7 +333,7 @@ function load {
 function query {
   local integrationName=$1
 
-  mkdir -p $integrationName
+  mkdir -p $integrationName/csv
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
@@ -345,17 +348,17 @@ function query {
   queryFilePubsPerLoc="$DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE"
   queryFilePubsPerPbl="$DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE"
 
-  outputFileKBR="$integrationName/$SUFFIX_DATA_PROFILE_FILE_KBR"
-  outputFileBnF="$integrationName/$SUFFIX_DATA_PROFILE_FILE_BNF"
-  outputFileAggKBR="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_KBR"
-  outputFileAggBnF="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_BNF"
-  outputFileContBE="$integrationName/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
-  outputFileContAll="$integrationName/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
-  outputFilePubsPerYear="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
-  outputFilePubsPerCountry="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE"
-  outputFilePubsPerLoc="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE"
-  outputFilePubsPerPbl="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE"
-  outputFileSourceStats="$integrationName/$SUFFIX_DATA_PROFILE_SOURCE_STATS"
+  outputFileKBR="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_KBR"
+  outputFileBnF="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_BNF"
+  outputFileAggKBR="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_KBR"
+  outputFileAggBnF="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_BNF"
+  outputFileContBE="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
+  outputFileContAll="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
+  outputFilePubsPerYear="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
+  outputFilePubsPerCountry="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE"
+  outputFilePubsPerLoc="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE"
+  outputFilePubsPerPbl="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE"
+  outputFileSourceStats="$integrationName/csv/$SUFFIX_DATA_PROFILE_SOURCE_STATS"
 
   echo "Creating the dataprofile CSV file - KBR ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileKBR" "$ENV_SPARQL_ENDPOINT" "$outputFileKBR"
@@ -395,18 +398,27 @@ function query {
 function postprocess {
   local integrationName=$1
 
-  integratedDataKBR="$integrationName/$SUFFIX_DATA_PROFILE_FILE_KBR"
-  integratedDataBnF="$integrationName/$SUFFIX_DATA_PROFILE_FILE_BNF"
-  integratedAggKBR="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_KBR"
-  integratedAggBnF="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_BNF"
+  integratedDataKBR="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_KBR"
+  integratedDataBnF="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_BNF"
+  integratedAggKBR="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_KBR"
+  integratedAggBnF="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_BNF"
 
-  processedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
-  processedAggData="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED"
+  processedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
+  processedAggData="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED"
 
-  contributorDataBE="$integrationName/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
-  contributorDataAll="$integrationName/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
-  processedContributorsBE="$integrationName/$SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED"
-  processedContributorsAll="$integrationName/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED"
+  contributorDataBE="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
+  contributorDataAll="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
+  processedContributorsBE="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED"
+  processedContributorsAll="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED"
+
+  outputFilePubsPerYear="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
+  outputFilePubsPerCountry="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE"
+  outputFilePubsPerLoc="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE"
+  outputFilePubsPerPbl="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE"
+  outputFileSourceStats="$integrationName/csv/$SUFFIX_DATA_PROFILE_SOURCE_STATS"
+
+  excelData="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_DATA"
+  excelStats="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_STATS"
 
   source ../data-sources/py-etl-env/bin/activate
 
@@ -422,6 +434,12 @@ function postprocess {
   echo "Postprocess aggregated data ..."
   source ../data-sources/py-etl-env/bin/activate
   time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -k $integratedAggKBR -b $integratedAggBnF -o $processedAggData
+
+  echo "Create Excel sheet for data ..."
+  time python $SCRIPT_CSV_TO_EXCEL $processedAggData $processedData $processedContributorsAll -s "unique" -s "all-data" -s "contributors" -o $excelData
+
+  echo "Create Excel sheet for statistics ..."
+  time python $SCRIPT_CSV_TO_EXCEL $outputFilePubsPerYear $outputFilePubsPerCountry $outputFilePubsPerLoc $outputFilePubsPerPbl $outputFileSourceStats -s "per-year" -s "per-country" -s "per-location" -s "per-publisher" -s "per-source" -o $excelStats
   
 }
 
