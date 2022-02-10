@@ -14,29 +14,16 @@ PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
   SELECT DISTINCT
-    (?manifestationID AS ?targetTextKBRIdentifier)
-    (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceTextKBRIdentifier)
-    (group_concat(distinct ?bnfManifestation;SEPARATOR=';') AS ?targetTextBnFIdentifier)
-    (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetTextThesaurusBB)
-    (group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
-    (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
-    (group_concat(distinct ?kbrSourceManifestationTtitle;SEPARATOR=';') AS ?sourceTextTitle)
-    (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetTextEdition)
-    (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetTextBindingType)
-    (group_concat(distinct ?kbrTargetManifestationCollectionID;SEPARATOR=';') AS ?targetTextCollectionIdentifier)
-    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
-    (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetTextYearOfPublication)
-    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetTextPlaceOfPublication)
-    (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetTextResponsibilityStatement)
+  
+    (?kbrSourceManifestationID AS ?sourceTextKBRIdentifier)
     (group_concat(distinct ?kbrSourceLangLabel;SEPARATOR=';') AS ?sourceTextLanguage)
     (group_concat(distinct ?kbrTargetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
-    (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceTextISBN)
-    (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetTextISBN) 
-    (group_concat(distinct ?kbrAuthorID;SEPARATOR=';') AS ?authorIdentifier)
-    (group_concat(distinct ?kbrTranslatorID;SEPARATOR=';') AS ?translatorIdentifier)
-    (group_concat(distinct ?kbrPublisherID;SEPARATOR=';') AS ?targetPublisherIdentifier)
-    (group_concat(distinct ?kbrIllustratorID;SEPARATOR=';') AS ?illustratorIdentifier)
-    (group_concat(distinct ?kbrScenaristID;SEPARATOR=';') AS ?scenaristIdentifier)
+    (?kbrSourceManifestationISBN13 AS ?sourceTextISBN)
+    (group_concat(distinct ?kbrSourceManifestationTitle;SEPARATOR=';') AS ?sourceTextTitle)
+    (COUNT(?manifestation) AS ?numberTranslations)
+#    (group_concat(distinct ?manifestationID;SEPARATOR=';') AS ?targetTextKBRIdentifier)
+#    (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
+
   FROM <http://kbr-syracuse>
   FROM <http://isni-sru>
   FROM <http://kbr-belgians>
@@ -45,55 +32,22 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
   FROM <http://kbr-linked-authorities>
   WHERE {
 
-    graph <http://kbr-syracuse> { 
-      ?manifestation a schema:CreativeWork ;
-                     dcterms:identifier ?manifestationID ;
-                     schema:name ?manifestationTitle .
-    }
-        
-    # determine if this manifestation is a multilingual work
-    BIND(exists{ graph <http://kbr-syracuse> { ?manifestation a btm:MultiLingualManifestation . } } AS ?classExists)
-    BIND(IF(?classExists, "multilingual", "translation") AS ?translationType)
+    graph <http://kbr-syracuse> {
+      ?manifestation schema:translationOfWork ?manifestationSource .
 
-    # optional attributes of the translation itself
-    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:datePublished ?kbrDatePublished . }}
-    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
-    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation schema:locationCreated ?kbrLocationCreated . }}
-    OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
+      ?manifestationSource schema:inLanguage ?kbrSourceLang ;
+                           dcterms:identifier ?kbrSourceManifestationID ;
+                           schema:name ?kbrSourceManifestationTitle .
+    }
+    
+    OPTIONAL { graph <http://kbr-syracuse> { ?manifestationSource bibo:isbn13 ?kbrSourceManifestationISBN13 . } }
 
     OPTIONAL {
-      graph <http://kbr-syracuse> { ?manifestation schema:isPartOf ?kbrTargetManifestationCollectionID . }
+      graph <http://master-data> { ?kbrSourceLang mads:authoritativeLabel ?kbrSourceLangLabel . }
+      FILTER (lang(?kbrSourceLangLabel) = 'en')
     }
 
-
-
-    OPTIONAL { 
-      graph <http://kbr-syracuse> { ?manifestation schema:about ?kbrTargetManifestationBB . }
-
-      OPTIONAL {
-        graph <http://master-data> { ?kbrTargetManifestationBB skos:prefLabel ?kbrTargetManifestationBBLabel . }
-        FILTER(lang(?kbrTargetManifestationBBLabel) = 'en')
-      }
-    }
-
-    OPTIONAL {
-      graph <http://kbr-syracuse> { ?manifestation schema:bookFormat ?kbrTargetManifestationBindingType . }
-
-      OPTIONAL {
-        graph <http://master-data> { ?kbrTargetManifestationBindingType rdfs:label ?kbrTargetManifestationBindingTypeLabel .}
-        FILTER(lang(?kbrTargetManifestationBindingTypeLabel) = 'en')
-      }
-    }
-
-    OPTIONAL { 
-      graph <http://kbr-syracuse> { ?manifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }
-
-      OPTIONAL {
-        graph <http://master-data> { ?kbrCountryOfOrigin mads:authoritativeLabel ?kbrCountryOfOriginLabel . } 
-        FILTER (lang(?kbrCountryOfOriginLabel) = 'en')
-      }
-    }
-
+   
     #
     # TARGET LANGUAGE
     #
@@ -107,49 +61,11 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       }
     } 
 
-    #
-    # SOURCE LANGUAGE
-    #
-    OPTIONAL {
-      graph <http://kbr-syracuse> {
-        ?manifestation schema:translationOfWork ?manifestationSource .
-        ?manifestationSource schema:inLanguage ?kbrSourceLang .
-      }
-
-      OPTIONAL {
-        graph <http://master-data> { ?kbrSourceLang mads:authoritativeLabel ?kbrSourceLangLabel . }
-        FILTER (lang(?kbrSourceLangLabel) = 'en')
-      }
-
-      #
-      # In case it is not a dummy source entry just with the language, there is an identifier and a title
-      #
-      OPTIONAL {
-        graph <http://kbr-syracuse> {
-          ?manifestationSource dcterms:identifier ?kbrSourceManifestationID ;
-                               schema:name ?kbrSourceManifestationTitle .
-        }
-
-       # Optionally there is also an ISBN for the source
-       OPTIONAL { graph <http://kbr-syracuse> { ?manifestationSource bibo:isbn13 ?kbrSourceManifestationISBN13 . } }
-      }
-
-
-    }
 
     #
-    # find the manifestation in other data sources based on ISBN
+    # ALL THE CONTENT BEGINNING FROM HERE QUERIES CONTRIBUTOR INFORMATION
+    # AND IS ALSO USED FOR FILTERING BASED ON BELGIAN NATIONALITY
     #
-    OPTIONAL {
-      graph <http://kbr-syracuse> { ?manifestation bibo:isbn13 ?isbn13 . }  
-
-      OPTIONAL {
-        graph <http://bnf-publications> { ?bnfManifestation bibo:isbn13 ?isbn13 . }
-      }
-      
-    }
-
-
 
     # ---------------------------------------------------------------------------
     #
@@ -311,7 +227,12 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
     }
 
-   FILTER( str(?kbrAuthorNationalityLabel) = 'Belgium' || str(?kbrIllustratorNationalityLabel) = 'Belgium' || str(?kbrScenaristNationalityLabel) = 'Belgium' )
+
+   FILTER(
+     ( !bound(?kbrAuthorNationalityLabel) || str(?kbrAuthorNationalityLabel) = 'Belgium') ||
+     ( !bound(?kbrIllustratorNationalityLabel) || str(?kbrIllustratorNationalityLabel) = 'Belgium') ||
+     ( !bound(?kbrScenaristNationalityLabel) || str(?kbrScenaristNationalityLabel) = 'Belgium') )
 
 }
-GROUP BY ?manifestationID
+GROUP BY ?kbrSourceManifestationID ?kbrSourceManifestationISBN13
+ORDER BY DESC(?numberTranslations)

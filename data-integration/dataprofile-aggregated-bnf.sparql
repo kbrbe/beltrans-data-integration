@@ -19,7 +19,7 @@ PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
 PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
   SELECT DISTINCT
-    (?manifestation AS ?sourceTextBnFIdentifier)
+    (?manifestation AS ?targetTextBnFIdentifier)
     (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
     (group_concat(distinct ?bnfCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
     (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetTextYearOfPublication)
@@ -28,12 +28,11 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?bnfSourceLangLabel;SEPARATOR=';') AS ?sourceTextLanguage)
     (group_concat(distinct ?bnfTargetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
     (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetTextISBN) 
-    (group_concat(distinct ?bnfAuthor;SEPARATOR=';') AS ?authorBnFIdentifier)
-    (group_concat(distinct ?isniSRUAuthorGenderLabel;SEPARATOR=';') AS ?authorGenderISNI)
-    (group_concat(distinct ?bnfTranslator;SEPARATOR=';') AS ?translatorBnFIdentifier)
-    (group_concat(distinct ?bnfPublisher;SEPARATOR=';') AS ?publisherBnFIdentifier)
-    (group_concat(distinct ?bnfIllustrator;SEPARATOR=';') AS ?illustratorBnFIdentifier)
-    (group_concat(distinct ?bnfScenarist;SEPARATOR=';') AS ?scenaristBnFIdentifier)
+    (group_concat(distinct ?bnfAuthor;SEPARATOR=';') AS ?authorIdentifier)
+    (group_concat(distinct ?bnfTranslator;SEPARATOR=';') AS ?translatorIdentifier)
+    (group_concat(distinct ?bnfPublisher;SEPARATOR=';') AS ?targetPublisherIdentifier)
+    (group_concat(distinct ?bnfIllustrator;SEPARATOR=';') AS ?illustratorIdentifier)
+    (group_concat(distinct ?bnfScenarist;SEPARATOR=';') AS ?scenaristIdentifier)
 
   FROM <http://kbr-syracuse>
   FROM <http://isni-sru>

@@ -216,13 +216,26 @@ def selectDate(row, role, dateType, sources, rowIDCol, mismatchLog):
   >>> selectDate(row, 'author', 'Death', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['authorDeathDate'] == '1988-04-25'
   True
+
+  The same works also for death dates
+  >>> row = {'authorDeathDate': '1988-04-25', 'authorDeathDateISNI': '1988'}
+  >>> selectDate(row, 'author', 'Death', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> row['authorDeathDate'] == '1988-04-25'
+  True
   """
 
-  # extract all possible birth dates
+  # extract all possible dates based on different sources
   dates = []
   for s in sources:
     colName = f'{role}{dateType}Date{s}'
-    dates.append(row[colName])
+    if colName in row:
+      dates.append(row[colName])
+
+  # extract all possible dates without a source identifier, e.g. authorDeathDate
+  noSourceColName = f'{role}{dateType}Date'
+  if noSourceColName in row:
+    dates.append(row[noSourceColName])
+  
 
   outputColName = f'{role}{dateType}Date'
 
@@ -245,8 +258,48 @@ def selectDate(row, role, dateType, sources, rowIDCol, mismatchLog):
     # only remove the initial sources
     for s in sources:
       colName = f'{role}{dateType}Date{s}'
-      row.pop(colName)
+      if colName in row:
+        row.pop(colName)
   
+
+# -----------------------------------------------------------------------------
+def addKeysWithoutValueToDict(valDict, keyArray):
+  """This function adds keys from keyArray to valDict in case it does not exist yet, the default value is an empty string
+
+  >>> addKeysWithoutValueToDict({'a': 'valA', 'b': 'valB'}, ['a', 'b', 'c'])
+  {'a': 'valA', 'b': 'valB', 'c': ''}
+  """
+
+  for key in keyArray:
+    if key not in valDict:
+      valDict[key] = ''
+  return valDict
+
+# -----------------------------------------------------------------------------
+def mergeDictionaries(inputDict, separator=';'):
+  """This function merges two or more dictionaries whereas values from different sources for the same key are combined by indicating the provenance.
+     For example sourceA = {'a': 'val1'} and sourceB = {'a': 'val2'} will be merged into {'a': 'val1 (sourceA)\nval2 (sourceB)}.
+     The given dictionary contains the two dictionaries with their respective names as keys (which will be used to indicate provenance)
+
+  >>> mergeDictionaries({'sourceA': {'a': 'val1'}, 'sourceB': {'a': 'val2'} })
+  {'a': 'val1 (sourceA);val2 (sourceB)'}
+  """
+
+  keyValues = {}
+  for sourceName in inputDict:
+    for key in inputDict[sourceName]:
+      value = inputDict[sourceName][key]
+      valueString = f'{value} ({sourceName})'
+      if key in keyValues:
+        keyValues[key].append(valueString)
+      else:
+        keyValues[key] = [valueString]
+
+  outputDict = {}
+  for k in keyValues:
+    outputDict[k] = separator.join(keyValues[k])
+
+  return outputDict
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":

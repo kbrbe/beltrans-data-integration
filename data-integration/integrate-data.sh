@@ -21,6 +21,7 @@ SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
 SCRIPT_QUERY_DATA="../utils/query-data.sh"
 SCRIPT_POSTPROCESS_QUERY_RESULT="post-process-integration-result.py"
+SCRIPT_POSTPROCESS_AGG_QUERY_RESULT="post-process-aggregation-result.py"
 SCRIPT_POSTPROCESS_QUERY_CONT_RESULT="post-process-contributors.py"
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
@@ -130,6 +131,7 @@ SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE="translations-per-country.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
+SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED="integrated-data-contributors-belgian.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.csv"
 SUFFIX_DATA_PROFILE_SOURCE_STATS="source-translation-stats.csv"
@@ -395,7 +397,11 @@ function postprocess {
 
   integratedDataKBR="$integrationName/$SUFFIX_DATA_PROFILE_FILE_KBR"
   integratedDataBnF="$integrationName/$SUFFIX_DATA_PROFILE_FILE_BNF"
+  integratedAggKBR="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_KBR"
+  integratedAggBnF="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_BNF"
+
   processedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
+  processedAggData="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED"
 
   contributorDataBE="$integrationName/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
   contributorDataAll="$integrationName/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
@@ -412,6 +418,11 @@ function postprocess {
 
   echo "Postprocess contributor data (all nationalities)..."
   postprocessContributorData $contributorDataAll $processedContributorsAll
+
+  echo "Postprocess aggregated data ..."
+  source ../data-sources/py-etl-env/bin/activate
+  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -k $integratedAggKBR -b $integratedAggBnF -o $processedAggData
+  
 }
 
 # -----------------------------------------------------------------------------
