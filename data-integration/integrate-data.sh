@@ -106,8 +106,10 @@ DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn-without-hyp
 TRANSFORM_QUERY_BNF_TRL_NL_FR="sparql-queries/transform-bnf-data-nl-fr.sparql"
 TRANSFORM_QUERY_BNF_TRL_FR_NL="sparql-queries/transform-bnf-data-fr-nl.sparql"
 
-DATA_PROFILE_QUERY_FILE="dataprofile.sparql"
-DATA_PROFILE_AGG_QUERY_FILE="dataprofile-aggregated.sparql"
+DATA_PROFILE_QUERY_FILE_KBR="dataprofile-kbr.sparql"
+DATA_PROFILE_QUERY_FILE_BNF="dataprofile-bnf.sparql"
+DATA_PROFILE_AGG_QUERY_FILE_KBR="dataprofile-aggregated-kbr.sparql"
+DATA_PROFILE_AGG_QUERY_FILE_BNF="dataprofile-aggregated-bnf.sparql"
 DATA_PROFILE_CONT_BE_QUERY_FILE="contributors-belgian.sparql"
 DATA_PROFILE_CONT_ALL_QUERY_FILE="contributors-all.sparql"
 DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE="translations-per-year.sparql"
@@ -116,10 +118,12 @@ DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE="translations-per-country.sparql"
 DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 
-SUFFIX_DATA_PROFILE_FILE="integrated-data-not-filtered.csv"
+SUFFIX_DATA_PROFILE_FILE_KBR="integrated-data-kbr-not-filtered.csv"
+SUFFIX_DATA_PROFILE_FILE_BNF="integrated-data-bnf-not-filtered.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE="integrated-data-contributors-belgian-not-filtered.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_FILE="integrated-data-contributors-all-not-filtered.csv"
-SUFFIX_DATA_PROFILE_AGG_FILE="integrated-data-aggregated.csv"
+SUFFIX_DATA_PROFILE_AGG_FILE_KBR="integrated-data-aggregated-kbr.csv"
+SUFFIX_DATA_PROFILE_AGG_FILE_BNF="integrated-data-aggregated-bnf.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE="translations-per-year.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE="translations-per-location.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE="translations-per-country.csv"
@@ -328,8 +332,10 @@ function query {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  queryFile="$DATA_PROFILE_QUERY_FILE"
-  queryFileAgg="$DATA_PROFILE_AGG_QUERY_FILE"
+  queryFileKBR="$DATA_PROFILE_QUERY_FILE_KBR"
+  queryFileBnF="$DATA_PROFILE_QUERY_FILE_BNF"
+  queryFileAggKBR="$DATA_PROFILE_AGG_QUERY_FILE_KBR"
+  queryFileAggBnF="$DATA_PROFILE_AGG_QUERY_FILE_BNF"
   queryFileContBE="$DATA_PROFILE_CONT_BE_QUERY_FILE"
   queryFileContAll="$DATA_PROFILE_CONT_ALL_QUERY_FILE"
   queryFilePubsPerYear="$DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE"
@@ -337,8 +343,10 @@ function query {
   queryFilePubsPerLoc="$DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE"
   queryFilePubsPerPbl="$DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE"
 
-  outputFile="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
-  outputFileAgg="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE"
+  outputFileKBR="$integrationName/$SUFFIX_DATA_PROFILE_FILE_KBR"
+  outputFileBnF="$integrationName/$SUFFIX_DATA_PROFILE_FILE_BNF"
+  outputFileAggKBR="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_KBR"
+  outputFileAggBnF="$integrationName/$SUFFIX_DATA_PROFILE_AGG_FILE_BNF"
   outputFileContBE="$integrationName/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
   outputFileContAll="$integrationName/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
   outputFilePubsPerYear="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
@@ -347,11 +355,17 @@ function query {
   outputFilePubsPerPbl="$integrationName/$SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE"
   outputFileSourceStats="$integrationName/$SUFFIX_DATA_PROFILE_SOURCE_STATS"
 
-  echo "Creating the dataprofile CSV file ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFile" "$ENV_SPARQL_ENDPOINT" "$outputFile"
+  echo "Creating the dataprofile CSV file - KBR ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileKBR" "$ENV_SPARQL_ENDPOINT" "$outputFileKBR"
 
-  echo "Creating the dataprofile CSV file with aggregated values ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
+  echo "Creating the dataprofile CSV file - BnF ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileBnF" "$ENV_SPARQL_ENDPOINT" "$outputFileBnF"
+
+  echo "Creating the dataprofile CSV file with aggregated values - KBR ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAggKBR" "$ENV_SPARQL_ENDPOINT" "$outputFileAggKBR"
+
+  echo "Creating the dataprofile CSV file with aggregated values - BnF ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAggBnF" "$ENV_SPARQL_ENDPOINT" "$outputFileAggBnF"
 
   echo "Creating the dataprofile CSV accompanying contributor file (Belgians) ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContBE" "$ENV_SPARQL_ENDPOINT" "$outputFileContBE"
@@ -379,7 +393,8 @@ function query {
 function postprocess {
   local integrationName=$1
 
-  integratedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE"
+  integratedDataKBR="$integrationName/$SUFFIX_DATA_PROFILE_FILE_KBR"
+  integratedDataBnF="$integrationName/$SUFFIX_DATA_PROFILE_FILE_BNF"
   processedData="$integrationName/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
 
   contributorDataBE="$integrationName/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
@@ -390,7 +405,7 @@ function postprocess {
   source ../data-sources/py-etl-env/bin/activate
 
   echo "Postprocess integrated data ..."
-  postprocessIntegratedData $integratedData $processedData
+  postprocessIntegratedData $integratedDataKBR $integratedDataBnF $processedData
 
   echo "Postprocess contributor data (Belgians)..."
   postprocessContributorData $contributorDataBE $processedContributorsBE
@@ -1187,11 +1202,13 @@ function queryData {
 # -----------------------------------------------------------------------------
 function postprocessIntegratedData {
 
-  local input=$1
-  local output=$2
+  local kbrInput=$1
+  local bnfInput=$2
+  local output=$3
 
-  checkFile $input
-  python $SCRIPT_POSTPROCESS_QUERY_RESULT -i "$input" -o "$output"
+  checkFile $kbrInput
+  checkFile $bnfInput
+  python $SCRIPT_POSTPROCESS_QUERY_RESULT -k "$kbrInput" -b "$bnfInput" -o "$output"
 
 }
 
