@@ -100,7 +100,12 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     #
     # The BnF languages are assigned based on the catalog export, thus if French source is Dutch and if Dutch source is French
     #
-    BIND(IF(?bnfTargetLang = 'http://id.loc.gov/vocabulary/languages/fre', iri('http://id.loc.gov/vocabulary/languages/dut'), iri('http://id.loc.gov/vocabulary/languages/fre')) AS ?bnfSourceLang)
+    BIND(
+      IF(str(?bnfTargetLang) = 'http://id.loc.gov/vocabulary/languages/fre',
+        iri('http://id.loc.gov/vocabulary/languages/dut'),
+        IF(str(?bnfTargetLang) = 'http://id.loc.gov/vocabulary/languages/dut',
+          iri('http://id.loc.gov/vocabulary/languages/fre'),
+          "")) AS ?bnfSourceLang)
     # within the optional language check optionally for an English label of it (it should exist though)
       OPTIONAL {
         graph <http://master-data> { ?bnfSourceLang mads:authoritativeLabel ?bnfSourceLangLabel . }
