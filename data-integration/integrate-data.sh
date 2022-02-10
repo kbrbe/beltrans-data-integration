@@ -55,8 +55,8 @@ INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
 INPUT_BNF_ORG_AUTHORS="../data-sources/bnf/org-authors"
 INPUT_BNF_EDITIONS="../data-sources/bnf/editions"
 INPUT_BNF_CONTRIBUTIONS="../data-sources/bnf/contributions"
-INPUT_BNF_TRL_FR="../data-sources/bnf/BnF_FR-NL_1970-2020_584notices.csv"
-INPUT_BNF_TRL_NL="../data-sources/bnf/BnF_NL-FR_1970-2020_3762notices.csv"
+INPUT_BNF_TRL_FR_NL="../data-sources/bnf/BnF_FR-NL_1970-2020_584notices.csv"
+INPUT_BNF_TRL_NL_FR="../data-sources/bnf/BnF_NL-FR_1970-2020_3762notices.csv"
 INPUT_BNF_CONT_ISNI="../data-sources/bnf/external/dump_extref-isni_exact_match.xml"
 INPUT_BNF_CONT_VIAF="../data-sources/bnf/external/dump_extref-viaf_exact_match.xml"
 INPUT_BNF_CONT_WIKIDATA="../data-sources/bnf/external/dump_extref-wikidata_exact_match.xml"
@@ -82,8 +82,8 @@ INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography
 
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
 TRIPLE_STORE_GRAPH_BNF_TRL="http://bnf-publications"
-TRIPLE_STORE_GRAPH_BNF_TRL_FR="http://bnf-fr"
-TRIPLE_STORE_GRAPH_BNF_TRL_NL="http://bnf-nl"
+TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL="http://bnf-fr-nl"
+TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR="http://bnf-nl-fr"
 TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS="http://bnf-trl-contributor-links"
 TRIPLE_STORE_GRAPH_BNF_CONT="http://bnf-contributors"
 TRIPLE_STORE_GRAPH_BNF_CONT_ISNI="http://bnf-contributors-isni"
@@ -103,8 +103,8 @@ FORMAT_SPARQL_UPDATE="application/sparql-update"
 
 GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn-without-hyphen.sparql"
 DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn-without-hyphen.sparql"
-TRANSFORM_QUERY_BNF_TRL_NL="sparql-queries/transform-bnf-data-nl.sparql"
-TRANSFORM_QUERY_BNF_TRL_FR="sparql-queries/transform-bnf-data-fr.sparql"
+TRANSFORM_QUERY_BNF_TRL_NL_FR="sparql-queries/transform-bnf-data-nl-fr.sparql"
+TRANSFORM_QUERY_BNF_TRL_FR_NL="sparql-queries/transform-bnf-data-fr-nl.sparql"
 
 DATA_PROFILE_QUERY_FILE="dataprofile.sparql"
 DATA_PROFILE_AGG_QUERY_FILE="dataprofile-aggregated.sparql"
@@ -179,8 +179,8 @@ SUFFIX_BNF_BELGIANS_IDS="bnf-belgian-contributor-ids.csv"
 SUFFIX_BNF_BELGIAN_PUBS_IDS="bnf-belgian-contributor-publication-ids.csv"
 SUFFIX_BNF_TRL_CONT_ORGS_IDS="bnf-translation-contributor-orgs-ids.csv"
 SUFFIX_BNF_TRL_CONT_IDS="bnf-translation-contributor-persons-ids.csv"
-SUFFIX_BNF_TRL_IDS_FR="bnf-translation-ids-fr-nl.csv"
-SUFFIX_BNF_TRL_IDS_NL="bnf-translation-ids-nl-fr.csv"
+SUFFIX_BNF_TRL_IDS_FR_NL="bnf-translation-ids-fr-nl.csv"
+SUFFIX_BNF_TRL_IDS_NL_FR="bnf-translation-ids-nl-fr.csv"
 SUFFIX_BNF_TRL_IDS="bnf-translation-ids.csv"
 
 SUFFIX_BNF_ISBN_NO_HYPHEN_CSV="bnf-records-no-isbn-hyphen.csv"
@@ -219,8 +219,8 @@ SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
 #
 # LINKED DATA - BNF
 #
-SUFFIX_BNF_TRL_FR_LD="fr-translations.xml"
-SUFFIX_BNF_TRL_NL_LD="nl-translations.xml"
+SUFFIX_BNF_TRL_FR_NL_LD="fr_nl-translations.xml"
+SUFFIX_BNF_TRL_NL_FR_LD="nl_fr-translations.xml"
 
 SUFFIX_BNF_CONT_LD="bnf-contributors-persons.xml"
 SUFFIX_BNF_CONT_ORGS_LD="bnf-contributors-orgs.xml"
@@ -442,13 +442,13 @@ function extractBnF {
   bnfBelgiansBELTRANS="$integrationName/bnf/agents/$SUFFIX_BNF_BELGIANS_IDS"
   bnfPersonsBELTRANS="$integrationName/bnf/agents/$SUFFIX_BNF_TRL_CONT_IDS"
   bnfOrgsBELTRANS="$integrationName/bnf/agents/$SUFFIX_BNF_TRL_CONT_ORGS_IDS"
-  bnfNLTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_NL"
-  bnfFRTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_FR"
+  bnfNLFRTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_NL_FR"
+  bnfFRNLTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_FR_NL"
   bnfBelgianPublications="$integrationName/bnf/translations/$SUFFIX_BNF_BELGIAN_PUBS_IDS"
   bnfTranslationIDs="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS"
 
-  bnfFRRelevantTranslationData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_LD"
-  bnfNLRelevantTranslationData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_LD"
+  bnfFRNLRelevantTranslationData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_NL_LD"
+  bnfNLFRRelevantTranslationData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_FR_LD"
   bnfContributorDataPersons="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_LD"
   bnfContributorDataOrgs="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_ORGS_LD"
   bnfContributionLinksData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_CONT_LINKS_LD"
@@ -466,16 +466,18 @@ function extractBnF {
 
   # get publicationIDs of a dump of publications which are known to be translations
   echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - NL-FR"
-  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_NL" "$bnfNLTranslations" 
+  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_NL_FR" "$bnfNLFRTranslations" 
+
   echo "EXTRACTION - Extract publication IDs of translations from BnF catalog export - FR-NL"
-  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_FR" "$bnfFRTranslations"
+  extractBnFTranslations "$integrationName" "$INPUT_BNF_TRL_FR_NL" "$bnfFRNLTranslations"
 
 
   # extract the actual data of translations with relevant Belgian contributors
+  echo "EXTRACTION - Extract publication data about publications from BnF data - FR-NL"
+  extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfFRNLTranslations" "$bnfBelgianPublications" "$bnfFRNLRelevantTranslationData"
+
   echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
-  extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfNLTranslations" "$bnfBelgianPublications" "$bnfNLRelevantTranslationData"
-  echo "EXTRACTION - Extract publication data about publications from BnF data - NL-FR"
-  extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfFRTranslations" "$bnfBelgianPublications" "$bnfFRRelevantTranslationData"
+  extractBnFRelevantPublicationData "$integrationName" "$INPUT_BNF_EDITIONS" "$bnfNLFRTranslations" "$bnfBelgianPublications" "$bnfNLFRRelevantTranslationData"
 
   #
   # we also need related information of the identified publications from other data dumps
@@ -483,7 +485,7 @@ function extractBnF {
   source ../data-sources/py-etl-env/bin/activate
 
   echo "EXTRACTION - Create list of both NL and FR BnF translation IDs"
-  time python $SCRIPT_UNION_IDS $bnfNLTranslations $bnfFRTranslations -o $bnfTranslationIDs -d ';'
+  time python $SCRIPT_UNION_IDS $bnfFRNLTranslations $bnfNLFRTranslations -o $bnfTranslationIDs -d ';'
 
   # extract contributor IDs of all translation contributors (also non-Belgian contributors)
   echo "EXTRACTION - Extract all BnF contributor IDs of BELTRANS translations (despite the nationality)"
@@ -947,15 +949,18 @@ function loadKBR {
 function loadBnF {
   local integrationName=$1
 
+  mkdir -p $integrationName/bnf/translations
+  mkdir -p $integrationName/bnf/rdf
+
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   # first delete content of the named graph in case it already exists
-  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_FR>"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR"
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL"
 
-  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_NL>"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL"
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR"
 
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_CONT>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT"
@@ -975,8 +980,8 @@ function loadBnF {
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL"
 
-  local bnfTranslationsFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_LD"
-  local bnfTranslationsNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_LD"
+  local bnfTranslationsFRNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_NL_LD"
+  local bnfTranslationsNLFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_FR_LD"
   local bnfContributorData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_LD"
   local bnfContributionLinksData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_CONT_LINKS_LD"
   local bnfContributorIsniData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_ISNI_LD"
@@ -984,10 +989,10 @@ function loadBnF {
   local bnfContributorWikidataData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
 
   echo "Load BNF translations FR-NL ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfTranslationsFR" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfTranslationsFRNL" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL"
 
   echo "Load BNF translations NL-FR ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfTranslationsNL" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfTranslationsNLFR" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR"
 
   echo "Load BnF contributors ..."
   uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT"
@@ -1005,17 +1010,17 @@ function loadBnF {
   uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorIsniData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA"
 
   echo "Load BnF publication data to a single named graph - FR-NL"
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$TRANSFORM_QUERY_BNF_TRL_FR" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$TRANSFORM_QUERY_BNF_TRL_FR_NL" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
   echo "Load BnF publication data to a single named graph - NL-FR"
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$TRANSFORM_QUERY_BNF_TRL_NL" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
-
-  echo "Fix BnF ISBN13 identifiers without hyphen - get malformed ISBN identifiers"
-  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBNMissingHyphen"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$TRANSFORM_QUERY_BNF_TRL_NL_FR" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
   bnfISBNMissingHyphen="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN_NO_HYPHEN_CSV"
   bnfCleanedISBN="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN_FIXED_CSV"
   bnfCleanedISBNTriples="$integrationName/bnf/rdf/$SUFFIX_BNF_ISBN_HYPHEN_NT"
+
+  echo "Fix BnF ISBN13 identifiers without hyphen - get malformed ISBN identifiers"
+  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBNMissingHyphen"
 
   echo "Fix BnF ISBN13 identifiers without hyphen - normalize ISBN identifiers"
   source ../data-sources/py-etl-env/bin/activate
@@ -1023,10 +1028,10 @@ function loadBnF {
 
   echo "Fix BnF ISBN13 identifiers without hyphen - upload normalized ISBN identifiers"
   time python $SCRIPT_CREATE_ISBN_TRIPLES -i $bnfCleanedISBN -o $bnfCleanedISBNTriples
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfcleanedISBNTriples" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfCleanedISBNTriples" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT"
 
   echo "Fix BnF ISBN13 identifiers without hyphen - delete malformed ISBN identifiers"
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
 }
 

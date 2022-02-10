@@ -18,17 +18,17 @@ PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
 SELECT
     ?bnfManifestation ?isbn ?date ?title
 FROM <http://kbr-syracuse>
-FROM <http://bnf-nl>
+FROM <http://bnf-nl-fr>
 WHERE {
 
-    graph <http://bnf-nl> { ?bnfManifestation a frbr:Manifestation . }
+    graph <http://bnf-nl-fr> { ?bnfManifestation a frbr:Manifestation . }
     
-    OPTIONAL { graph <http://bnf-nl> { ?bnfManifestation dcterms:title ?title . } }
-    OPTIONAL { graph <http://bnf-nl> { ?bnfManifestation dcterms:date ?date . } }
+    OPTIONAL { graph <http://bnf-nl-fr> { ?bnfManifestation dcterms:title ?title . } }
+    OPTIONAL { graph <http://bnf-nl-fr> { ?bnfManifestation dcterms:date ?date . } }
           
     OPTIONAL {
       
-      graph <http://bnf-nl> { ?bnfManifestation bnf-onto:isbn ?isbn . }
+      graph <http://bnf-nl-fr> { ?bnfManifestation bnf-onto:isbn ?isbn . }
             
       FILTER NOT EXISTS { graph <http://kbr-syracuse> { ?kbrManifestation schema:isbn ?isbn . } }
     }

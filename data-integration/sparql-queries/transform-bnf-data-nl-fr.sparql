@@ -43,23 +43,23 @@ INSERT {
 }
 WHERE {
 
-    graph <http://bnf-nl> { 
+    graph <http://bnf-nl-fr> { 
       ?manifestation a frbr:Manifestation ;
                      rda-wemi:expressionManifested ?expression .
     }   
                       
-    OPTIONAL { graph <http://bnf-nl> { ?manifestation dcterms:title ?manifestationTitle . } } 
-    OPTIONAL { graph <http://bnf-nl> { ?manifestation dcterms:date ?manifestationPublishingDate . } } 
-    OPTIONAL { graph <http://bnf-nl> { ?manifestation rdagroup1elements:placeOfPublication ?manifestationLocation . } } 
-    OPTIONAL { graph <http://bnf-nl> { ?manifestation bibo:isbn10 ?isbn10 . } } 
-    OPTIONAL { graph <http://bnf-nl> { ?manifestation bibo:isbn13 ?isbn13 . } } 
-    OPTIONAL { graph <http://bnf-nl> { ?manifestation rdagroup1elements:note ?note . } } 
+    OPTIONAL { graph <http://bnf-nl-fr> { ?manifestation dcterms:title ?manifestationTitle . } } 
+    OPTIONAL { graph <http://bnf-nl-fr> { ?manifestation dcterms:date ?manifestationPublishingDate . } } 
+    OPTIONAL { graph <http://bnf-nl-fr> { ?manifestation rdagroup1elements:placeOfPublication ?manifestationLocation . } } 
+    OPTIONAL { graph <http://bnf-nl-fr> { ?manifestation bibo:isbn10 ?isbn10 . } } 
+    OPTIONAL { graph <http://bnf-nl-fr> { ?manifestation bibo:isbn13 ?isbn13 . } } 
+    OPTIONAL { graph <http://bnf-nl-fr> { ?manifestation rdagroup1elements:note ?note . } } 
 
     OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:aut ?author . } } 
     OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:trl ?translator . } } 
     OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:ill ?illustrator . } } 
     OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:sce ?scenarist . } } 
     OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:pbl ?publisher . } } 
-    OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression rdagroup1elements:publishersName ?publisherName . } } 
+    OPTIONAL { graph <http://bnf-nl-fr> { ?expression rdagroup1elements:publishersName ?publisherName . } } 
          
 }
