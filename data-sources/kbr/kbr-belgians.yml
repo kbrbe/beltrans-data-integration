@@ -33,29 +33,29 @@ mappings:
 #      - access: "kbr/belgian-authors-enriched.csv"
       - access: *sourceKBRBelgians
         referenceFormulation: csv
-        delimiter: ';'
-    s: btid:authority_$(IDNO)
+        delimiter: ','
+    s: btid:authority_$(authorityID)
     po:
       - [a, schema:Person]
-      - [dcterms:identifier, $(IDNO)]
-      - [rdfs:label, $(REFA)]
+      - [dcterms:identifier, $(authorityID)]
+      - [rdfs:label, $(name)]
       - [schema:nationality, countries:be~iri] 
       - [schema:givenName, $(given_name)]
       - [schema:familyName, $(family_name)]
-      - [foaf:isPrimaryTopicOf, btabout:authority_$(IDNO)~iri]
+      - [foaf:isPrimaryTopicOf, btabout:authority_$(authorityID)~iri]
       - p: schema:gender
         o: schema:Female~iri
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(GENDER)]
+            - [grel:valueParameter, $(gender)]
             - [grel:valueParameter2, "F"]
       - p: schema:gender
         o: schema:Male~iri
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(GENDER)]
+            - [grel:valueParameter, $(gender)]
             - [grel:valueParameter2, "M"]
       - p: schema:birthDate
         o:
@@ -76,19 +76,19 @@ mappings:
             - [grel:valueParameter, $(death_date)]
             - [grel:valueParameter2, ""]
       - p: bf:identifiedBy
-        o: btid:identifier_isni_$(IDNO)~iri
+        o: btid:identifier_isni_$(authorityID)~iri
         condition:
-          function: grel:string_startsWith
+          function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(ISNI)]
-            - [grel:string_sub, "ISNI 0"]
+            - [grel:valueParameter, $(isni_id)]
+            - [grel:valueParameter2, ""]
       - p: bf:identifiedBy
-        o: btid:identifier_viaf_$(IDNO)~iri
+        o: btid:identifier_viaf_$(authorityID)~iri
         condition:
-          function: grel:string_startsWith
+          function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(ISNI)]
-            - [grel:string_sub, "VIAF"]
+            - [grel:valueParameter, $(viaf_id)]
+            - [grel:string_sub, ""]
 
 
   # ---------------------------------------------------------------------------
@@ -100,11 +100,11 @@ mappings:
 #      - access: "kbr/belgian-authors-enriched.csv"
       - access: *sourceKBRBelgians
         referenceFormulation: csv
-        delimiter: ';'
-    s: btabout:authority_$(IDNO)
+        delimiter: ','
+    s: btabout:authority_$(authorityID)
     po:
       - [a, schema:WebPage]
-      - [foaf:primaryTopic, btid:authority_$(IDNO)~iri]
+      - [foaf:primaryTopic, btid:authority_$(authorityID)~iri]
 
 
   # ---------------------------------------------------------------------------
@@ -116,13 +116,13 @@ mappings:
 #      - access: "kbr/belgian-authors-enriched.csv"
       - access: *sourceKBRBelgians
         referenceFormulation: csv
-        delimiter: ';'
-    s: btid:identifier_isni_$(IDNO)
+        delimiter: ','
+    s: btid:identifier_isni_$(authorityID)
     condition:
-      function: grel:string_startsWith
+      function: idlab-fn:notEqual
       parameters:
-        - [grel:valueParameter, $(ISNI)]
-        - [grel:string_sub, "ISNI 0"]
+        - [grel:valueParameter, $(isni_id)]
+        - [grel:valueParameter2, ""]
     po:
       - [a, bf:Isni]
       - [rdf:value, $(isni_id)]
@@ -137,13 +137,13 @@ mappings:
 #      - access: "kbr/belgian-authors-enriched.csv"
       - access: *sourceKBRBelgians
         referenceFormulation: csv
-        delimiter: ';'
-    s: btid:identifier_viaf_$(IDNO)
+        delimiter: ','
+    s: btid:identifier_viaf_$(authorityID)
     condition:
-      function: grel:string_startsWith
+      function: idlab-fn:notEqual
       parameters:
-        - [grel:valueParameter, $(ISNI)]
-        - [grel:string_sub, "VIAF"]
+        - [grel:valueParameter, $(viaf_id)]
+        - [grel:valueParamter2, ""]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "VIAF"]

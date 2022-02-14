@@ -39,38 +39,38 @@ mappings:
 #      - access: "kbr/2021-10-25-clean-isni-data.csv"
       - access: *sourceKBRLinkedAuthoritiesPersonsNL
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesPersonsFR
         referenceFormulation: csv
-        delimiter: ';'
-    s: btid:authority_$(IDNO)
+        delimiter: ','
+    s: btid:authority_$(authorityID)
     po:
       - [a, schema:Person]
-      - [dcterms:identifier, $(IDNO)]
-      - [rdfs:label, $(REFA)]
+      - [dcterms:identifier, $(authorityID)]
+      - [rdfs:label, $(name)]
       - [schema:givenName, $(given_name)]
       - [schema:familyName, $(family_name)]
-      - [foaf:isPrimaryTopicOf, btabout:authority_$(IDNO)~iri]
+      - [foaf:isPrimaryTopicOf, btabout:authority_$(authorityID)~iri]
       - p: schema:nationality
         o: countries:be~iri
         condition:
           function: grel:string_startsWith
           parameters:
-            - [grel:valueParameter, $(ANAT)]
-            - [grel:string_sub, "Belg"]
+            - [grel:valueParameter, $(nationality)]
+            - [grel:string_sub, "be"]
       - p: schema:gender
         o: schema:Female~iri
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(GENDER)]
+            - [grel:valueParameter, $(gender)]
             - [grel:valueParameter2, "F"]
       - p: schema:gender
         o: schema:Male~iri
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(GENDER)]
+            - [grel:valueParameter, $(gender)]
             - [grel:valueParameter2, "M"]
       - p: schema:birthDate
         o:
@@ -91,14 +91,14 @@ mappings:
             - [grel:valueParameter, $(death_date)]
             - [grel:valueParameter2, ""]
       - p: bf:identifiedBy
-        o: btid:identifier_isni_$(IDNO)~iri
+        o: btid:identifier_isni_$(authorityID)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
             - [grel:valueParameter, $(isni_id)]
             - [grel:valueParameter2, ""]
       - p: bf:identifiedBy
-        o: btid:identifier_viaf_$(IDNO)~iri
+        o: btid:identifier_viaf_$(authorityID)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
@@ -115,20 +115,20 @@ mappings:
 #      - access: "kbr/2021-10-25-clean-isni-data.csv"
       - access: *sourceKBRLinkedAuthoritiesPersonsNL
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesPersonsFR
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesOrgsNL
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesOrgsFR
         referenceFormulation: csv
-        delimiter: ';'
-    s: btabout:authority_$(IDNO)
+        delimiter: ','
+    s: btabout:authority_$(authorityID)
     po:
       - [a, schema:WebPage]
-      - [foaf:primaryTopic, btid:authority_$(IDNO)~iri]
+      - [foaf:primaryTopic, btid:authority_$(authorityID)~iri]
 
 
   # ---------------------------------------------------------------------------
@@ -140,17 +140,17 @@ mappings:
 #      - access: "kbr/2021-10-25-clean-isni-data.csv"
       - access: *sourceKBRLinkedAuthoritiesPersonsNL
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesPersonsFR
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesOrgsNL
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesOrgsFR
         referenceFormulation: csv
-        delimiter: ';'
-    s: btid:identifier_isni_$(IDNO)
+        delimiter: ','
+    s: btid:identifier_isni_$(authorityID)
     condition:
       function: idlab-fn:notEqual
       parameters:
@@ -170,17 +170,17 @@ mappings:
 #      - access: "kbr/2021-10-25-clean-isni-data.csv"
       - access: *sourceKBRLinkedAuthoritiesPersonsNL
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesPersonsFR
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesOrgsNL
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesOrgsFR
         referenceFormulation: csv
-        delimiter: ';'
-    s: btid:identifier_viaf_$(IDNO)
+        delimiter: ','
+    s: btid:identifier_viaf_$(authorityID)
     condition:
       function: idlab-fn:notEqual
       parameters:
@@ -201,32 +201,32 @@ mappings:
 #      - access: "kbr/2021-10-25-clean-isni-data.csv"
       - access: *sourceKBRLinkedAuthoritiesOrgsNL
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesOrgsFR
         referenceFormulation: csv
-        delimiter: ';'
-    s: btid:authority_$(IDNO)
+        delimiter: ','
+    s: btid:authority_$(authorityID)
     po:
       - [a, schema:Organization]
-      - [dcterms:identifier, $(IDNO)]
-      - [rdfs:label, $(REFA)]
-      - [foaf:isPrimaryTopicOf, btabout:authority_$(IDNO)~iri]
+      - [dcterms:identifier, $(authorityID)]
+      - [rdfs:label, $(name)]
+      - [foaf:isPrimaryTopicOf, btabout:authority_$(authorityID)~iri]
       - p: schema:address
-        o: btid:address_$(IDNO)~iri
+        o: btid:address_$(authorityID)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(C043)]
+            - [grel:valueParameter, $(country_code)]
             - [grel:valueParameter2, ""]
       - p: bf:identifiedBy
-        o: btid:identifier_isni_$(IDNO)~iri
+        o: btid:identifier_isni_$(authorityID)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
             - [grel:valueParameter, $(isni_id)]
             - [grel:valueParameter2, ""]
       - p: bf:identifiedBy
-        o: btid:identifier_viaf_$(IDNO)~iri
+        o: btid:identifier_viaf_$(authorityID)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
@@ -241,26 +241,26 @@ mappings:
     sources:
       - access: *sourceKBRLinkedAuthoritiesOrgsNL
         referenceFormulation: csv
-        delimiter: ';'
+        delimiter: ','
       - access: *sourceKBRLinkedAuthoritiesOrgsFR
         referenceFormulation: csv
-        delimiter: ';'
-    s: btid:address_$(IDNO)
+        delimiter: ','
+    s: btid:address_$(authorityID)
     condition:
       function: idlab-fn:notEqual
       parameters:
-        - [grel:valueParameter, $(C043)]
+        - [grel:valueParameter, $(country_code)]
         - [grel:valueParameter, ""]
     po:
       - [a, schema:PostalAddress]
-      - [rdfs:label, "Address of authority $(IDNO)"]
+      - [rdfs:label, "Address of authority $(authorityID)"]
       - p: schema:addressCountry
         o: countries:be~iri
         condition:
           function: grel:string_startsWith
           parameters:
-            - [grel:valueParameter, $(C043)]
-            - [grel:string_sub, "BE"]
+            - [grel:valueParameter, $(country_code)]
+            - [grel:string_sub, "be"]
 
   # ---------------------------------------------------------------------------
   #

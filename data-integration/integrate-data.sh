@@ -2,6 +2,7 @@
 
 SCRIPT_CLEAN_TRANSLATIONS="../data-sources/kbr/clean-marc-slim.py"
 SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
+SCRIPT_EXTRACT_AGENTS="../data-sources/kbr/authority-marc-to-csv.py"
 SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
 SCRIPT_NORMALIZE_HEADERS="../data-sources/kbr/replace-headers.py"
 SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-authorities.sh"
@@ -36,21 +37,21 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 # KBR - translations
 #INPUT_KBR_TRL_NL="../data-sources/kbr/translations/ExportSyracuse_20211213_NL-FR_1970-2020_3866records.xml"
 #INPUT_KBR_TRL_FR="../data-sources/kbr/translations/ExportSyracuse_20211213_FR-NL_1970-2020_9239records.xml"
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_4597records.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_12962records.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-14_744records.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-14_13002records.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_AUT-lies_APEP_3769records-all-fields.csv"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_AUT-lies_AORG_711records-all-fields.csv"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_AUT-lies_APEP_8384records-all-fields.csv"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_AUT-lies_AORG_702records-all-fields.csv"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-02-14_NL-FR_APEP_4016records.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-02-14_NL-FR_AORG_752records.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-02-14_FR-NL_APEP_8821records.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-02-14_FR-NL_AORG_761records.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
 INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 
 # KBR - Belgians
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/2021-11-29-kbr-belgians.csv"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-belg_2022-02-05.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -722,21 +723,17 @@ function extractKBRLinkedAuthorities {
 
   source ../data-sources/py-etl-env/bin/activate
 
-  echo "Clean authorities NL - Persons ..."
-  normalizeCSVHeaders "$kbrNLPersons" "$kbrNLPersonsNorm" "$KBR_CSV_HEADER_CONVERSION"
-  cleanAgents "$kbrNLPersonsNorm" "$kbrNLPersonsCleaned"
+  echo "Extract authorities NL - Persons ..."
+  python $SCRIPT_EXTRACT_AGENTS -i $kbrNLPersons -o $kbrNLPersonsCleaned
 
-  echo "Clean authorities NL - Organizations ..."
-  normalizeCSVHeaders "$kbrNLOrgs" "$kbrNLOrgsNorm" "$KBR_CSV_HEADER_CONVERSION"
-  cleanAgents "$kbrNLOrgsNorm" "$kbrNLOrgsCleaned"
+  echo "Extract authorities NL - Organizations ..."
+  python $SCRIPT_EXTRACT_AGENTS -i $kbrNLOrgs -o $kbrNLOrgsCleaned
 
-  echo "Clean authorities FR - Persons ..."
-  normalizeCSVHeaders "$kbrFRPersons" "$kbrFRPersonsNorm" "$KBR_CSV_HEADER_CONVERSION"
-  cleanAgents "$kbrFRPersonsNorm" "$kbrFRPersonsCleaned"
+  echo "Extract authorities FR - Persons ..."
+  python $SCRIPT_EXTRACT_AGENTS -i $kbrFRPersons -o $kbrFRPersonsCleaned
 
-  echo "Clean authorities FR - Organizations ..."
-  normalizeCSVHeaders "$kbrFROrgs" "$kbrFROrgsNorm" "$KBR_CSV_HEADER_CONVERSION"
-  cleanAgents "$kbrFROrgsNorm" "$kbrFROrgsCleaned"
+  echo "Extract authorities FR - Organizations ..."
+  python $SCRIPT_EXTRACT_AGENTS -i $kbrFROrgs -o $kbrFROrgsCleaned
 
   echo "Copy publisher location information ..."
   cp "$INPUT_KBR_LA_PLACES_VLG" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
@@ -762,10 +759,10 @@ function extractKBRBelgians {
 
   source ../data-sources/py-etl-env/bin/activate
 
-  echo "Clean Belgians ..."
+  echo "Extract Belgians ..."
   # currently this input has already normalized headers
   #normalizeCSVHeaders "$kbrBelgians" "$kbrBelgiansNorm" "$KBR_CSV_HEADER_CONVERSION"
-  cleanAgents "$kbrBelgians" "$kbrBelgiansCleaned"
+  python $SCRIPT_EXTRACT_AGENTS -i $kbrBelgians -o $kbrBelgiansCleaned
 }
 
 # -----------------------------------------------------------------------------
@@ -1341,7 +1338,7 @@ else
   elif [ "$1" = "tl" ];
   then
     transform $2 $3
-    load $3 $3
+    load $2 $3
 
   else
     echo "uknown command, please use different combinations of extract (e) transform (t) load (l) query (q) and postprocess (p): 'etl', 'etlq', 'etlqp', 'e', 'et', 't', 'l', 'tl', 'q' etc"

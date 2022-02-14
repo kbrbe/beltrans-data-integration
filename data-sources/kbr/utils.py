@@ -222,7 +222,7 @@ def extractNameComponents(value):
 
 # -----------------------------------------------------------------------------
 def extractIdentifier(rowID, value, pattern):
-  """Extracts the digits of an identifier in column 'col' if it starts with 'pattern'.
+  """Extracts the digits of an identifier from 'value' based on the type of identifier ('value' starts with 'pattern').
 
   >>> extractIdentifier('1', 'ISNI 0000 0000 0000 1234', 'ISNI')
   '0000000000001234'
