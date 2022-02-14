@@ -182,8 +182,6 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     }
   }
 
- FILTER( str(?contributorNationalityLabel) = 'Belgium')
-
 
 }
 ORDER BY DESC(?numberAuthored) DESC(?numberTranslated) DESC(?numberIllustrations) DESC(?numberScened)
