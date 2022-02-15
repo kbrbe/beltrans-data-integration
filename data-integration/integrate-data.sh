@@ -8,6 +8,7 @@ SCRIPT_NORMALIZE_HEADERS="../data-sources/kbr/replace-headers.py"
 SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-authorities.sh"
 SCRIPT_EXTRACT_BB="../data-sources/kbr/extract-belgian-bibliography.py"
 SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.py"
+SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
 SCRIPT_FIX_ISBN="../data-sources/bnf/formatISBN13.py"
 SCRIPT_CREATE_ISBN_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
@@ -39,6 +40,8 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 #INPUT_KBR_TRL_FR="../data-sources/kbr/translations/ExportSyracuse_20211213_FR-NL_1970-2020_9239records.xml"
 INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-14_744records.xml"
 INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-14_13002records.xml"
+
+INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
 # KBR - linked authorities
 INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-02-14_NL-FR_APEP_4016records.xml"
@@ -150,6 +153,7 @@ SUFFIX_DATA_PROFILE_EXCEL_STATS="corpus-stats.xlsx"
 SUFFIX_KBR_TRL_NL_CLEANED="nl-translations-cleaned.xml"
 SUFFIX_KBR_TRL_NL_WORKS="nl-translations-works.csv"
 SUFFIX_KBR_TRL_NL_CONT="nl-translations-contributors.csv"
+SUFFIX_KBR_TRL_NL_CONT_DEDUP="nl-translations-contributors-deduplicated.csv"
 SUFFIX_KBR_TRL_NL_NEWAUT="nl-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_NL_BB="nl-translations-bb.csv"
 SUFFIX_KBR_TRL_NL_PUB_COUNTRY="nl-translations-pub-country.csv"
@@ -157,6 +161,7 @@ SUFFIX_KBR_TRL_NL_COL_LINKS="nl-collection-links.csv"
 SUFFIX_KBR_TRL_FR_CLEANED="fr-translations-cleaned.xml"
 SUFFIX_KBR_TRL_FR_WORKS="fr-translations-works.csv"
 SUFFIX_KBR_TRL_FR_CONT="fr-translations-contributors.csv"
+SUFFIX_KBR_TRL_FR_CONT_DEDUP="fr-translations-contributors-deduplicated.csv"
 SUFFIX_KBR_TRL_FR_NEWAUT="fr-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_FR_BB="fr-translations-bb.csv"
 SUFFIX_KBR_TRL_FR_PUB_COUNTRY="fr-translations-pub-country.csv"
@@ -650,7 +655,9 @@ function extractKBRTranslationsAndContributions {
   kbrFrenchTranslationsCSVWorks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_WORKS"
 
   kbrDutchTranslationsCSVCont="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT"
+  kbrDutchTranslationsCSVContDedup="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT_DEDUP"
   kbrFrenchTranslationsCSVCont="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT"
+  kbrFrenchTranslationsCSVContDedup="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT_DEDUP"
 
   kbrDutchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_NEWAUT"
   kbrFrenchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_NEWAUT"
@@ -678,6 +685,12 @@ function extractKBRTranslationsAndContributions {
   echo "Extract CSV from French translations XML..."
   extractCSVFromXMLTranslations "$kbrFrenchTranslationsCleaned" "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsCSVCont" "$kbrFrenchTranslationsCollectionLinks"
 
+  echo "Deduplicate newly identified contributors - NL-FR"
+  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrDutchTranslationsCSVCont -o $kbrDutchTranslationsCSVContDedup
+
+  echo "Deduplicate newly identified contributors - FR-NL"
+  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrFrenchTranslationsCSVCont -o $kbrFrenchTranslationsCSVContDedup
+
   echo "Extract BB assignments for Dutch translations ..."
   extractBBEntries "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVBB"
 
@@ -693,6 +706,7 @@ function extractKBRTranslationsAndContributions {
   echo "Extract newly identified contributors ..."
   extractIdentifiedAuthorities "$kbrDutchTranslationsCSVCont" "$kbrDutchTranslationsIdentifiedAuthorities"
   extractIdentifiedAuthorities "$kbrFrenchTranslationsCSVCont" "$kbrFrenchTranslationsIdentifiedAuthorities"
+
 
 }
 
@@ -837,8 +851,8 @@ function mapKBRTranslationsAndContributions {
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
   export RML_SOURCE_WORKS_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_WORKS"
   export RML_SOURCE_WORKS_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_WORKS"
-  export RML_SOURCE_CONT_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT"
-  export RML_SOURCE_CONT_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT"
+  export RML_SOURCE_CONT_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT_DEDUP"
+  export RML_SOURCE_CONT_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT_DEDUP"
   export RML_SOURCE_COLLECTION_LINKS_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
   export RML_SOURCE_COLLECTION_LINKS_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
 
