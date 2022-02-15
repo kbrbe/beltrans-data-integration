@@ -37,6 +37,17 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
   linkedOrganizationNames = set()
 
   #
+  # add person contributors from the field 100 (https://github.com/kbrbe/beltrans-data-integration/issues/71)
+  #
+  field100Contributors = elem.findall('./datafield[@tag="100"]', ALL_NS)
+  for p in field100Contributors:
+    (cID, cName, cRole) = getContributorData(p)
+    # If no role is set it is an author (confirmed with KBRs cataloging agency)
+    if cRole == '':
+      cRole = 'aut'
+    foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': 'no'})
+
+  #
   # add person contributors, in case the role is empty it is the author with role 'aut'
   #
   personContributors = elem.findall('./datafield[@tag="700"]', ALL_NS)
