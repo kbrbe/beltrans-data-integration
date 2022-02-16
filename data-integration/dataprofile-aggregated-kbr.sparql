@@ -23,7 +23,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (group_concat(distinct ?kbrSourceManifestationTtitle;SEPARATOR=';') AS ?sourceTextTitle)
     (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetTextEdition)
     (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetTextBindingType)
-    (group_concat(distinct ?kbrTargetManifestationCollectionID;SEPARATOR=';') AS ?targetTextCollectionIdentifier)
+    (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetTextCollectionIdentifier)
     (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
     (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetTextYearOfPublication)
     (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetTextPlaceOfPublication)
@@ -32,11 +32,11 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (group_concat(distinct ?kbrTargetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
     (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceTextISBN)
     (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetTextISBN) 
-    (group_concat(distinct ?kbrAuthorID;SEPARATOR=';') AS ?authorIdentifier)
-    (group_concat(distinct ?kbrTranslatorID;SEPARATOR=';') AS ?translatorIdentifier)
-    (group_concat(distinct ?kbrPublisherID;SEPARATOR=';') AS ?targetPublisherIdentifier)
-    (group_concat(distinct ?kbrIllustratorID;SEPARATOR=';') AS ?illustratorIdentifier)
-    (group_concat(distinct ?kbrScenaristID;SEPARATOR=';') AS ?scenaristIdentifier)
+    (group_concat(distinct ?kbrAuthorNameID;SEPARATOR=';') AS ?authorIdentifier)
+    (group_concat(distinct ?kbrTranslatorNameID;SEPARATOR=';') AS ?translatorIdentifier)
+    (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifier)
+    (group_concat(distinct ?kbrIllustratorNameID;SEPARATOR=';') AS ?illustratorIdentifier)
+    (group_concat(distinct ?kbrScenaristNameID;SEPARATOR=';') AS ?scenaristIdentifier)
   FROM <http://kbr-syracuse>
   FROM <http://isni-sru>
   FROM <http://kbr-belgians>
@@ -62,7 +62,12 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     OPTIONAL { graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?kbrResponsibilityStatement . }}
 
     OPTIONAL {
-      graph <http://kbr-syracuse> { ?manifestation schema:isPartOf ?kbrTargetManifestationCollectionID . }
+      graph <http://kbr-syracuse> { ?manifestation schema:isPartOf ?kbrTargetManifestationCollectionURI . }
+
+      OPTIONAL { graph <http://kbr-syracuse> { ?kbrTargetManifestationCollectionURI dcterms:identifier ?kbrTargetManifestationCollectionID . } }
+      OPTIONAL { graph <http://kbr-syracuse> { ?kbrTargetManifestationCollectionURI schema:name ?kbrTargetManifestationCollectionName . } }
+
+      BIND(CONCAT(?kbrTargetManifestationCollectionName, ' (', ?kbrTargetManifestationCollectionID, ')') AS ?kbrTargetManifestationCollectionNameID)
     }
 
 
@@ -162,13 +167,19 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
       # within this optional author check optionally for Belgians from KBR (it could be the author from kbr-syracuse is not in kbr-belgians
       OPTIONAL {
-        graph <http://kbr-belgians> { 
-          # There is always a nationality for this dataset, thus not optional
+        graph <http://kbr-linked-authorities> { 
           ?kbrAuthor a schema:Person ;
                      dcterms:identifier ?kbrAuthorID ;
                      schema:nationality ?kbrAuthorNationality . 
         }
 
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> { ?kbrAuthor schema:familyName ?kbrAuthorFamilyName . }
+          graph <http://kbr-linked-authorities> { ?kbrAuthor schema:givenName ?kbrAuthorGivenName . }
+        }
+
+        BIND(CONCAT(?kbrAuthorFamilyName, ', ', ?kbrAuthorGivenName, ' (', ?kbrAuthorID, ')') AS ?kbrAuthorNameID)
+ 
         # within this optional nationality check optionally for an English label in the master data
         OPTIONAL {
           graph <http://master-data> { ?kbrAuthorNationality mads:authoritativeLabel ?kbrAuthorNationalityLabel . }
@@ -189,12 +200,20 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
       # within this optional translator check optionally for Belgians from KBR (it could be the translator from kbr-syracuse is not in kbr-belgians
       OPTIONAL {
-        graph <http://kbr-belgians> { 
+        graph <http://kbr-linked-authorities> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrTranslator a schema:Person ;
                          dcterms:identifier ?kbrTranslatorID ;
                          schema:nationality ?kbrTranslatorNationality . 
         }
+
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> { ?kbrTranslator schema:familyName ?kbrTranslatorFamilyName . }
+          graph <http://kbr-linked-authorities> { ?kbrTranslator schema:givenName ?kbrTranslatorGivenName . }
+        }
+
+        BIND(CONCAT(?kbrTranslatorFamilyName, ', ', ?kbrTranslatorGivenName, ' (', ?kbrTranslatorID, ')') AS ?kbrTranslatorNameID)
+ 
 
         # within this optional nationality check optionally for an English label in the master data
         OPTIONAL {
@@ -228,12 +247,17 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         }
 
         OPTIONAL {
-          graph <http://kbr-linked-authorities> { ?kbrPublisher dcterms:identifier ?kbrPublisherID . }
+          graph <http://kbr-linked-authorities> { 
+            ?kbrPublisher rdfs:label ?kbrPublisherName ;
+                          dcterms:identifier ?kbrPublisherID . }
         }
 
         OPTIONAL {
           graph <http://kbr-syracuse> { ?publisherAssociation up:assertionType ?publisherUncertainty . }
         }
+
+        BIND(CONCAT(?kbrPublisherName, ' (', ?kbrPublisherID, ')') AS ?kbrPublisherNameID)
+ 
       }
     }
 
@@ -257,7 +281,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
       # within this optional illustrator check optionally for Belgians from KBR (it could be the illustrator from kbr-syracuse is not in kbr-belgians
       OPTIONAL {
-        graph <http://kbr-belgians> { 
+        graph <http://kbr-linked-authorities> { 
           # There is always a nationality for this dataset, thus not optional
           ?kbrIllustrator a schema:Person ;
                           dcterms:identifier ?kbrIllustratorID ;
@@ -269,6 +293,15 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
           graph <http://master-data> { ?kbrIllustratorNationality mads:authoritativeLabel ?kbrIllustratorNationalityLabel . }
           FILTER (lang(?kbrIllustratorNationalityLabel) = 'en')
         }
+
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:familyName ?kbrIllustratorFamilyName . }
+          graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:givenName ?kbrIllustratorGivenName . }
+        }
+
+        BIND(CONCAT(?kbrIllustratorFamilyName, ', ', ?kbrIllustratorGivenName, ' (', ?kbrIllustratorID, ')') AS ?kbrIllustratorNameID)
+ 
+
       }
 
 
@@ -306,6 +339,15 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
           graph <http://master-data> { ?kbrScenaristNationality mads:authoritativeLabel ?kbrScenaristNationalityLabel . }
           FILTER (lang(?kbrScenaristNationalityLabel) = 'en')
         }
+
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> { ?kbrScenarist schema:familyName ?kbrScenaristFamilyName . }
+          graph <http://kbr-linked-authorities> { ?kbrScenarist schema:givenName ?kbrScenaristGivenName . }
+        }
+
+        BIND(CONCAT(?kbrScenaristFamilyName, ', ', ?kbrScenaristGivenName, ' (', ?kbrScenaristID, ')') AS ?kbrScenaristNameID)
+ 
+
       }
 
 

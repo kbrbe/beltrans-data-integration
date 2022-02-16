@@ -28,11 +28,11 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?bnfSourceLangLabel;SEPARATOR=';') AS ?sourceTextLanguage)
     (group_concat(distinct ?bnfTargetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
     (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetTextISBN) 
-    (group_concat(distinct ?bnfAuthor;SEPARATOR=';') AS ?authorIdentifier)
-    (group_concat(distinct ?bnfTranslator;SEPARATOR=';') AS ?translatorIdentifier)
-    (group_concat(distinct ?bnfPublisher;SEPARATOR=';') AS ?targetPublisherIdentifier)
-    (group_concat(distinct ?bnfIllustrator;SEPARATOR=';') AS ?illustratorIdentifier)
-    (group_concat(distinct ?bnfScenarist;SEPARATOR=';') AS ?scenaristIdentifier)
+    (group_concat(distinct ?bnfAuthorNameID;SEPARATOR=';') AS ?authorIdentifier)
+    (group_concat(distinct ?bnfTranslatorNameID;SEPARATOR=';') AS ?translatorIdentifier)
+    (group_concat(distinct ?bnfPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifier)
+    (group_concat(distinct ?bnfIllustratorNameID;SEPARATOR=';') AS ?illustratorIdentifier)
+    (group_concat(distinct ?bnfScenaristNameID;SEPARATOR=';') AS ?scenaristIdentifier)
 
   FROM <http://kbr-syracuse>
   FROM <http://isni-sru>
@@ -133,6 +133,9 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:givenName ?bnfAuthorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:gender ?bnfAuthorGender . } }
 
+      BIND(CONCAT(?bnfAuthorFamilyName, ', ', ?bnfAuthorGivenName, ' (', STRBEFORE(STRAFTER(str(?bnfAuthor), "12148/"), "#"), ')') as ?bnfAuthorNameID)
+      
+
       # within this optional author, check optionally for authors with ISNI
       OPTIONAL {
         graph <http://bnf-contributors-isni> { ?bnfAuthor skos:exactMatch ?bnfAuthorISNIURI . }
@@ -210,6 +213,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:givenName ?bnfTranslatorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:gender ?bnfTranslatorGender . } }
 
+      BIND(CONCAT(?bnfTranslatorFamilyName, ', ', ?bnfTranslatorGivenName, ' (', STRBEFORE(STRAFTER(str(?bnfTranslator), "12148/"), "#"), ')') as ?bnfTranslatorNameID)
+
       # within this optional translator, check optionally for Belgians with ISNI
       OPTIONAL {
         graph <http://bnf-contributors-isni> { ?bnfTranslator skos:exactMatch ?bnfTranslatorISNIURI . }
@@ -269,6 +274,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
       graph <http://bnf-publications> { ?manifestation schema:publisher ?bnfPublisher . } 
 
+      BIND(CONCAT(?bnfPublisherName, ' (', STRBEFORE(STRAFTER(str(?bnfPublisher), "12148/"), "#"), ')') as ?bnfPublisherNameID)
+
       # within this optional publisher, check optional attributes from the linked authorities dataset
       OPTIONAL { 
         
@@ -307,6 +314,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         }
       }
 
+      BIND(CONCAT(?bnfIllustratorFamilyName, ', ', ?bnfIllustratorGivenName, ' (', STRBEFORE(STRAFTER(str(?bnfIllustrator), "12148/"), "#"), ')') as ?bnfIllustratorNameID)
 
       # within this optional translator, check optional attributes from the linked authorities dataset
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator bio:birth ?bnfIllustratorBirthDate . } }
@@ -389,6 +397,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:familyName ?bnfScenaristFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:givenName ?bnfScenaristGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:gender ?bnfScenaristGender . } }
+
+      BIND(CONCAT(?bnfScenaristFamilyName, ', ', ?bnfScenaristGivenName, ' (', STRBEFORE(STRAFTER(str(?bnfScenarist), "12148/"), "#"), ')') as ?bnfScenaristNameID)
 
       # within this optional translator, check optionally for Belgians with ISNI
       OPTIONAL {
