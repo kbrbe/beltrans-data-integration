@@ -13,6 +13,7 @@ SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py
 SCRIPT_FIX_ISBN="../data-sources/bnf/formatISBN13.py"
 SCRIPT_CREATE_ISBN_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
 SCRIPT_CSV_TO_EXCEL="csv-to-excel.py"
+SCRIPT_COMPUTE_STATS="create-stats.py"
 
 SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
@@ -134,6 +135,7 @@ SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE="translations-per-year.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE="translations-per-location.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE="translations-per-country.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
+SUFFIX_DATA_PROFILE_DTYPES="dataprofile-dtypes.csv"
 
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED="integrated-data-aggregated.csv"
@@ -384,20 +386,6 @@ function query {
   echo "Creating the dataprofile CSV accompanying contributor file (all nationalities) ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContAll" "$ENV_SPARQL_ENDPOINT" "$outputFileContAll"
 
-  echo "Creating statistics about publications per language and year ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFilePubsPerYear" "$ENV_SPARQL_ENDPOINT" "$outputFilePubsPerYear"
-
-  echo "Creating statistics about publications per language and country ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFilePubsPerCountry" "$ENV_SPARQL_ENDPOINT" "$outputFilePubsPerCountry"
-
-  echo "Creating statistics about publications per language and location ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFilePubsPerLoc" "$ENV_SPARQL_ENDPOINT" "$outputFilePubsPerLoc"
-
-  echo "Creating statistics about publications per language and publisher ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFilePubsPerPbl" "$ENV_SPARQL_ENDPOINT" "$outputFilePubsPerPbl"
-
-  echo "Creating statistics about translations from sources ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$DATA_PROFILE_SOURCE_STATS_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileSourceStats"
 }
 
 # -----------------------------------------------------------------------------
@@ -445,8 +433,8 @@ function postprocess {
   time python $SCRIPT_CSV_TO_EXCEL $processedAggData $processedData $processedContributorsAll -s "unique" -s "all-data" -s "contributors" -o $excelData
 
   echo "Create Excel sheet for statistics ..."
-  time python $SCRIPT_CSV_TO_EXCEL $outputFilePubsPerYear $outputFilePubsPerCountry $outputFilePubsPerLoc $outputFilePubsPerPbl $outputFileSourceStats -s "per-year" -s "per-country" -s "per-location" -s "per-publisher" -s "per-source" -o $excelStats
-  
+  python $SCRIPT_COMPUTE_STATS -i $processedData -a $processedAggData -d $SUFFIX_DATA_PROFILE_DTYPES -o $excelStats
+
 }
 
 # -----------------------------------------------------------------------------
