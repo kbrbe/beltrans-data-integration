@@ -29,6 +29,7 @@ def getStatsPerLanguage(column, df, dfAgg):
   #
   aggRelevant = dfAgg[[column, 'targetTextLanguage']]
   trlPerCombo = aggRelevant.pivot_table(index=column, columns='targetTextLanguage', aggfunc='size', fill_value=0)
+  trlPerCombo.loc['TOTAL'] = trlPerCombo.sum()
 
   #
   # Translations per column single value
@@ -36,7 +37,7 @@ def getStatsPerLanguage(column, df, dfAgg):
   relevant = df[['targetTextKBRIdentifier', 'targetTextBnFIdentifier', column, 'targetTextLanguage']]
   # We need the identifier of the translation to eliminate duplicate trl-column relationships, but therefore we require an ID column
   # take the KBR identifier as identifier and if there is non take the BnF identifier
-  relevant['rowID'] = relevant['targetTextKBRIdentifier'].fillna(relevant['targetTextBnFIdentifier'])
+  relevant.loc[:,'rowID'] = relevant.loc[:,'targetTextKBRIdentifier'].fillna(relevant.loc[:,'targetTextBnFIdentifier'])
   #relevant.assign('rowID'=np.where(relevant['targetTextKBRIdentifier'].isnull(), relevant['targetTextBnFIdentifier'], relevant['targetTextKBRIdentifier']))
   #relevant.loc[:,'rowID'] = np.where(relevant['targetTextKBRIdentifier'].isnull(), relevant['targetTextBnFIdentifier'], relevant['targetTextKBRIdentifier'])
 
@@ -50,6 +51,7 @@ def getStatsPerLanguage(column, df, dfAgg):
   # writer.close()
 
   trlPerValue = relevantAllUnique.pivot_table(index=column, columns='targetTextLanguage', aggfunc='size', fill_value=0)
+  trlPerValue.loc['TOTAL'] = trlPerValue.sum()
 
   return (trlPerCombo, trlPerValue)
 

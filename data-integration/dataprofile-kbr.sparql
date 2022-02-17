@@ -54,7 +54,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?kbrTranslatorDeathDate AS ?translatorDeathDateKBR)
     (?isniRDFTranslatorDeathDate AS ?translatorDeathDateISNI)
     (IF(bound(?publisherUncertainty), "uncertain", "certain") AS ?targetTextPublisherCertainty)
-    (?kbrPublisherID AS ?targetPublisherIdentifier)
+    (?kbrPublisherNameID AS ?targetPublisherIdentifier)
     (?kbrPublisherISNI AS ?targetPublisherISNI)
     (?kbrPublisherName AS ?targetPublisherName)
     (?kbrPublisherLocation AS ?targetPublisherLocation)
@@ -376,6 +376,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
           ?kbrPublisher rdfs:label ?kbrPublisherName ;
                         dcterms:identifier ?kbrPublisherID .
         } 
+
+        BIND(CONCAT(?kbrPublisherName, ' (', ?kbrPublisherID, ')') AS ?kbrPublisherNameID)
       }
 
       OPTIONAL { 
