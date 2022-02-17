@@ -14,7 +14,8 @@ SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py
 SCRIPT_FIX_ISBN="../data-sources/bnf/formatISBN13.py"
 SCRIPT_CREATE_ISBN_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
 SCRIPT_CSV_TO_EXCEL="csv-to-excel.py"
-SCRIPT_COMPUTE_STATS="create-stats.py"
+SCRIPT_COMPUTE_STATS="create-publication-stats.py"
+SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
 
 SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
@@ -383,12 +384,6 @@ function query {
   echo "Creating the dataprofile CSV file with aggregated values - BnF ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAggBnF" "$ENV_SPARQL_ENDPOINT" "$outputFileAggBnF"
 
-  echo "Creating the dataprofile CSV accompanying contributor file (Belgians) ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContBE" "$ENV_SPARQL_ENDPOINT" "$outputFileContBE"
-
-  echo "Creating the dataprofile CSV accompanying contributor file (all nationalities) ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContAll" "$ENV_SPARQL_ENDPOINT" "$outputFileContAll"
-
 }
 
 # -----------------------------------------------------------------------------
@@ -403,10 +398,7 @@ function postprocess {
   processedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   processedAggData="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED"
 
-  contributorDataBE="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
-  contributorDataAll="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
   processedContributorsBE="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED"
-  processedContributorsAll="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED"
 
   outputFilePubsPerYear="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
   outputFilePubsPerCountry="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE"
@@ -422,18 +414,16 @@ function postprocess {
   echo "Postprocess integrated data ..."
   postprocessIntegratedData $integratedDataKBR $integratedDataBnF $processedData
 
-  echo "Postprocess contributor data (Belgians)..."
-  postprocessContributorData $contributorDataBE $processedContributorsBE
-
-  echo "Postprocess contributor data (all nationalities)..."
-  postprocessContributorData $contributorDataAll $processedContributorsAll
+  source ../data-sources/py-etl-env/bin/activate
 
   echo "Postprocess aggregated data ..."
-  source ../data-sources/py-etl-env/bin/activate
   time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -k $integratedAggKBR -b $integratedAggBnF -o $processedAggData
 
+  echo "Create contributor list ..."
+  time python $SCRIPT_CREATE_CONTRIBUTOR_LIST -i $processedData -d $SUFFIX_DATA_PROFILE_DTYPES -o $processedContributorsBE
+
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $processedAggData $processedData $processedContributorsAll -s "unique" -s "all-data" -s "contributors" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $processedAggData $processedData $processedContributorsBE -s "unique" -s "all-data" -s "contributors" -o $excelData
 
   echo "Create Excel sheet for statistics ..."
   python $SCRIPT_COMPUTE_STATS -i $processedData -a $processedAggData -d $SUFFIX_DATA_PROFILE_DTYPES -o $excelStats
@@ -467,8 +457,6 @@ function extractKBR {
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
   extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR"
 
-  #echo "EXTRACTION - Extract and clean KBR Belgians"
-  #extractKBRBelgians "$integrationName" "$INPUT_KBR_BELGIANS"
 }
 
 # -----------------------------------------------------------------------------
