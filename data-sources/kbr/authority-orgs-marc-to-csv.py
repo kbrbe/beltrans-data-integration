@@ -26,39 +26,14 @@ def addAuthorityFieldsToCSV(elem, writer, stats):
   # extract relevant data from the current record
   #
   authorityID = utils.getElementValue(elem.find('./marc:controlfield[@tag="001"]', ALL_NS))
-  namePerson = utils.getElementValue(elem.find('./marc:datafield[@tag="100"]/marc:subfield[@code="a"]', ALL_NS))
-  nameOrg = utils.getElementValue(elem.find('./marc:datafield[@tag="110"]/marc:subfield[@code="a"]', ALL_NS))
-  nationality = utils.getElementValue(elem.find('./marc:datafield[@tag="370"]/marc:subfield[@code="c"]', ALL_NS))
-  gender = utils.getElementValue(elem.find('./marc:datafield[@tag="375"]/marc:subfield[@code="a"]', ALL_NS))
-  birthDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="f"]', ALL_NS))
-  deathDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="g"]', ALL_NS))
+  name = utils.getElementValue(elem.find('./marc:datafield[@tag="110"]/marc:subfield[@code="a"]', ALL_NS))
   isniRaw = utils.getElementValue(elem.xpath('./marc:datafield[@tag="024"]/marc:subfield[@code="2" and text()="isni"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
   viafRaw = utils.getElementValue(elem.xpath('./marc:datafield[@tag="024"]/marc:subfield[@code="2" and text()="viaf"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
   countryCode = utils.getElementValue(elem.find('./marc:datafield[@tag="043"]/marc:subfield[@code="c"]', ALL_NS))
  
-
-  (familyName, givenName) = utils.extractNameComponents(namePerson)
-  birthDate = ''
-  deathDate = ''
-
-  datePatterns = ['%Y', '(%Y)', '[%Y]', '%Y-%m-%d', '%d/%m/%Y', '%Y%m%d']
-  if birthDateRaw:
-    birthDate = utils.parseDate(birthDateRaw, datePatterns)
-
-  if deathDateRaw:
-    deathDate = utils.parseDate(deathDateRaw, datePatterns)
-
-  name = f'{namePerson} {nameOrg}'.strip()
-
   newRecord = {
     'authorityID': authorityID,
     'name': name,
-    'family_name': familyName,
-    'given_name': givenName,
-    'nationality': nationality,
-    'gender': gender,
-    'birth_date': birthDate,
-    'death_date': deathDate,
     'isni_id': utils.extractIdentifier(authorityID, f'ISNI {isniRaw}', pattern='ISNI'),
     'viaf_id': utils.extractIdentifier(authorityID, f'VIAF {viafRaw}', pattern='VIAF'),
     'country_code': countryCode
@@ -88,9 +63,10 @@ def main():
   with open(options.output_file, 'w') as outFile:
 
     stats = {}
-    outputFields = ['authorityID', 'name', 'family_name', 'given_name', 'nationality', 'gender', 'birth_date', 'death_date', 'isni_id', 'viaf_id', 'country_code']
+    outputFields = ['authorityID', 'name', 'isni_id', 'viaf_id', 'country_code']
     outputWriter = csv.DictWriter(outFile, fieldnames=outputFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     outputWriter.writeheader()
+
 
     for event, elem in ET.iterparse(options.input_file, events=('start', 'end')):
 

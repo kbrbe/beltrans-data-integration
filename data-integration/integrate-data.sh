@@ -2,7 +2,8 @@
 
 SCRIPT_CLEAN_TRANSLATIONS="../data-sources/kbr/clean-marc-slim.py"
 SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
-SCRIPT_EXTRACT_AGENTS="../data-sources/kbr/authority-marc-to-csv.py"
+SCRIPT_EXTRACT_AGENTS_ORGS="../data-sources/kbr/authority-orgs-marc-to-csv.py"
+SCRIPT_EXTRACT_AGENTS_PERSONS="../data-sources/kbr/authority-persons-marc-to-csv.py"
 SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
 SCRIPT_NORMALIZE_HEADERS="../data-sources/kbr/replace-headers.py"
 SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-authorities.sh"
@@ -184,6 +185,8 @@ SUFFIX_KBR_LA_PERSONS_NL_NORM="nl-translations-linked-authorities-persons-norm.c
 SUFFIX_KBR_LA_ORGS_NL_NORM="nl-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NORM="fr-translations-linked-authorities-persons-norm.csv"
 SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
+SUFFIX_KBR_LA_PERSONS_FR_NAT="fr-translations-linked-authorities-nationalities.csv"
+SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.csv"
 
 # DATA SOURCE - KBR BELGIANS
 #
@@ -464,8 +467,8 @@ function extractKBR {
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
   extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR"
 
-  echo "EXTRACTION - Extract and clean KBR Belgians"
-  extractKBRBelgians "$integrationName" "$INPUT_KBR_BELGIANS"
+  #echo "EXTRACTION - Extract and clean KBR Belgians"
+  #extractKBRBelgians "$integrationName" "$INPUT_KBR_BELGIANS"
 }
 
 # -----------------------------------------------------------------------------
@@ -592,8 +595,8 @@ function transformKBR {
   echo "TRANSFORMATION - Map KBR linked authorities data to RDF"
   mapKBRLinkedAuthorities $integrationName
 
-  echo "TRANSFORMATION - Map KBR Belgians data to RDF"
-  mapKBRBelgians $integrationName
+  #echo "TRANSFORMATION - Map KBR Belgians data to RDF"
+  #mapKBRBelgians $integrationName
 }
 
 # -----------------------------------------------------------------------------
@@ -723,19 +726,22 @@ function extractKBRLinkedAuthorities {
   kbrFRPersonsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_CLEANED"
   kbrFROrgsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
 
+  kbrNLPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
+  kbrFRPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
+
   source ../data-sources/py-etl-env/bin/activate
 
   echo "Extract authorities NL - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS -i $kbrNLPersons -o $kbrNLPersonsCleaned
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCleaned -n $kbrNLPersonsNationalities
 
   echo "Extract authorities NL - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS -i $kbrNLOrgs -o $kbrNLOrgsCleaned
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrNLOrgs -o $kbrNLOrgsCleaned
 
   echo "Extract authorities FR - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS -i $kbrFRPersons -o $kbrFRPersonsCleaned
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrFRPersons -o $kbrFRPersonsCleaned -n $kbrFRPersonsNationalities
 
   echo "Extract authorities FR - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS -i $kbrFROrgs -o $kbrFROrgsCleaned
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrFROrgs -o $kbrFROrgsCleaned
 
   echo "Copy publisher location information ..."
   cp "$INPUT_KBR_LA_PLACES_VLG" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
@@ -764,7 +770,7 @@ function extractKBRBelgians {
   echo "Extract Belgians ..."
   # currently this input has already normalized headers
   #normalizeCSVHeaders "$kbrBelgians" "$kbrBelgiansNorm" "$KBR_CSV_HEADER_CONVERSION"
-  python $SCRIPT_EXTRACT_AGENTS -i $kbrBelgians -o $kbrBelgiansCleaned
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrBelgians -o $kbrBelgiansCleaned
 }
 
 # -----------------------------------------------------------------------------
@@ -896,6 +902,9 @@ function mapKBRLinkedAuthorities {
   export RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_NL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
   export RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_FR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
 
+  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_NL_NAT="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
+  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_FR_NAT="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
+
   export RML_SOURCE_KBR_PUBLISHER_PLACES_FLANDERS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
   export RML_SOURCE_KBR_PUBLISHER_PLACES_WALLONIA="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_WAL"
   export RML_SOURCE_KBR_PUBLISHER_PLACES_BRUSSELS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_BRU"
@@ -980,11 +989,11 @@ function loadKBR {
   echo "Load KBR newly identified authorities ..."
   uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrIdentifiedAuthorities" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_LA"
 
-  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_BELGIANS>"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_BELGIANS"
+  #echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_BELGIANS>"
+  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_BELGIANS"
 
-  echo "Load KBR Belgians ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrBelgians" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_BELGIANS"
+  #echo "Load KBR Belgians ..."
+  #uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrBelgians" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_BELGIANS"
 
 }
 

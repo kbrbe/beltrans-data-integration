@@ -26,6 +26,8 @@ variables:
   sourceKBRPublisherPlacesFlanders: &sourceKBRPublisherPlacesFlanders ${RML_SOURCE_KBR_PUBLISHER_PLACES_FLANDERS}
   sourceKBRPublisherPlacesWallonia: &sourceKBRPublisherPlacesWallonia ${RML_SOURCE_KBR_PUBLISHER_PLACES_WALLONIA}
   sourceKBRPublisherPlacesBrussels: &sourceKBRPublisherPlacesBrussels ${RML_SOURCE_KBR_PUBLISHER_PLACES_BRUSSELS}
+  sourceKBRLinkedAuthoritiesPersonsNLNat: &sourceKBRLinkedAuthoritiesPersonsNLNat ${RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_NL_NAT}
+  sourceKBRLinkedAuthoritiesPersonsFRNat: &sourceKBRLinkedAuthoritiesPersonsFRNat ${RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_FR_NAT}
 
 mappings:
 
@@ -51,13 +53,6 @@ mappings:
       - [schema:givenName, $(given_name)]
       - [schema:familyName, $(family_name)]
       - [foaf:isPrimaryTopicOf, btabout:authority_$(authorityID)~iri]
-      - p: schema:nationality
-        o: countries:be~iri
-        condition:
-          function: grel:string_startsWith
-          parameters:
-            - [grel:valueParameter, $(nationality)]
-            - [grel:string_sub, "be"]
       - p: schema:gender
         o: schema:Female~iri
         condition:
@@ -190,6 +185,22 @@ mappings:
       - [a, bf:Identifier]
       - [rdfs:label, "VIAF"]
       - [rdf:value, $(viaf_id)]
+
+  # ---------------------------------------------------------------------------
+  #
+  nationalities:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links between person authorities and their nationality."
+    sources:
+      - access: *sourceKBRLinkedAuthoritiesPersonsFRNat
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRLinkedAuthoritiesPersonsNLNat
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:authority_$(authorityID)
+    po:
+      - [schema:nationality, $(nationality)~iri]
 
   # ---------------------------------------------------------------------------
   #
