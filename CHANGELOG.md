@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
+## [20220217] - 2022-02-17
+
+This version includes also data from BnF as well as fixes and improvements based on received corpus feedback.
+It corresponds to the milestone https://github.com/kbrbe/beltrans-data-integration/milestone/3.
+
+### Added
+
+- We added translations from BnF to our corpus, thus there is a new column *targetTextBnFIdentifier*. Via ISBN identifiers links between KBR and BnF manifestations were established. ([#30](https://github.com/kbrbe/beltrans-data-integration/issues/30), [#63](https://github.com/kbrbe/beltrans-data-integration/issues/63))
+- Based on available links from the KBR catalog, we added information about the original of a translation ([#29](https://github.com/kbrbe/beltrans-data-integration/issues/29))
+- We added new columns to the CSV corpus file with the name and ID of the collection, in case a translation is part of a collection [#45](https://github.com/kbrbe/beltrans-data-integration/issues/45)
+- Previous corpus versioned missed the field of the language of the original, this is now added ([#60](https://github.com/kbrbe/beltrans-data-integration/issues/60))
+
+### Changed
+
+- ISBN numbers are now represented in normalized form (all with hyphen) which also helped in establishing links between KBR and BnF records ([#17](https://github.com/kbrbe/beltrans-data-integration/issues/17), [#67](https://github.com/kbrbe/beltrans-data-integration/issues/67))
+- The corpus now contains two Excel files which are automatically generated, one for data one for statistics. Initially we only created CSV files which had to be imported to Excel manually by also selecting the used characterset. ([#56](https://github.com/kbrbe/beltrans-data-integration/issues/56))
+- In the Excel sheet containing one translation per row we refer now to the name and ID of a contributor instead of only the ID to increase readability. For example `Sven Lieber (1234); John Doe (567)` ([#74](https://github.com/kbrbe/beltrans-data-integration/issues/74))
+- Statistics of the corpus describe now both KBR and BnF records ([#72](https://github.com/kbrbe/beltrans-data-integration/issues/72))
+- Contributors listed in a separate Excel sheet now contain besides KBR also BnF records ([#76](https://github.com/kbrbe/beltrans-data-integration/issues/76))
+- Internally we use now a MARCXML export of KBR for authorities instead of CSV, therefore we have access to more structured data ([#48](https://github.com/kbrbe/beltrans-data-integration/issues/48))
+
+### Fixed
+
+- We also use author information from the MARC field `100` of a manifestation. Initially we only extracted contributors from `700` fields, therefore several relationships between authors and manifestations were missing ([#71](https://github.com/kbrbe/beltrans-data-integration/issues/71), [#57](https://github.com/kbrbe/beltrans-data-integration/issues/57), [#58](https://github.com/kbrbe/beltrans-data-integration/issues/58))
+- The list of contributors is now complete, a wrong SPARQL query resulted in the issue that only contributors where shown which were also translators ([#70](https://github.com/kbrbe/beltrans-data-integration/issues/70))
+- We use now less self-created publisher IDs and refer to existing publisher records as much as possible. Publishers in KBR records are represented both in text fields and as linked authorities, when there was no linked authority in the record we created our own identifier. However a global check afterwards was needed to check if the publisher name is found in all KBR authority records ([#62](https://github.com/kbrbe/beltrans-data-integration/issues/62))
+
 ## [20211213] - 2021-12-23
 
 This version contains fixes and improvements based on received corpus feedback.
@@ -57,4 +84,5 @@ This version corresponds to the milestone https://github.com/SvenLieber/beltrans
 
 [20211129]: https://github.com/SvenLieber/beltrans-data/releases/tag/2021-11-29
 [20211223]: https://github.com/SvenLieber/beltrans-data/compare/2021-11-29...2021-12-23
+[20220217]: https://github.com/SvenLieber/beltrans-data/compare/2021-12-23...2022-02-17
 
