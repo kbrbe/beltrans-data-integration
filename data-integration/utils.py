@@ -1,5 +1,6 @@
 import itertools
 from datetime import datetime
+import pandas as pd
 
 # -----------------------------------------------------------------------------
 def addToMismatchLog(mismatchLog, dateType, roleType, contributorURI, s, value):
@@ -300,6 +301,30 @@ def mergeDictionaries(inputDict, separator=';'):
     outputDict[k] = separator.join(keyValues[k])
 
   return outputDict
+
+# -----------------------------------------------------------------------------
+def getContributorData(df, role, colNamesRaw):
+  """
+  >>> df = pd.DataFrame({'authorColA': [1,2,3], 'authorColB': [1,2,3], 'authorColC': [4,5,6]})
+  >>> getContributorData(df, 'author', ['ColA', 'ColB'])
+     ColA  ColB
+  0     1     1
+  1     2     2
+  2     3     3
+  """
+
+  #colNamesRaw = ['Identifier', 'ISNI', 'Nationality', 'Gender', 'FamilyName', 'GivenName', 'BirthDate', 'DeathDate']
+  colNames = []
+  renameDict = {}
+  for c in colNamesRaw:
+    currentName = f'{role}{c}'
+    colNames.append(currentName)
+    renameDict[currentName] = c
+
+  df = df.rename(columns=renameDict)
+  return df[colNamesRaw]
+
+
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
