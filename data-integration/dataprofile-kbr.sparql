@@ -82,7 +82,6 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?isniRDFScenaristDeathDate AS ?scenaristDeathDateISNI)
   FROM  <http://kbr-syracuse>
   FROM <http://isni-sru>
-  FROM <http://kbr-belgians>
   FROM <http://isni-rdf>
   FROM <http://master-data>
   FROM <http://kbr-linked-authorities>
@@ -203,14 +202,15 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     OPTIONAL { 
       graph <http://kbr-syracuse> { ?manifestation schema:author ?kbrAuthor . } 
 
-      # within this optional author check optionally for Belgians from KBR (it could be the author from kbr-syracuse is not in kbr-belgians
+      # within this optional author, check optional attributes
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor dcterms:identifier ?kbrAuthorID . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:birthDate ?kbrAuthorBirthDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:deathDate ?kbrAuthorDeathDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:familyName ?kbrAuthorFamilyName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:givenName ?kbrAuthorGivenName . } }
+
       OPTIONAL {
-        graph <http://kbr-belgians> { 
-          # There is always a nationality for this dataset, thus not optional
-          ?kbrAuthor a schema:Person ;
-                     dcterms:identifier ?kbrAuthorID ;
-                     schema:nationality ?kbrAuthorNationality . 
-        }
+        graph <http://kbr-linked-authorities> { ?kbrAuthor schema:nationality ?kbrAuthorNationality . }
 
         # within this optional nationality check optionally for an English label in the master data
         OPTIONAL {
@@ -219,14 +219,9 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         }
       }
 
-      # within this optional author, check optional attributes
-      OPTIONAL { graph <http://kbr-belgians> { ?kbrAuthor schema:birthDate ?kbrAuthorBirthDate . } }
-      OPTIONAL { graph <http://kbr-belgians> { ?kbrAuthor schema:deathDate ?kbrAuthorDeathDate . } }
-      OPTIONAL { graph <http://kbr-belgians> { ?kbrAuthor schema:familyName ?kbrAuthorFamilyName . } }
-      OPTIONAL { graph <http://kbr-belgians> { ?kbrAuthor schema:givenName ?kbrAuthorGivenName . } }
       # within this optional author, check optionally for Belgians with ISNI
       OPTIONAL {
-        graph <http://kbr-belgians> { 
+        graph <http://kbr-linked-authorities> { 
           ?kbrAuthor bf:identifiedBy ?isniAuthorEntity . 
           ?isniAuthorEntity a bf:Isni ;
                       rdf:value ?kbrAuthorISNI . 
@@ -282,14 +277,15 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
       graph <http://kbr-syracuse> { ?manifestation schema:translator ?kbrTranslator . } 
 
-      # within this optional translator check optionally for Belgians from KBR (it could be the translator from kbr-syracuse is not in kbr-belgians
+      # within this optional translator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator dcterms:identifier ?kbrTranslatorID . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:birthDate ?kbrTranslatorBirthDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:deathDate ?kbrTranslatorDeathDate . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:familyName ?kbrTranslatorFamilyName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:givenName ?kbrTranslatorGivenName . } }
+
       OPTIONAL {
-        graph <http://kbr-belgians> { 
-          # There is always a nationality for this dataset, thus not optional
-          ?kbrTranslator a schema:Person ;
-                         dcterms:identifier ?kbrTranslatorID ;
-                         schema:nationality ?kbrTranslatorNationality . 
-        }
+        graph <http://kbr-linked-authorities> { ?kbrTranslator schema:nationality ?kbrTranslatorNationality . }
 
         # within this optional nationality check optionally for an English label in the master data
         OPTIONAL {
@@ -297,13 +293,6 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
           FILTER (lang(?kbrTranslatorNationalityLabel) = 'en')
         }
       }
-
-
-      # within this optional translator, check optional attributes from the linked authorities dataset
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:birthDate ?kbrTranslatorBirthDate . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:deathDate ?kbrTranslatorDeathDate . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:familyName ?kbrTranslatorFamilyName . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrTranslator schema:givenName ?kbrTranslatorGivenName . } }
 
       # within this optional translator, check optionally for Belgians with ISNI
       OPTIONAL {
@@ -442,19 +431,14 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
 
       # within this optional illustrator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator dcterms:identifier ?kbrIllustratorID . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:familyName ?kbrIllustratorFamilyName . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:givenName ?kbrIllustratorGivenName . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:birthDate ?kbrIllustratorBirthDate . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:deathDate ?kbrIllustratorDeathDate . } }
 
-      # within this optional illustrator check optionally for Belgians from KBR (it could be the illustrator from kbr-syracuse is not in kbr-belgians
       OPTIONAL {
-        graph <http://kbr-belgians> { 
-          # There is always a nationality for this dataset, thus not optional
-          ?kbrIllustrator a schema:Person ;
-                          dcterms:identifier ?kbrIllustratorID ;
-                          schema:nationality ?kbrIllustratorNationality . 
-        }
+        graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:nationality ?kbrIllustratorNationality . }
 
         # within this optional nationality check optionally for an English label in the master data
         OPTIONAL {
@@ -532,19 +516,14 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
 
       # within this optional scenarist, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist dcterms:identifier ?kbrScenaristID . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:familyName ?kbrScenaristFamilyName . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:givenName ?kbrScenaristGivenName . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:birthDate ?kbrScenaristBirthDate . } }
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:deathDate ?kbrScenaristDeathDate . } }
 
-      # within this optional scenarist check optionally for Belgians from KBR (it could be the scenarist from kbr-syracuse is not in kbr-belgians
       OPTIONAL {
-        graph <http://kbr-belgians> { 
-          # There is always a nationality for this dataset, thus not optional
-          ?kbrScenarist a schema:Person ;
-                        dcterms:identifier ?kbrScenaristID ;
-                        schema:nationality ?kbrScenaristNationality . 
-        }
+        graph <http://kbr-linked-authorities> { ?kbrScenarist schema:nationality ?kbrScenaristNationality . }
 
         # within this optional nationality check optionally for an English label in the master data
         OPTIONAL {
