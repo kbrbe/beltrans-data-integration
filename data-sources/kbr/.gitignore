@@ -5,4 +5,5 @@
 *.ttl
 *.json
 !author-headers.csv
+!agents/publisher-name-mapping.csv
 

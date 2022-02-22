@@ -6,6 +6,7 @@ SCRIPT_EXTRACT_AGENTS_ORGS="../data-sources/kbr/authority-orgs-marc-to-csv.py"
 SCRIPT_EXTRACT_AGENTS_PERSONS="../data-sources/kbr/authority-persons-marc-to-csv.py"
 SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
 SCRIPT_NORMALIZE_HEADERS="../data-sources/kbr/replace-headers.py"
+SCRIPT_CHANGE_PUBLISHER_NAME="../data-sources/kbr/change-publisher-name.py"
 SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-authorities.sh"
 SCRIPT_EXTRACT_BB="../data-sources/kbr/extract-belgian-bibliography.py"
 SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.py"
@@ -55,6 +56,8 @@ INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-0
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
 INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
+
+INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
 INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-belg_2022-02-05.xml"
@@ -157,6 +160,7 @@ SUFFIX_DATA_PROFILE_EXCEL_STATS="corpus-stats.xlsx"
 SUFFIX_KBR_TRL_NL_CLEANED="nl-translations-cleaned.xml"
 SUFFIX_KBR_TRL_NL_WORKS="nl-translations-works.csv"
 SUFFIX_KBR_TRL_NL_CONT="nl-translations-contributors.csv"
+SUFFIX_KBR_TRL_NL_CONT_REPLACE="nl-translations-contributors-replaced.csv"
 SUFFIX_KBR_TRL_NL_CONT_DEDUP="nl-translations-contributors-deduplicated.csv"
 SUFFIX_KBR_TRL_NL_NEWAUT="nl-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_NL_BB="nl-translations-bb.csv"
@@ -165,6 +169,7 @@ SUFFIX_KBR_TRL_NL_COL_LINKS="nl-collection-links.csv"
 SUFFIX_KBR_TRL_FR_CLEANED="fr-translations-cleaned.xml"
 SUFFIX_KBR_TRL_FR_WORKS="fr-translations-works.csv"
 SUFFIX_KBR_TRL_FR_CONT="fr-translations-contributors.csv"
+SUFFIX_KBR_TRL_FR_CONT_REPLACE="fr-translations-contributors-replaced.csv"
 SUFFIX_KBR_TRL_FR_CONT_DEDUP="fr-translations-contributors-deduplicated.csv"
 SUFFIX_KBR_TRL_FR_NEWAUT="fr-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_FR_BB="fr-translations-bb.csv"
@@ -634,8 +639,10 @@ function extractKBRTranslationsAndContributions {
   kbrFrenchTranslationsCSVWorks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_WORKS"
 
   kbrDutchTranslationsCSVCont="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT"
+  kbrDutchTranslationsCSVContReplaced="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT_REPLACE"
   kbrDutchTranslationsCSVContDedup="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT_DEDUP"
   kbrFrenchTranslationsCSVCont="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT"
+  kbrFrenchTranslationsCSVContReplaced="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT_REPLACE"
   kbrFrenchTranslationsCSVContDedup="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT_DEDUP"
 
   kbrDutchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_NEWAUT"
@@ -664,11 +671,17 @@ function extractKBRTranslationsAndContributions {
   echo "Extract CSV from French translations XML..."
   extractCSVFromXMLTranslations "$kbrFrenchTranslationsCleaned" "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsCSVCont" "$kbrFrenchTranslationsCollectionLinks"
 
+  echo "Replace publisher names to support deduplication - NL-FR"
+  python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrDutchTranslationsCSVCont -o $kbrDutchTranslationsCSVContReplaced
+
+  echo "Replace publisher names to support deduplication - FR-NL"
+  python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrFrenchTranslationsCSVCont -o $kbrFrenchTranslationsCSVContReplaced
+
   echo "Deduplicate newly identified contributors - NL-FR"
-  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrDutchTranslationsCSVCont -o $kbrDutchTranslationsCSVContDedup
+  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrDutchTranslationsCSVContReplaced -o $kbrDutchTranslationsCSVContDedup
 
   echo "Deduplicate newly identified contributors - FR-NL"
-  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrFrenchTranslationsCSVCont -o $kbrFrenchTranslationsCSVContDedup
+  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrFrenchTranslationsCSVContReplaced -o $kbrFrenchTranslationsCSVContDedup
 
   echo "Extract BB assignments for Dutch translations ..."
   extractBBEntries "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVBB"
