@@ -26,14 +26,31 @@ def addAuthorityFieldsToCSV(elem, writer, stats):
   # extract relevant data from the current record
   #
   authorityID = utils.getElementValue(elem.find('./marc:controlfield[@tag="001"]', ALL_NS))
-  name = utils.getElementValue(elem.find('./marc:datafield[@tag="110"]/marc:subfield[@code="a"]', ALL_NS))
+  name = utils.getElementValue(elem.xpath('./marc:datafield[@tag="110" and count(./marc:subfield[@code="@"]) = 0]/marc:subfield[@code="a"]', namespaces=ALL_NS))
+  nameEN = utils.getElementValue(elem.xpath('./marc:datafield[@tag="110"]/marc:subfield[@code="@" and text()="en-GB"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
+  nameNL = utils.getElementValue(elem.xpath('./marc:datafield[@tag="110"]/marc:subfield[@code="@" and text()="nl-BE"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
+  nameFR = utils.getElementValue(elem.xpath('./marc:datafield[@tag="110"]/marc:subfield[@code="@" and text()="fr-BE"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
   isniRaw = utils.getElementValue(elem.xpath('./marc:datafield[@tag="024"]/marc:subfield[@code="2" and text()="isni"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
   viafRaw = utils.getElementValue(elem.xpath('./marc:datafield[@tag="024"]/marc:subfield[@code="2" and text()="viaf"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
   countryCode = utils.getElementValue(elem.find('./marc:datafield[@tag="043"]/marc:subfield[@code="c"]', ALL_NS))
  
+  # elif because we only want one of it
+  prefLabel = ''
+  if name != '':
+    prefLabel = name
+  elif nameEN != '':
+    prefLabel = nameEN
+  elif nameNL != '':
+    prefLabel = nameNL
+  elif nameFR != '':
+    prefLabel = nameFR
+
   newRecord = {
     'authorityID': authorityID,
-    'name': name,
+    'nameEN': nameEN,
+    'nameNL': nameNL,
+    'nameFR': nameFR,
+    'prefLabel': utils.getNormalizedString(prefLabel),
     'isni_id': utils.extractIdentifier(authorityID, f'ISNI {isniRaw}', pattern='ISNI'),
     'viaf_id': utils.extractIdentifier(authorityID, f'VIAF {viafRaw}', pattern='VIAF'),
     'country_code': countryCode
@@ -63,7 +80,7 @@ def main():
   with open(options.output_file, 'w') as outFile:
 
     stats = {}
-    outputFields = ['authorityID', 'name', 'isni_id', 'viaf_id', 'country_code']
+    outputFields = ['authorityID', 'nameEN', 'nameNL', 'nameFR', 'prefLabel', 'isni_id', 'viaf_id', 'country_code']
     outputWriter = csv.DictWriter(outFile, fieldnames=outputFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     outputWriter.writeheader()
 

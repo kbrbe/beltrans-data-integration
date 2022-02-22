@@ -58,7 +58,8 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
       cRole = 'aut'
     # Also persons can publish, thus we should add them for the later check on publishers
     if cRole == 'pbl':
-      linkedOrganizationNames.add(utils.getNormalizedString(cName))
+      cName = utils.getNormalizedString(cName)
+      linkedOrganizationNames.add(cName)
     foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': 'no'})
 
   #
@@ -73,7 +74,8 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
     if cRole == '':
       cRole = 'pbl'
       uncertainty = 'yes'
-    foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': uncertainty})
+    cNameNorm = utils.getNormalizedString(cName)
+    foundContributors.append({'contributorID': cID, 'contributorName': cNameNorm, 'contributorRole': cRole, 'uncertainty': uncertainty})
 
   #
   # Publishers are also indicated in field 264, but only as text string as it appeared on the book
@@ -115,7 +117,8 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
           nameID = hashlib.md5(normalizedName.encode('utf-8')).hexdigest()
           utils.count(stats['counter'], 'publishers-without-authority')
           stats['unique-publishers-without-authority'].add(nameID)
-          foundContributors.append({'contributorID': nameID, 'contributorName': textName, 'contributorRole': 'pbl', 'uncertainty': 'no'})
+          textNameNorm = utils.getNormalizedString(textName)
+          foundContributors.append({'contributorID': nameID, 'contributorName': textNameNorm, 'contributorRole': 'pbl', 'uncertainty': 'no'})
        
 
   #

@@ -14,6 +14,7 @@ prefixes:
   bts: "http://kbr.be/ns/beltrans/shapes#"
   btid: "http://kbr.be/id/data/"
   btabout: "http://kbr.be/about/data/"
+  skos: "http://www.w3.org/2004/02/skos/core#"
   ex: "http://example.org/ns#"
   countries: "http://id.loc.gov/vocabulary/countries/"
   schema: "http://schema.org/"
@@ -39,7 +40,7 @@ mappings:
     s: btid:authority_$(contributorID)
     po:
       - [a, schema:Organization]
-      - [rdfs:label, $(contributorName)]
+      - [skos:prefLabel, $(contributorName)]
       - [dcterms:identifier, $(contributorID)]
       - [prov:wasGeneratedBy, btid:authority_prov_$(contributorID)~iri]
       - [foaf:isPrimaryTopicOf, btabout:authority_$(contributorID)~iri]

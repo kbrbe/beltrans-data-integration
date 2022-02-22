@@ -373,7 +373,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       # within this optional publisher, check optional attributes from the linked authorities dataset
       OPTIONAL { 
         graph <http://kbr-linked-authorities> {
-          ?kbrPublisher rdfs:label ?kbrPublisherName ;
+          ?kbrPublisher skos:prefLabel ?kbrPublisherName ;
                         dcterms:identifier ?kbrPublisherID .
         } 
 

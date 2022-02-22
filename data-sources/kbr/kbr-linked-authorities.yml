@@ -14,6 +14,7 @@ prefixes:
   bts: "http://kbr.be/ns/beltrans/shapes#"
   btid: "http://kbr.be/id/data/"
   btabout: "http://kbr.be/about/data/"
+  skos: "http://www.w3.org/2004/02/skos/core#"
   ex: "http://example.org/ns#"
   countries: "http://id.loc.gov/vocabulary/countries/"
   schema: "http://schema.org/"
@@ -220,7 +221,34 @@ mappings:
     po:
       - [a, schema:Organization]
       - [dcterms:identifier, $(authorityID)]
-      - [rdfs:label, $(name)]
+      - [skos:prefLabel, $(prefLabel)]
+      - p: schema:name
+        o: 
+          value: $(nameEN)
+          language: en
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(nameEN)]
+            - [grel:valueParameter2, ""]
+      - p: schema:name
+        o: 
+          value: $(nameNL)
+          language: nl
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(nameNL)]
+            - [grel:valueParameter2, ""]
+      - p: schema:name
+        o: 
+          value: $(nameFR)
+          language: fr
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(nameFR)]
+            - [grel:valueParameter2, ""]
       - [foaf:isPrimaryTopicOf, btabout:authority_$(authorityID)~iri]
       - p: schema:address
         o: btid:address_$(authorityID)~iri

@@ -21,5 +21,5 @@ outputFile=$2
 # head -n 1 $inputFile > $outputFile
 
 # extract contributors with an ID with more than 8 characters and append the found lines to the output file
-awk -F, 'length($2) > 8 { print }' $inputFile >> $outputFile
+awk -F, 'length($2) > 8 { print }' $inputFile > $outputFile
 

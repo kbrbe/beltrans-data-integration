@@ -327,6 +327,12 @@ def getNormalizedString(s):
   'abe ce de'
   >>> getNormalizedString("Abe Ce De :")
   'abe ce de'
+
+  >>> getNormalizedString("A. W. Bruna & zoon")
+  'a. w. bruna & zoon'
+  >>> getNormalizedString("A.W. Bruna & Zoon")
+  'a.w. bruna & zoon'
+  
   """
   noComma = s.replace(',', '')
   noQuestionMark = noComma.replace('?', '')
@@ -536,16 +542,22 @@ def smallLevenshteinDistance(stats, str1, str2):
 def smallLevenshteinDistanceImproved(stats, str1, str2):
   """This function checks both strings with respect to their levenshtein distance, checking also substrings.
 
-  >>> smallLevenshteinDistance({}, 'koninklijke bibliotheek albert i', 'koninklijke bibliotheek van belgie')
+  >>> smallLevenshteinDistanceImproved({}, 'koninklijke bibliotheek albert i', 'koninklijke bibliotheek van belgie')
   True
-  >>> smallLevenshteinDistance({}, 'athenaeum-polak & van gennep', 'athenaeum  polak & van gennep')
+  >>> smallLevenshteinDistanceImproved({}, 'athenaeum-polak & van gennep', 'athenaeum  polak & van gennep')
   True
-  >>> smallLevenshteinDistance({}, 'publieboek : baart', 'publiboek')
+  >>> smallLevenshteinDistanceImproved({}, 'publieboek : baart', 'publiboek')
   True
-  >>> smallLevenshteinDistance({}, 'blake en mortimer', 'blake & mortimer')
+  >>> smallLevenshteinDistanceImproved({}, 'blake en mortimer', 'blake & mortimer')
   True
-  >>> smallLevenshteinDistance({}, 'nomonkeybooks', 'no monkey business')
+  >>> smallLevenshteinDistanceImproved({}, 'nomonkeybooks', 'no monkey business')
   False
+
+  >>> smallLevenshteinDistanceImproved({}, 'A.W. Bruna & Zoon', 'A. W. Bruna & zoon')
+  True
+
+  >>> smallLevenshteinDistanceImproved({}, 'A.W. Bruna & Zoon', 'A.W. Bruna & Zoon ')
+  True
   """
 
   retVal = False
