@@ -117,6 +117,8 @@ GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn-without-hyph
 DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn-without-hyphen.sparql"
 TRANSFORM_QUERY_BNF_TRL_NL_FR="sparql-queries/transform-bnf-data-nl-fr.sparql"
 TRANSFORM_QUERY_BNF_TRL_FR_NL="sparql-queries/transform-bnf-data-fr-nl.sparql"
+CREATE_QUERY_BNF_IDENTIFIER="sparql-queries/create-bnf-identifier.sparql"
+CREATE_QUERY_BNF_ISNI="sparql-queries/create-bnf-isni.sparql"
 
 DATA_PROFILE_QUERY_FILE_KBR="dataprofile-kbr.sparql"
 DATA_PROFILE_QUERY_FILE_BNF="dataprofile-bnf.sparql"
@@ -1085,6 +1087,12 @@ function loadBnF {
 
   echo "Fix BnF ISBN13 identifiers without hyphen - delete malformed ISBN identifiers"
   uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Add dcterms:identifier to BnF contributors"
+  uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_IDENTIFIER" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Add ISNI number according to the bibframe vocabulary to BnF contributors"
+  uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_ISNI" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
 }
 
