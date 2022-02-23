@@ -33,7 +33,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?kbrTargetLangLabel AS ?targetTextLanguage)
     (?kbrSourceManifestationISBN13 AS ?sourceTextISBN)
     (?isbn13 AS ?targetTextISBN) 
-    (?kbrAuthorID AS ?authorIdentifier)
+    (?kbrAuthorID AS ?authorKBRIdentifier)
+    (?bnfAuthorID AS ?authorBnFIdentifier)
     (?kbrAuthorISNI AS ?authorISNI)
     (?kbrAuthorNationalityLabel AS ?authorNationality)
     (?isniSRUAuthorGenderLabel AS ?authorGenderISNI)
@@ -43,7 +44,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?isniRDFAuthorBirthDate AS ?authorBirthDateISNI)
     (?kbrAuthorDeathDate AS ?authorDeathDateKBR)
     (?isniRDFAuthorDeathDate AS ?authorDeathDateISNI)
-    (?kbrTranslatorID AS ?translatorIdentifier)
+    (?kbrTranslatorID AS ?translatorKBRIdentifier)
+    (?bnfTranslatorID AS ?translatorBnFIdentifier)
     (?kbrTranslatorFamilyName AS ?translatorFamilyName)
     (?kbrTranslatorGivenName AS ?translatorGivenName)
     (?kbrTranslatorISNI AS ?translatorISNI)
@@ -60,7 +62,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?kbrPublisherLocation AS ?targetPublisherLocation)
     (?kbrPublisherRegion AS ?targetPublisherRegion)
     (?kbrPublisherCountryLabel AS ?targetPublisherCountry)
-    (?kbrIllustratorID AS ?illustratorIdentifier)
+    (?kbrIllustratorID AS ?illustratorKBRIdentifier)
+    (?bnfIllustratorID AS ?illustratorBnFIdentifier)
     (?kbrIllustratorISNI AS ?illustratorISNI)
     (?kbrIllustratorNationalityLabel AS ?illustratorNationality)
     (?isniSRUIllustratorGenderLabel AS ?illustratorGenderISNI)
@@ -70,7 +73,8 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (?isniRDFIllustratorBirthDate AS ?illustratorBirthDateISNI)
     (?kbrIllustratorDeathDate AS ?illustratorDeathDateKBR)
     (?isniRDFIllustratorDeathDate AS ?illustratorDeathDateISNI)
-    (?kbrScenaristID AS ?scenaristIdentifier)
+    (?kbrScenaristID AS ?scenaristKBRIdentifier)
+    (?bnfScenaristID AS ?scenaristBnFIdentifier)
     (?kbrScenaristFamilyName AS ?scenaristFamilyName)
     (?kbrScenraistGivenName AS ?scenaristGivenName)
     (?kbrScenaristISNI AS ?scenaristISNI)
@@ -227,6 +231,19 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
                       rdf:value ?kbrAuthorISNI . 
         }
 
+        # if there is an optional ISNI we look up the author in BnF
+        OPTIONAL {
+          graph <http://bnf-contributors> {
+            ?bnfAuthor bf:identifiedBy ?bnfIsniEntity . 
+
+            ?bnfIsniEntity a bf:Isni ;
+                           rdf:value ?kbrAuthorISNI .
+          }
+          OPTIONAL {
+            graph <http://bnf-contributors> { ?bnfAuthor dcterms:identifier ?bnfAuthorID . }
+          }
+        }
+
         # if there is an optional ISNI we look it up in Belgians from ISNI SRU
         # optional in case it is not a person marked as Belgian in ISNI SRU
         OPTIONAL {
@@ -300,6 +317,19 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
           ?kbrTranslator bf:identifiedBy ?isniTranslatorEntity . 
           ?isniTranslatorEntity a bf:Isni ;
                       rdf:value ?kbrTranslatorISNI . 
+        }
+
+        # if there is an optional ISNI we look up the translator in BnF
+        OPTIONAL {
+          graph <http://bnf-contributors> {
+            ?bnfTranslator bf:identifiedBy ?bnfIsniEntity . 
+
+            ?bnfIsniEntity a bf:Isni ;
+                           rdf:value ?kbrTranslatorISNI .
+          }
+          OPTIONAL {
+            graph <http://bnf-contributors> { ?bnfTranslator dcterms:identifier ?bnfTranslatorID . }
+          }
         }
 
         # if there is an optional ISNI we look it up in Belgians from ISNI SRU
@@ -457,6 +487,19 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
                       rdf:value ?kbrIllustratorISNI . 
         }
 
+        # if there is an optional ISNI we look up the illustrator in BnF
+        OPTIONAL {
+          graph <http://bnf-contributors> {
+            ?bnfIllustrator bf:identifiedBy ?bnfIsniEntity . 
+
+            ?bnfIsniEntity a bf:Isni ;
+                           rdf:value ?kbrIllustratorISNI .
+          }
+          OPTIONAL {
+            graph <http://bnf-contributors> { ?bnfIllustrator dcterms:identifier ?bnfIllustratorID . }
+          }
+        }
+
         # if there is an optional ISNI we look it up in Belgians from ISNI SRU
         # optional in case it is not a person marked as Belgian in ISNI SRU
         OPTIONAL {
@@ -541,6 +584,21 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
           ?isniScenaristEntity a bf:Isni ;
                       rdf:value ?kbrScenaristISNI . 
         }
+
+        # if there is an optional ISNI we look up the scenarist in BnF
+        OPTIONAL {
+          graph <http://bnf-contributors> {
+            ?bnfScenarist bf:identifiedBy ?bnfIsniEntity . 
+
+            ?bnfIsniEntity a bf:Isni ;
+                           rdf:value ?kbrScenaristISNI .
+          }
+          OPTIONAL {
+            graph <http://bnf-contributors> { ?bnfScenarist dcterms:identifier ?bnfScenaristID . }
+          }
+        }
+
+
 
         # if there is an optional ISNI we look it up in Belgians from ISNI SRU
         # optional in case it is not a person marked as Belgian in ISNI SRU

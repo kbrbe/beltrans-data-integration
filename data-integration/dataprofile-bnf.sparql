@@ -28,8 +28,9 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (?bnfSourceLangLabel AS ?sourceTextLanguage)
     (?bnfTargetLangLabel AS ?targetTextLanguage)
     (?isbn13 AS ?targetTextISBN) 
-    (?bnfAuthor AS ?authorIdentifier)
-    (?bnfAuthorISNIURI AS ?authorISNI)
+    (?kbrAuthorID AS ?authorKBRIdentifier)
+    (?bnfAuthorID AS ?authorBnFIdentifier)
+    (?bnfAuthorISNI AS ?authorISNI)
     (?bnfAuthorNationalityLabel AS ?authorNationality)
     (?bnfAuthorGender AS ?authorGender)
     (?isniSRUAuthorGenderLabel AS ?authorGenderISNI)
@@ -39,10 +40,11 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (?isniRDFAuthorBirthDate AS ?authorBirthDateISNI)
     (?bnfAuthorDeathDate AS ?authorDeathDate)
     (?isniRDFAuthorDeathDate AS ?authorDeathDateISNI)
-    (?bnfTranslator AS ?translatorIdentifier)
+    (?kbrTranslatorID AS ?translatorKBRIdentifier)
+    (?bnfTranslatorID AS ?translatorBnFIdentifier)
     (?bnfTranslatorFamilyName AS ?translatorFamilyName)
     (?bnfTranslatorGivenName AS ?translatorGivenName)
-    (?bnfTranslatorISNIURI AS ?translatorISNI)
+    (?bnfTranslatorISNI AS ?translatorISNI)
     (?bnfTranslatorNationalityLabel AS ?translatorNationality)
     (?bnfTranslatorGender AS ?translatorGender)
     (?isniSRUTranslatorGenderLabel AS ?translatorGenderISNI)
@@ -51,16 +53,18 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (?bnfPublisher AS ?targetPublisherIdentifier)
     (CONCAT(?bnfPublisherName, " ; ", ?bnfPublisherResourceName) AS ?targetPublisherName)
     (?bnfPublisherCountryLabel AS ?targetPublisherCountry)
-    (?bnfIllustrator AS ?illustratorIdentifier)
+    (?kbrIllustratorID AS ?illustratorKBRIdentifier)
+    (?bnfIllustratorID AS ?illustratorBnFIdentifier)
     (?bnfIllustratorFamilyName AS ?illustratorFamilyName)
     (?bnfIllustratorGivenName AS ?illustratorGivenName)
-    (?bnfIllustratorISNIURI AS ?illustratorISNI)
+    (?bnfIllustratorISNI AS ?illustratorISNI)
     (?bnfIllustratorNationalityLabel AS ?illustratorNationality)
     (?bnfIllustratorGender AS ?illustratorGender)
-    (?bnfScenarist AS ?scenaristIdentifier)
+    (?kbrScenaristID AS ?scenaristKBRIdentifier)
+    (?bnfScenaristID AS ?scenaristBnFIdentifier)
     (?bnfScenaristFamilyName AS ?scenaristFamilyName)
     (?bnfScenaristGivenName AS ?scenaristGivenName)
-    (?bnfScenaristISNIURI AS ?scenaristISNI)
+    (?bnfScenaristISNI AS ?scenaristISNI)
     (?bnfScenaristNationalityLabel AS ?scenaristNationality)
     (?bnfScenaristGender AS ?scenaristGender)
 
@@ -157,6 +161,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
 
       # within this optional author, check optional attributes
+      OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor dcterms:identifier ?bnfAuthorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor bio:birth ?bnfAuthorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor bio:death ?bnfAuthorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:familyName ?bnfAuthorFamilyName . } }
@@ -165,7 +170,25 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
       # within this optional author, check optionally for authors with ISNI
       OPTIONAL {
-        graph <http://bnf-contributors-isni> { ?bnfAuthor skos:exactMatch ?bnfAuthorISNIURI . }
+        graph <http://bnf-contributors> {
+          ?bnfAuthor bf:identifiedBy ?isniAuthorEntity .
+
+          ?isniAuthorEntity a bf:Isni ;
+                            rdf:value ?bnfAuthorISNI . 
+        }
+
+        # if there is an optional ISNI we look up the author at KBR
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> {
+            ?kbrAuthor bf:identifiedBy ?kbrIsniAuthorEntity . 
+
+            ?kbrIsniAuthorEntity a bf:Isni ;
+                           rdf:value ?bnfAuthorISNI .
+          }
+          OPTIONAL {
+            graph <http://kbr-linked-authorities> { ?kbrAuthor dcterms:identifier ?kbrAuthorID . }
+          }
+        }
 
         # if there is an optional ISNI we look it up in Belgians from ISNI SRU
         # optional in case it is not a person marked as Belgian in ISNI SRU
@@ -175,7 +198,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
                            bf:identifiedBy ?isniSRUEntity . 
 
             ?isniSRUEntity a bf:Isni ;
-                           rdf:value ?bnfAuthorISNIURI .
+                           rdf:value ?bnfAuthorISNI .
           }
 
           # optional attributes of the ISNI SRU dump
@@ -234,15 +257,34 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator dcterms:identifier ?bnfTranslatorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator bio:birth ?bnfTranslatorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator bio:death ?bnfTranslatorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:familyName ?bnfTranslatorFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:givenName ?bnfTranslatorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:gender ?bnfTranslatorGender . } }
 
-      # within this optional translator, check optionally for Belgians with ISNI
+      # within this optional translator, check optionally for translators with ISNI
       OPTIONAL {
-        graph <http://bnf-contributors-isni> { ?bnfTranslator skos:exactMatch ?bnfTranslatorISNIURI . }
+        graph <http://bnf-contributors> {
+          ?bnfTranslator bf:identifiedBy ?isniTranslatorEntity .
+
+          ?isniTranslatorEntity a bf:Isni ;
+                            rdf:value ?bnfTranslatorISNI . 
+        }
+
+        # if there is an optional ISNI we look up the author at KBR
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> {
+            ?kbrTranslator bf:identifiedBy ?kbrIsniTranslatorEntity . 
+
+            ?kbrIsniTranslatorEntity a bf:Isni ;
+                           rdf:value ?bnfTranslatorISNI .
+          }
+          OPTIONAL {
+            graph <http://kbr-linked-authorities> { ?kbrTranslator dcterms:identifier ?kbrTranslatorID . }
+          }
+        }
 
         # if there is an optional ISNI we look it up in Belgians from ISNI SRU
         # optional in case it is not a person marked as Belgian in ISNI SRU
@@ -252,7 +294,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
                            bf:identifiedBy ?isniSRUTranslatorEntity . 
 
             ?isniSRUTranslatorEntity a bf:Isni ;
-                           rdf:value ?bnfTranslatorISNIURI .
+                           rdf:value ?bnfTranslatorISNI .
           }
 
           # optional attributes of the ISNI SRU dump
@@ -339,15 +381,34 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator dcterms:identifier ?bnfIllustratorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator bio:birth ?bnfIllustratorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator bio:death ?bnfIllustratorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:familyName ?bnfIllustratorFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:givenName ?bnfIllustratorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:gender ?bnfIllustratorGender . } }
 
-      # within this optional translator, check optionally for Belgians with ISNI
+      # within this optional translator, check optionally for illustrators with ISNI
       OPTIONAL {
-        graph <http://bnf-contributors-isni> { ?bnfIllustrator skos:exactMatch ?bnfIllustratorISNIURI . }
+        graph <http://bnf-contributors> {
+          ?bnfIllustrator bf:identifiedBy ?isniIllustratorEntity .
+
+          ?isniIllustratorEntity a bf:Isni ;
+                            rdf:value ?bnfIllustratorISNI . 
+        }
+
+        # if there is an optional ISNI we look up the author at KBR
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> {
+            ?kbrIllustrator bf:identifiedBy ?kbrIsniIllustratorEntity . 
+
+            ?kbrIsniIllustratorEntity a bf:Isni ;
+                           rdf:value ?bnfIllustratorISNI .
+          }
+          OPTIONAL {
+            graph <http://kbr-linked-authorities> { ?kbrIllustrator dcterms:identifier ?kbrIllustratorID . }
+          }
+        }
 
         # if there is an optional ISNI we look it up in Belgians from ISNI SRU
         # optional in case it is not a person marked as Belgian in ISNI SRU
@@ -356,8 +417,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
             ?isniSRUIllustrator a schema:Person ;
                            bf:identifiedBy ?isniSRUIllustratorEntity . 
 
-            ?isniSRUTranslatorEntity a bf:Isni ;
-                           rdf:value ?bnfIllustratorISNIURI .
+            ?isniSRUIllustratorEntity a bf:Isni ;
+                           rdf:value ?bnfIllustratorISNI .
           }
 
           # optional attributes of the ISNI SRU dump
@@ -376,7 +437,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         OPTIONAL {
           graph <http://isni-rdf> {
             ?isniRDFIllustrator a schema:Person ;
-                           schema:identifier [ schema:value ?bnfIllustratorISNIURI ] .
+                           schema:identifier [ schema:value ?bnfIllustratorISNI ] .
 
           }
 
@@ -414,15 +475,35 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist dcterms:identifier ?bnfScenaristID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist bio:birth ?bnfScenaristBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist bio:death ?bnfScenaristDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:familyName ?bnfScenaristFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:givenName ?bnfScenaristGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:gender ?bnfScenaristGender . } }
 
-      # within this optional translator, check optionally for Belgians with ISNI
+      # within this optional translator, check optionally for scenarists with ISNI
       OPTIONAL {
-        graph <http://bnf-contributors-isni> { ?bnfScenarist skos:exactMatch ?bnfScenaristISNIURI . }
+        graph <http://bnf-contributors> {
+          ?bnfScenarist bf:identifiedBy ?isniScenaristEntity .
+
+          ?isniScenaristEntity a bf:Isni ;
+                            rdf:value ?bnfScenaristISNI . 
+        }
+
+        # if there is an optional ISNI we look up the author at KBR
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> {
+            ?kbrScenarist bf:identifiedBy ?kbrIsniScenaristEntity . 
+
+            ?kbrIsniScenaristEntity a bf:Isni ;
+                           rdf:value ?bnfScenaristISNI .
+          }
+          OPTIONAL {
+            graph <http://kbr-linked-authorities> { ?kbrScenarist dcterms:identifier ?kbrScenaristID . }
+          }
+        }
+
 
         # if there is an optional ISNI we look it up in Belgians from ISNI SRU
         # optional in case it is not a person marked as Belgian in ISNI SRU
@@ -432,7 +513,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
                            bf:identifiedBy ?isniSRUScenaristEntity . 
 
             ?isniSRUScenaristEntity a bf:Isni ;
-                           rdf:value ?bnfScenaristISNIURI .
+                           rdf:value ?bnfScenaristISNI .
           }
 
           # optional attributes of the ISNI SRU dump
@@ -451,7 +532,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         OPTIONAL {
           graph <http://isni-rdf> {
             ?isniRDFScenarist a schema:Person ;
-                           schema:identifier [ schema:value ?bnfScenaristISNIURI ] .
+                           schema:identifier [ schema:value ?bnfScenaristISNI ] .
 
           }
 

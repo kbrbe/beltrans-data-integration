@@ -40,7 +40,7 @@ def main():
   dtypes = getDataTypes(options.dtype_file)
   df = pd.read_csv(options.input_file, dtype=dtypes)
 
-  contributorColumns = ['Identifier', 'ISNI', 'Nationality', 'Gender', 'FamilyName', 'GivenName', 'BirthDate', 'DeathDate']
+  contributorColumns = ['KBRIdentifier', 'BnFIdentifier', 'ISNI', 'Nationality', 'Gender', 'FamilyName', 'GivenName', 'BirthDate', 'DeathDate']
   # get data of all authors
 
   authorData = utils.getContributorData(df, 'author', contributorColumns)

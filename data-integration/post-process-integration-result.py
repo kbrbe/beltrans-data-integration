@@ -10,7 +10,7 @@ import json
 # -----------------------------------------------------------------------------
 def getOutputHeaders():
 
-  return ['targetTextKBRIdentifier','sourceTextKBRIdentifier','targetTextBnFIdentifier','targetTextThesaurusBB','translationType','targetTextTitle','sourceTextTitle','targetTextEdition','targetTextCollectionIdentifier','targetTextCollectionName','targetTextBindingType','targetTextCountryOfPublication','targetTextYearOfPublication','targetTextPlaceOfPublication','targetTextResponsibilityStatement','sourceTextLanguage','targetTextLanguage','sourceTextISBN','targetTextISBN','authorIdentifier','authorISNI','authorNationality','authorGender','authorGenderISNI','authorFamilyName','authorGivenName','authorBirthDate','authorBirthDateISNI','authorDeathDate','authorDeathDateISNI','translatorIdentifier','translatorFamilyName','translatorGivenName','translatorISNI','translatorNationality','translatorGender', 'translatorGenderISNI','translatorBirthDate','translatorBirthDateISNI','translatorDeathDate','translatorDeathDateISNI','targetTextPublisherCertainty','targetPublisherIdentifier','targetPublisherISNI','targetPublisherName','targetPublisherLocation','targetPublisherRegion','targetPublisherCountry','illustratorIdentifier','illustratorISNI','illustratorNationality','illustratorGender', 'illustratorGenderISNI','illustratorFamilyName','illustratorGivenName','illustratorBirthDate','illustratorBirthDateISNI','illustratorDeathDate','illustratorDeathDateISNI','scenaristIdentifier','scenaristFamilyName','scenaristGivenName','scenaristISNI','scenaristNationality','scenaristGender', 'scenaristGenderISNI','scenaristBirthDate','scenaristBirthDateISNI','scenaristDeathDate','scenaristDeathDateISNI']
+  return ['targetTextKBRIdentifier','sourceTextKBRIdentifier','targetTextBnFIdentifier','targetTextThesaurusBB','translationType','targetTextTitle','sourceTextTitle','targetTextEdition','targetTextCollectionIdentifier','targetTextCollectionName','targetTextBindingType','targetTextCountryOfPublication','targetTextYearOfPublication','targetTextPlaceOfPublication','targetTextResponsibilityStatement','sourceTextLanguage','targetTextLanguage','sourceTextISBN','targetTextISBN','authorKBRIdentifier', 'authorBnFIdentifier', 'authorISNI','authorNationality','authorGender','authorGenderISNI','authorFamilyName','authorGivenName','authorBirthDate','authorBirthDateISNI','authorDeathDate','authorDeathDateISNI','translatorKBRIdentifier','translatorBnFIdentifier', 'translatorFamilyName','translatorGivenName','translatorISNI','translatorNationality','translatorGender', 'translatorGenderISNI','translatorBirthDate','translatorBirthDateISNI','translatorDeathDate','translatorDeathDateISNI','targetTextPublisherCertainty','targetPublisherIdentifier','targetPublisherISNI','targetPublisherName','targetPublisherLocation','targetPublisherRegion','targetPublisherCountry','illustratorKBRIdentifier','illustratorBnFIdentifier', 'illustratorISNI','illustratorNationality','illustratorGender', 'illustratorGenderISNI','illustratorFamilyName','illustratorGivenName','illustratorBirthDate','illustratorBirthDateISNI','illustratorDeathDate','illustratorDeathDateISNI','scenaristKBRIdentifier','scenaristBnFIdentifier', 'scenaristFamilyName','scenaristGivenName','scenaristISNI','scenaristNationality','scenaristGender', 'scenaristGenderISNI','scenaristBirthDate','scenaristBirthDateISNI','scenaristDeathDate','scenaristDeathDateISNI']
 
 # -----------------------------------------------------------------------------
 def main():
@@ -64,29 +64,32 @@ def main():
     belgian = 'Belgium'
 
     # used to parse certain columns based on their name, e.g. authorBirthDateKBR and authorBirthDateISNI
-    sources = ['KBR', 'ISNI']
     mismatchLog = {}
 
     
+    sourceCount = 0
     dataSources = [inputReaderKBR, inputReaderBnF]
+    sources = ['KBR', 'ISNI']
     # write relevant data to output
     for dsReader in dataSources:
+      source = [sources[sourceCount]]
       for row in dsReader:
 
         if( row['authorNationality'] == belgian or row['illustratorNationality'] == belgian or row['scenaristNationality'] == belgian):
 
           # This is a relevant row, we process it further before writing it
-          utils.selectDate(row, 'author', 'Birth', sources, 'authorIdentifier', mismatchLog)
-          utils.selectDate(row, 'illustrator', 'Birth', sources, 'illustratorIdentifier', mismatchLog)
-          utils.selectDate(row, 'translator', 'Birth', sources, 'translatorIdentifier', mismatchLog)
-          utils.selectDate(row, 'scenarist', 'Birth', sources, 'scenaristIdentifier', mismatchLog)
+          utils.selectDate(row, 'author', 'Birth', source, 'authorKBRIdentifier', mismatchLog)
+          utils.selectDate(row, 'illustrator', 'Birth', source, 'illustratorKBRIdentifier', mismatchLog)
+          utils.selectDate(row, 'translator', 'Birth', source, 'translatorKBRIdentifier', mismatchLog)
+          utils.selectDate(row, 'scenarist', 'Birth', source, 'scenaristKBRIdentifier', mismatchLog)
 
-          utils.selectDate(row, 'author', 'Death', sources, 'authorIdentifier', mismatchLog)
-          utils.selectDate(row, 'illustrator', 'Death', sources, 'illustratorIdentifier', mismatchLog)
-          utils.selectDate(row, 'translator', 'Death', sources, 'translatorIdentifier', mismatchLog)
-          utils.selectDate(row, 'scenarist', 'Death', sources, 'scenaristIdentifier', mismatchLog)
+          utils.selectDate(row, 'author', 'Death', source, 'authorKBRIdentifier', mismatchLog)
+          utils.selectDate(row, 'illustrator', 'Death', source, 'illustratorKBRIdentifier', mismatchLog)
+          utils.selectDate(row, 'translator', 'Death', source, 'translatorKBRIdentifier', mismatchLog)
+          utils.selectDate(row, 'scenarist', 'Death', source, 'scenaristKBRIdentifier', mismatchLog)
 
           outputWriter.writerow(utils.addKeysWithoutValueToDict(row, allOutputHeaders))
+      sourceCount += 1
 
 
   # print statistics
