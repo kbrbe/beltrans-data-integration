@@ -37,7 +37,8 @@ INSERT {
                   schema:inLanguage lang:fre ;
                   rdagroup1elements:publishersName ?publisherName ;
                   schema:publisher ?publisher ;
-                  rdfs:comment ?note .
+                  rdfs:comment ?note ;
+                  dcterms:identifier ?identifier .
 
   }
 }
@@ -47,6 +48,10 @@ WHERE {
       ?manifestation a frbr:Manifestation ;
                      rda-wemi:expressionManifested ?expression .
     }   
+
+    OPTIONAL {
+      graph <http://bnf-fr-nl> { ?publicationInfo foaf:focus ?manifestation . }
+    }
                       
     OPTIONAL { graph <http://bnf-fr-nl> { ?manifestation dcterms:title ?manifestationTitle . } } 
     OPTIONAL { graph <http://bnf-fr-nl> { ?manifestation dcterms:date ?manifestationPublishingDate . } } 
@@ -62,4 +67,5 @@ WHERE {
     OPTIONAL { graph <http://bnf-trl-contributor-links> { ?expression marcrel:pbl ?publisher . } } 
     OPTIONAL { graph <http://bnf-fr-nl> { ?expression rdagroup1elements:publishersName ?publisherName . } } 
          
+    BIND( IF( BOUND(?publicationInfo), strafter(str(?publicationInfo), "12148/"), "") AS ?identifier)
 }
