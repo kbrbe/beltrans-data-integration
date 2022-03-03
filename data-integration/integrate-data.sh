@@ -117,7 +117,7 @@ GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn-without-hyph
 DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn-without-hyphen.sparql"
 TRANSFORM_QUERY_BNF_TRL_NL_FR="sparql-queries/transform-bnf-data-nl-fr.sparql"
 TRANSFORM_QUERY_BNF_TRL_FR_NL="sparql-queries/transform-bnf-data-fr-nl.sparql"
-CREATE_QUERY_BNF_IDENTIFIER="sparql-queries/create-bnf-identifier.sparql"
+CREATE_QUERY_BNF_IDENTIFIER="sparql-queries/create-bnf-contributors-identifier.sparql"
 CREATE_QUERY_BNF_ISNI="sparql-queries/create-bnf-isni.sparql"
 
 DATA_PROFILE_QUERY_FILE_KBR="dataprofile-kbr.sparql"

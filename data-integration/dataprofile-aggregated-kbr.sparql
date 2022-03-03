@@ -16,7 +16,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
   SELECT DISTINCT
     (?manifestationID AS ?targetTextKBRIdentifier)
     (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceTextKBRIdentifier)
-    (group_concat(distinct ?bnfManifestation;SEPARATOR=';') AS ?targetTextBnFIdentifier)
+    (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetTextBnFIdentifier)
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetTextThesaurusBB)
     (group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
     (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
@@ -148,7 +148,10 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
       graph <http://kbr-syracuse> { ?manifestation bibo:isbn13 ?isbn13 . }  
 
       OPTIONAL {
-        graph <http://bnf-publications> { ?bnfManifestation bibo:isbn13 ?isbn13 . }
+        graph <http://bnf-publications> {
+          ?bnfManifestation bibo:isbn13 ?isbn13 ;
+                            dcterms:identifier ?bnfManifestationID .
+        }
       }
       
     }
@@ -177,7 +180,30 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
           FILTER (lang(?kbrAuthorNationalityLabel) = 'en')
         }
       }
-        BIND(CONCAT(?kbrAuthorFamilyName, ', ', ?kbrAuthorGivenName, ' (', ?kbrAuthorID, ')') AS ?kbrAuthorNameID)
+
+      # get BnF link via ISNI
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> { 
+          ?kbrAuthor bf:identifiedBy ?isniAuthorEntity . 
+          ?isniAuthorEntity a bf:Isni ;
+                      rdf:value ?kbrAuthorISNI . 
+        }
+
+        # if there is an optional ISNI we look up the author in BnF
+        OPTIONAL {
+          graph <http://bnf-contributors> {
+            ?bnfAuthor bf:identifiedBy ?bnfIsniEntity . 
+
+            ?bnfIsniEntity a bf:Isni ;
+                           rdf:value ?kbrAuthorISNI .
+          }
+          OPTIONAL {
+            graph <http://bnf-contributors> { ?bnfAuthor dcterms:identifier ?bnfAuthorID . }
+          }
+        }
+      }
+      BIND( IF( BOUND(?bnfAuthorID), concat(", ", ?bnfAuthorID), "") AS ?bnfAuthorIDString)
+      BIND(CONCAT(?kbrAuthorFamilyName, ', ', ?kbrAuthorGivenName, ' (', ?kbrAuthorID, ?bnfAuthorIDString, ')') AS ?kbrAuthorNameID)
     }
 
     # ---------------------------------------------------------------------------
@@ -205,7 +231,30 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
           FILTER (lang(?kbrTranslatorNationalityLabel) = 'en')
         }
       }
-      BIND(CONCAT(?kbrTranslatorFamilyName, ', ', ?kbrTranslatorGivenName, ' (', ?kbrTranslatorID, ')') AS ?kbrTranslatorNameID)
+
+      # get BnF link via ISNI
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> { 
+          ?kbrTranslator bf:identifiedBy ?isniTranslatorEntity . 
+          ?isniTranslatorEntity a bf:Isni ;
+                      rdf:value ?kbrTranslatorISNI . 
+        }
+
+        # if there is an optional ISNI we look up the author in BnF
+        OPTIONAL {
+          graph <http://bnf-contributors> {
+            ?bnfTranslator bf:identifiedBy ?bnfIsniEntity . 
+
+            ?bnfIsniEntity a bf:Isni ;
+                           rdf:value ?kbrTranslatorISNI .
+          }
+          OPTIONAL {
+            graph <http://bnf-contributors> { ?bnfTranslator dcterms:identifier ?bnfTranslatorID . }
+          }
+        }
+      }
+      BIND( IF( BOUND(?bnfTranslatorID), concat(", ", ?bnfTranslatorID), "") AS ?bnfTranslatorIDString)
+      BIND(CONCAT(?kbrTranslatorFamilyName, ', ', ?kbrTranslatorGivenName, ' (', ?kbrTranslatorID, ?bnfTranslatorIDString, ')') AS ?kbrTranslatorNameID)
     }
 
 
@@ -274,8 +323,29 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         }
       }
 
-      BIND(CONCAT(?kbrIllustratorFamilyName, ', ', ?kbrIllustratorGivenName, ' (', ?kbrIllustratorID, ')') AS ?kbrIllustratorNameID)
+      # get BnF link via ISNI
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> { 
+          ?kbrIllustrator bf:identifiedBy ?isniIllustratorEntity . 
+          ?isniIllustratorEntity a bf:Isni ;
+                      rdf:value ?kbrIllustratorISNI . 
+        }
 
+        # if there is an optional ISNI we look up the author in BnF
+        OPTIONAL {
+          graph <http://bnf-contributors> {
+            ?bnfIllustrator bf:identifiedBy ?bnfIsniEntity . 
+
+            ?bnfIsniEntity a bf:Isni ;
+                           rdf:value ?kbrIllustratorISNI .
+          }
+          OPTIONAL {
+            graph <http://bnf-contributors> { ?bnfIllustrator dcterms:identifier ?bnfIllustratorID . }
+          }
+        }
+      }
+      BIND( IF( BOUND(?bnfIllustratorID), concat(", ", ?bnfIllustratorID), "") AS ?bnfIllustratorIDString)
+      BIND(CONCAT(?kbrIllustratorFamilyName, ', ', ?kbrIllustratorGivenName, ' (', ?kbrIllustratorID, ?bnfIllustratorIDString, ')') AS ?kbrIllustratorNameID)
     }
 
     # ---------------------------------------------------------------------------
@@ -310,8 +380,29 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
         }
       }
 
-      BIND(CONCAT(?kbrScenaristFamilyName, ', ', ?kbrScenaristGivenName, ' (', ?kbrScenaristID, ')') AS ?kbrScenaristNameID)
- 
+      # get BnF link via ISNI
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> { 
+          ?kbrScenarist bf:identifiedBy ?isniScenaristEntity . 
+          ?isniScenaristEntity a bf:Isni ;
+                      rdf:value ?kbrScenaristISNI . 
+        }
+
+        # if there is an optional ISNI we look up the author in BnF
+        OPTIONAL {
+          graph <http://bnf-contributors> {
+            ?bnfScenarist bf:identifiedBy ?bnfIsniEntity . 
+
+            ?bnfIsniEntity a bf:Isni ;
+                           rdf:value ?kbrScenaristISNI .
+          }
+          OPTIONAL {
+            graph <http://bnf-contributors> { ?bnfScenarist dcterms:identifier ?bnfScenaristID . }
+          }
+        }
+      }
+      BIND( IF( BOUND(?bnfScenaristID), concat(", ", ?bnfScenaristID), "") AS ?bnfScenaristIDString)
+      BIND(CONCAT(?kbrScenaristFamilyName, ', ', ?kbrScenaristGivenName, ' (', ?kbrScenaristID, ?bnfScenaristIDString, ')') AS ?kbrScenaristNameID)
    }
 
    FILTER( str(?kbrAuthorNationalityLabel) = 'Belgium' || str(?kbrIllustratorNationalityLabel) = 'Belgium' || str(?kbrScenaristNationalityLabel) = 'Belgium' )

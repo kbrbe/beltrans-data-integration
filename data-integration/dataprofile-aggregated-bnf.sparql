@@ -19,7 +19,7 @@ PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
 PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
   SELECT DISTINCT
-    (?manifestation AS ?targetTextBnFIdentifier)
+    (?manifestationID AS ?targetTextBnFIdentifier)
     (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTextTitle)
     (group_concat(distinct ?bnfCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
     (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetTextYearOfPublication)
@@ -52,6 +52,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     #
     # optional attributes of the KBR translation itself
     #
+    OPTIONAL { graph <http://bnf-publications> { ?manifestation dcterms:identifier ?manifestationID . }}
     OPTIONAL { graph <http://bnf-publications> { ?manifestation schema:datePublished ?bnfDatePublished . }}
     OPTIONAL { graph <http://bnf-publications> { ?manifestation schema:locationCreated ?bnfLocationCreated . }}
     OPTIONAL { graph <http://bnf-publications> { ?manifestation rdfs:comment ?bnfResponsibilityStatement . }}
@@ -127,57 +128,36 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
 
       # within this optional author, check optional attributes
+      OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor dcterms:identifier ?bnfAuthorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor bio:birth ?bnfAuthorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor bio:death ?bnfAuthorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:familyName ?bnfAuthorFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:givenName ?bnfAuthorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:gender ?bnfAuthorGender . } }
 
-      BIND(CONCAT(?bnfAuthorFamilyName, ', ', ?bnfAuthorGivenName, ' (', STRBEFORE(STRAFTER(str(?bnfAuthor), "12148/"), "#"), ')') as ?bnfAuthorNameID)
-      
-
-      # within this optional author, check optionally for authors with ISNI
+      # get KBR link via ISNI
       OPTIONAL {
-        graph <http://bnf-contributors-isni> { ?bnfAuthor skos:exactMatch ?bnfAuthorISNIURI . }
-
-        # if there is an optional ISNI we look it up in Belgians from ISNI SRU
-        # optional in case it is not a person marked as Belgian in ISNI SRU
-        OPTIONAL {
-          graph <http://isni-sru> {
-            ?isniSRUAuthor a schema:Person ;
-                           bf:identifiedBy ?isniSRUEntity . 
-
-            ?isniSRUEntity a bf:Isni ;
-                           rdf:value ?bnfAuthorISNIURI .
-          }
-
-          # optional attributes of the ISNI SRU dump
-          OPTIONAL { graph <http://isni-sru> { ?isniSRUAuthor schema:gender ?isniSRUAuthorGender . } 
-
-            # within the optional gender check for an optional gender label (it should exist though)
-            OPTIONAL {
-              graph <http://master-data> { ?isniSRUAuthorGender rdfs:label ?isniSRUAuthorGenderLabel . }
-              FILTER (lang(?isniSRUAuthorGenderLabel) = 'en')
-            }
-          }
+        graph <http://bnf-contributors> { 
+          ?bnfAuthor bf:identifiedBy ?isniAuthorEntity . 
+          ?isniAuthorEntity a bf:Isni ;
+                      rdf:value ?bnfAuthorISNI . 
         }
 
-        # if there is an optional ISNI we look it up in the ISNI RDF dump
-        # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+        # if there is an optional ISNI we look up the author in KBR
         OPTIONAL {
-          graph <http://isni-rdf> {
-            ?isniRDFAuthor a schema:Person ;
-                           schema:identifier [ schema:value ?bnfAuthorISNI ] .
+          graph <http://kbr-linked-authorities> {
+            ?kbrAuthor bf:identifiedBy ?kbrIsniEntity . 
 
+            ?kbrIsniEntity a bf:Isni ;
+                           rdf:value ?bnfAuthorISNI .
           }
-
-          # optional attributes of the ISNI RDF dump
-          OPTIONAL { graph <http://isni-rdf> { ?isniRDFAuthor schema:birthDate ?isniRDFAuthorBirthDate . } }
-          OPTIONAL { graph <http://isni-rdf> { ?isniRDFAuthor schema:deathDate ?isniRDFAuthorDeathDate . } }
+          OPTIONAL {
+            graph <http://kbr-linked-authorities> { ?kbrAuthor dcterms:identifier ?kbrAuthorID . }
+          }
         }
       }
-
-
+      BIND( IF( BOUND(?kbrAuthorID), concat(", ", ?kbrAuthorID), "") AS ?kbrAuthorIDString)
+      BIND(CONCAT(?bnfAuthorFamilyName, ', ', ?bnfAuthorGivenName, ' (', ?bnfAuthorID, ?kbrAuthorIDString, ')') AS ?bnfAuthorNameID)
     }
 
     
@@ -207,56 +187,37 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator dcterms:identifier ?bnfTranslatorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator bio:birth ?bnfTranslatorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator bio:death ?bnfTranslatorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:familyName ?bnfTranslatorFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:givenName ?bnfTranslatorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:gender ?bnfTranslatorGender . } }
 
-      BIND(CONCAT(?bnfTranslatorFamilyName, ', ', ?bnfTranslatorGivenName, ' (', STRBEFORE(STRAFTER(str(?bnfTranslator), "12148/"), "#"), ')') as ?bnfTranslatorNameID)
 
-      # within this optional translator, check optionally for Belgians with ISNI
+      # get KBR link via ISNI
       OPTIONAL {
-        graph <http://bnf-contributors-isni> { ?bnfTranslator skos:exactMatch ?bnfTranslatorISNIURI . }
-
-        # if there is an optional ISNI we look it up in Belgians from ISNI SRU
-        # optional in case it is not a person marked as Belgian in ISNI SRU
-        OPTIONAL {
-          graph <http://isni-sru> {
-            ?isniSRUTranslator a schema:Person ;
-                           bf:identifiedBy ?isniSRUTranslatorEntity . 
-
-            ?isniSRUTranslatorEntity a bf:Isni ;
-                           rdf:value ?bnfTranslatorISNIURI .
-          }
-
-          # optional attributes of the ISNI SRU dump
-          OPTIONAL { graph <http://isni-sru> { ?isniSRUTranslator schema:gender ?isniSRUTranslatorGender . }
-
-            # within the optional gender check for an optional gender label (it should exist though)
-            OPTIONAL {
-              graph <http://master-data> { ?isniSRUTranslatorGender rdfs:label ?isniSRUTranslatorGenderLabel . }
-              FILTER (lang(?isniSRUTranslatorGenderLabel) = 'en')
-            }
-          }
+        graph <http://bnf-contributors> { 
+          ?bnfTranslator bf:identifiedBy ?isniTranslatorEntity . 
+          ?isniTranslatorEntity a bf:Isni ;
+                      rdf:value ?bnfTranslatorISNI . 
         }
 
-        # if there is an optional ISNI we look it up in the ISNI RDF dump
-        # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+        # if there is an optional ISNI we look up the author in KBR
         OPTIONAL {
-          graph <http://isni-rdf> {
-            ?isniRDFTranslator a schema:Person ;
-                           schema:identifier [ schema:value ?bnfTranslatorISNI ] .
+          graph <http://kbr-linked-authorities> {
+            ?kbrTranslator bf:identifiedBy ?kbrIsniEntity . 
 
+            ?kbrIsniEntity a bf:Isni ;
+                           rdf:value ?bnfTranslatorISNI .
           }
-
-          # optional attributes of the ISNI RDF dump
-          OPTIONAL { graph <http://isni-rdf> { ?isniRDFTranslator schema:birthDate ?isniRDFTranslatorBirthDate . } }
-          OPTIONAL { graph <http://isni-rdf> { ?isniRDFTranslator schema:deathDate ?isniRDFTraslatorDeathDate . } }
+          OPTIONAL {
+            graph <http://kbr-linked-authorities> { ?kbrTranslator dcterms:identifier ?kbrTranslatorID . }
+          }
         }
       }
-
-
+      BIND( IF( BOUND(?kbrTranslatorID), concat(", ", ?kbrTranslatorID), "") AS ?kbrTranslatorIDString)
+      BIND(CONCAT(?bnfTranslatorFamilyName, ', ', ?bnfTranslatorGivenName, ' (', ?bnfTranslatorID, ?kbrTranslatorIDString, ')') AS ?bnfTranslatorNameID)
     }
  
     # ---------------------------------------------------------------------------
@@ -317,52 +278,36 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       BIND(CONCAT(?bnfIllustratorFamilyName, ', ', ?bnfIllustratorGivenName, ' (', STRBEFORE(STRAFTER(str(?bnfIllustrator), "12148/"), "#"), ')') as ?bnfIllustratorNameID)
 
       # within this optional translator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator dcterms:identifier ?bnfIllustratorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator bio:birth ?bnfIllustratorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator bio:death ?bnfIllustratorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:familyName ?bnfIllustratorFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:givenName ?bnfIllustratorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:gender ?bnfIllustratorGender . } }
 
-      # within this optional translator, check optionally for Belgians with ISNI
+      # get KBR link via ISNI
       OPTIONAL {
-        graph <http://bnf-contributors-isni> { ?bnfIllustrator skos:exactMatch ?bnfIllustratorISNIURI . }
-
-        # if there is an optional ISNI we look it up in Belgians from ISNI SRU
-        # optional in case it is not a person marked as Belgian in ISNI SRU
-        OPTIONAL {
-          graph <http://isni-sru> {
-            ?isniSRUIllustrator a schema:Person ;
-                           bf:identifiedBy ?isniSRUIllustratorEntity . 
-
-            ?isniSRUTranslatorEntity a bf:Isni ;
-                           rdf:value ?bnfIllustratorISNIURI .
-          }
-
-          # optional attributes of the ISNI SRU dump
-          OPTIONAL { graph <http://isni-sru> { ?isniSRUIllustrator schema:gender ?isniSRUIllustratorGender . }
-
-            # within the optional gender check for an optional gender label (it should exist though)
-            OPTIONAL {
-              graph <http://master-data> { ?isniSRUIllustratorGender rdfs:label ?isniSRUIllustratorGenderLabel . }
-              FILTER (lang(?isniSRUIllustratorGenderLabel) = 'en')
-            }
-          }
+        graph <http://bnf-contributors> { 
+          ?bnfIllustrator bf:identifiedBy ?isniIllustratorEntity . 
+          ?isniIllustratorEntity a bf:Isni ;
+                      rdf:value ?bnfIllustratorISNI . 
         }
 
-        # if there is an optional ISNI we look it up in the ISNI RDF dump
-        # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+        # if there is an optional ISNI we look up the author in KBR
         OPTIONAL {
-          graph <http://isni-rdf> {
-            ?isniRDFIllustrator a schema:Person ;
-                           schema:identifier [ schema:value ?bnfIllustratorISNIURI ] .
+          graph <http://kbr-linked-authorities> {
+            ?kbrIllustrator bf:identifiedBy ?kbrIsniEntity . 
 
+            ?kbrIsniEntity a bf:Isni ;
+                           rdf:value ?bnfIllustratorISNI .
           }
-
-          # optional attributes of the ISNI RDF dump
-          OPTIONAL { graph <http://isni-rdf> { ?isniRDFIllustrator schema:birthDate ?isniRDFIllustratorBirthDate . } }
-          OPTIONAL { graph <http://isni-rdf> { ?isniRDFIllustrator schema:deathDate ?isniRDFIllustratorDeathDate . } }
+          OPTIONAL {
+            graph <http://kbr-linked-authorities> { ?kbrIllustrator dcterms:identifier ?kbrIllustratorID . }
+          }
         }
       }
+      BIND( IF( BOUND(?kbrIllustratorID), concat(", ", ?kbrIllustratorID), "") AS ?kbrIllustratorIDString)
+      BIND(CONCAT(?bnfIllustratorFamilyName, ', ', ?bnfIllustratorGivenName, ' (', ?bnfIllustratorID, ?kbrIllustratorIDString, ')') AS ?bnfIllustratorNameID)
 
     }
     
@@ -392,56 +337,38 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
+      OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist dcterms:identifier ?bnfScenaristID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist bio:birth ?bnfScenaristBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist bio:death ?bnfScenaristDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:familyName ?bnfScenaristFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:givenName ?bnfScenaristGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:gender ?bnfScenaristGender . } }
 
-      BIND(CONCAT(?bnfScenaristFamilyName, ', ', ?bnfScenaristGivenName, ' (', STRBEFORE(STRAFTER(str(?bnfScenarist), "12148/"), "#"), ')') as ?bnfScenaristNameID)
-
-      # within this optional translator, check optionally for Belgians with ISNI
+      # get KBR link via ISNI
       OPTIONAL {
-        graph <http://bnf-contributors-isni> { ?bnfScenarist skos:exactMatch ?bnfScenaristISNIURI . }
-
-        # if there is an optional ISNI we look it up in Belgians from ISNI SRU
-        # optional in case it is not a person marked as Belgian in ISNI SRU
-        OPTIONAL {
-          graph <http://isni-sru> {
-            ?isniSRUScenarist a schema:Person ;
-                           bf:identifiedBy ?isniSRUScenaristEntity . 
-
-            ?isniSRUScenaristEntity a bf:Isni ;
-                           rdf:value ?bnfScenaristISNIURI .
-          }
-
-          # optional attributes of the ISNI SRU dump
-          OPTIONAL { graph <http://isni-sru> { ?isniSRUIScenarist schema:gender ?isniSRUIScenaristGender . }
-
-            # within the optional gender check for an optional gender label (it should exist though)
-            OPTIONAL {
-              graph <http://master-data> { ?isniSRUScenaristGender rdfs:label ?isniSRUScenaristGenderLabel . }
-              FILTER (lang(?isniSRUScenaristGenderLabel) = 'en')
-            }
-          }
+        graph <http://bnf-contributors> { 
+          ?bnfScenarist bf:identifiedBy ?isniScenaristEntity . 
+          ?isniScenaristEntity a bf:Isni ;
+                      rdf:value ?bnfScenaristISNI . 
         }
 
-        # if there is an optional ISNI we look it up in the ISNI RDF dump
-        # since it is a full ISNI dump we should always have a match, but to be sure an "optional"
+        # if there is an optional ISNI we look up the author in KBR
         OPTIONAL {
-          graph <http://isni-rdf> {
-            ?isniRDFScenarist a schema:Person ;
-                           schema:identifier [ schema:value ?bnfScenaristISNIURI ] .
+          graph <http://kbr-linked-authorities> {
+            ?kbrScenarist bf:identifiedBy ?kbrIsniEntity . 
 
+            ?kbrIsniEntity a bf:Isni ;
+                           rdf:value ?bnfScenaristISNI .
           }
-
-          # optional attributes of the ISNI RDF dump
-          OPTIONAL { graph <http://isni-rdf> { ?isniRDFScenarist schema:birthDate ?isniRDFScenaristBirthDate . } }
-          OPTIONAL { graph <http://isni-rdf> { ?isniRDFScenarist schema:deathDate ?isniRDFScenaristDeathDate . } }
+          OPTIONAL {
+            graph <http://kbr-linked-authorities> { ?kbrScenarist dcterms:identifier ?kbrScenaristID . }
+          }
         }
       }
+      BIND( IF( BOUND(?kbrScenaristID), concat(", ", ?kbrScenaristID), "") AS ?kbrScenaristIDString)
+      BIND(CONCAT(?bnfScenaristFamilyName, ', ', ?bnfScenaristGivenName, ' (', ?bnfScenaristID, ?kbrScenaristIDString, ')') AS ?bnfScenaristNameID)
 
     }
 
 }
-GROUP BY ?manifestation
+GROUP BY ?manifestationID
