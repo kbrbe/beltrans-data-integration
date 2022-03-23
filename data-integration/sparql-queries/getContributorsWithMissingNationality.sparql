@@ -1,0 +1,52 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+
+SELECT DISTINCT
+  ?kbrContributorID
+  ?kbrContributorFamilyName
+  ?kbrContributorGivenName
+  ?kbrContributorNationality
+WHERE {
+  
+  graph <http://kbr-syracuse> { ?manifestation a schema:CreativeWork . }
+         
+  OPTIONAL { 
+      # role could be for example ?manifestation schema:author ?kbrContributor
+      # or for some other roles via the following construct (using MARC relator codes, illustrator=ill, scenarist=sce)
+      #   ?activityAssociation a prov:Association ;
+      #                        prov:agent ?kbrContributor ;
+      #                        prov:hadRole btid:role_ill .
+      #    ?activity a prov:Activity ;
+      #              prov:qualitifedAssociation ?activityAssociation ;
+      #              prov:generated ?manifestation .
+      #
+      graph <http://kbr-syracuse> { ?manifestation schema:author ?kbrContributor . } 
+
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrContributor dcterms:identifier ?kbrContributorID . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrContributor schema:familyName ?kbrContributorFamilyName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrContributor schema:givenName ?kbrContributorGivenName . }}
+
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> { ?kbrContributor schema:nationality ?kbrContributorNationality . } 
+
+        # within this optional nationality check optionally for an English label in the master data
+        OPTIONAL {
+          graph <http://master-data> { ?kbrContributorNationality mads:authoritativeLabel ?kbrContributorNationalityLabel . }
+          FILTER (lang(?kbrContributorNationalityLabel) = 'en')
+        }
+      }
+    }
+  FILTER(!bound(?kbrContributorNationality))
+}
