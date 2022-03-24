@@ -1,0 +1,91 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+
+SELECT DISTINCT
+  ?manifestationID
+  ?kbrAuthorID
+  ?kbrAuthorFamilyName
+  ?kbrAuthorGivenName
+  ?kbrAuthorNationality
+  ?kbrIllustratorID
+  ?kbrIllustratorFamilyName
+  ?kbrIllustratorGivenName
+  ?kbrIllustratorNationality
+  ?kbrScenaristID
+  ?kbrScenaristFamilyName
+  ?kbrScenaristGivenName
+  ?kbrScenaristNationality
+WHERE {
+  
+  graph <http://kbr-syracuse> {
+    ?manifestation a schema:CreativeWork ;
+                   dcterms:identifier ?manifestationID .
+  }
+  graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?responsibilityStatement . }
+         
+  # AUTHOR
+  OPTIONAL { 
+      graph <http://kbr-syracuse> {
+         ?activityAssociationAuthor a prov:Association ;
+                              prov:agent ?kbrAuthor ;
+                              prov:hadRole btid:role_aut .
+          ?activityAuthor a prov:Activity ;
+                    prov:qualifiedAssociation ?activityAssociationAuthor ;
+                    prov:generated ?manifestation .      
+      }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor dcterms:identifier ?kbrAuthorID . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:familyName ?kbrAuthorFamilyName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:givenName ?kbrAuthorGivenName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:nationality ?kbrAuthorNationality . } }
+  }
+
+  # ILLUSTRATOR
+  OPTIONAL { 
+      graph <http://kbr-syracuse> {
+         ?activityAssociationIllustrator a prov:Association ;
+                              prov:agent ?kbrIllustrator ;
+                              prov:hadRole btid:role_ill .
+          ?activityIllustrator a prov:Activity ;
+                    prov:qualifiedAssociation ?activityAssociationIllustrator ;
+                    prov:generated ?manifestation .      
+      }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator dcterms:identifier ?kbrIllustratorID . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:familyName ?kbrIllustratorFamilyName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:givenName ?kbrIllustratorGivenName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:nationality ?kbrIllustratorNationality . } }
+  }
+
+  # SCENARIST
+  OPTIONAL { 
+      graph <http://kbr-syracuse> {
+         ?activityAssociationScenarist a prov:Association ;
+                              prov:agent ?kbrScenarist ;
+                              prov:hadRole btid:role_sce .
+          ?activityScenarist a prov:Activity ;
+                    prov:qualifiedAssociation ?activityAssociationScenarist ;
+                    prov:generated ?manifestation .      
+      }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist dcterms:identifier ?kbrScenaristID . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:familyName ?kbrScenaristFamilyName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:givenName ?kbrScenaristGivenName . } }
+      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:nationality ?kbrScenaristNationality . } }
+  }
+
+
+  FILTER( (bound(?kbrAuthor) && !bound(?kbrAuthorNationality) )
+       || (bound(?kbrIllustrator) && !bound(?kbrIllustratorNationality) )
+       || (bound(?kbrScenarist) && !bound(?kbrScenaristNationality) ) )
+
+}
