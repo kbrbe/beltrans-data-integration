@@ -113,6 +113,8 @@ FORMAT_TURTLE="text/turtle"
 FORMAT_NT="text/rdf+n3"
 FORMAT_SPARQL_UPDATE="application/sparql-update"
 
+KB_SPARQL_ENDPOINT="http://data.bibliotheken.nl/sparql"
+
 GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn-without-hyphen.sparql"
 DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn-without-hyphen.sparql"
 TRANSFORM_QUERY_BNF_TRL_NL_FR="sparql-queries/transform-bnf-data-nl-fr.sparql"
@@ -201,6 +203,22 @@ SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.c
 SUFFIX_KBR_BELGIANS_CLEANED="belgians-cleaned.csv"
 SUFFIX_KBR_BELGIANS_NORM="belgians-norm.csv"
 
+# DATA SOURCE - KB
+#
+SUFFIX_KB_TRL_FR_NL="kb-translations-fr-nl.csv"
+SUFFIX_KB_TRL_NL_FR="kb-translations-nl-fr.csv"
+SUFFIX_KB_CONT_FR_NL="kb-contributors-fr-nl.csv"
+SUFFIX_KB_CONT_NL_FR="kb-contributors-nl-fr.csv"
+SUFFIX_KB_AUT_FR_NL="kb-authors-fr-nl.csv"
+SUFFIX_KB_AUT_NL_FR="kb-authors-nl-fr.csv"
+
+GET_KB_TRL_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-manifestations-fr-nl.sparql"
+GET_KB_TRL_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-manifestations-nl-fr.sparql"
+GET_KB_CONT_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-contributors-fr-nl.sparql"
+GET_KB_CONT_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-contributors-nl-fr.sparql"
+GET_KB_AUT_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-authors-fr-nl.sparql"
+GET_KB_AUT_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-authors-nl-fr.sparql"
+
 # DATA SOURCE - BNF
 #
 SUFFIX_BNF_BELGIANS_IDS="bnf-belgian-contributor-ids.csv"
@@ -287,9 +305,13 @@ function extract {
   elif [ "$dataSource" = "bnf" ];
   then
     extractBnF $integrationFolderName
+  elif [ "$dataSource" = "kb" ];
+  then
+    extractKB $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
+    extractKB $integrationFolderName
     extractBnF $integrationFolderName
     extractMasterData $integrationFolderName
   fi
@@ -313,9 +335,13 @@ function transform {
   elif [ "$dataSource" = "bnf" ];
   then
     transformBnF $integrationFolderName
+  elif [ "$dataSource" = "kb" ];
+  then
+    transformKB $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
+    transformKB $integrationFolderName
     transformBnF $integrationFolderName
     transformMasterData $integrationFolderName
   fi
@@ -339,11 +365,15 @@ function load {
   elif [ "$dataSource" = "bnf" ];
   then
     loadBnF $integrationFolderName
+  elif [ "$dataSource" = "kb" ];
+  then
+    loadKB $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
     loadBnF $integrationFolderName
     loadKBR $integrationFolderName
+    loadKB $integrationFolderName
   fi
 
 }
@@ -464,6 +494,49 @@ function extractKBR {
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
   extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR"
 
+}
+
+# -----------------------------------------------------------------------------
+function extractKB {
+
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # create the folders to place the extracted translations and agents
+  mkdir -p $integrationName/kb/translations
+  mkdir -p $integrationName/kb/agents
+
+  #printf "\nUsed input (KB translations and contributors)\n* $kbrDutchTranslations\n* $kbrFrenchTranslations" >> "$integrationName/kb/README.md"
+
+  #
+  # Define file names based on current integration directory and file name patterns
+  #
+  kbTranslationsFRNL="$integrationName/kb/translations/$SUFFIX_KB_TRL_FR_NL"
+  kbTranslationsNLFR="$integrationName/kb/translations/$SUFFIX_KB_TRL_NL_FR"
+  kbContributorsFRNL="$integrationName/kb/agents/$SUFFIX_KB_CONT_FR_NL"
+  kbContributorsNLFR="$integrationName/kb/agents/$SUFFIX_KB_CONT_NL_FR"
+  kbAuthorsFRNL="$integrationName/kb/agents/$SUFFIX_KB_AUT_FR_NL"
+  kbAuthorsNLFR="$integrationName/kb/agents/$SUFFIX_KB_AUT_NL_FR"
+
+  echo "EXTRACTION - Extract KB translations FR - NL"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_FR_NL_QUERY_FILE" "$kbTranslationsFRNL"
+
+  echo "EXTRACTION - Extract KB translations NL - FR"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_NL_FR_QUERY_FILE" "$kbTranslationsNLFR"
+
+  echo "EXTRACTION - Extract KB translation contributors FR - NL"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_FR_NL_QUERY_FILE" "$kbContributorsFRNL"
+
+  echo "EXTRACTION - Extract KB translation contributors NL - FR"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_NL_FR_QUERY_FILE" "$kbContributorsNLFR"
+
+  echo "EXTRACTION - Extract KB translation authors FR - NL"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_FR_NL_QUERY_FILE" "$kbAuthorsFRNL"
+
+  echo "EXTRACTION - Extract KB translation authors NL - FR"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_NL_FR_QUERY_FILE" "$kbAuthorsNLFR"
 }
 
 # -----------------------------------------------------------------------------

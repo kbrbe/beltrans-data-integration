@@ -1,0 +1,24 @@
+SELECT ?manifestation ?isbn ?title ?edition ?responsibilityStatement ?description ?authorID ?publicationYear ?placeOfPublication ?publisherName
+WHERE {
+
+  ?manifestation a schema:Book ;
+                 schema:inLanguage "nl" ;
+                 schema:translationOfWork/schema:inLanguage "fr" .
+
+  OPTIONAL { ?manifestation schema:name ?title . }
+  OPTIONAL { ?manifestation schema:description ?description . }
+  OPTIONAL { ?manifestation rdfs:label ?responsibilityStatement . }
+  OPTIONAL { ?manifestation schema:bookEdition ?edition . }
+  OPTIONAL { ?manifestation schema:isbn ?isbn . }
+  OPTIONAL { ?manifestation schema:author ?authorID . }
+
+  OPTIONAL {
+    ?manifestation schema:publication ?publication .
+
+    OPTIONAL { ?publication schema:startDate ?publicationYear . }
+    OPTIONAL { ?publication schema:organizer/schema:name ?publisherName . }
+    OPTIONAL { ?publication schema:location/schema:name ?placeOfPublication . }
+  }
+ 
+  FILTER( xsd:integer(str(?publicationYear)) > 1969 && xsd:integer(str(?publicationYear)) < 2021)
+}

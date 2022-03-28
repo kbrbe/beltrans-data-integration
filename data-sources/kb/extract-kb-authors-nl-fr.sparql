@@ -1,0 +1,21 @@
+SELECT ?manifestation ?author ?name ?familyName ?givenName ?birthDate
+WHERE {
+
+  ?manifestation a schema:Book ;
+                 schema:inLanguage "fr" ;
+                 schema:translationOfWork/schema:inLanguage "nl" ;
+                 schema:author ?author .
+
+  OPTIONAL {
+    ?manifestation schema:publication ?publication .
+
+    OPTIONAL { ?publication schema:startDate ?publicationYear . }
+  }
+
+  OPTIONAL { ?author schema:name ?name . }
+  OPTIONAL { ?author schema:familyName ?familyName . }
+  OPTIONAL { ?author schema:givenName ?givenName . }
+  OPTIONAL { ?author schema:birthDate ?birthDate . }
+ 
+  FILTER( xsd:integer(str(?publicationYear)) > 1969 && xsd:integer(str(?publicationYear)) < 2021)
+}
