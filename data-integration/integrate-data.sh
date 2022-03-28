@@ -262,6 +262,14 @@ SUFFIX_KBR_TRL_PUB_COUNTRY_LD="translations-publication-countries.ttl"
 SUFFIX_KBR_LA_LD="linked-authorities.ttl"
 
 #
+# LINKED DATA - KB
+#
+SUFFIX_KB_TRL_LD="kb-translations.ttl"
+SUFFIX_KB_CONT_LD="kb-contributors.ttl"
+SUFFIX_KB_AUT_LD="kb-authors.ttl"
+SUFFIX_KB_TRL_CONT_LD="kb-translation-contributions.ttl"
+
+#
 # LINKED DATA - KBR BELGIANS
 #
 SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
@@ -680,6 +688,34 @@ function transformKBR {
 
   #echo "TRANSFORMATION - Map KBR Belgians data to RDF"
   #mapKBRBelgians $integrationName
+}
+
+# -----------------------------------------------------------------------------
+function transformKB {
+
+  local integrationName=$1
+
+  # create the folder to place the transformed data
+  mkdir -p $integrationName/kb/rdf 
+
+  kbTranslationsTurtle="$integrationName/kb/rdf/$SUFFIX_KB_TRL_LD"
+
+  # map the translations
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_KB_TRL_FR_NL="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_FR_NL"
+  export RML_SOURCE_KB_TRL_NL_FR="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_NL_FR"
+
+  export RML_SOURCE_KB_CONT_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_CONT_FR_NL"
+  export RML_SOURCE_KB_CONT_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_CONT_NL_FR"
+  export RML_SOURCE_KB_AUT_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_AUT_FR_NL"
+  export RML_SOURCE_KB_AUT_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_AUT_NL_FR"
+
+  # 2) execute the mapping
+  echo "TRANSFORMATION - Map KB translations FR-NL ..."
+  . map.sh ../data-sources/kb/kb-translations.yml $kbTranslationsTurtle
+
+
 }
 
 # -----------------------------------------------------------------------------

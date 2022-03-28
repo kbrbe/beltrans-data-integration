@@ -1,9 +1,13 @@
-SELECT ?manifestation ?isbn ?title ?edition ?responsibilityStatement ?description ?authorID ?publicationYear ?placeOfPublication ?publisherName
+PREFIX kb: <http://data.bibliotheken.nl/def#>
+SELECT ?manifestation ?manifestationID ?isbn ?title ?sourceTitle ?edition ?responsibilityStatement ?description ?authorID ?publicationYear ?placeOfPublication ?publisherName
 WHERE {
 
   ?manifestation a schema:Book ;
                  schema:inLanguage "nl" ;
                  schema:translationOfWork/schema:inLanguage "fr" .
+
+  OPTIONAL { ?manifestation schema:translationOfWork/rdfs:label ?sourceTitle . }
+  OPTIONAL { ?manifestation schema:mainEntityOfPage/kb:ppn ?manifestationID . }
 
   OPTIONAL { ?manifestation schema:name ?title . }
   OPTIONAL { ?manifestation schema:description ?description . }
