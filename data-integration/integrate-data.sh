@@ -12,6 +12,7 @@ SCRIPT_EXTRACT_BB="../data-sources/kbr/extract-belgian-bibliography.py"
 SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.py"
 SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
+SCRIPT_ADD_ISBN_10_13="../data-sources/kb/add-formatted-isbn-10-13.py"
 SCRIPT_FIX_ISBN="../data-sources/bnf/formatISBN13.py"
 SCRIPT_CREATE_ISBN_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
 SCRIPT_CSV_TO_EXCEL="csv-to-excel.py"
@@ -211,6 +212,9 @@ SUFFIX_KB_CONT_FR_NL="kb-contributors-fr-nl.csv"
 SUFFIX_KB_CONT_NL_FR="kb-contributors-nl-fr.csv"
 SUFFIX_KB_AUT_FR_NL="kb-authors-fr-nl.csv"
 SUFFIX_KB_AUT_NL_FR="kb-authors-nl-fr.csv"
+
+SUFFIX_KB_TRL_ISBN_NL_FR="kb-translations-with-formatted-isbn-nl-fr.csv"
+SUFFIX_KB_TRL_ISBN_FR_NL="kb-translations-with-formatted-isbn-fr-nl.csv"
 
 GET_KB_TRL_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-manifestations-fr-nl.sparql"
 GET_KB_TRL_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-manifestations-nl-fr.sparql"
@@ -520,11 +524,22 @@ function extractKB {
   kbAuthorsFRNL="$integrationName/kb/agents/$SUFFIX_KB_AUT_FR_NL"
   kbAuthorsNLFR="$integrationName/kb/agents/$SUFFIX_KB_AUT_NL_FR"
 
+  kbTranslationsWithISBNFRNL="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_FR_NL"
+  kbTranslationsWithISBNNLFR="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_NL_FR"
+
+  source ../data-sources/py-etl-env/bin/activate
+
   echo "EXTRACTION - Extract KB translations FR - NL"
   . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_FR_NL_QUERY_FILE" "$kbTranslationsFRNL"
 
   echo "EXTRACTION - Extract KB translations NL - FR"
   . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_NL_FR_QUERY_FILE" "$kbTranslationsNLFR"
+
+  echo "EXTRACTION - Compute formatted ISBN10 and ISBN13 identifiers FR - NL"
+  time python $SCRIPT_ADD_ISBN_10_13 -i $kbTranslationsFRNL -o $kbTranslationsWithISBNFRNL
+
+  echo "EXTRACTION - Compute formatted ISBN10 and ISBN13 identifiers NL - FR"
+  time python $SCRIPT_ADD_ISBN_10_13 -i $kbTranslationsNLFR -o $kbTranslationsWithISBNNLFR
 
   echo "EXTRACTION - Extract KB translation contributors FR - NL"
   . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_FR_NL_QUERY_FILE" "$kbContributorsFRNL"
