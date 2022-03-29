@@ -1,0 +1,82 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  bibo: "http://purl.org/ontology/bibo/"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  lang: "http://id.loc.gov/vocabulary/languages/"
+  schema: "http://schema.org/"
+  up: "http://users.ugent.be/~tdenies/up/"
+
+variables:
+  sourceCONTFRNL: &sourceCONTFRNL ${RML_SOURCE_KB_CONT_FR_NL}
+  sourceCONTNLFR: &sourceCONTNLFR ${RML_SOURCE_KB_CONT_NL_FR}
+  sourceAUTFRNL: &sourceAUTFRNL ${RML_SOURCE_KB_AUT_FR_NL}
+  sourceAUTNLFR: &sourceAUTNLFR ${RML_SOURCE_KB_AUT_NL_FR}
+
+mappings:
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authors:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates direct schema.org links for authors from the translated manifestation."
+    sources:
+      - access: *sourceAUTFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: $(author)
+    condition:
+      function: grel:string_startsWith
+      parameters:
+        - [grel:valueParameter, $(author)]
+        - [grel:string_sub, "http"] 
+    po:
+      - [a, schema:Person]
+      - p: schema:name
+        o: $(name)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(name)]
+            - [grel:valueParameter2, ""]
+      - p: schema:familyName
+        o: $(familyName)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(familyName)]
+            - [grel:valueParameter2, ""]
+      - p: schema:givenName
+        o: $(givenName)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(givenName)]
+            - [grel:valueParameter2, ""]
+      - p: schema:birthDate
+        o: $(birthDate)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(birthDate)]
+            - [grel:valueParameter2, ""]
+
+

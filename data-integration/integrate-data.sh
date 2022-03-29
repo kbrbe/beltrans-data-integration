@@ -104,6 +104,8 @@ TRIPLE_STORE_GRAPH_BNF_CONT_VIAF="http://bnf-contributors-viaf"
 TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA="http://bnf-contributors-wikidata"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
+TRIPLE_STORE_GRAPH_KB_TRL="http://kb-publications"
+TRIPLE_STORE_GRAPH_KB_LA="http://kb-linked-authorities"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
 
 # if it is a blazegraph triple store
@@ -265,9 +267,7 @@ SUFFIX_KBR_LA_LD="linked-authorities.ttl"
 # LINKED DATA - KB
 #
 SUFFIX_KB_TRL_LD="kb-translations.ttl"
-SUFFIX_KB_CONT_LD="kb-contributors.ttl"
-SUFFIX_KB_AUT_LD="kb-authors.ttl"
-SUFFIX_KB_TRL_CONT_LD="kb-translation-contributions.ttl"
+SUFFIX_KB_LA_LD="kb-linked-authorities.ttl"
 
 #
 # LINKED DATA - KBR BELGIANS
@@ -699,6 +699,7 @@ function transformKB {
   mkdir -p $integrationName/kb/rdf 
 
   kbTranslationsTurtle="$integrationName/kb/rdf/$SUFFIX_KB_TRL_LD"
+  kbLinkedAuthoritiesTurtle="$integrationName/kb/rdf/$SUFFIX_KB_LA_LD" 
 
   # map the translations
 
@@ -715,6 +716,9 @@ function transformKB {
   echo "TRANSFORMATION - Map KB translations FR-NL ..."
   . map.sh ../data-sources/kb/kb-translations.yml $kbTranslationsTurtle
 
+
+  echo "TRANSFORMATION - Map KB linked authorities FR-NL ..."
+  . map.sh ../data-sources/kb/kb-linked-authorities.yml $kbLinkedAuthoritiesTurtle
 
 }
 
@@ -1121,6 +1125,32 @@ function loadKBR {
 
   #echo "Load KBR Belgians ..."
   #uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrBelgians" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_BELGIANS"
+
+}
+
+# -----------------------------------------------------------------------------
+function loadKB {
+
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local kbTranslationsAndContributions="$integrationName/kb/rdf/$SUFFIX_KB_TRL_LD"
+  local kbLinkedAuthorities="$integrationName/kb/rdf/$SUFFIX_KB_LA_LD"
+
+  # first delete content of the named graph in case it already exists
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KB_TRL>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_TRL"
+
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KB_LA>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_LA"
+
+  echo "Load KB translations and contributions ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbTranslationsAndContributions" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_TRL"
+
+  echo "Load KB linked authorities ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbLinkedAuthorities" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_LA"
 
 }
 

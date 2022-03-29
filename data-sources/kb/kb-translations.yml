@@ -35,7 +35,7 @@ mappings:
   #
   manifestations:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates creative works, currently on the LRM level of manifestations."
+    description: "This mapping creates creative works, currently on the LRM level of manifestations. Properties common for both FR-NL and NL-FR are created here, hence both sources should be used."
     sources:
       - access: *sourceTRLFRNL
         referenceFormulation: csv
@@ -105,5 +105,97 @@ mappings:
           parameters:
             - [grel:valueParameter, $(isbn13)]
             - [grel:valueParameter2, ""] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsFRNL:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates the language property for French manifestations."
+    sources:
+      - access: *sourceTRLFRNL
+        referenceFormulation: csv
+        delimiter: ','
+    s: $(manifestation)
+    po:
+      - [schema:inLanguage, lang:fre~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsNLFR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates the language property for Dutch manifestations."
+    sources:
+      - access: *sourceTRLNLFR
+        referenceFormulation: csv
+        delimiter: ','
+    s: $(manifestation)
+    po:
+      - [schema:inLanguage, lang:dut~iri]
+
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  directContributions:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates direct schema.org links for authors from the translated manifestation."
+    sources:
+      - access: *sourceAUTFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: $(manifestation)
+    po:
+      - p: schema:author
+        o: $(author)
+        condition:
+          function: grel:string_startsWith
+          parameters:
+            - [grel:valueParameter, $(author)]
+            - [grel:string_sub, "http"] 
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsSourcesNLFR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping adds the language to the Dutch source of a creative work, currently on the LRM level of manifestations."
+    sources:
+      - access: *sourceTRLNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_source_$(manifestationID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(sourceTitle)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [schema:name, $(sourceTitle)]
+      - [schema:inLanguage, lang:dut~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsSourcesFRNL:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping adds the language to the French source of a creative work, currently on the LRM level of manifestations."
+    sources:
+      - access: *sourceTRLFRNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_source_$(manifestationID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(sourceTitle)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [schema:name, $(sourceTitle)]
+      - [schema:inLanguage, lang:fre~iri]
 
 
