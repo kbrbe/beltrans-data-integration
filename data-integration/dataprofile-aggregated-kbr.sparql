@@ -12,6 +12,7 @@ PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX btisni: <http://kbr.be/isni/>
 PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
 
   SELECT DISTINCT
     (?manifestationID AS ?targetTextKBRIdentifier)
@@ -37,11 +38,11 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifier)
     (group_concat(distinct ?kbrIllustratorNameID;SEPARATOR=';') AS ?illustratorIdentifier)
     (group_concat(distinct ?kbrScenaristNameID;SEPARATOR=';') AS ?scenaristIdentifier)
-  FROM <http://kbr-syracuse>
-  FROM <http://isni-sru>
-  FROM <http://isni-rdf>
-  FROM <http://master-data>
-  FROM <http://kbr-linked-authorities>
+#  FROM <http://kbr-syracuse>
+#  FROM <http://isni-sru>
+#  FROM <http://isni-rdf>
+#  FROM <http://master-data>
+#  FROM <http://kbr-linked-authorities>
   WHERE {
 
     graph <http://kbr-syracuse> { 
@@ -142,7 +143,7 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     }
 
     #
-    # find the manifestation in other data sources based on ISBN
+    # find the manifestation in other data sources based on ISBN13
     #
     OPTIONAL {
       graph <http://kbr-syracuse> { ?manifestation bibo:isbn13 ?isbn13 . }  
@@ -152,9 +153,23 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
           ?bnfManifestation bibo:isbn13 ?isbn13 ;
                             dcterms:identifier ?bnfManifestationID .
         }
-      }
-      
+      }      
     }
+
+    #
+    # find the manifestation in other data sources based on ISBN10
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?manifestation bibo:isbn10 ?isbn10 . }  
+
+      OPTIONAL {
+        graph <http://bnf-publications> {
+          ?bnfManifestation bibo:isbn10 ?isbn10 ;
+                            dcterms:identifier ?bnfManifestationID .
+        }
+      } 
+    }
+
 
 
 
@@ -304,13 +319,15 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     OPTIONAL { 
 
       graph <http://kbr-syracuse> { 
-        ?illustratorAssociation a prov:Association ;
-                                prov:agent ?kbrIllustrator ;
-                                prov:hadRole btid:role_ill .
+        ?manifestation marcrel:ill ?kbrIllustrator .
 
-        ?activity a prov:Activity ;
-                  prov:qualifiedAssociation ?illustratorAssociation ;
-                  prov:generated ?manifestation .
+#        ?illustratorAssociation a prov:Association ;
+#                                prov:agent ?kbrIllustrator ;
+#                                prov:hadRole btid:role_ill .
+
+#        ?activity a prov:Activity ;
+#                  prov:qualifiedAssociation ?illustratorAssociation ;
+#                  prov:generated ?manifestation .
       } 
 
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:familyName ?kbrIllustratorFamilyName . } }
@@ -357,13 +374,15 @@ PREFIX up: <http://users.ugent.be/~tdenies/up/>
     OPTIONAL { 
 
       graph <http://kbr-syracuse> { 
-        ?scenaristAssociation a prov:Association ;
-                                prov:agent ?kbrScenarist ;
-                                prov:hadRole btid:role_sce .
+        ?manifestation marcrel:sce ?kbrScenarist .
 
-        ?activity a prov:Activity ;
-                  prov:qualifiedAssociation ?scenaristAssociation ;
-                  prov:generated ?manifestation .
+#        ?scenaristAssociation a prov:Association ;
+#                                prov:agent ?kbrScenarist ;
+#                                prov:hadRole btid:role_sce .
+
+#        ?activity a prov:Activity ;
+#                  prov:qualifiedAssociation ?scenaristAssociation ;
+#                  prov:generated ?manifestation .
       } 
 
       OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:familyName ?kbrScenaristFamilyName . } }

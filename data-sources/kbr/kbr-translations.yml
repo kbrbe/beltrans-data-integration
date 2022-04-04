@@ -20,6 +20,7 @@ prefixes:
   lang: "http://id.loc.gov/vocabulary/languages/"
   schema: "http://schema.org/"
   up: "http://users.ugent.be/~tdenies/up/"
+  marcrel: "http://id.loc.gov/vocabulary/relators/"
 
 variables:
   sourceWorksFR: &sourceWorksFR ${RML_SOURCE_WORKS_FR}
@@ -331,6 +332,20 @@ mappings:
           parameters:
             - [grel:valueParameter, $(contributorRole)]
             - [grel:valueParameter2, "aut"] 
+      - p: marcrel:ill
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "ill"] 
+      - p: marcrel:sce
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "sce"] 
 
 
   # ---------------------------------------------------------------------------
