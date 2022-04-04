@@ -1,0 +1,11 @@
+@prefix countries: <http://id.loc.gov/vocabulary/countries/> .
+@prefix mads: <http://www.loc.gov/mads/rdf/v1#> .
+
+countries:be a mads:Authority .
+countries:be mads:authoritativeLabel "Belgium"@en .
+
+countries:fr a mads:Authority .
+countries:fr mads:authoritativeLabel "France"@en .
+
+countries:ne a mads:Authority .
+countries:ne mads:authoritativeLabel "Netherlands"@en .

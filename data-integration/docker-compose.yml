@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+
+  # ---------------------------------------------------------------------------
+  #
+  # The Blazegraph database to store RDF triples and provide SPARQL endpoints
+  #
+  blazegraph-test:
+    build: ./blazegraph
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-Xmx3g
+

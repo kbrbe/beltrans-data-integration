@@ -1,0 +1,90 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix bibo: <http://purl.org/ontology/bibo/> .
+@prefix btid: <http://bnf.be/id/data/> .
+
+btid:bnfBookA a schema:CreativeWork ;
+              rdfs:label "BnF A" ;
+              rdfs:comment "A book with no ISBN" .
+
+btid:bnfBookB a schema:CreativeWork ;
+              rdfs:label "BnF B" ;
+              rdfs:comment "A book with ISBN10, not linked to another data source" ;
+              bibo:isbn10 "bnf-000-000-000-0" .
+
+btid:bnfBookC a schema:CreativeWork ;
+              rdfs:label "BnF C" ;
+              rdfs:comment "A book with ISBN10, linked to KBR via isbn10" ;
+              bibo:isbn10 "000-000-000-1" .
+
+btid:bnfBookC_author_BE a schema:CreativeWork ;
+                rdfs:label "BnF C author BE" ;
+                rdfs:comment "A book with ISBN10, linked to KBR via isbn10, Belgian author (as the KBR version)" ;
+                schema:author btid:authority_bnf_author1_BE ;
+                bibo:isbn10 "000-000-000-1-be" .
+
+btid:bnfBookC_author_BE2 a schema:CreativeWork ;
+                rdfs:label "BnF C author BE 2" ;
+                rdfs:comment "A book with ISBN10, linked to KBR via isbn10, but in contrast to the KBR version, no Belgian contributor" ;
+                bibo:isbn10 "000-000-000-1-be-only-kbr" .
+
+btid:bnfBookC_author_BE3 a schema:CreativeWork ;
+                rdfs:label "BnF C author BE 3" ;
+                rdfs:comment "A book with ISBN10, linked to KBR via isbn10, but in contrast to the KBR version, it has a Belgian contributor" ;
+                schema:author btid:authority_bnf_author2 ;
+                bibo:isbn10 "000-000-000-1-be-only-bnf" .
+
+
+
+btid:bnfBookD a schema:CreativeWork ;
+              rdfs:label "BnF D" ;
+              rdfs:comment "A book with ISBN13, not linked to another data source" ;
+              bibo:isbn13 "bnf-000-000-000-0001" .
+
+btid:bnfBookE a schema:CreativeWork ;
+              rdfs:label "BnF E" ;
+              rdfs:comment "A book with ISBN13, linked to KBR via ISBN13, no Belgian contributors" ;
+              bibo:isbn13 "000-000-000-0001" .
+
+btid:bnfBookE_scenarist_BE a schema:CreativeWork ;
+              rdfs:label "BnF E" ;
+              rdfs:comment "A book with ISBN13, linked to KBR via ISBN13, KBR and BnF indicate a Belgian contributor" ;
+              marcrel:sce btid:authority_bnf_scenarist1_BE ;
+              bibo:isbn13 "000-000-000-0001-be" .
+
+btid:bnfBookE_scenarist_BE2 a schema:CreativeWork ;
+              dcterms:identifier "BnF E scenarist BE2" ;
+              schema:name "BnF E scenarist BE2" ;
+              rdfs:comment "A book with ISBN13, linked to KBR via ISBN13, only KBR indicates a Belgian scenarist" ;
+              bibo:isbn13 "000-000-000-0001-be-only-kbr" .
+
+btid:bnfBookE_author_BE3 a schema:CreativeWork ;
+                rdfs:label "BnF E author BE 3" ;
+                rdfs:comment "A book with ISBN10, linked to KBR via isbn10, but in contrast to the KBR version, it has a Belgian contributor" ;
+                schema:author btid:authority_bnf_author2 ;
+                bibo:isbn10 "000-000-000-0001-be-only-bnf" .
+
+btid:bnfBookF a schema:CreativeWork ;
+              rdfs:label "BnF F" ;
+              rdfs:comment "A book with ISBN10 and ISBN13, not linked to another data source" ;
+              bibo:isbn10 "bnf-000-000-000-2" ;
+              bibo:isbn13 "bnf-000-000-000-0002" .
+
+btid:bnfBookG a schema:CreativeWork ;
+              rdfs:label "BnF F" ;
+              rdfs:comment "A book with ISBN10 and ISBN13, linked to KBR via both" ;
+              bibo:isbn10 "000-000-000-3" ;
+              bibo:isbn13 "000-000-000-0003" .
+
+btid:bnfBookH a schema:CreativeWork ;
+              rdfs:label "BnF H" ;
+              rdfs:comment "A book with ISBN10 and ISBN13, linked to KBR via ISBN10" ;
+              bibo:isbn10 "000-000-000-4" ;
+              bibo:isbn13 "bnf-000-000-000-0004" .
+
+btid:bnfBookI a schema:CreativeWork ;
+              rdfs:label "BnF I" ;
+              rdfs:comment "A book with ISBN10 and ISBN13, linked to KBR via ISBN13" ;
+              bibo:isbn10 "bnf-000-000-000-5" ;
+              bibo:isbn13 "000-000-000-0005" .
