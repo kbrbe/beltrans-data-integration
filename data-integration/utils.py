@@ -1,6 +1,65 @@
 import itertools
 from datetime import datetime
+import requests
+import rdflib
+import os
 import pandas as pd
+from SPARQLWrapper import SPARQLWrapper, TURTLE, JSON, POST
+
+# -----------------------------------------------------------------------------
+def addTestData(target, loadConfig):
+  """This function reads the test data and stores it into several named graphs (one file for one named graph).
+  The config looks like the following: {'http://first-named-graph': 'filename1', 'http://second-named-graph': 'filename2'}
+
+  The data could already be in quad format, but we are more flexible if we can configure which data is stored in which named graph.
+  """
+  for ng in loadConfig:
+    filename = loadConfig[ng]
+    if os.path.isfile(filename):
+      with open(filename, 'r') as dataIn:
+        if isinstance(target, rdflib.ConjunctiveGraph):
+          namedGraphURI = rdflib.URIRef(ng)
+          target.get_context(namedGraphURI).parse(filename, format='turtle')
+        else:
+          print(f'## Add data from {filename} to {ng} of {target}\n')
+          addDataToBlazegraph(url=target, namedGraph=ng, filename=filename, fileFormat='text/turtle')
+
+# -----------------------------------------------------------------------------
+def addDataToBlazegraph(url, namedGraph, filename, fileFormat):
+  print(f'## Add data from {filename} to {namedGraph} of {url}\n')
+  with open(filename, 'rb') as fileIn:
+    #r = requests.post(url, files={'file': (filename, fileIn, fileFormat)}, headers={'Content-Type': fileFormat}, params={'context-uri': namedGraph})
+    r = requests.post(url, data=fileIn.read(), headers={'Content-Type': fileFormat}, params={'context-uri': namedGraph})
+    print(r.headers)
+    print(r.content)
+
+# -----------------------------------------------------------------------------
+def query(target, queryString, outputWriter):
+  """This function executes the given SPARQL query against the target and writes the output to outputWriter."""
+  res = None
+  if isinstance(target, rdflib.ConjunctiveGraph):
+    # target is a local rdflib graph
+    print(target)
+    res = target.query(queryString)
+    for row in res:
+      print(row)
+  else:
+    # SPARQLWrapper has issues retrieving CSV from Blazegraph, thus we send the query low level via a request
+    res = requests.post(target, data=queryString, headers={'Accept': 'text/csv', 'Content-Type': 'application/sparql-query'})
+    print("#### BEGIN CONTENT ####")
+    print(res.content.decode('utf-8'))
+    print("#### END CONTENT ####")
+    outputWriter.write(res.content)
+
+# ------------------------------------------------------------
+def readSPARQLQuery(filename):
+    """Read a SPARQL query from file and return the content as a string."""
+    content = ""
+    with open(filename, 'r') as reader:
+        content = reader.read()
+    return content
+
+
 
 # -----------------------------------------------------------------------------
 def addToMismatchLog(mismatchLog, dateType, roleType, contributorURI, s, value):
