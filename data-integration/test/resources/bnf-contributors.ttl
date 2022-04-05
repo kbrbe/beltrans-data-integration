@@ -1,23 +1,53 @@
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix countries: <http://id.loc.gov/vocabulary/countries/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix schema: <http://schema.org/> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix bibo: <http://purl.org/ontology/bibo/> .
-@prefix btid: <http://kbr.be/id/data/> .
-@prefix countries: <http://id.loc.gov/vocabulary/countries/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-btid:authority_bnf_author1_BE a schema:Person ;
-                          dcterms:identifier "BE author1 BnF" ;
-                          schema:nationality countries:be .
+<http://kbr.be/id/data/authority_bnfAuthorBE1> a schema:Person;
+  dcterms:identifier "KBR author1 BE";
+  schema:nationality countries:be .
 
-btid:authority_bnf_author2_BE a schema:Person ;
-                          dcterms:identifier "BE author2 BnF" ;
-                          schema:nationality countries:be .
+<http://kbr.be/id/data/authority_bnfAuthorBE2> a schema:Person;
+  dcterms:identifier "KBR author2 BE";
+  schema:nationality countries:be .
 
-btid:authority_bnf_illustrator1_BE a schema:Person ;
-                          dcterms:identifier "BE illustrator1 BnF" ;
-                          schema:nationality countries:be .
+<http://kbr.be/id/data/authority_bnfAuthorBE3> a schema:Person;
+  dcterms:identifier "KBR author3 BE";
+  schema:nationality countries:be .
 
-btid:authority_bnf_scenarist1_BE a schema:Person ;
-                                 dcterms:identifier "BE scenarist1 BnF" ;
-                                 schema:nationality countries:be .
+<http://kbr.be/id/data/authority_bnfAuthorBE4> a schema:Person;
+  dcterms:identifier "KBR author4 BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/authority_bnfAuthorBE5> a schema:Person;
+  dcterms:identifier "KBR author5 BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/authority_bnfAuthorBE6> a schema:Person;
+  dcterms:identifier "KBR author6 BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/authority_bnfAuthorFR1> a schema:Person;
+  dcterms:identifier "KBR author1 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_bnfAuthorFR2> a schema:Person;
+  dcterms:identifier "KBR author2 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_bnfAuthorFR3> a schema:Person;
+  dcterms:identifier "KBR author3 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_bnfAuthorFR4> a schema:Person;
+  dcterms:identifier "KBR author4 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_bnfAuthorFR5> a schema:Person;
+  dcterms:identifier "KBR author5 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_bnfAuthorFR6> a schema:Person;
+  dcterms:identifier "KBR author6 FR";
+  schema:nationality countries:fr .

@@ -1,90 +1,232 @@
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix schema: <http://schema.org/> .
+@prefix : <http://mapping.example.com/> .
+@prefix bf: <http://id.loc.gov/ontologies/bibframe/> .
 @prefix bibo: <http://purl.org/ontology/bibo/> .
-@prefix btid: <http://bnf.be/id/data/> .
+@prefix btabout: <http://kbr.be/about/data/> .
+@prefix btid: <http://kbr.be/id/data/> .
+@prefix btm: <http://kbr.be/ns/beltrans/model#> .
+@prefix bts: <http://kbr.be/ns/beltrans/shapes#> .
+@prefix countries: <http://id.loc.gov/vocabulary/countries/> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix edm: <http://www.europeana.eu/schemas/edm/> .
+@prefix ex: <http://example.org/ns#> .
+@prefix fnml: <http://semweb.mmlab.be/ns/fnml#> .
+@prefix fno: <https://w3id.org/function/ontology#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix grel: <http://users.ugent.be/~bjdmeest/function/grel.ttl#> .
+@prefix http: <http://www.w3.org/2011/http#> .
+@prefix idlab-fn: <http://example.com/idlab/function/> .
+@prefix lang: <http://id.loc.gov/vocabulary/languages/> .
+@prefix marcrel: <http://id.loc.gov/vocabulary/relators/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix schema: <http://schema.org/> .
+@prefix up: <http://users.ugent.be/~tdenies/up/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-btid:bnfBookA a schema:CreativeWork ;
-              rdfs:label "BnF A" ;
-              rdfs:comment "A book with no ISBN" .
+btid:bnfBook1 a schema:CreativeWork;
+  dcterms:identifier "BnF book 1";
+  schema:author btid:authority_bnfAuthorBE1;
+  schema:name "BnF book 1";
+  rdfs:comment "KBR: - ; No ISBN, Belgian" .
 
-btid:bnfBookB a schema:CreativeWork ;
-              rdfs:label "BnF B" ;
-              rdfs:comment "A book with ISBN10, not linked to another data source" ;
-              bibo:isbn10 "bnf-000-000-000-0" .
+btid:bnfBook10 a schema:CreativeWork;
+  dcterms:identifier "BnF book 10";
+  bibo:isbn13 "000-000-000-0002";
+  schema:author btid:authority_bnfAuthorBE3;
+  schema:name "BnF book 10";
+  rdfs:comment "KBR: ISBN13, Belgian; BnF: ISBN13, Belgian" .
 
-btid:bnfBookC a schema:CreativeWork ;
-              rdfs:label "BnF C" ;
-              rdfs:comment "A book with ISBN10, linked to KBR via isbn10" ;
-              bibo:isbn10 "000-000-000-1" .
+btid:bnfBook11 a schema:CreativeWork;
+  dcterms:identifier "BnF book 11";
+  bibo:isbn13 "000-000-000-0003";
+  schema:author btid:authority_bnfAuthorFR3;
+  schema:name "BnF book 11";
+  rdfs:comment "KBR: ISBN13, Belgian; BnF: ISBN13, Not Belgian" .
 
-btid:bnfBookC_author_BE a schema:CreativeWork ;
-                rdfs:label "BnF C author BE" ;
-                rdfs:comment "A book with ISBN10, linked to KBR via isbn10, Belgian author (as the KBR version)" ;
-                schema:author btid:authority_bnf_author1_BE ;
-                bibo:isbn10 "000-000-000-1-be" .
+btid:bnfBook12 a schema:CreativeWork;
+  dcterms:identifier "BnF book 12";
+  bibo:isbn13 "BNF-000-000-0004";
+  schema:author btid:authority_bnfAuthorFR3;
+  schema:name "BnF book 12";
+  rdfs:comment "KBR: - ; BnF: ISBN13, Not Belgian" .
 
-btid:bnfBookC_author_BE2 a schema:CreativeWork ;
-                rdfs:label "BnF C author BE 2" ;
-                rdfs:comment "A book with ISBN10, linked to KBR via isbn10, but in contrast to the KBR version, no Belgian contributor" ;
-                bibo:isbn10 "000-000-000-1-be-only-kbr" .
+btid:bnfBook13 a schema:CreativeWork;
+  dcterms:identifier "BnF book 13";
+  bibo:isbn13 "000-000-000-0005";
+  schema:author btid:authority_bnfAuthorBE3;
+  schema:name "BnF book 13";
+  rdfs:comment "KBR: ISBN13, Not Belgian; BnF: ISBN13, Belgian" .
 
-btid:bnfBookC_author_BE3 a schema:CreativeWork ;
-                rdfs:label "BnF C author BE 3" ;
-                rdfs:comment "A book with ISBN10, linked to KBR via isbn10, but in contrast to the KBR version, it has a Belgian contributor" ;
-                schema:author btid:authority_bnf_author2 ;
-                bibo:isbn10 "000-000-000-1-be-only-bnf" .
+btid:bnfBook14 a schema:CreativeWork;
+  dcterms:identifier "BnF book 14";
+  bibo:isbn13 "000-000-000-0006";
+  schema:author btid:authority_bnfAuthorFR3;
+  schema:name "BnF book 14";
+  rdfs:comment "KBR: ISBN13, Not Belgian; BnF: ISBN13, Not Belgian" .
 
+btid:bnfBook15 a schema:CreativeWork;
+  dcterms:identifier "BnF book 15";
+  bibo:isbn10 "BNF-000-000-7";
+  bibo:isbn13 "BNF-000-000-0007";
+  schema:author btid:authority_bnfAuthorBE4;
+  schema:name "BnF book 15";
+  rdfs:comment "KBR: - ; BnF: ISBN10 & ISBN13, Belgian" .
 
+btid:bnfBook16 a schema:CreativeWork;
+  dcterms:identifier "BnF book 16";
+  bibo:isbn10 "000-000-000-8";
+  schema:author btid:authority_bnfAuthorBE4;
+  schema:name "BnF book 16";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Belgian; BnF: ISBN10, Belgian" .
 
-btid:bnfBookD a schema:CreativeWork ;
-              rdfs:label "BnF D" ;
-              rdfs:comment "A book with ISBN13, not linked to another data source" ;
-              bibo:isbn13 "bnf-000-000-000-0001" .
+btid:bnfBook17 a schema:CreativeWork;
+  dcterms:identifier "BnF book 17";
+  bibo:isbn10 "000-000-000-9";
+  schema:author btid:authority_bnfAuthorFR4;
+  schema:name "BnF book 17";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Belgian; BnF: ISBN10, Not Belgian" .
 
-btid:bnfBookE a schema:CreativeWork ;
-              rdfs:label "BnF E" ;
-              rdfs:comment "A book with ISBN13, linked to KBR via ISBN13, no Belgian contributors" ;
-              bibo:isbn13 "000-000-000-0001" .
+btid:bnfBook18 a schema:CreativeWork;
+  dcterms:identifier "BnF book 18";
+  bibo:isbn10 "BNF-000-001-0";
+  bibo:isbn13 "BNF-000-000-0010";
+  schema:author btid:authority_bnfAuthorFR4;
+  schema:name "BnF book 18";
+  rdfs:comment "KBR: - ; BnF: ISBN10 & ISBN13, Not Belgian" .
 
-btid:bnfBookE_scenarist_BE a schema:CreativeWork ;
-              rdfs:label "BnF E" ;
-              rdfs:comment "A book with ISBN13, linked to KBR via ISBN13, KBR and BnF indicate a Belgian contributor" ;
-              marcrel:sce btid:authority_bnf_scenarist1_BE ;
-              bibo:isbn13 "000-000-000-0001-be" .
+btid:bnfBook19 a schema:CreativeWork;
+  dcterms:identifier "BnF book 19";
+  bibo:isbn10 "000-000-001-1";
+  schema:author btid:authority_bnfAuthorBE4;
+  schema:name "BnF book 19";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Not Belgian; BnF: ISBN10, Belgian" .
 
-btid:bnfBookE_scenarist_BE2 a schema:CreativeWork ;
-              dcterms:identifier "BnF E scenarist BE2" ;
-              schema:name "BnF E scenarist BE2" ;
-              rdfs:comment "A book with ISBN13, linked to KBR via ISBN13, only KBR indicates a Belgian scenarist" ;
-              bibo:isbn13 "000-000-000-0001-be-only-kbr" .
+btid:bnfBook2 a schema:CreativeWork;
+  dcterms:identifier "BnF book 2";
+  schema:author btid:authority_bnfAuthorFR1;
+  schema:name "BnF book 2";
+  rdfs:comment "KBR: - ; BnF: No ISBN, not Belgian" .
 
-btid:bnfBookE_author_BE3 a schema:CreativeWork ;
-                rdfs:label "BnF E author BE 3" ;
-                rdfs:comment "A book with ISBN10, linked to KBR via isbn10, but in contrast to the KBR version, it has a Belgian contributor" ;
-                schema:author btid:authority_bnf_author2 ;
-                bibo:isbn10 "000-000-000-0001-be-only-bnf" .
+btid:bnfBook20 a schema:CreativeWork;
+  dcterms:identifier "BnF book 20";
+  bibo:isbn10 "000-000-001-2";
+  schema:author btid:authority_bnfAuthorFR4;
+  schema:name "BnF book 20";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Not Belgian; BnF: ISBN10, Not Belgian" .
 
-btid:bnfBookF a schema:CreativeWork ;
-              rdfs:label "BnF F" ;
-              rdfs:comment "A book with ISBN10 and ISBN13, not linked to another data source" ;
-              bibo:isbn10 "bnf-000-000-000-2" ;
-              bibo:isbn13 "bnf-000-000-000-0002" .
+btid:bnfBook21 a schema:CreativeWork;
+  dcterms:identifier "BnF book 21";
+  bibo:isbn13 "000-000-000-0013";
+  schema:author btid:authority_bnfAuthorBE5;
+  schema:name "BnF book 21";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Belgian; BnF: ISBN13, Belgian" .
 
-btid:bnfBookG a schema:CreativeWork ;
-              rdfs:label "BnF F" ;
-              rdfs:comment "A book with ISBN10 and ISBN13, linked to KBR via both" ;
-              bibo:isbn10 "000-000-000-3" ;
-              bibo:isbn13 "000-000-000-0003" .
+btid:bnfBook22 a schema:CreativeWork;
+  dcterms:identifier "BnF book 22";
+  bibo:isbn13 "000-000-000-0014";
+  schema:author btid:authority_bnfAuthorFR5;
+  schema:name "BnF book 22";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Belgian; BnF: ISBN13, Not Belgian" .
 
-btid:bnfBookH a schema:CreativeWork ;
-              rdfs:label "BnF H" ;
-              rdfs:comment "A book with ISBN10 and ISBN13, linked to KBR via ISBN10" ;
-              bibo:isbn10 "000-000-000-4" ;
-              bibo:isbn13 "bnf-000-000-000-0004" .
+btid:bnfBook23 a schema:CreativeWork;
+  dcterms:identifier "BnF book 23";
+  bibo:isbn13 "000-000-000-0015";
+  schema:author btid:authority_bnfAuthorBE5;
+  schema:name "BnF book 23";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Not Belgian; BnF: ISBN13, Belgian" .
 
-btid:bnfBookI a schema:CreativeWork ;
-              rdfs:label "BnF I" ;
-              rdfs:comment "A book with ISBN10 and ISBN13, linked to KBR via ISBN13" ;
-              bibo:isbn10 "bnf-000-000-000-5" ;
-              bibo:isbn13 "000-000-000-0005" .
+btid:bnfBook24 a schema:CreativeWork;
+  dcterms:identifier "BnF book 24";
+  bibo:isbn13 "000-000-000-0016";
+  schema:author btid:authority_bnfAuthorFR5;
+  schema:name "BnF book 24";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Not Belgian; BnF: ISBN13, Not Belgian" .
+
+btid:bnfBook25 a schema:CreativeWork;
+  dcterms:identifier "BnF book 25";
+  bibo:isbn10 "000-000-001-7";
+  bibo:isbn13 "000-000-000-0017";
+  schema:author btid:authority_bnfAuthorBE6;
+  schema:name "BnF book 25";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Belgian; BnF: ISBN10 & ISBN13, Belgian" .
+
+btid:bnfBook26 a schema:CreativeWork;
+  dcterms:identifier "BnF book 26";
+  bibo:isbn10 "000-000-001-8";
+  bibo:isbn13 "000-000-000-0018";
+  schema:author btid:authority_bnfAuthorFR6;
+  schema:name "BnF book 26";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Belgian; BnF: ISBN10 & ISBN13, Not Belgian" .
+
+btid:bnfBook27 a schema:CreativeWork;
+  dcterms:identifier "BnF book 27";
+  bibo:isbn10 "000-000-001-9";
+  bibo:isbn13 "000-000-000-0019";
+  schema:author btid:authority_bnfAuthorBE6;
+  schema:name "BnF book 27";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Not Belgian; BnF: ISBN10 & ISBN13, Belgian" .
+
+btid:bnfBook28 a schema:CreativeWork;
+  dcterms:identifier "BnF book 28";
+  bibo:isbn10 "000-000-002-0";
+  bibo:isbn13 "000-000-000-0020";
+  schema:author btid:authority_bnfAuthorFR6;
+  schema:name "BnF book 28";
+  rdfs:comment "KBR: ISBN10 & ISBN13, Not Belgian; BnF: ISBN10 & ISBN13, Not Belgian" .
+
+btid:bnfBook3 a schema:CreativeWork;
+  dcterms:identifier "BnF book 3";
+  bibo:isbn10 "BNF-000-000-1";
+  schema:author btid:authority_bnfAuthorBE2;
+  schema:name "BnF book 3";
+  rdfs:comment "KBR: - ; BnF: ISBN10, Belgian" .
+
+btid:bnfBook4 a schema:CreativeWork;
+  dcterms:identifier "BnF book 4";
+  bibo:isbn10 "000-000-000-2";
+  schema:author btid:authority_bnfAuthorBE2;
+  schema:name "BnF book 4";
+  rdfs:comment "KBR: ISBN10, Belgian; BnF: ISBN10, Belgian" .
+
+btid:bnfBook5 a schema:CreativeWork;
+  dcterms:identifier "BnF book 5";
+  bibo:isbn10 "000-000-000-3";
+  schema:author btid:authority_bnfAuthorFR2;
+  schema:name "BnF book 5";
+  rdfs:comment "KBR: ISBN10, Belgian; BnF: ISBN10, Not Belgian" .
+
+btid:bnfBook6 a schema:CreativeWork;
+  dcterms:identifier "BnF book 6";
+  bibo:isbn10 "BNF-000-000-4";
+  schema:author btid:authority_bnfAuthorFR2;
+  schema:name "BnF book 6";
+  rdfs:comment "KBR: - ; BnF: ISBN10, Not Belgian" .
+
+btid:bnfBook7 a schema:CreativeWork;
+  dcterms:identifier "BnF book 7";
+  bibo:isbn10 "000-000-000-5";
+  schema:author btid:authority_bnfAuthorBE2;
+  schema:name "BnF book 7";
+  rdfs:comment "KBR: ISBN10, Not Belgian; BnF: ISBN10, Belgian" .
+
+btid:bnfBook8 a schema:CreativeWork;
+  dcterms:identifier "BnF book 8";
+  bibo:isbn10 "000-000-000-6";
+  schema:author btid:authority_bnfAuthorFR2;
+  schema:name "BnF book 8";
+  rdfs:comment "KBR: ISBN10, Not Belgian; BnF: ISBN10, Not Belgian" .
+
+btid:bnfBook9 a schema:CreativeWork;
+  dcterms:identifier "BnF book 9";
+  bibo:isbn13 "BNF-000-000-0001";
+  schema:author btid:authority_bnfAuthorBE3;
+  schema:name "BnF book 9";
+  rdfs:comment "KBR: - ; BnF: ISBN13, Belgian" .

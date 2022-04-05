@@ -45,7 +45,7 @@ mappings:
             - [grel:valueParameter, $(ISBN10)]
             - [grel:valueParameter2, ""] 
       - p: bibo:isbn13
-        o: $(ISBN10)
+        o: $(ISBN13)
         condition:
           function: idlab-fn:notEqual
           parameters:
@@ -56,5 +56,5 @@ mappings:
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(ISBN10)]
+            - [grel:valueParameter, $(authorURI)]
             - [grel:valueParameter2, ""] 
