@@ -458,12 +458,10 @@ function postprocess {
   excelData="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_DATA"
   excelStats="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_STATS"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source ./py-integration-env/bin/activate
 
   echo "Postprocess integrated data ..."
   postprocessIntegratedData $integratedDataKBR $integratedDataBnF $processedData
-
-  source ../data-sources/py-etl-env/bin/activate
 
   echo "Postprocess aggregated data ..."
   time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -k $integratedAggKBR -b $integratedAggBnF -o $processedAggData

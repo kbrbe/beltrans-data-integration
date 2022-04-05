@@ -25,11 +25,22 @@ to cover border cases with respect to books and contributors from different sour
   * One without BE contributors (this should NOT appear in the output, `btid:kbrBookE`)
   * One without BE contributor, but linked to BnF which has a BE contributor (this should appear once in the output, `btid:kbrBookE_no_BE` with linked `btid:bnfBookE_author_BE3`)
 * one KBR book with ISBN10 and one ISBN 13 (no match to other sources)
-  * One with a BE contributor (this should appear once in the output)
-  * One without BE contributors (this should NOT appear in the output)
+  * One with a BE contributor (this should appear once in the output, `btid:kbrBookF_author_BE`)
+  * One without BE contributors (this should NOT appear in the output, `btid:kbrBookF`)
 * one KBR book with ISBN10 and one ISBN13 (link to BnF via both)
   * One with a BE contributor (this should appear once in the output)
-  * One without BE contributors (this should NOT appear in the output)
+  * One without BE contributors (this should NOT appear in the output, `btid:kbrBookG`)
+
+| Name                          | KBR URI          | BnF URI          |
+| ----------------------------- | ---------------- | ---------------- |
+| No ISBN                       | `btid:kbrBook1`
+|                               | `-`              | `btid:bnfBook1`  |
+| No link via ISBN10            | `btid:kbrBook2`  |
+| No link via ISBN13
+| No link via ISBN10 & ISBN13
+| Link via ISBN10
+| Link via ISBN13
+| Link via ISBN10 & ISBN13
 
 ## Detect quality issues
 

@@ -9,6 +9,9 @@ class BlazegraphIntegrationTestContainer:
     self._hostName = hostName
 
   def __enter__(self):
+    print(f'build image {self._imageName}...')
+    self._image = docker.images.build(path='./blazegraph', tag=self._imageName)
+    print(f'run container ...')
     self._container = docker.containers.run(image=self._imageName, detach=True, hostname=self._hostName, ports={"8080": "8080"})
     return self._container
 

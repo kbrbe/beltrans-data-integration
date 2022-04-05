@@ -5,6 +5,7 @@ import time
 import utils
 import csv
 import os
+import integration
 from dataprofileTestHelper import DataprofileTestHelper
 from BlazegraphIntegrationTestContainer import BlazegraphIntegrationTestContainer
 
@@ -17,7 +18,7 @@ class TestAggregatedDataKBRAndBnF(unittest.TestCase):
   def setUpClass(cls):
     # use temporary files which will be deleted in the tearDownClass function
     cls.tempAggKBR = os.path.join(tempfile.gettempdir(), 'aggregated-kbr.csv')
-    cls.tempAggBnF = os.path.join(tempfile.gettempdir(), 'aggregated-kbr.csv')
+    cls.tempAggBnF = os.path.join(tempfile.gettempdir(), 'aggregated-bnf.csv')
     cls.tempAggAll = os.path.join(tempfile.gettempdir(), 'aggregated-data.csv')
 
     # start a local Blazegraph and insert our test data
@@ -30,7 +31,7 @@ class TestAggregatedDataKBRAndBnF(unittest.TestCase):
         'http://master-data': './test/resources/master-data.ttl',
         'http://bnf-publications': './test/resources/bnf-data.ttl',
         'http://bnf-contributors': './test/resources/bnf-contributors.ttl',
-        'http://kbr-linked-authorities': './test/resources/kbr-linked-authorities.ttl',
+        'http://kbr-linked-authorities': './test/resources/kbr-contributors.ttl',
   #      'http://isni-sru': './test/resources/isni-sru.ttl',
   #      'http://isni-rdf': './test/resources/isni-rdf.ttl'
       }
@@ -39,30 +40,28 @@ class TestAggregatedDataKBRAndBnF(unittest.TestCase):
       utils.addTestData(uploadURL, loadConfig)
 
       # query data from our test fixture
-      with open(cls.tempAggKBR, 'wb') as resultFileAggKBR:
-      # todo: query KBR and store data
+      with open(cls.tempAggKBR, 'wb') as resultFileAggKBR, \
+           open(cls.tempAggBnF, 'wb') as resultFileAggBnF:
+
         queryAggKBR = utils.readSPARQLQuery('./dataprofile-aggregated-kbr.sparql')
-        #queryAggKBR = utils.readSPARQLQuery('./get-all.sparql')
         utils.query(uploadURL, queryAggKBR, resultFileAggKBR)
 
-      with open(cls.tempAggKBR, 'r') as kbrIn:
-        csvReader = csv.DictReader(kbrIn, delimiter=',')
+        queryAggBnF = utils.readSPARQLQuery('./dataprofile-aggregated-bnf.sparql')
+        utils.query(uploadURL, queryAggBnF, resultFileAggBnF)
+
+      # call the postprocessing function we would like to test
+      integration.combineAggregatedResults(cls.tempAggKBR, cls.tempAggBnF, cls.tempAggAll)
+
+      # read and store the queried/integrated data such that we can easily use it in the test functions
+      with open(cls.tempAggAll, 'r') as allIn:
+        csvReader = csv.DictReader(allIn, delimiter=',')
         csvData = [dict(d) for d in csvReader]
         cls.data = DataprofileTestHelper(csvData)
-    # todo: query BnF
-    # todo: postprocessing
     
-    # read the CSV query result into our own data structure
-    #with open(csvResultFilename, 'r') as dataIn:
-    #  csvReader = csv.DictReader(dataIn, delimiter=',')
-    #  csvData = [dict(d) for d in csvReader]
-    #  cls.data = DataprofileTestHelper(csvData)
-
   # ---------------------------------------------------------------------------
   @classmethod
   def tearDownClass(cls):
     if os.path.isfile(cls.tempAggKBR):
-      print(os.path.getsize(cls.tempAggKBR))
       os.remove(cls.tempAggKBR)
     if os.path.isfile(cls.tempAggBnF):
       os.remove(cls.tempAggBnF)

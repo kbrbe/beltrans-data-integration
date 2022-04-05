@@ -21,7 +21,6 @@ def addTestData(target, loadConfig):
           namedGraphURI = rdflib.URIRef(ng)
           target.get_context(namedGraphURI).parse(filename, format='turtle')
         else:
-          print(f'## Add data from {filename} to {ng} of {target}\n')
           addDataToBlazegraph(url=target, namedGraph=ng, filename=filename, fileFormat='text/turtle')
 
 # -----------------------------------------------------------------------------

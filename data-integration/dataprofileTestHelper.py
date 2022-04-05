@@ -5,6 +5,7 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def __init__(self, data):
     self.df = pd.DataFrame(data)
+    print(self.df)
 
   # ---------------------------------------------------------------------------
   def numberRows(self):
