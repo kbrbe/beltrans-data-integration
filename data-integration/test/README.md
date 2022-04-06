@@ -5,42 +5,46 @@ As part of our pipeline we query data from a RDF triple store to create CSV file
 To verify that the query and postprocessing of the results works correct we created test data
 to cover border cases with respect to books and contributors from different sources and their links.
 
-* A KBR book with no ISBN information
-  * One with a BE contributor (this should appear once in the output, `btid:kbrBookA_author_BE`)
-  * One without BE contributors (this should NOT appear in the output, `btid:kbrBookA`)
-* A KBR book with one ISBN10 (no match to other sources)
-  * One with a BE contributor (this should appear once in the output, `btid:kbrBookB_illustrator_BE`)
-  * One without BE contributors (this should NOT appear in the output, `btid:kbrBookB`)
-* A KBR book with one ISBN10 (link to BnF)
-  * One with a BE contributor, linked to BnF which also has a Belgian contributor (this should appear once in the output, `btid:kbrBookC_author_BE` linked `btid:bnfBookC_author_BE`)
-  * One with a BE contributor, linked to Bnf, but the BnF version does not indicate a BE contributor (this should appear once in the output, `btid:kbrBookC_author_BE2` with linked `btid:bnfBookC_author_BE2`)
-  * One without BE contributors (this should NOT appear in the output, `btid:kbrBookC`)
-  * One without BE contributor, but linked to BnF which has a BE contributor (this should appear once in the output, `btid:kbrBookC_no_BE` and linked `btid:bnfBookC_author_BE3`)
-* one KBR book with one ISBN13 (no match to other sources)
-  * One with a BE contributor (this should appear once in the output, `btid:kbrBookD_author_BE`)
-  * One without BE contributors (this should NOT appear in the output, `btid:kbrBookD`)
-* one KBR book with one ISBN13 (link to BnF)
-  * One with a BE contributor (this should appear once in the output, `btid:kbrBookE_scenarist_BE`, linked to `btid:bnfBookE_scenarist_BE`)
-  * One with a BE contributor, linked to Bnf, but the BnF version does not indicate a BE contributor (this should appear once in the output, `btid:kbrBookE_scenarist_BE2` and linked `btid:bnfBookE_scenarist_BE2`)
-  * One without BE contributors (this should NOT appear in the output, `btid:kbrBookE`)
-  * One without BE contributor, but linked to BnF which has a BE contributor (this should appear once in the output, `btid:kbrBookE_no_BE` with linked `btid:bnfBookE_author_BE3`)
-* one KBR book with ISBN10 and one ISBN 13 (no match to other sources)
-  * One with a BE contributor (this should appear once in the output, `btid:kbrBookF_author_BE`)
-  * One without BE contributors (this should NOT appear in the output, `btid:kbrBookF`)
-* one KBR book with ISBN10 and one ISBN13 (link to BnF via both)
-  * One with a BE contributor (this should appear once in the output)
-  * One without BE contributors (this should NOT appear in the output, `btid:kbrBookG`)
+|  KBR book URI    | BnF book URI     | In corpus? | Belgian contributor? | ISBN10 | ISBN13 | book link     |
+|------------------|------------------|------------|----------------------|--------|--------|---------------|
+| `btid:kbrBook1`  | `-`              | Yes        | KBR                  | `-`    | `-`    | `-`           |
+| `btid:kbrBook2`  | `-`              | No         | `-`                  | `-`    | `-`    | `-`           |
+| `-`              | `btid:bnfBook1`  | Yes        | BnF                  | `-`    | `-`    | `-`           |
+| `-`              | `btid:bnfBook2`  | No         | `-`                  | `-`    | `-`    | `-`           |
+| `btid:kbrBook3`  | `-`              | Yes        | KBR                  | Yes    | `-`    | `-`           |
+| `-`              | `btid:bnfBook3`  | Yes        | BnF                  | Yes    | `-`    | `-`           |
+| `btid:kbrBook4`  | `btid:bnfBook4`  | Yes        | KBR,BnF              | Yes    | `-`    | ISBN10        |
+| `btid:kbrBook5`  | `btid:bnfBook5`  | Yes        | KBR                  | Yes    | `-`    | ISBN10        |
+| `btid:kbrBook6`  | `-`              | No         | `-`                  | Yes    | `-`    | `-`           |
+| `-`              | `btid:bnfBook6`  | No         | `-`                  | Yes    | `-`    | `-`           |
+| `btid:kbrBook7`  | `btid:bnfBook7`  | Yes        | BnF                  | Yes    | `-`    | `-`           |
+| `btid:kbrBook8`  | `btid:bnfBook8`  | No         | `-`                  | Yes    | `-`    | ISBN10        |
+| `btid:kbrBook9`  | `-`              | Yes        | KBR                  | `-`    | Yes    | `-`           |
+| `-`              | `btid:bnfBook9`  | Yes        | BnF                  | `-`    | Yes    | `-`           |
+| `btid:kbrBook10` | `btid:bnfBook10` | Yes        | KBR,BnF              | `-`    | Yes    | ISBN13        |
+| `btid:kbrBook11` | `btid:bnfBook11` | Yes        | KBR                  | `-`    | Yes    | ISBN13        |
+| `btid:kbrBook12` | `-`              | No         | `-`                  | `-`    | Yes    | `-`           |
+| `-`              | `btid:bnfBook12` | No         | `-`                  | `-`    | Yes    | `-`           |
+| `btid:kbrBook13` | `btid:bnfBook13` | Yes        | BnF                  | `-`    | Yes    | ISBN13        |
+| `btid:kbrBook14` | `btid:bnfBook14` | No         | `-`                  | `-`    | Yes    | ISBN13        |
+| `btid:kbrBook15` | `-`              | Yes        | KBR                  | Yes    | Yes    | `-`           |
+| `-`              | `btid:bnfBook15` | Yes        | BnF                  | Yes    | Yes    | `-`           |
+| `btid:kbrBook16` | `btid:bnfBook16` | Yes        | KBR,BnF              | Yes    | Yes    | ISBN10        |
+| `btid:kbrBook17` | `btid:bnfBook17` | Yes        | KBR                  | Yes    | Yes    | ISBN10        |
+| `btid:kbrBook18` | `-`              | No         | `-`                  | Yes    | Yes    | `-`           |
+| `-`              | `btid:bnfBook18` | No         | `-`                  | Yes    | Yes    | `-`           |
+| `btid:kbrBook19` | `btid:bnfBook19` | Yes        | BnF                  | Yes    | Yes    | ISBN10        |
+| `btid:kbrBook20` | `btid:bnfBook20` | No         | `-`                  | Yes    | Yes    | ISBN10        |
+| `btid:kbrBook21` | `btid:bnfBook21` | Yes        | KBR,BnF              | Yes    | Yes    | ISBN13        |
+| `btid:kbrBook22` | `btid:bnfBook22` | Yes        | KBR                  | Yes    | Yes    | ISBN13        |
+| `btid:kbrBook23` | `btid:bnfBook23` | Yes        | BnF                  | Yes    | Yes    | ISBN13        |
+| `btid:kbrBook24` | `btid:bnfBook24` | No         | `-`                  | Yes    | Yes    | ISBN13        |
+| `btid:kbrBook25` | `btid:bnfBook25` | Yes        | KBR,BnF              | Yes    | Yes    | ISBN10,ISBN13 |
+| `btid:kbrBook26` | `btid:bnfBook26` | Yes        | KBR                  | Yes    | Yes    | ISBN10,ISBN13 |
+| `btid:kbrBook27` | `btid:bnfBook27` | Yes        | BnF                  | Yes    | Yes    | ISBN10,ISBN13 |
+| `btid:kbrBook28` | `btid:bnfBook28` | No         | `-`                  | Yes    | Yes    | ISBN10,ISBN13 |
 
-| Name                          | KBR URI          | BnF URI          |
-| ----------------------------- | ---------------- | ---------------- |
-| No ISBN                       | `btid:kbrBook1`
-|                               | `-`              | `btid:bnfBook1`  |
-| No link via ISBN10            | `btid:kbrBook2`  |
-| No link via ISBN13
-| No link via ISBN10 & ISBN13
-| Link via ISBN10
-| Link via ISBN13
-| Link via ISBN10 & ISBN13
+The queried test corpus should contain **23** books.
 
 ## Detect quality issues
 
