@@ -83,6 +83,7 @@ btid:bnfBook15 a schema:CreativeWork;
 btid:bnfBook16 a schema:CreativeWork;
   dcterms:identifier "BnF book 16";
   bibo:isbn10 "000-000-000-8";
+  bibo:isbn13 "BNF-000-000-0008";
   schema:author btid:authority_bnfAuthorBE4;
   schema:name "BnF book 16";
   rdfs:comment "KBR: ISBN10 & ISBN13, Belgian; BnF: ISBN10, Belgian" .
@@ -90,6 +91,7 @@ btid:bnfBook16 a schema:CreativeWork;
 btid:bnfBook17 a schema:CreativeWork;
   dcterms:identifier "BnF book 17";
   bibo:isbn10 "000-000-000-9";
+  bibo:isbn13 "BNF-000-000-0009";
   schema:author btid:authority_bnfAuthorFR4;
   schema:name "BnF book 17";
   rdfs:comment "KBR: ISBN10 & ISBN13, Belgian; BnF: ISBN10, Not Belgian" .
@@ -105,6 +107,7 @@ btid:bnfBook18 a schema:CreativeWork;
 btid:bnfBook19 a schema:CreativeWork;
   dcterms:identifier "BnF book 19";
   bibo:isbn10 "000-000-001-1";
+  bibo:isbn13 "BNF-000-000-0011";
   schema:author btid:authority_bnfAuthorBE4;
   schema:name "BnF book 19";
   rdfs:comment "KBR: ISBN10 & ISBN13, Not Belgian; BnF: ISBN10, Belgian" .
@@ -118,12 +121,14 @@ btid:bnfBook2 a schema:CreativeWork;
 btid:bnfBook20 a schema:CreativeWork;
   dcterms:identifier "BnF book 20";
   bibo:isbn10 "000-000-001-2";
+  bibo:isbn13 "BNF-000-000-0012";
   schema:author btid:authority_bnfAuthorFR4;
   schema:name "BnF book 20";
   rdfs:comment "KBR: ISBN10 & ISBN13, Not Belgian; BnF: ISBN10, Not Belgian" .
 
 btid:bnfBook21 a schema:CreativeWork;
   dcterms:identifier "BnF book 21";
+  bibo:isbn10 "BNF-000-001-3";
   bibo:isbn13 "000-000-000-0013";
   schema:author btid:authority_bnfAuthorBE5;
   schema:name "BnF book 21";
@@ -131,6 +136,7 @@ btid:bnfBook21 a schema:CreativeWork;
 
 btid:bnfBook22 a schema:CreativeWork;
   dcterms:identifier "BnF book 22";
+  bibo:isbn10 "BNF-000-001-4";
   bibo:isbn13 "000-000-000-0014";
   schema:author btid:authority_bnfAuthorFR5;
   schema:name "BnF book 22";
@@ -138,6 +144,7 @@ btid:bnfBook22 a schema:CreativeWork;
 
 btid:bnfBook23 a schema:CreativeWork;
   dcterms:identifier "BnF book 23";
+  bibo:isbn10 "BNF-000-001-5";
   bibo:isbn13 "000-000-000-0015";
   schema:author btid:authority_bnfAuthorBE5;
   schema:name "BnF book 23";
@@ -145,6 +152,7 @@ btid:bnfBook23 a schema:CreativeWork;
 
 btid:bnfBook24 a schema:CreativeWork;
   dcterms:identifier "BnF book 24";
+  bibo:isbn10 "BNF-000-001-6";
   bibo:isbn13 "000-000-000-0016";
   schema:author btid:authority_bnfAuthorFR5;
   schema:name "BnF book 24";

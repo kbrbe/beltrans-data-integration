@@ -17,7 +17,7 @@ to cover border cases with respect to books and contributors from different sour
 | `btid:kbrBook5`  | `btid:bnfBook5`  | Yes        | KBR                  | Yes    | `-`    | ISBN10        |
 | `btid:kbrBook6`  | `-`              | No         | `-`                  | Yes    | `-`    | `-`           |
 | `-`              | `btid:bnfBook6`  | No         | `-`                  | Yes    | `-`    | `-`           |
-| `btid:kbrBook7`  | `btid:bnfBook7`  | Yes        | BnF                  | Yes    | `-`    | `-`           |
+| `btid:kbrBook7`  | `btid:bnfBook7`  | Yes        | BnF                  | Yes    | `-`    | ISBN10        |
 | `btid:kbrBook8`  | `btid:bnfBook8`  | No         | `-`                  | Yes    | `-`    | ISBN10        |
 | `btid:kbrBook9`  | `-`              | Yes        | KBR                  | `-`    | Yes    | `-`           |
 | `-`              | `btid:bnfBook9`  | Yes        | BnF                  | `-`    | Yes    | `-`           |

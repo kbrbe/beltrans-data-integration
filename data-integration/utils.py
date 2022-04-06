@@ -45,9 +45,6 @@ def query(target, queryString, outputWriter):
   else:
     # SPARQLWrapper has issues retrieving CSV from Blazegraph, thus we send the query low level via a request
     res = requests.post(target, data=queryString, headers={'Accept': 'text/csv', 'Content-Type': 'application/sparql-query'})
-    print("#### BEGIN CONTENT ####")
-    print(res.content.decode('utf-8'))
-    print("#### END CONTENT ####")
     outputWriter.write(res.content)
 
 # ------------------------------------------------------------
