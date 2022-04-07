@@ -10,6 +10,7 @@ import enchant
 import hashlib
 import csv
 from optparse import OptionParser
+from contributor import PersonContributor, OrganizationalContributor
 import utils
 import stdnum
 
@@ -23,7 +24,7 @@ def getContributorData(elem):
 
   cID = utils.getElementValue(elem.find('./subfield[@code="*"]', ALL_NS))
   cName = utils.getElementValue(elem.find('./subfield[@code="a"]', ALL_NS))
-  cRole = utils.getElementValue(elem.find('./subfield[@code="4"]', ALL_NS))
+  cRole = utils.getElementValue(elem.findall('./subfield[@code="4"]', ALL_NS))
 
   return (cID, cName, cRole)
   
@@ -41,26 +42,25 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
   #
   field100Contributors = elem.findall('./datafield[@tag="100"]', ALL_NS)
   for p in field100Contributors:
-    (cID, cName, cRole) = getContributorData(p)
-    # If no role is set it is an author (confirmed with KBRs cataloging agency)
-    if cRole == '':
-      cRole = 'aut'
-    foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': 'no'})
+    c = PersonContributor.fromTuple(getContributorData(p))
+    # every contributor may have several roles
+    for cRole in c.getRoles(): 
+      foundContributors.append({'contributorID': c.getIdentifier(), 'contributorName': c.getName(), 'contributorRole': cRole, 'uncertainty': 'no'})
 
   #
-  # add person contributors, in case the role is empty it is the author with role 'aut'
+  # add person contributors from the linked authorities field
   #
   personContributors = elem.findall('./datafield[@tag="700"]', ALL_NS)
   for p in personContributors:
-    (cID, cName, cRole) = getContributorData(p)
-    # If no role is set it is an author (confirmed with KBRs cataloging agency)
-    if cRole == '':
-      cRole = 'aut'
-    # Also persons can publish, thus we should add them for the later check on publishers
-    if cRole == 'pbl':
-      cName = utils.getNormalizedString(cName)
-      linkedOrganizationNames.add(cName)
-    foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': 'no'})
+    c = PersonContributor.fromTuple(getContributorData(p))
+    cID = c.getIdentifier()
+    cName = c.getName()
+    for cRole in c.getRoles():
+      # Also persons can publish, thus we should add them for the later check on publishers
+      if cRole == 'pbl':
+        cName = utils.getNormalizedString(cName)
+        linkedOrganizationNames.add(cName)
+      foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': 'no'})
 
   #
   # add organizational contributors such as publishers
@@ -68,14 +68,16 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
   orgContributors = elem.findall('./datafield[@tag="710"]', ALL_NS)
   for o in orgContributors:
     uncertainty = 'no'
-    (cID, cName, cRole) = getContributorData(o)
+    c = OrganizationalContributor.fromTuple(getContributorData(o))
+    cID = c.getIdentifier()
+    cName = c.getName()
     linkedOrganizationNames.add(utils.getNormalizedString(cName))
-    # If no role is set it likely is an author (confirmed with KBRs cataloging agency)
-    if cRole == '':
-      cRole = 'pbl'
-      uncertainty = 'yes'
-    cNameNorm = utils.getNormalizedString(cName)
-    foundContributors.append({'contributorID': cID, 'contributorName': cNameNorm, 'contributorRole': cRole, 'uncertainty': uncertainty})
+
+    for cRole in c.getRoles():
+      if c.roleUncertain():
+        uncertainty = 'yes'
+      cNameNorm = utils.getNormalizedString(cName)
+      foundContributors.append({'contributorID': cID, 'contributorName': cNameNorm, 'contributorRole': cRole, 'uncertainty': uncertainty})
 
   #
   # Publishers are also indicated in field 264, but only as text string as it appeared on the book
