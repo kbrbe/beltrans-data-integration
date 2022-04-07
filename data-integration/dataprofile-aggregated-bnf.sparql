@@ -33,14 +33,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?bnfPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifier)
     (group_concat(distinct ?bnfIllustratorNameID;SEPARATOR=';') AS ?illustratorIdentifier)
     (group_concat(distinct ?bnfScenaristNameID;SEPARATOR=';') AS ?scenaristIdentifier)
-
-  FROM <http://kbr-syracuse>
-  FROM <http://isni-sru>
-  FROM <http://kbr-belgians>
-  FROM <http://isni-rdf>
-  FROM <http://master-data>
-  FROM <http://kbr-linked-authorities>
-  FROM <http://bnf-publications>
   WHERE {
 
     graph <http://bnf-publications> { 
@@ -92,7 +84,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     }   
     
     #
-    # Exclude the BnF record if it is found via ISBN in the KBR data (because then we query it already with another query)
+    # Exclude the BnF record if it is found via ISBN13 in the KBR data (because then we query it already with another query)
     #
     OPTIONAL {
       graph <http://bnf-publications> { ?manifestation bibo:isbn13 ?isbn13 . }  
@@ -100,8 +92,19 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       #BIND(exists{graph <http://kbr-syracuse> {?kbrManifestation bibo:isbn13 ?isbn13 . } } AS ?kbrLinkExists)
       OPTIONAL {
         graph <http://kbr-syracuse> { ?kbrManifestation bibo:isbn13 ?isbn13 . }
-      }
-      
+      } 
+    }
+
+    #
+    # Exclude the BnF record if it is found via ISBN10 in the KBR data (because then we query it already with another query)
+    #
+    OPTIONAL {
+      graph <http://bnf-publications> { ?manifestation bibo:isbn10 ?isbn10 . }  
+
+      #BIND(exists{graph <http://kbr-syracuse> {?kbrManifestation bibo:isbn10 ?isbn10 . } } AS ?kbrLinkExists)
+      OPTIONAL {
+        graph <http://kbr-syracuse> { ?kbrManifestation bibo:isbn10 ?isbn10 . }
+      } 
     }
     FILTER (!bound(?kbrManifestation))
 
@@ -128,7 +131,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
 
       # within this optional author, check optional attributes
-      OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor dcterms:identifier ?bnfAuthorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor bio:birth ?bnfAuthorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor bio:death ?bnfAuthorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:familyName ?bnfAuthorFamilyName . } }
@@ -156,6 +158,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
           }
         }
       }
+      BIND( STRBEFORE(STRAFTER(str(?bnfAuthor), "12148/"), "#") as ?bnfAuthorID)
       BIND( IF( BOUND(?kbrAuthorID), concat(", ", ?kbrAuthorID), "") AS ?kbrAuthorIDString)
       BIND(CONCAT(?bnfAuthorFamilyName, ', ', ?bnfAuthorGivenName, ' (', ?bnfAuthorID, ?kbrAuthorIDString, ')') AS ?bnfAuthorNameID)
     }
@@ -187,7 +190,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
-      OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator dcterms:identifier ?bnfTranslatorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator bio:birth ?bnfTranslatorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator bio:death ?bnfTranslatorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:familyName ?bnfTranslatorFamilyName . } }
@@ -216,6 +218,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
           }
         }
       }
+      BIND( STRBEFORE(STRAFTER(str(?bnfTranslator), "12148/"), "#") as ?bnfTranslatorID)
       BIND( IF( BOUND(?kbrTranslatorID), concat(", ", ?kbrTranslatorID), "") AS ?kbrTranslatorIDString)
       BIND(CONCAT(?bnfTranslatorFamilyName, ', ', ?bnfTranslatorGivenName, ' (', ?bnfTranslatorID, ?kbrTranslatorIDString, ')') AS ?bnfTranslatorNameID)
     }
@@ -275,10 +278,10 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         }
       }
 
+      BIND( STRBEFORE(STRAFTER(str(?bnfIllustrator), "12148/"), "#") as ?bnfIllustratorID)
       BIND(CONCAT(?bnfIllustratorFamilyName, ', ', ?bnfIllustratorGivenName, ' (', STRBEFORE(STRAFTER(str(?bnfIllustrator), "12148/"), "#"), ')') as ?bnfIllustratorNameID)
 
       # within this optional translator, check optional attributes from the linked authorities dataset
-      OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator dcterms:identifier ?bnfIllustratorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator bio:birth ?bnfIllustratorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator bio:death ?bnfIllustratorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:familyName ?bnfIllustratorFamilyName . } }
@@ -337,7 +340,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
-      OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist dcterms:identifier ?bnfScenaristID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist bio:birth ?bnfScenaristBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist bio:death ?bnfScenaristDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:familyName ?bnfScenaristFamilyName . } }
@@ -365,6 +367,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
           }
         }
       }
+      BIND( STRBEFORE(STRAFTER(str(?bnfScenarist), "12148/"), "#") as ?bnfScenaristID)
       BIND( IF( BOUND(?kbrScenaristID), concat(", ", ?kbrScenaristID), "") AS ?kbrScenaristIDString)
       BIND(CONCAT(?bnfScenaristFamilyName, ', ', ?bnfScenaristGivenName, ' (', ?bnfScenaristID, ?kbrScenaristIDString, ')') AS ?bnfScenaristNameID)
 
