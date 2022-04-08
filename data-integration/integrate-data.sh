@@ -8,8 +8,7 @@ SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
 SCRIPT_NORMALIZE_HEADERS="../data-sources/kbr/replace-headers.py"
 SCRIPT_CHANGE_PUBLISHER_NAME="../data-sources/kbr/change-publisher-name.py"
 SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-authorities.sh"
-SCRIPT_EXTRACT_BB="../data-sources/kbr/extract-belgian-bibliography.py"
-SCRIPT_EXTRACT_PUB_COUNTRIES="../data-sources/kbr/extract-publication-countries.py"
+SCRIPT_EXTRACT_SEPARATED_COL="../data-sources/kbr/extract-and-normalize-separated-strings.py"
 SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
 SCRIPT_ADD_ISBN_10_13="../data-sources/kb/add-formatted-isbn-10-13.py"
@@ -1341,8 +1340,7 @@ function extractBBEntries {
   local input=$1
   local output=$2
 
-  checkFile $input
-  python $SCRIPT_EXTRACT_BB -i $input -o $output
+  extractSeparatedColumn $input $output "KBRID" "belgianBibliography" "KBRID" "bbURI"
 }
 
 # -----------------------------------------------------------------------------
@@ -1350,9 +1348,22 @@ function extractPubCountries {
   local input=$1
   local output=$2
 
-  checkFile $input
-  python $SCRIPT_EXTRACT_PUB_COUNTRIES -i $input -o $output
+  extractSeparatedColumn $input $output "KBRID" "countryOfPublication" "KBRID" "pubCountryURI"
 }
+
+# -----------------------------------------------------------------------------
+function extractSeparatedColumn {
+  local input=$1
+  local output=$2
+  local inputIDCol=$3
+  local inputValueCol=$4
+  local outputIDCol=$5
+  local outputValueCol=$6
+
+  checkFile $input
+  python $SCRIPT_EXTRACT_SEPARATED_COL -i $input -o $output --input-id-column-name $inputIDCol --input-value-column-name $inputValueCol --output-id-column-name $outputIDCol --output-value-column-name $outputValueCol
+}
+
 
 # -----------------------------------------------------------------------------
 function getSubjects {
