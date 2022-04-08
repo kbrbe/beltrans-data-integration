@@ -171,6 +171,7 @@ SUFFIX_KBR_TRL_NL_CONT_DEDUP="nl-translations-contributors-deduplicated.csv"
 SUFFIX_KBR_TRL_NL_NEWAUT="nl-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_NL_BB="nl-translations-bb.csv"
 SUFFIX_KBR_TRL_NL_PUB_COUNTRY="nl-translations-pub-country.csv"
+SUFFIX_KBR_TRL_NL_PUB_PLACE="nl-translations-pub-place.csv"
 SUFFIX_KBR_TRL_NL_COL_LINKS="nl-collection-links.csv"
 SUFFIX_KBR_TRL_FR_CLEANED="fr-translations-cleaned.xml"
 SUFFIX_KBR_TRL_FR_WORKS="fr-translations-works.csv"
@@ -180,6 +181,7 @@ SUFFIX_KBR_TRL_FR_CONT_DEDUP="fr-translations-contributors-deduplicated.csv"
 SUFFIX_KBR_TRL_FR_NEWAUT="fr-translations-identified-authorities.csv"
 SUFFIX_KBR_TRL_FR_BB="fr-translations-bb.csv"
 SUFFIX_KBR_TRL_FR_PUB_COUNTRY="fr-translations-pub-country.csv"
+SUFFIX_KBR_TRL_FR_PUB_PLACE="fr-translations-pub-place.csv"
 SUFFIX_KBR_TRL_FR_COL_LINKS="fr-collection-links.csv"
 
 SUFFIX_KBR_LA_PLACES_VLG="publisher-places-VLG.csv"
@@ -256,6 +258,7 @@ SUFFIX_KBR_TRL_LD="translations-and-contributions.ttl"
 SUFFIX_KBR_NEWAUT_LD="translations-identified-authorities.ttl"
 SUFFIX_KBR_TRL_BB_LD="translations-bb.ttl"
 SUFFIX_KBR_TRL_PUB_COUNTRY_LD="translations-publication-countries.ttl"
+SUFFIX_KBR_TRL_PUB_PLACE_LD="translations-publication-places.ttl"
 
 #
 # LINKED DATA - KBR LINKED AUTHORITIES
@@ -781,6 +784,9 @@ function extractKBRTranslationsAndContributions {
   kbrDutchTranslationsPubCountries="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
   kbrFrenchTranslationsPubCountries="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
 
+  kbrDutchTranslationsPubPlaces="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_PLACE"
+  kbrFrenchTranslationsPubPlaces="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_PLACE"
+
   kbrDutchTranslationsCollectionLinks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
   kbrFrenchTranslationsCollectionLinks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
   
@@ -821,6 +827,14 @@ function extractKBRTranslationsAndContributions {
 
   echo "Extract publication countries from French translations ..."
   extractPubCountries "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsPubCountries"
+
+  echo "Extract publication places from Dutch translations ..."
+  extractPubPlaces "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsPubPlaces"
+
+  echo "Extract publication places from French translations ..."
+  extractPubPlaces "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsPubPlaces"
+
+
 
   echo "Extract newly identified contributors ..."
   extractIdentifiedAuthorities "$kbrDutchTranslationsCSVContDedup" "$kbrDutchTranslationsIdentifiedAuthorities"
@@ -967,6 +981,7 @@ function mapKBRTranslationsAndContributions {
   kbrTranslationsIdentifiedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_NEWAUT_LD"
   kbrTranslationsBBTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_BB_LD"
   kbrTranslationsPubCountriesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
+  kbrTranslationsPubPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_PLACE_LD"
 
   # map the translations
 
@@ -1010,8 +1025,20 @@ function mapKBRTranslationsAndContributions {
   export RML_SOURCE_KBR_PUB_COUNTRIES_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
 
   # 2) execute the mapping
-  echo "Map KBR publication countries ..."
+  echo "Map KBR publication countries relationships ..."
   . map.sh ../data-sources/kbr/kbr-publication-countries.yml $kbrTranslationsPubCountriesTurtle
+
+  # map publication places
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_KBR_PUB_PLACES_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_PLACE"
+  export RML_SOURCE_KBR_PUB_PLACES_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_PLACE"
+
+  # 2) execute the mapping
+  echo "Map KBR publication places relationships ..."
+  . map.sh ../data-sources/kbr/kbr-publication-places.yml $kbrTranslationsPubPlacesTurtle
+
+
 
 }
 
@@ -1096,6 +1123,7 @@ function loadKBR {
   local kbrLinkedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_LA_LD"
   local kbrTranslationsBB="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_BB_LD"
   local kbrTranslationsPubCountries="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
+  local kbrTranslationsPubPlaces="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_PLACE_LD"
   local kbrBelgians="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
 
   echo "Load KBR translations and contributions ..."
@@ -1104,8 +1132,11 @@ function loadKBR {
   echo "Load KBR BB assignments ..."
   uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsBB" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
 
-  echo "Load KBR publication countries ..."
+  echo "Load KBR publication countries relationships ..."
   uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsPubCountries" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
+
+  echo "Load KBR publication places relationships ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsPubPlaces" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
 
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_LA>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_LA"
@@ -1349,6 +1380,14 @@ function extractPubCountries {
   local output=$2
 
   extractSeparatedColumn $input $output "KBRID" "countryOfPublication" "KBRID" "pubCountryURI"
+}
+
+# -----------------------------------------------------------------------------
+function extractPubPlaces {
+  local input=$1
+  local output=$2
+
+  extractSeparatedColumn $input $output "KBRID" "placeOfPublication" "KBRID" "place"
 }
 
 # -----------------------------------------------------------------------------
