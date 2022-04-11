@@ -1241,10 +1241,10 @@ function loadBnF {
   uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorIsniData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI"
 
   echo "Load external links of BnF contributors - VIAF ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorIsniData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorVIAFData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF"
 
   echo "Load external links of BnF contributors - WIKIDATA ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorIsniData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorWikidataData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA"
 
   echo "Load BnF publication data to a single named graph - FR-NL"
   uploadData "$TRIPLE_STORE_NAMESPACE" "$TRANSFORM_QUERY_BNF_TRL_FR_NL" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
