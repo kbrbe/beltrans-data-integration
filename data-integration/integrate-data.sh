@@ -123,6 +123,8 @@ TRANSFORM_QUERY_BNF_TRL_NL_FR="sparql-queries/transform-bnf-data-nl-fr.sparql"
 TRANSFORM_QUERY_BNF_TRL_FR_NL="sparql-queries/transform-bnf-data-fr-nl.sparql"
 CREATE_QUERY_BNF_IDENTIFIER="sparql-queries/create-bnf-contributors-identifier.sparql"
 CREATE_QUERY_BNF_ISNI="sparql-queries/create-bnf-isni.sparql"
+CREATE_QUERY_BNF_VIAF="sparql-queries/create-bnf-viaf.sparql"
+CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 
 DATA_PROFILE_QUERY_FILE_KBR="dataprofile-kbr.sparql"
 DATA_PROFILE_QUERY_FILE_BNF="dataprofile-bnf.sparql"
@@ -1273,8 +1275,14 @@ function loadBnF {
   echo "Add dcterms:identifier to BnF contributors"
   uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_IDENTIFIER" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
-  echo "Add ISNI number according to the bibframe vocabulary to BnF contributors"
+  echo "Add ISNI identifier according to the bibframe vocabulary to BnF contributors"
   uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_ISNI" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Add VIAF identifier according to the bibframe vocabulary to BnF contributors"
+  uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_VIAF" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Add Wikidata identifier according to the bibframe vocabulary to BnF contributors"
+  uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_WIKIDATA" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
 }
 
