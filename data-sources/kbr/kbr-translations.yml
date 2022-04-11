@@ -84,13 +84,6 @@ mappings:
           parameters:
             - [grel:valueParameter, $(yearOfPublication)]
             - [grel:valueParameter2, ""] 
-      - p: schema:locationCreated
-        o: $(placeOfPublication)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(placeOfPublication)]
-            - [grel:valueParameter2, ""] 
       - p: schema:bookEdition
         o: $(edition)
         condition:

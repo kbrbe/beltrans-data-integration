@@ -144,7 +144,7 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
   bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
   title = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="a"]', ALL_NS))
   responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
-  placeOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="a"]', ALL_NS))
+  placesOfPublication = utils.getElementValue(elem.findall('./datafield[@tag="264"]/subfield[@code="a"]', ALL_NS))
   yearOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="c"]', ALL_NS))
   edition = utils.getElementValue(elem.find('./datafield[@tag="250"]/subfield[@code="a"]', ALL_NS))
 
@@ -198,7 +198,7 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
     'isbn13': isbn13,
     'title': title,
     'languages': langURIsString,
-    'placeOfPublication': placeOfPublication,
+    'placeOfPublication': placesOfPublication,
     'countryOfPublication': countryURIsString,
     'yearOfPublication': yearOfPublication,
     'responsibilityStatement': responsibilityStatement,
