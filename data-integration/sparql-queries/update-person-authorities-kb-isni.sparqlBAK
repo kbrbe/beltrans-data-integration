@@ -1,0 +1,72 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+
+#
+# Add link to KB via ISNI and also nationality information at the aggregated URI
+#
+INSERT {
+  graph <http://beltrans-contributors> {
+    ?authorityURI
+      schema:nationality ?kbAuthorityNationality ;
+      schema:sameAs ?kbAuthority .
+  }
+}
+WHERE {
+
+    graph <http://kb-linked-authorities> { ?kbAuthority a schema:Person . }   
+
+    #
+    # Get some optional properties
+    #
+    OPTIONAL { graph <http://kb-linked-authorities> { ?kbAuthority schema:nationality ?kbAuthorityNationality . } }
+
+    #
+    # Get the linked ISNI identifier
+    #
+    graph <http://kb-linked-authorities> { 
+      ?kbAuthority bf:identifiedBy ?isniAuthorEntity . 
+      ?isniAuthorEntity a bf:Isni ;
+                  rdf:value ?kbAuthorityISNI . 
+    }
+
+    OPTIONAL {
+      graph <http://beltrans-contributors> {
+        ?authorityURI bf:identifiedBy ?isniEntity .
+
+        ?isniEntity a bf:Isni ;
+                  rdf:value ?kbAuthorityISNI 
+      }
+    }
+
+    #
+    # Find the link to an existing URI with the same ISNI instead of creating a new URI
+    #
+    FILTER EXISTS{
+      graph <http://beltrans-contributors> {
+        ?authorityURI bf:identifiedBy ?isniEntity .
+
+        ?isniEntity a bf:Isni ;
+                  rdf:value ?kbAuthorityISNI 
+      }
+    }
+}
