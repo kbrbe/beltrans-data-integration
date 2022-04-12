@@ -22,7 +22,7 @@ PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
 
 INSERT {
   graph <http://bnf-contributors> {
-    ?personAbout bf:identifiedBy ?personIsni .
+    ?personAbout bf:identifiedBy ?personViaf .
     ?personViaf a bf:Identifier ;
                 rdfs:label "VIAF" ;
                 rdf:value ?viaf .
