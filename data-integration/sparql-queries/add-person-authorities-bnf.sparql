@@ -26,7 +26,7 @@ INSERT {
   graph <http://beltrans-contributors> {
     ?authorityURI a schema:Person ;
       rdfs:label ?authorityLabel ;
-      schema:nationality ?bnfNationality ;
+      schema:nationality ?bnfAuthorityNationality ;
       schema:familyName ?bnfAuthorityFamilyName ;
       schema:givenName ?bnfAuthorityGivenName ;
       schema:sameAs ?bnfAuthority ;
