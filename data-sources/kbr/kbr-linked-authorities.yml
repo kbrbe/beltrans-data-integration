@@ -51,8 +51,20 @@ mappings:
       - [a, schema:Person]
       - [dcterms:identifier, $(authorityID)]
       - [rdfs:label, $(name)]
-      - [schema:givenName, $(given_name)]
-      - [schema:familyName, $(family_name)]
+      - p: schema:givenName
+        o: $(given_name)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(given_name)]
+            - [grel:valueParameter2, ""]
+      - p: schema:familyName
+        o: $(family_name)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(family_name)]
+            - [grel:valueParameter2, ""]
       - [foaf:isPrimaryTopicOf, btabout:authority_$(authorityID)~iri]
       - p: schema:gender
         o: schema:Female~iri
