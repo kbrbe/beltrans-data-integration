@@ -25,7 +25,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 # Add link to BnF via ISNI and also other identifiers as well as nationality information
 #
 INSERT {
-  graph <http://beltrans-contributors-test> {
+  graph <http://beltrans-contributors> {
 
     ?authorityURI
       schema:nationality ?bnfAuthorityNationality ;
@@ -34,10 +34,12 @@ INSERT {
       schema:sameAs ?bnfAuthority .
 
     ?viafEntityURI a bf:Identifier ;
+                   rdfs:comment "Added from BnF via ISNI" ;
                    rdfs:value "VIAF" ;
                    rdf:value ?viaf .
 
     ?wdEntityURI a bf:Identifier ;
+                 rdfs:comment "Added from BnF via ISNI" ;
                  rdfs:value "Wikidata" ;
                  rdf:value ?wd .
   }
@@ -89,11 +91,10 @@ WHERE {
     }
 
     OPTIONAL {
-      graph <http://beltrans-contributors-test> {
+      graph <http://beltrans-contributors> {
         ?authorityURI bf:identifiedBy ?isniEntity .
-
         ?isniEntity a bf:Isni ;
-                  rdf:value ?bnfAuthorityISNI 
+                    rdf:value ?bnfAuthorityISNI .
       }
     }
 
@@ -101,11 +102,11 @@ WHERE {
     # Find the link to an existing URI with the same ISNI instead of creating a new URI
     #
     FILTER EXISTS{
-      graph <http://beltrans-contributors-test> {
+      graph <http://beltrans-contributors> {
         ?authorityURI bf:identifiedBy ?isniEntity .
 
         ?isniEntity a bf:Isni ;
-                  rdf:value ?bnfAuthorityISNI 
+                  rdf:value ?bnfAuthorityISNI .
       }
     }
 }
