@@ -78,5 +78,97 @@ mappings:
           parameters:
             - [grel:valueParameter, $(birthDate)]
             - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_isni_p$(authorID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isni)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_viaf_p$(authorID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(viaf)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_wikidata_p$(authorID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(wikidata)]
+            - [grel:valueParameter2, ""]
+
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsISNI:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
+    sources:
+      - access: *sourceAUTFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:identifier_isni_p$(authorID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(isni)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Isni]
+      - [rdf:value, $(isni)]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsVIAF:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
+    sources:
+      - access: *sourceAUTFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:identifier_viaf_p$(authorID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(viaf)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "VIAF"]
+      - [rdf:value, $(viaf)]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsWikidata:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for Wikidata identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated Wikidata subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'Wikidata' identifiers."
+    sources:
+      - access: *sourceAUTFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:identifier_wikidata_p$(authorID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(wikidata)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "Wikidata"]
+      - [rdf:value, $(wikidata)]
 
 

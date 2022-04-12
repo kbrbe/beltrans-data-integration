@@ -1,4 +1,6 @@
-SELECT ?manifestation ?author ?name ?familyName ?givenName ?birthDate
+PREFIX kb: <http://data.bibliotheken.nl/def#>
+
+SELECT ?manifestation ?author ?authorID ?name ?familyName ?givenName ?birthDate ?isni ?viaf ?wikidata
 WHERE {
 
   ?manifestation a schema:Book ;
@@ -12,10 +14,32 @@ WHERE {
     OPTIONAL { ?publication schema:startDate ?publicationYear . }
   }
 
+  OPTIONAL { ?author schema:mainEntityOfPage/kb:ppn ?authorID . }
   OPTIONAL { ?author schema:name ?name . }
   OPTIONAL { ?author schema:familyName ?familyName . }
   OPTIONAL { ?author schema:givenName ?givenName . }
   OPTIONAL { ?author schema:birthDate ?birthDate . }
+
+  OPTIONAL { 
+    ?author schema:sameAs ?isniURI .
+    FILTER(regex(?isniURI, "isni", "i"))
+  }
+  BIND(STRAFTER(str(?isniURI), "isni.org/isni/") as ?isni)
+
+  OPTIONAL { 
+    ?author schema:sameAs ?viafURI .
+    FILTER(regex(?viafURI, "viaf", "i"))
+  }
+  BIND(STRAFTER(str(?viafURI), "viaf.org/viaf/") as ?viaf)
+
+  OPTIONAL { 
+    ?author schema:sameAs ?wdURI .
+    FILTER(regex(?wdURI, "wikidata", "i"))
+  }
+  BIND(STRAFTER(str(?wdURI), "wikidata.org/entity/") as ?wikidata)
+
+
+
  
   FILTER( xsd:integer(str(?publicationYear)) > 1969 && xsd:integer(str(?publicationYear)) < 2021)
 }
