@@ -35,6 +35,15 @@ INSERT {
 
     ?authorityURIISNI a bf:Isni ;
       rdf:value ?bnfAuthorityISNI .
+
+    ?viafEntityURI a bf:Identifier ;
+                   rdfs:value "VIAF" ;
+                   rdf:value ?viaf .
+
+    ?wdEntityURI a bf:Identifier ;
+                 rdfs:value "Wikidata" ;
+                 rdf:value ?wd .
+
   }
 }
 WHERE {
@@ -51,6 +60,35 @@ WHERE {
     BIND( STRUUID() as ?uuid)
     BIND( IRI( CONCAT( "http://kbr.be/id/data/", ?uuid ) ) as ?authorityURI)
     BIND( CONCAT( "BELTRANS authority ", ?uuid ) as ?authorityLabel)
+
+    #
+    # Get optional VIAF
+    #
+    OPTIONAL {
+      graph <http://bnf-contributors> {
+        ?bnfAuthority bf:identifiedBy ?viafEntity .
+
+        ?viafEntity a bf:Identifier ;
+                    rdfs:label "VIAF" ;
+                    rdf:value ?viaf .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_viaf_", ?viaf)) as ?viafEntityURI)
+    }
+
+    #
+    # Get optional WIKIDATA
+    #
+    OPTIONAL {
+      graph <http://bnf-contributors> {
+        ?bnfAuthority bf:identifiedBy ?wdEntity .
+
+        ?wdEntity a bf:Identifier ;
+                  rdfs:label "Wikidata" ;
+                  rdf:value ?wd .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) as ?wdEntityURI)
+    }
+
 
     #
     # Get the linked ISNI identifier
