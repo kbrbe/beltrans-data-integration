@@ -50,6 +50,7 @@ mappings:
         - [grel:string_sub, "http"] 
     po:
       - [a, schema:Person]
+      - [dcterms:identifier, p$(authorID)]
       - p: schema:name
         o: $(name)
         condition:
