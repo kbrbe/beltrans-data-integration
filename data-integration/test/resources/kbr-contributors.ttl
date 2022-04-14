@@ -1,0 +1,53 @@
+@prefix countries: <http://id.loc.gov/vocabulary/countries/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://kbr.be/id/data/authority_kbrAuthorBE1> a schema:Person;
+  dcterms:identifier "KBR author1 BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/authority_kbrAuthorBE2> a schema:Person;
+  dcterms:identifier "KBR author2 BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/authority_kbrAuthorBE3> a schema:Person;
+  dcterms:identifier "KBR author3 BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/authority_kbrAuthorBE4> a schema:Person;
+  dcterms:identifier "KBR author4 BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/authority_kbrAuthorBE5> a schema:Person;
+  dcterms:identifier "KBR author5 BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/authority_kbrAuthorBE6> a schema:Person;
+  dcterms:identifier "KBR author6 BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/authority_kbrAuthorFR1> a schema:Person;
+  dcterms:identifier "KBR author1 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_kbrAuthorFR2> a schema:Person;
+  dcterms:identifier "KBR author2 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_kbrAuthorFR3> a schema:Person;
+  dcterms:identifier "KBR author3 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_kbrAuthorFR4> a schema:Person;
+  dcterms:identifier "KBR author4 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_kbrAuthorFR5> a schema:Person;
+  dcterms:identifier "KBR author5 FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/authority_kbrAuthorFR6> a schema:Person;
+  dcterms:identifier "KBR author6 FR";
+  schema:nationality countries:fr .
