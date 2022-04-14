@@ -38,7 +38,7 @@ INSERT {
                    rdf:value ?isni .
 
     ?viafEntityURI a bf:Identifier ;
-                   rdfs:value "VIAF" ;
+                   rdfs:label "VIAF" ;
                    rdfs:comment "Added from BnF via Wikidata" ;
                    rdf:value ?viaf .
   }

@@ -35,12 +35,12 @@ INSERT {
 
     ?viafEntityURI a bf:Identifier ;
                    rdfs:comment "Added from BnF via ISNI" ;
-                   rdfs:value "VIAF" ;
+                   rdfs:label "VIAF" ;
                    rdf:value ?viaf .
 
     ?wdEntityURI a bf:Identifier ;
                  rdfs:comment "Added from BnF via ISNI" ;
-                 rdfs:value "Wikidata" ;
+                 rdfs:label "Wikidata" ;
                  rdf:value ?wd .
   }
 }
