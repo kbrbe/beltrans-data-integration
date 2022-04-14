@@ -1,3 +1,5 @@
 *-rml.ttl
+*.log
+*.xslx
 yarrrml-parser
 py-*

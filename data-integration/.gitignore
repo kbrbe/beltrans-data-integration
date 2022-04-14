@@ -1,3 +1,9 @@
 *.csv
+*.log
 py-*
+*-rml.ttl
+2021-*
+2022-*
+yarrrml-parser
+!test/resources/*csv
 !dataprofile-dtypes.csv
