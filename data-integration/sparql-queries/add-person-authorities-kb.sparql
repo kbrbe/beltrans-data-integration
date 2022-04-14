@@ -30,17 +30,19 @@ INSERT {
       schema:givenName ?kbAuthorityGivenName ;
       schema:sameAs ?kbAuthority ;
       rdfs:comment "Created from KB data" ;
-      bf:identifiedBy ?authorityURIISNI .
+      bf:identifiedBy ?authorityURIISNI ;
+      bf:identifiedBy ?viafEntityURI ;
+      bf:identifiedBy ?wdEntityURI .
 
     ?authorityURIISNI a bf:Isni ;
       rdf:value ?kbAuthorityISNI .
 
     ?viafEntityURI a bf:Identifier ;
-                   rdfs:value "VIAF" ;
+                   rdfs:label "VIAF" ;
                    rdf:value ?viaf .
 
     ?wdEntityURI a bf:Identifier ;
-                 rdfs:value "Wikidata" ;
+                 rdfs:label "Wikidata" ;
                  rdf:value ?wd .
 
 
