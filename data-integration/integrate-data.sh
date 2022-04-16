@@ -84,6 +84,9 @@ INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography
 INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl-hierarchy.csv"
 INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography-fr-hierarchy.csv"
 
+# WIKIDATA
+INPUT_WIKIDATA_ENRICHED="../data-sources/wikidata/2022-04-14-beltrans-wikidata-manually-enriched.csv"
+
 
 # #############################################################################
 
@@ -254,6 +257,10 @@ SUFFIX_MASTER_THES_EN="thesaurus-belgian-bibliography-en-hierarchy.csv"
 SUFFIX_MASTER_THES_NL="thesaurus-belgian-bibliography-nl-hierarchy.csv"
 SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
 
+# DATA SOURCE - WIKIDATA
+#
+SUFFIX_WIKIDATA_ENRICHED="wikidata-links.csv"
+
 #
 # LINKED DATA - KBR TRANSLATIONS
 #
@@ -325,12 +332,16 @@ function extract {
   elif [ "$dataSource" = "kb" ];
   then
     extractKB $integrationFolderName
+  elif [ "$dataSource" = "wikidata" ];
+  then
+    extractWikidata $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
     extractKB $integrationFolderName
     extractBnF $integrationFolderName
     extractMasterData $integrationFolderName
+    extractWikidata $integrationFolderName
   fi
   
 }
@@ -355,12 +366,16 @@ function transform {
   elif [ "$dataSource" = "kb" ];
   then
     transformKB $integrationFolderName
+  elif [ "$dataSource" = "wikidata" ];
+  then
+    transformWikidata $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
     transformKB $integrationFolderName
     transformBnF $integrationFolderName
     transformMasterData $integrationFolderName
+    transformWikidata $integrationFolderName
   fi
   
 }
@@ -676,6 +691,22 @@ function extractMasterData {
 }
 
 # -----------------------------------------------------------------------------
+function extractWikidata {
+
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # create the folders to place the extracted translations and agents
+  mkdir -p $integrationName/wikidata
+
+  echo "EXTRACTION - Nothing to extract from Wikidata, copying files"
+  cp "$INPUT_WIKIDATA_ENRICHED" "$integrationName/wikidata/$SUFFIX_WIKIDATA_ENRICHED"
+
+}
+
+# -----------------------------------------------------------------------------
 function transformKBR {
 
   local integrationName=$1
@@ -743,6 +774,25 @@ function transformMasterData {
   echo "TRANSFORMATION - Map master data to RDF"
   mapMasterData $integrationName
 
+}
+
+# -----------------------------------------------------------------------------
+function transformWikidata {
+
+  local integrationName=$1
+
+  # create the folder to place the transformed data
+  mkdir -p $integrationName/wikiata/rdf 
+
+  wikidataTurtle="$integrationName/wikidata/rdf/$SUFFIX_MASTER_LD"
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_WIKIDATA_ENRICHED="$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
+
+  # 2) execute the mapping
+  echo "Map enriched Wikidata dump ..."
+  . map.sh ../data-sources/wikidata/authors.yml $wikidataTurtle
+ 
 }
 
 # -----------------------------------------------------------------------------
