@@ -20,6 +20,8 @@ SCRIPT_CSV_TO_EXCEL="csv-to-excel.py"
 SCRIPT_COMPUTE_STATS="create-publication-stats.py"
 SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
 
+SCRIPT_INTERLINK_DATA="interlink-named-graph-data.py"
+
 SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
 SCRIPT_EXTRACT_COLUMN="../data-sources/bnf/extractColumn.py" 
@@ -97,6 +99,8 @@ INPUT_WIKIDATA_ENRICHED="../data-sources/wikidata/2022-04-14-beltrans-wikidata-m
 #
 #
 
+TRIPLE_STORE_GRAPH_INT_TRL="http://beltrans-manifestations"
+TRIPLE_STORE_GRAPH_INT_CONT="http://beltrans-contributors"
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
 TRIPLE_STORE_GRAPH_BNF_TRL="http://bnf-publications"
 TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL="http://bnf-fr-nl"
@@ -133,6 +137,11 @@ CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS="sparql-queries/create-bnf-manifestat
 CREATE_QUERY_BNF_ISNI="sparql-queries/create-bnf-isni.sparql"
 CREATE_QUERY_BNF_VIAF="sparql-queries/create-bnf-viaf.sparql"
 CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
+
+LINK_QUERY_CONT_AUTHORS="sparql-queries/link-beltrans-manifestations-authors.sparql"
+LINK_QUERY_CONT_TRANSLATORS="sparql-queries/link-beltrans-manifestations-translators.sparql"
+LINK_QUERY_CONT_ILLUSTRATORS="sparql-queries/link-beltrans-manifestations-illustrators.sparql"
+LINK_QUERY_CONT_SCENARISTS="sparql-queries/link-beltrans-manifestations-scenarists.sparql"
 
 DATA_PROFILE_QUERY_FILE_KBR="dataprofile-kbr.sparql"
 DATA_PROFILE_QUERY_FILE_BNF="dataprofile-bnf.sparql"
@@ -416,6 +425,47 @@ function load {
     loadKB $integrationFolderName
   fi
 
+}
+
+# -----------------------------------------------------------------------------
+function integrate {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  createManifestationsQueries="manifestations-create-queries.csv"
+  createContributorsQueries="contributors-create-queries.csv"
+  updateManifestationsQueries="manifestations-update-queries.csv"
+  updateContributorsQueries="contributors-update-queries.csv"
+
+  integrationNamespace="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  # first delete content of the named graph in case it already exists
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_TRL>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
+
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_CONT>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
+
+  source ./py-integration-env/bin/activate
+  echo "Integrate manifestations ..."
+  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2
+
+  echo "Integrate contributors ..."
+  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3
+
+  echo "Establish links between integrated manifestations and contributors - authors ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$LINK_QUERY_CONT_AUTHORS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Establish links between integrated manifestations and contributors - translators ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$LINK_QUERY_CONT_TRANSLATORS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Establish links between integrated manifestations and contributors - illustrators ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$LINK_QUERY_CONT_ILLUSTRATORS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Establish links between integrated manifestations and contributors - scenarists ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$LINK_QUERY_CONT_SCENARISTS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 }
 
 # -----------------------------------------------------------------------------
@@ -1568,14 +1618,15 @@ function postprocessContributorData {
 if [ "$#" -ne 3 ];
 then
   echo "use 'bash integrate-data.sh <command> <data source> <integration folder name>, whereas command are combinations of"
-  echo "extract (e) transform (t) load (l) query (q) and postprocess (p): 'etl', 'etlq', 'etlqp', 'e', 'et', 't', 'l', 'tl', 'q' etc"
+  echo "extract (e) transform (t) load (l)  integrate (i) query (q) and postprocess (p): 'etl', 'etliq', 'etliqp', 'e', 'et', 't', 'l', 'tl', 'q', 'i' etc"
   exit 1
 else
-  if [ "$1" = "etlqp" ];
+  if [ "$1" = "etliqp" ];
   then
     extract $2 $3
     transform $2 $3
     load $2 $3
+    integrate $3
     query $3
     postprocess $3
 
@@ -1646,6 +1697,9 @@ else
   then
     load $2 $3
 
+  elif [ "$1" = "i" ];
+  then
+    integrate $3
   elif [ "$1" = "tl" ];
   then
     transform $2 $3

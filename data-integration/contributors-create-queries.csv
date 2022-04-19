@@ -1,0 +1,4 @@
+"Create ISNI SRU authorities",sparql-queries/add-person-authorities-isni-sru.sparql
+"Create KBR authorities",sparql-queries/add-person-authorities-kbr.sparql
+"Create BnF authorities",sparql-queries/add-person-authorities-bnf.sparql
+"Create KB (NTA) authorities",sparql-queries/add-person-authorities-kb.sparql

@@ -7,3 +7,7 @@ py-*
 yarrrml-parser
 !test/resources/*csv
 !dataprofile-dtypes.csv
+!manifestations-create-queries.csv
+!manifestations-update-queries.csv
+!contributors-create-queries.csv
+!contributors-update-queries.csv

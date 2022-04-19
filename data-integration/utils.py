@@ -24,11 +24,26 @@ def addTestData(target, loadConfig):
           addDataToBlazegraph(url=target, namedGraph=ng, filename=filename, fileFormat='text/turtle')
 
 # -----------------------------------------------------------------------------
-def addDataToBlazegraph(url, namedGraph, filename, fileFormat):
+def loadData(url, loadConfig):
+  """This function reads the given config containing the source of RDF data and its type to store it in a SPARQL endpoint at 'url'."""
+
+  for graph in loadConfig:
+    filename = loadConfig['graph']
+    if os.path.isfile(filename):
+      if filename.endswith('.ttl'):
+        addDataToBlazegraph(url=url, namedGraph=graph, filename=filename, fileFormat='text/turtle')
+      elif filename.endswith('.sparql'):
+        addDataToBlazegraph(url=url, namedGraph=graph, filename=filename, fileFormat='application/sparql-update')
+
+# -----------------------------------------------------------------------------
+def addDataToBlazegraph(url, filename, fileFormat, namedGraph=None, auth=None):
   print(f'## Add data from {filename} to {namedGraph} of {url}\n')
   with open(filename, 'rb') as fileIn:
     #r = requests.post(url, files={'file': (filename, fileIn, fileFormat)}, headers={'Content-Type': fileFormat}, params={'context-uri': namedGraph})
-    r = requests.post(url, data=fileIn.read(), headers={'Content-Type': fileFormat}, params={'context-uri': namedGraph})
+    if namedGraph:
+      r = requests.post(url, data=fileIn.read(), headers={'Content-Type': fileFormat}, params={'context-uri': namedGraph}, auth=auth)
+    else:
+      r = requests.post(url, data=fileIn.read(), headers={'Content-Type': fileFormat}, auth=auth)
     print(r.headers)
     print(r.content)
 

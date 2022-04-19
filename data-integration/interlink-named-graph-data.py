@@ -11,19 +11,36 @@ from dotenv import load_dotenv
 
 # -----------------------------------------------------------------------------
 def loadData(url, filename, fileFormat, queryName, auth=None):
+  if not os.path.isfile(filename):
+    print(f'"{filename}" is not a file!')
+    return
   with open(filename, 'rb') as fileIn:
-    r = requests.post(url, data=fileIn.read(), headers={'Content-Type': fileFormat}, auth=auth)
-    response = r.content.decode('utf-8')
-    m = re.search(r".*totalElapsed=(\d+)ms.*mutationCount=(\d+).*", response)
-    timeElapsed = m.group(1)
-    mutations = m.group(2)
-    print(f'\t{queryName}: {mutations} changes in {timeElapsed}ms')
+    print(f'\tProcessing file {filename}')
+    r = None
+    try:
+      r = requests.post(url, data=fileIn.read(), headers={'Content-Type': fileFormat}, auth=auth)
+      r.raise_for_status()
 
+      response = r.content.decode('utf-8')
+      try:
+        m = re.search(r".*totalElapsed=(\d+)ms.*mutationCount=(\d+).*", response)
+        timeElapsed = m.group(1)
+        mutations = m.group(2)
+        print(f'\t{queryName}: {mutations} changes in {timeElapsed}ms')
+      except Exception as e:
+        print(f'Unexpected answer' + response[0:200])
+
+    except requests.HTTPError as he:
+      statusCode = he.response.status_code
+      print(f'{statusCode} error while updating {filename}: ' + he.response.content.decode('utf-8')[0:40])
+    except Exception as e:
+      print('Error while updating {url} with {filename} and type {fileFormat}')
+      print(e)
 
 
 # -----------------------------------------------------------------------------
 def main():
-  """This script uses SPARQL INSERT/UPDATE queries to create a single named graph of authority data. For all creation queries all updates are executed several times."""
+  """This script uses SPARQL INSERT/UPDATE queries to create a single named graph of data. For all creation queries all updates are executed several times."""
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-u', '--url', action='store', help='The URL of the SPARQL endpoint which is queried')
@@ -61,12 +78,12 @@ def main():
     # For all creation queries: create URIs, then run numDataSources-1 updates to link other data sources
     for c in createQueries:
       # create data
-      print(f'CREATE authorities from {c[0]}')
+      print(f'CREATE data from {c[0]}')
       loadData(options.url, c[1], 'application/sparql-update', c[0], auth=auth)
 
       # perform update query per source to link found data to created URIs via sameAs
       for i in range(options.number_updates):
-        print(f'Update cycle {i}')
+        print(f'Update cycle {i}/{options.number_updates}')
         for u in updateQueries:
           loadData(options.url, u[1], 'application/sparql-update', u[0], auth=auth)
 

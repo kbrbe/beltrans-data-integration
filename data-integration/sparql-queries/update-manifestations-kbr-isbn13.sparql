@@ -1,0 +1,64 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+
+#
+# Add sameAs link to KBR via ISBN13 and also add ISBN10 and other properties
+#
+INSERT {
+  graph <http://beltrans-manifestations> {
+
+    ?manifestationURI
+      schema:inLanguage ?targetLang ;
+      btm:sourceLanguage ?sourceLang ;
+      bibo:isbn10 ?isbn10 ;
+      schema:sameAs ?kbrManifestation .
+  }
+}
+WHERE {
+
+
+    graph <http://kbr-syracuse> { ?kbrManifestation a schema:CreativeWork . }
+
+    #
+    # Get the source and target language we want to add to the aggregated URI
+    #
+    OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:inLanguage ?targetLang . } }
+    OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:translationOfWork/schema:inLanguage ?sourceLang . } }
+
+    #
+    # Get optional ISBN10
+    #
+    OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation bibo:isbn10 ?isbn10 . } }
+
+    #
+    # Get ISBN13
+    #
+    graph <http://kbr-syracuse> { ?kbrManifestation bibo:isbn13 ?isbn13 . }
+
+    #
+    # Find the link to an existing URI with the same ISBN10 instead of creating a new URI
+    #
+    OPTIONAL {  graph <http://beltrans-manifestations> { ?manifestationURI bibo:isbn13 ?isbn13 . } }
+    FILTER EXISTS{
+      graph <http://beltrans-manifestations> { ?manifestationURI bibo:isbn13 ?isbn13 . } }
+}
