@@ -1,4 +1,6 @@
 
+## Integrated data
+
 | Book URI      | Author URI                                    | Illustrator URI        | Scenarist URI          | In corpus? | 
 |---------------|-----------------------------------------------|------------------------|------------------------|------------|
 | `btid:book1`  | `btid:contributor1BE  `                       | `-`                    |                        | Yes        |
@@ -10,6 +12,7 @@
 | `btid:book7`  | `-`                                           | `btid:contributor9BE`  | `btid:contributor10FR` | Yes        |
 | `btid:book8`  | `btid:contributor11BE`                        | `btid:contributor11BE` | `-`                    | Yes        |
 
+## Correspondence between integrated contributors and sources
 
 | Contributor URI        | KBR URI            | BnF URI            | KB URI           |
 |------------------------|--------------------|--------------------|------------------|
