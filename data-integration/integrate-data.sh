@@ -12,8 +12,10 @@ SCRIPT_EXTRACT_SEPARATED_COL="../data-sources/kbr/extract-and-normalize-separate
 SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
 SCRIPT_ADD_ISBN_10_13="../data-sources/kb/add-formatted-isbn-10-13.py"
-SCRIPT_FIX_ISBN="../data-sources/bnf/formatISBN13.py"
-SCRIPT_CREATE_ISBN_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
+SCRIPT_FIX_ISBN10="../data-sources/bnf/formatISBN10.py"
+SCRIPT_FIX_ISBN13="../data-sources/bnf/formatISBN13.py"
+SCRIPT_CREATE_ISBN10_TRIPLES="../data-sources/bnf/createISBN10Triples.py"
+SCRIPT_CREATE_ISBN13_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
 SCRIPT_CSV_TO_EXCEL="csv-to-excel.py"
 SCRIPT_COMPUTE_STATS="create-publication-stats.py"
 SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
@@ -120,8 +122,10 @@ FORMAT_SPARQL_UPDATE="application/sparql-update"
 
 KB_SPARQL_ENDPOINT="http://data.bibliotheken.nl/sparql"
 
-GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn-without-hyphen.sparql"
-DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn-without-hyphen.sparql"
+GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn10-without-hyphen.sparql"
+GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn13-without-hyphen.sparql"
+DELETE_QUERY_BNF_ISBN10_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn10-without-hyphen.sparql"
+DELETE_QUERY_BNF_ISBN13_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn13-without-hyphen.sparql"
 TRANSFORM_QUERY_BNF_TRL_NL_FR="sparql-queries/transform-bnf-data-nl-fr.sparql"
 TRANSFORM_QUERY_BNF_TRL_FR_NL="sparql-queries/transform-bnf-data-fr-nl.sparql"
 CREATE_QUERY_BNF_IDENTIFIER_CONT="sparql-queries/create-bnf-contributors-identifier.sparql"
@@ -242,9 +246,13 @@ SUFFIX_BNF_TRL_IDS_FR_NL="bnf-translation-ids-fr-nl.csv"
 SUFFIX_BNF_TRL_IDS_NL_FR="bnf-translation-ids-nl-fr.csv"
 SUFFIX_BNF_TRL_IDS="bnf-translation-ids.csv"
 
-SUFFIX_BNF_ISBN_NO_HYPHEN_CSV="bnf-records-no-isbn-hyphen.csv"
-SUFFIX_BNF_ISBN_FIXED_CSV="bnf-records-fixed-isbn.csv"
-SUFFIX_BNF_ISBN_HYPHEN_NT="bnf-fixed-isbn13.nt"
+SUFFIX_BNF_ISBN13_NO_HYPHEN_CSV="bnf-records-no-isbn13-hyphen.csv"
+SUFFIX_BNF_ISBN13_FIXED_CSV="bnf-records-fixed-isbn13.csv"
+SUFFIX_BNF_ISBN13_HYPHEN_NT="bnf-fixed-isbn13.nt"
+
+SUFFIX_BNF_ISBN10_NO_HYPHEN_CSV="bnf-records-no-isbn10-hyphen.csv"
+SUFFIX_BNF_ISBN10_FIXED_CSV="bnf-records-fixed-isbn10.csv"
+SUFFIX_BNF_ISBN10_HYPHEN_NT="bnf-fixed-isbn10.nt"
   
 # DATA SOURCE - MASTER DATA
 #
@@ -1305,23 +1313,42 @@ function loadBnF {
   echo "Load BnF publication data to a single named graph - NL-FR"
   uploadData "$TRIPLE_STORE_NAMESPACE" "$TRANSFORM_QUERY_BNF_TRL_NL_FR" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
-  bnfISBNMissingHyphen="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN_NO_HYPHEN_CSV"
-  bnfCleanedISBN="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN_FIXED_CSV"
-  bnfCleanedISBNTriples="$integrationName/bnf/rdf/$SUFFIX_BNF_ISBN_HYPHEN_NT"
+  bnfISBN13MissingHyphen="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN13_NO_HYPHEN_CSV"
+  bnfCleanedISBN13="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN13_FIXED_CSV"
+  bnfCleanedISBN13Triples="$integrationName/bnf/rdf/$SUFFIX_BNF_ISBN13_HYPHEN_NT"
+
+  bnfISBN10MissingHyphen="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN10_NO_HYPHEN_CSV"
+  bnfCleanedISBN10="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN10_FIXED_CSV"
+  bnfCleanedISBN10Triples="$integrationName/bnf/rdf/$SUFFIX_BNF_ISBN10_HYPHEN_NT"
 
   echo "Fix BnF ISBN13 identifiers without hyphen - get malformed ISBN identifiers"
-  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBNMissingHyphen"
+  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN13MissingHyphen"
 
   echo "Fix BnF ISBN13 identifiers without hyphen - normalize ISBN identifiers"
   source ../data-sources/py-etl-env/bin/activate
-  time python $SCRIPT_FIX_ISBN -i $bnfISBNMissingHyphen -o $bnfCleanedISBN
+  time python $SCRIPT_FIX_ISBN13 -i $bnfISBN13MissingHyphen -o $bnfCleanedISBN13
 
   echo "Fix BnF ISBN13 identifiers without hyphen - upload normalized ISBN identifiers"
-  time python $SCRIPT_CREATE_ISBN_TRIPLES -i $bnfCleanedISBN -o $bnfCleanedISBNTriples
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfCleanedISBNTriples" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT"
+  time python $SCRIPT_CREATE_ISBN13_TRIPLES -i $bnfCleanedISBN13 -o $bnfCleanedISBN13Triples
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfCleanedISBN13Triples" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL"
 
   echo "Fix BnF ISBN13 identifiers without hyphen - delete malformed ISBN identifiers"
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_BNF_ISBN_WITHOUT_HYPHEN" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_BNF_ISBN13_WITHOUT_HYPHEN" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Fix BnF ISBN10 identifiers without hyphen - get malformed ISBN identifiers" 
+  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10MissingHyphen"
+
+  echo "Fix BnF ISBN10 identifiers without hyphen - normalize ISBN identifiers"
+  source ../data-sources/py-etl-env/bin/activate
+  time python $SCRIPT_FIX_ISBN10 -i $bnfISBN10MissingHyphen -o $bnfCleanedISBN10
+
+  echo "Fix BnF ISBN10 identifiers without hyphen - upload normalized ISBN identifiers"
+  time python $SCRIPT_CREATE_ISBN10_TRIPLES -i $bnfCleanedISBN10 -o $bnfCleanedISBN10Triples
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfCleanedISBN10Triples" "$FORMAT_NT" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL"
+
+  echo "Fix BnF ISBN10 identifiers without hyphen - delete malformed ISBN identifiers"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_BNF_ISBN10_WITHOUT_HYPHEN" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
 
   echo "Add dcterms:identifier to BnF contributors"
   uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
