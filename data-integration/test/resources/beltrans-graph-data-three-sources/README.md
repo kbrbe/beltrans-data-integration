@@ -12,6 +12,19 @@
 | `btid:book7`  | `-`                                           | `btid:contributor9BE`  | `btid:contributor10FR` | Yes        |
 | `btid:book8`  | `btid:contributor11BE`                        | `btid:contributor11BE` | `-`                    | Yes        |
 
+## Correspondence between integrated manifestations and sources
+
+| Manifestation URI      | KBR URI            | BnF URI            | KB URI           |
+|------------------------|--------------------|--------------------|------------------|
+| `btid:book1`           | `btid:kbrBook1`    |                    |                  |
+| `btid:book2`           | `-`                | `btid:bnfBook2`    | `btid:kbBook2`  |
+| `btid:book3`           | `btid:kbrBook3`    |                    |                  |
+| `btid:book4`           |                    |                    |                  |
+| `btid:book5`           |                    | `btid:bnfBook5`    |                  |
+| `btid:book6`           |                    | `btid:bnfBook6`    |                  |
+| `btid:book7`           | `btid:kbrBook7`    | `btid:bnfBook7`    |                  |
+| `btid:book8`           | `btid:kbrBook8`    |                    | `btid:kbrBook8`  |
+
 ## Correspondence between integrated contributors and sources
 
 | Contributor URI        | KBR URI            | BnF URI            | KB URI           |
