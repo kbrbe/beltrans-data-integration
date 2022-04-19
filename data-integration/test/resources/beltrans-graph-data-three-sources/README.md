@@ -12,7 +12,7 @@
 
 
 | Contributor URI        | KBR URI            | BnF URI            | KB URI           |
-|------------------------|--------------------|--------------------|``````````````````|
+|------------------------|--------------------|--------------------|------------------|
 | `btid:contributor1BE`  | `btid:kbrCont1BE`  | `btid:bnfCont1`    | `-`              |
 | `btid:contributor2BE`  | `btid:kbrCont2`    | `-`                | `btid:kbCont2BE` |
 | `btid:contributor3FR`  | `-`                | `btid:bnfCont3FR`  | `btid:kbCont3`   |
