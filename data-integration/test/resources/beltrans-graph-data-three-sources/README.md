@@ -17,13 +17,13 @@
 | Manifestation URI      | KBR URI            | BnF URI            | KB URI           |
 |------------------------|--------------------|--------------------|------------------|
 | `btid:book1`           | `btid:kbrBook1`    |                    |                  |
-| `btid:book2`           | `-`                | `btid:bnfBook2`    | `btid:kbBook2`  |
+| `btid:book2`           | `-`                | `btid:bnfBook2`    | `btid:kbBook2`   |
 | `btid:book3`           | `btid:kbrBook3`    |                    |                  |
-| `btid:book4`           |                    |                    |                  |
+| `btid:book4`           |                    |                    | `btid:kbBook4`   |
 | `btid:book5`           |                    | `btid:bnfBook5`    |                  |
 | `btid:book6`           |                    | `btid:bnfBook6`    |                  |
 | `btid:book7`           | `btid:kbrBook7`    | `btid:bnfBook7`    |                  |
-| `btid:book8`           | `btid:kbrBook8`    |                    | `btid:kbrBook8`  |
+| `btid:book8`           | `btid:kbrBook8`    |                    | `btid:kbBook8`   |
 
 ## Correspondence between integrated contributors and sources
 
