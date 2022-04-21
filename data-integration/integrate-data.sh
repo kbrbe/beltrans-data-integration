@@ -291,6 +291,7 @@ SUFFIX_KBR_NEWAUT_LD="translations-identified-authorities.ttl"
 SUFFIX_KBR_TRL_BB_LD="translations-bb.ttl"
 SUFFIX_KBR_TRL_PUB_COUNTRY_LD="translations-publication-countries.ttl"
 SUFFIX_KBR_TRL_PUB_PLACE_LD="translations-publication-places.ttl"
+SUFFIX_KBR_TRL_ISBN_LD="translations-isbn.ttl"
 
 #
 # LINKED DATA - KBR LINKED AUTHORITIES
@@ -1117,6 +1118,7 @@ function mapKBRTranslationsAndContributions {
   kbrTranslationsBBTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_BB_LD"
   kbrTranslationsPubCountriesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
   kbrTranslationsPubPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_PLACE_LD"
+  kbrTranslationsISBNTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_ISBN_LD"
 
   # map the translations
 
@@ -1174,6 +1176,18 @@ function mapKBRTranslationsAndContributions {
   . map.sh ../data-sources/kbr/kbr-publication-places.yml $kbrTranslationsPubPlacesTurtle
 
 
+  # map ISBN10/ISBN13
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_KBR_ISBN10_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_ISBN10"
+  export RML_SOURCE_KBR_ISBN10_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_ISBN10"
+  export RML_SOURCE_KBR_ISBN13_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_ISBN13"
+  export RML_SOURCE_KBR_ISBN13_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_ISBN13"
+
+  # 2) execute the mapping
+  echo "Map KBR ISBN10/ISBN13 relationships ..."
+  . map.sh ../data-sources/kbr/kbr-isbn.yml $kbrTranslationsISBNTurtle
+  
 
 }
 

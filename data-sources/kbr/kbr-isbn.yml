@@ -1,0 +1,62 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  bibo: "http://purl.org/ontology/bibo/"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+  up: "http://users.ugent.be/~tdenies/up/"
+
+variables:
+  ISBN10FR: &ISBN10FR ${RML_SOURCE_KBR_ISBN10_FR}
+  ISBN10NL: &ISBN10NL ${RML_SOURCE_KBR_ISBN10_NL}
+  ISBN13FR: &ISBN13FR ${RML_SOURCE_KBR_ISBN13_FR}
+  ISBN13NL: &ISBN13NL ${RML_SOURCE_KBR_ISBN13_NL}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  isbn10:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates associations between manifestations and their ISBN10 (workaround because of bug https://github.com/RMLio/yarrrml-parser/issues/146)."
+    sources:
+      - access: *ISBN10FR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *ISBN10NL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(KBRID)
+    po:
+      - [bibo:isbn10, $(isbn10)]
+
+  # ---------------------------------------------------------------------------
+  #
+  isbn13:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates associations between manifestations and their ISBN13 (workaround because of bug https://github.com/RMLio/yarrrml-parser/issues/146)."
+    sources:
+      - access: *ISBN13FR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *ISBN13NL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(KBRID)
+    po:
+      - [bibo:isbn13, $(isbn13)]
+
