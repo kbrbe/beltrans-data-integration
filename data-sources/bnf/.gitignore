@@ -1,1 +1,6 @@
 *.csv
+*.tsv
+*.xml
+*.xlsx
+*.ttl
+*.json
