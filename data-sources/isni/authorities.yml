@@ -28,7 +28,7 @@ mappings:
     description: "This mapping creates authorities represented as schema Person."
     sources:
 #      - [kbr/belgian-authors-enriched.csv~csv]
-      - access: "isni/2021-11-25-isni-authorities-belgian.csv"
+      - access: "isni/2022-04-21-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
     s: btisni:authority_$(ISNI)
@@ -70,97 +70,55 @@ mappings:
                 parameters:
                   - [grel:valueParameter, $(nationality)]
           type: iri
-      - p: owl:sameAs
-        o: http://www.wikidata.org/entity/$(sourceID)~iri
-        condition:
-          function: idlab-fn:equal
-          parameters:
-            - [grel:valueParameter, $(subSourceName)]
-            - [grel:valueParameter2, "WKP"]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authoritiesLinks:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links to other identifiers"
+    sources:
+#      - [kbr/belgian-authors-enriched.csv~csv]
+      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btisni:authority_$(ISNI)
+    po:
       - p: bf:identifiedBy
         o: btisni:identifier_viaf_$(ISNI)~iri
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(sourceName)]
+            - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "VIAF"]
       - p: bf:identifiedBy
         o: btisni:identifier_bnf_$(ISNI)~iri
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(sourceName)]
+            - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "BNF"]
       - p: bf:identifiedBy
         o: btisni:identifier_nta_$(ISNI)~iri
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(sourceName)]
+            - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "NTA"]
       - p: bf:identifiedBy
         o: btisni:identifier_dnb_$(ISNI)~iri
         condition:
           function: idlab-fn:equal
           parameters:
-            - [grel:valueParameter, $(sourceName)]
+            - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "DNB"]
-
-
-# Checking multiple conditions does not work yet,
-# for example sourceName == 'BNF' AND sourceID != ''
-
-# The YARRRML solution 1 using multiple conditions does not create valid RML
-# and the result is a java.lang.IllegalArgumentException: Not a valid (absolute) IRI: undefined
-#
-#      - p: bf:identifiedBy
-#        o: btid:identifier_bnf_$(ISNI)~iri
-#        condition:
-#          - function: idlab-fn:equal
-#            parameters:
-#              - [grel:valueParameter, $(sourceName)]
-#              - [grel:valueParameter1, "BNF"]
-#          - function: idlab-fn:notEqual
-#            parameters:
-#              - [grel:valueParameter, $(sourceID)]
-#              - [grel:valueParameter1, ""]
- 
-# The YARRRML solution 2 using the boolean_and function seems to create invalid RML
-# it results in a Caused by: java.lang.ClassCastException: class java.lang.String cannot be cast to class java.lang.Boolean (java.lang.String and java.lang.Boolean are in module java.base of loader 'bootstrap')
-
-#      - p: bf:identifiedBy
-#        o: btid:identifier_bnf_$(ISNI)~iri
-#        condition:
-#          function: grel:boolean_and
-#          parameters:
-#            - parameter: grel:param_rep_b
-#              value:
-#                function: idlab-fn:equal
-#                parameters:
-#                  - [grel:valueParameter, $(sourceName)]
-#                  - [grel:valueParameter1, "BNF"]
-#            - parameter: grel:param_rep_b
-#              value:
-#                function: idlab-fn:notEqual
-#                parameters:
-#                  - [grel:valueParameter, $(sourceID)]
-#                  - [grel:valueParameter1, ""]
-                
-
-
-  # ---------------------------------------------------------------------------
-  #
-  authoritiesAbout:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates descriptions of authorities represented as schema WebPage."
-    sources:
-      - access: "isni/2021-11-25-isni-authorities-belgian.csv"
-        referenceFormulation: csv
-        delimiter: ','
-    s: btabout:authority_$(ISNI)
-    po:
-      - [a, schema:WebPage]
-      - [foaf:primaryTopic, btisni:authority_$(ISNI)~iri]
+      - p: bf:identifiedBy
+        o: btisni:identifier_wikidata_$(ISNI)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(source)]
+            - [grel:valueParameter2, "Wikidata"]
 
   # ---------------------------------------------------------------------------
   #
@@ -168,7 +126,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for ISNI identifiers according to BIBFRAME."
     sources:
-      - access: "isni/2021-11-25-isni-authorities-belgian.csv"
+      - access: "isni/2022-04-21-isni-authorities-belgian.csv"
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_isni_$(ISNI)
@@ -183,19 +141,19 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
     sources:
-      - access: "isni/2021-11-25-isni-authorities-belgian.csv"
+      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_viaf_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
-        - [grel:valueParameter, $(sourceName)]
+        - [grel:valueParameter, $(source)]
         - [grel:valueParameter2, "VIAF"]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "VIAF"]
-      - [rdf:value, $(sourceID)]
+      - [rdf:value, $(identifier)]
 
 
   # ---------------------------------------------------------------------------
@@ -204,19 +162,19 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for BNF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated BNF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'BNF' identifiers."
     sources:
-      - access: "isni/2021-11-25-isni-authorities-belgian.csv"
+      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_bnf_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
-        - [grel:valueParameter, $(sourceName)]
+        - [grel:valueParameter, $(source)]
         - [grel:valueParameter2, "BNF"]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "BNF"]
-      - [rdf:value, $(sourceID)]
+      - [rdf:value, $(identifier)]
 
 
   # ---------------------------------------------------------------------------
@@ -225,19 +183,19 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for NTA identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated NTA subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'NTA' identifiers."
     sources:
-      - access: "isni/2021-11-25-isni-authorities-belgian.csv"
+      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_nta_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
-        - [grel:valueParameter, $(sourceName)]
+        - [grel:valueParameter, $(source)]
         - [grel:valueParameter2, "NTA"]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "NTA"]
-      - [rdf:value, $(sourceID)]
+      - [rdf:value, $(identifier)]
 
 
   # ---------------------------------------------------------------------------
@@ -246,17 +204,53 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for DNB identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated DNB subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'DNB' identifiers."
     sources:
-      - access: "isni/2021-11-25-isni-authorities-belgian.csv"
+      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_dnb_$(ISNI)
     condition:
       function: idlab-fn:equal
       parameters:
-        - [grel:valueParameter, $(sourceName)]
+        - [grel:valueParameter, $(source)]
         - [grel:valueParameter2, "DNB"]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "DNB"]
-      - [rdf:value, $(sourceID)]
+      - [rdf:value, $(identifier)]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsWikidata:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for Wikidata identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated Wikidata subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'Wikidata' identifiers."
+    sources:
+      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btisni:identifier_wikidata_$(ISNI)
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, $(source)]
+        - [grel:valueParameter2, "Wikidata"]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "Wikidata"]
+      - [rdf:value, $(identifier)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authoritiesAbout:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates descriptions of authorities represented as schema WebPage."
+    sources:
+      - access: "isni/2022-04-21-isni-authorities-belgian.csv"
+        referenceFormulation: csv
+        delimiter: ','
+    s: btabout:authority_$(ISNI)
+    po:
+      - [a, schema:WebPage]
+      - [foaf:primaryTopic, btisni:authority_$(ISNI)~iri]
+
 
