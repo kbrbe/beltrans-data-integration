@@ -203,6 +203,11 @@ SUFFIX_KBR_TRL_FR_PUB_COUNTRY="fr-translations-pub-country.csv"
 SUFFIX_KBR_TRL_FR_PUB_PLACE="fr-translations-pub-place.csv"
 SUFFIX_KBR_TRL_FR_COL_LINKS="fr-collection-links.csv"
 
+SUFFIX_KBR_TRL_NL_ISBN10="nl-fr-isbn10.csv"
+SUFFIX_KBR_TRL_NL_ISBN13="nl-fr-isbn13.csv"
+SUFFIX_KBR_TRL_FR_ISBN10="fr-nl-isbn10.csv"
+SUFFIX_KBR_TRL_FR_ISBN13="fr-nl-isbn13.csv"
+
 SUFFIX_KBR_LA_PLACES_VLG="publisher-places-VLG.csv"
 SUFFIX_KBR_LA_PLACES_WAL="publisher-places-WAL.csv"
 SUFFIX_KBR_LA_PLACES_BRU="publisher-places-BRU.csv"
@@ -866,6 +871,8 @@ function extractKBRTranslationsAndContributions {
   local kbrDutchTranslations=$2
   local kbrFrenchTranslations=$3
 
+  # DutchTranslations = NL-FR
+  # FrenchTranslations = FR-NL
 
   # document which input was used
   printf "\nUsed input (KBR translations and contributors)\n* $kbrDutchTranslations\n* $kbrFrenchTranslations" >> "$integrationName/kbr/README.md"
@@ -900,6 +907,11 @@ function extractKBRTranslationsAndContributions {
 
   kbrDutchTranslationsCollectionLinks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
   kbrFrenchTranslationsCollectionLinks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
+
+  kbrDutchTranslationsISBN10="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_ISBN10"
+  kbrDutchTranslationsISBN13="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_ISBN13"
+  kbrFrenchTranslationsISBN10="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_ISBN10"
+  kbrFrenchTranslationsISBN13="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_ISBN13"
   
   source ../data-sources/py-etl-env/bin/activate
 
@@ -945,6 +957,18 @@ function extractKBRTranslationsAndContributions {
   echo "Extract publication places from French translations ..."
   extractPubPlaces "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsPubPlaces"
 
+
+  echo "Extract (possibly multiple) ISBN10 identifiers per translation - NL-FR"
+  extractISBN10 "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsISBN10"
+
+  echo "Extract (possibly multiple) ISBN13 identifiers per translation - NL-FR"
+  extractISBN13 "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsISBN13"
+
+  echo "Extract (possibly multiple) ISBN10 identifiers per translation - FR-NL"
+  extractISBN10 "$kbrDutchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN10"
+
+  echo "Extract (possibly multiple) ISBN13 identifiers per translation - FR-NL"
+  extractISBN13 "$kbrDutchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN13"
 
 
   echo "Extract newly identified contributors ..."
@@ -1528,6 +1552,23 @@ function extractPubPlaces {
 
   extractSeparatedColumn $input $output "KBRID" "placeOfPublication" "KBRID" "place"
 }
+
+# -----------------------------------------------------------------------------
+function extractISBN10 {
+  local input=$1
+  local output=$2
+
+  extractSeparatedColumn $input $output "KBRID" "isbn10" "KBRID" "isbn10"
+}
+
+# -----------------------------------------------------------------------------
+function extractISBN13 {
+  local input=$1
+  local output=$2
+
+  extractSeparatedColumn $input $output "KBRID" "isbn13" "KBRID" "isbn13"
+}
+
 
 # -----------------------------------------------------------------------------
 function extractSeparatedColumn {
