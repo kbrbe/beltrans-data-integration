@@ -125,7 +125,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     }   
     
     #
-    # Exclude the BnF record if it is found via ISBN in the KBR data (because then we query it already with another query)
+    # Exclude the BnF record if it is found via ISBN13 in the KBR data (because then we query it already with another query)
     #
     OPTIONAL {
       graph <http://bnf-publications> { ?manifestation bibo:isbn13 ?isbn13 . }  
@@ -135,6 +135,18 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         graph <http://kbr-syracuse> { ?kbrManifestation bibo:isbn13 ?isbn13 . }
       }
       
+    }
+
+    #
+    # Exclude the BnF record if it is found via ISBN10 in the KBR data (because then we query it already with another query)
+    #
+    OPTIONAL {
+      graph <http://bnf-publications> { ?manifestation bibo:isbn10 ?isbn10 . }  
+
+      #BIND(exists{graph <http://kbr-syracuse> {?kbrManifestation bibo:isbn10 ?isbn10 . } } AS ?kbrLinkExists)
+      OPTIONAL {
+        graph <http://kbr-syracuse> { ?kbrManifestation bibo:isbn10 ?isbn10 . }
+      } 
     }
     FILTER (!bound(?kbrManifestation))
 
@@ -161,12 +173,13 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
 
       # within this optional author, check optional attributes
-      OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor dcterms:identifier ?bnfAuthorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor bio:birth ?bnfAuthorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor bio:death ?bnfAuthorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:familyName ?bnfAuthorFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:givenName ?bnfAuthorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthor foaf:gender ?bnfAuthorGender . } }
+
+      BIND( STRBEFORE(STRAFTER(str(?bnfAuthor), "12148/"), "#") as ?bnfAuthorID)
 
       # within this optional author, check optionally for authors with ISNI
       OPTIONAL {
@@ -257,12 +270,13 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
-      OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator dcterms:identifier ?bnfTranslatorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator bio:birth ?bnfTranslatorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator bio:death ?bnfTranslatorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:familyName ?bnfTranslatorFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:givenName ?bnfTranslatorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfTranslator foaf:gender ?bnfTranslatorGender . } }
+
+      BIND( STRBEFORE(STRAFTER(str(?bnfTranslator), "12148/"), "#") as ?bnfTranslatorID)
 
       # within this optional translator, check optionally for translators with ISNI
       OPTIONAL {
@@ -381,12 +395,13 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
-      OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator dcterms:identifier ?bnfIllustratorID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator bio:birth ?bnfIllustratorBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator bio:death ?bnfIllustratorDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:familyName ?bnfIllustratorFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:givenName ?bnfIllustratorGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfIllustrator foaf:gender ?bnfIllustratorGender . } }
+
+      BIND( STRBEFORE(STRAFTER(str(?bnfIllustrator), "12148/"), "#") as ?bnfIllustratorID)
 
       # within this optional translator, check optionally for illustrators with ISNI
       OPTIONAL {
@@ -475,12 +490,13 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
       # within this optional translator, check optional attributes from the linked authorities dataset
-      OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist dcterms:identifier ?bnfScenaristID . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist bio:birth ?bnfScenaristBirthDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist bio:death ?bnfScenaristDeathDate . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:familyName ?bnfScenaristFamilyName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:givenName ?bnfScenaristGivenName . } }
       OPTIONAL { graph <http://bnf-contributors> { ?bnfScenarist foaf:gender ?bnfScenaristGender . } }
+
+      BIND( STRBEFORE(STRAFTER(str(?bnfScenarist), "12148/"), "#") as ?bnfScenaristID)
 
       # within this optional translator, check optionally for scenarists with ISNI
       OPTIONAL {
