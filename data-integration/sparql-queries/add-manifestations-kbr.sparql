@@ -23,6 +23,7 @@ PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
 INSERT {
   graph <http://beltrans-manifestations> {
     ?manifestationURI a schema:CreativeWork ;
+      dcterms:identifier ?uuid ;
       rdfs:label ?manifestationLabel ;
       schema:name ?manifestationTitle ;
       schema:inLanguage ?targetLang ;

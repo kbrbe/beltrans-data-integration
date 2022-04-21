@@ -24,6 +24,7 @@ INSERT {
   graph <http://beltrans-manifestations> {
     ?manifestationURI a schema:CreativeWork ;
       rdfs:label ?manifestationLabel ;
+      dcterms:identifier ?uuid ;
       schema:name ?manifestationTitle ;
       schema:inLanguage ?targetLang ;
       btm:sourceLanguage ?sourceLang ;
