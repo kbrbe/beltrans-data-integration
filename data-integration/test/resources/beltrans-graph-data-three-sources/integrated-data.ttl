@@ -1,0 +1,57 @@
+@prefix btid: <http://kbr.be/id/data/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix marcrel: <http://id.loc.gov/vocabulary/relators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+btid:book1 a schema:CreativeWork;
+  dcterms:identifier "Book 1";
+  schema:author btid:contributor1BE;
+  schema:name "Book 1";
+  schema:sameAs btid:kbrBook1 .
+
+btid:book2 a schema:CreativeWork;
+  dcterms:identifier "Book 2";
+  schema:author btid:contributor2BE, btid:contributor3FR;
+  schema:name "Book 2";
+  schema:sameAs btid:bnfBook2, btid:kbBook2 .
+
+btid:book3 a schema:CreativeWork;
+  marcrel:ill btid:contributor4BE;
+  dcterms:identifier "Book 3";
+  schema:name "Book 3";
+  schema:sameAs btid:kbrBook3 .
+
+btid:book4 a schema:CreativeWork;
+  marcrel:sce btid:contributor5BE;
+  dcterms:identifier "Book 4";
+  schema:name "Book 4";
+  schema:sameAs btid:kbBook4 .
+
+btid:book5 a schema:CreativeWork;
+  marcrel:sce btid:contributor6FR;
+  dcterms:identifier "Book 5";
+  schema:name "Book 5";
+  schema:sameAs btid:bnfBook5 .
+
+btid:book6 a schema:CreativeWork;
+  marcrel:ill btid:contributor7FR;
+  marcrel:sce btid:contributor8FR;
+  dcterms:identifier "Book 6";
+  schema:name "Book 6";
+  schema:sameAs btid:bnfBook6 .
+
+btid:book7 a schema:CreativeWork;
+  marcrel:ill btid:contributor9BE;
+  marcrel:sce btid:contributor10FR;
+  dcterms:identifier "Book 7";
+  schema:name "Book 7";
+  schema:sameAs btid:bnfBook7, btid:kbrBook7 .
+
+btid:book8 a schema:CreativeWork;
+  marcrel:ill btid:contributor11BE;
+  dcterms:identifier "Book 8";
+  schema:author btid:contributor11BE;
+  schema:name "Book 8";
+  schema:sameAs btid:kbBook8, btid:kbrBook8 .

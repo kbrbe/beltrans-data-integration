@@ -1,0 +1,94 @@
+@prefix btid: <http://kbr.be/id/data/> .
+@prefix countries: <http://id.loc.gov/vocabulary/countries/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+btid:contributor10FR a schema:Person;
+  dcterms:identifier "contributor 10 FR";
+  schema:familyName "Van 10FR";
+  schema:givenName "Eduard";
+  schema:nationality countries:fr;
+  schema:sameAs btid:bnfCont10FR, btid:kbrCont10FR;
+  rdfs:label "Eduard Van 10FR" .
+
+btid:contributor11BE a schema:Person;
+  dcterms:identifier "contributor 11 BE";
+  schema:familyName "Van 11BE", "alt Van 11BE";
+  schema:givenName "Sophie", "alt Sophie";
+  schema:nationality countries:be;
+  schema:sameAs btid:bnfCont11BE, btid:kbCont11BE, btid:kbrCont11BE;
+  rdfs:label "Sophie Van 11BE" .
+
+btid:contributor1BE a schema:Person;
+  dcterms:identifier "contributor 1 BE";
+  schema:familyName "Van 1BE";
+  schema:givenName "John";
+  schema:nationality countries:be;
+  schema:sameAs btid:bnfCont1, btid:kbrCont1BE;
+  rdfs:label "John Van 1BE" .
+
+btid:contributor2BE a schema:Person;
+  dcterms:identifier "contributor 2 BE";
+  schema:familyName "Van 2BE";
+  schema:givenName "Jane";
+  schema:nationality countries:be, countries:fr;
+  schema:sameAs btid:kbCont2BE, btid:kbrCont2FR;
+  rdfs:label "Jane Van 2BE" .
+
+btid:contributor3FR a schema:Person;
+  dcterms:identifier "contributor 3 FR";
+  schema:familyName "Van 3FR";
+  schema:givenName "Ann";
+  schema:nationality countries:fr;
+  schema:sameAs btid:bnfCont3FR, btid:kbCont3;
+  rdfs:label "Ann Van 3FR" .
+
+btid:contributor4BE a schema:Person;
+  dcterms:identifier "contributor 4 BE";
+  schema:familyName "Van 4BE";
+  schema:givenName "Joseph";
+  schema:nationality countries:be;
+  schema:sameAs btid:kbrCont4BE;
+  rdfs:label "Joseph Van 4BE" .
+
+btid:contributor5BE a schema:Person;
+  dcterms:identifier "contributor 5 BE";
+  schema:familyName "Van 5BE";
+  schema:givenName "Alice";
+  schema:nationality countries:be;
+  schema:sameAs btid:bnfCont5FR, btid:kbCont5BE;
+  rdfs:label "Alice Van 5BE" .
+
+btid:contributor6FR a schema:Person;
+  dcterms:identifier "contributor 6 FR";
+  schema:familyName "Van 6FR";
+  schema:givenName "Jim";
+  schema:nationality countries:fr;
+  schema:sameAs btid:bnfCont6FR, btid:kbCont6FR;
+  rdfs:label "Jim Van 6FR" .
+
+btid:contributor7FR a schema:Person;
+  dcterms:identifier "contributor 7 FR";
+  schema:familyName "Van 7FR";
+  schema:givenName "Sabine";
+  schema:nationality countries:fr;
+  schema:sameAs btid:bnfCont7FR;
+  rdfs:label "Sabine Van 7FR" .
+
+btid:contributor8FR a schema:Person;
+  dcterms:identifier "contributor 8 FR";
+  schema:familyName "Van 8FR";
+  schema:givenName "Wout";
+  schema:nationality countries:fr;
+  schema:sameAs btid:bnfCont8FR;
+  rdfs:label "Wout Van 8FR" .
+
+btid:contributor9BE a schema:Person;
+  dcterms:identifier "contributor 9 BE";
+  schema:familyName "Van 9BE";
+  schema:givenName "Els";
+  schema:nationality countries:be;
+  schema:sameAs btid:kbrCont9BE .

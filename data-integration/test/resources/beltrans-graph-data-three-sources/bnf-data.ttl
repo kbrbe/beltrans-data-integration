@@ -1,0 +1,27 @@
+@prefix btid: <http://kbr.be/id/data/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix marcrel: <http://id.loc.gov/vocabulary/relators/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+btid:bnfBook2 a schema:CreativeWork;
+  dcterms:identifier "BnF book 2";
+  schema:author btid:bnfCont3FR;
+  schema:name "BnF book 2" .
+
+btid:bnfBook5 a schema:CreativeWork;
+  marcrel:ill btid:bnfCont6FR;
+  dcterms:identifier "BnF book 5";
+  schema:name "BnF book 5" .
+
+btid:bnfBook6 a schema:CreativeWork;
+  marcrel:ill btid:bnfCont7FR;
+  marcrel:sce btid:bnfCont8FR;
+  dcterms:identifier "BnF book 6";
+  schema:name "BnF book 6" .
+
+btid:bnfBook7 a schema:CreativeWork;
+  marcrel:sce btid:bnfCont10FR;
+  dcterms:identifier "BnF book 7";
+  schema:name "BnF book 7" .

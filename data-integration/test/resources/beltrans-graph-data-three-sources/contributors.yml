@@ -31,8 +31,8 @@ mappings:
       - access: ${RML_TEST_SOURCE_CONTRIBUTORS}
         referenceFormulation: csv
         delimiter: ','
-    s: btid:authority_$(uri)
+    s: btid:$(uri)
     po:
       - [a, schema:Person]
-      - [dcterms:identifier, $(name)]
+      - [dcterms:identifier, $(identifier)]
       - [schema:nationality, countries:$(nationality)~iri]

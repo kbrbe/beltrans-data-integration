@@ -1,0 +1,18 @@
+@prefix btid: <http://kbr.be/id/data/> .
+@prefix schema: <http://schema.org/> .
+
+btid:book1 schema:sameAs btid:kbrBook1 .
+
+btid:book2 schema:sameAs btid:bnfBook2, btid:kbBook2 .
+
+btid:book3 schema:sameAs btid:kbrBook3 .
+
+btid:book4 schema:sameAs btid:kbBook4 .
+
+btid:book5 schema:sameAs btid:bnfBook5 .
+
+btid:book6 schema:sameAs btid:bnfBook6 .
+
+btid:book7 schema:sameAs btid:bnfBook7, btid:kbrBook7 .
+
+btid:book8 schema:sameAs btid:kbBook8, btid:kbrBook8 .

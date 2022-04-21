@@ -1,0 +1,23 @@
+@prefix countries: <http://id.loc.gov/vocabulary/countries/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://kbr.be/id/data/kbCont11> a schema:Person;
+  dcterms:identifier "KB11" .
+
+<http://kbr.be/id/data/kbCont2BE> a schema:Person;
+  dcterms:identifier "KB2BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/kbCont3> a schema:Person;
+  dcterms:identifier "KB3" .
+
+<http://kbr.be/id/data/kbCont5BE> a schema:Person;
+  dcterms:identifier "KB5BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/kbCont6FR> a schema:Person;
+  dcterms:identifier "KB6FR";
+  schema:nationality countries:fr .

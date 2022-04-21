@@ -26,14 +26,14 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  publications:
+  contributors:
     sources:
-      - access: ${RML_TEST_SOURCE_PUBLICATIONS}
+      - access: ${RML_TEST_SOURCE_CONTRIBUTORS}
         referenceFormulation: csv
         delimiter: ','
     s: btid:$(uri)
     po:
-      - [a, schema:CreativeWork]
+      - [a, schema:Person]
       - p: dcterms:identifier
         o: $(name)
         condition:
@@ -41,38 +41,43 @@ mappings:
           parameters:
             - [grel:valueParameter, $(name)]
             - [grel:valueParameter2, ""] 
-      - p: schema:name
-        o: $(name)
+      - p: rdfs:label
+        o: $(label)
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(name)]
+            - [grel:valueParameter, $(label)]
             - [grel:valueParameter2, ""] 
-      - p: rdfs:comment
-        o: $(comment)
+      - p: schema:nationality
+        o: countries:$(nationality)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(comment)]
+            - [grel:valueParameter, $(nationality)]
             - [grel:valueParameter2, ""] 
-      - p: schema:author
-        o: btid:$(authorURI)~iri
+      - p: schema:familyName
+        o: $(familyName)
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(authorURI)]
+            - [grel:valueParameter, $(familyName)]
             - [grel:valueParameter2, ""] 
-      - p: marcrel:ill
-        o: btid:$(illustratorURI)~iri
+      - p: schema:givenName
+        o: $(givenName)
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(illustratorURI)]
+            - [grel:valueParameter, $(givenName)]
             - [grel:valueParameter2, ""] 
-      - p: marcrel:sce
-        o: btid:$(scenaristURI)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(scenaristURI)]
-            - [grel:valueParameter2, ""] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  sameAsLinks:
+    sources:
+      - access: ${RML_TEST_SOURCE_SAME_AS_LINKS}
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(uri)
+    po:
+      - [schema:sameAs, btid:$(otherURI)~iri]

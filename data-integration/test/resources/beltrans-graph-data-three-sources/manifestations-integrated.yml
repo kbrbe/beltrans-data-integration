@@ -76,3 +76,14 @@ mappings:
           parameters:
             - [grel:valueParameter, $(scenaristURI)]
             - [grel:valueParameter2, ""] 
+
+  # ---------------------------------------------------------------------------
+  #
+  sameAsLinks:
+    sources:
+      - access: ${RML_TEST_SOURCE_SAME_AS_LINKS}
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(uri)
+    po:
+      - [schema:sameAs, btid:$(otherURI)~iri]

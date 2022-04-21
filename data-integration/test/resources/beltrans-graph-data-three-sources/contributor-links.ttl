@@ -1,0 +1,24 @@
+@prefix btid: <http://kbr.be/id/data/> .
+@prefix schema: <http://schema.org/> .
+
+btid:contributor10FR schema:sameAs btid:bnfCont10FR, btid:kbrCont10FR .
+
+btid:contributor11BE schema:sameAs btid:bnfCont11BE, btid:kbCont11BE, btid:kbrCont11BE .
+
+btid:contributor1BE schema:sameAs btid:bnfCont1, btid:kbrCont1BE .
+
+btid:contributor2BE schema:sameAs btid:kbCont2BE, btid:kbrCont2 .
+
+btid:contributor3FR schema:sameAs btid:bnfCont3FR, btid:kbCont3 .
+
+btid:contributor4BE schema:sameAs btid:kbrCont4BE .
+
+btid:contributor5BE schema:sameAs btid:bnfCont5FR, btid:kbCont5BE .
+
+btid:contributor6FR schema:sameAs btid:bnfCont6FR, btid:kbCont6FR .
+
+btid:contributor7FR schema:sameAs btid:bnfCont7FR .
+
+btid:contributor8FR schema:sameAs btid:bnfCont8FR .
+
+btid:contributor9BE schema:sameAs btid:kbrCont9BE .

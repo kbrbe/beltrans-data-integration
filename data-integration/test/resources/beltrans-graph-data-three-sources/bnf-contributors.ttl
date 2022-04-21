@@ -1,0 +1,36 @@
+@prefix countries: <http://id.loc.gov/vocabulary/countries/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://kbr.be/id/data/bnfCont1> a schema:Person;
+  dcterms:identifier "BnF1" .
+
+<http://kbr.be/id/data/bnfCont10FR> a schema:Person;
+  dcterms:identifier "BnF10FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/bnfCont11BE> a schema:Person;
+  dcterms:identifier "BnF11BE";
+  schema:nationality countries:be .
+
+<http://kbr.be/id/data/bnfCont3FR> a schema:Person;
+  dcterms:identifier "BnF3FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/bnfCont5FR> a schema:Person;
+  dcterms:identifier "BnF5FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/bnfCont6FR> a schema:Person;
+  dcterms:identifier "BnF6FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/bnfCont7FR> a schema:Person;
+  dcterms:identifier "BnF7FR";
+  schema:nationality countries:fr .
+
+<http://kbr.be/id/data/bnfCont8FR> a schema:Person;
+  dcterms:identifier "BnF8FR";
+  schema:nationality countries:fr .
