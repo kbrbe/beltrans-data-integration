@@ -140,7 +140,7 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
   # extract relevant data from the current record
   #
   kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
-  isbn = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="a"]', ALL_NS))
+  isbns = elem.findall('./datafield[@tag="020"]/subfield[@code="a"]', ALL_NS)
   bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
   title = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="a"]', ALL_NS))
   responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
@@ -166,17 +166,24 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
   # create a URI for all belgian bibliographic classifications
   bbURIsString = utils.createURIString(belgianBibliographyClassificationsString, ';', 'http://kbr.be/id/data/')
 
-  isbn10 = ''
-  isbn13 = ''
-  try:
-    isbn10 = utils.getNormalizedISBN10(isbn)
-  except:
-    stats['not-convertable-isbn'][isbn] = kbrID
+  # There may be several ISBN10 or ISBN13 in case of co-editions
+  isbn10s = []
+  isbn13s = []
+  for isbnElement in isbns:
+    isbn = utils.getElementValue(isbnElement)
+    isbn10 = ''
+    isbn13 = ''
+    try:
+      isbn10 = utils.getNormalizedISBN10(isbn)
+      isbn10s.append(isbn10)
+    except:
+      stats['not-convertable-isbn'][isbn] = kbrID
 
-  try:
-    isbn13 = utils.getNormalizedISBN13(isbn)
-  except:
-    stats['erroneous-isbn'][isbn] = kbrID
+    try:
+      isbn13 = utils.getNormalizedISBN13(isbn)
+      isbn13s.append(isbn13)
+    except:
+      stats['erroneous-isbn'][isbn] = kbrID
 
   sourceISBN10 = ''
   sourceISBN13 = ''
@@ -194,8 +201,8 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
 
   newRecord = {
     'KBRID': kbrID,
-    'isbn10': isbn10,
-    'isbn13': isbn13,
+    'isbn10': ';'.join(isbn10s),
+    'isbn13': ';'.join(isbn13s),
     'title': title,
     'languages': langURIsString,
     'placeOfPublication': placesOfPublication,
