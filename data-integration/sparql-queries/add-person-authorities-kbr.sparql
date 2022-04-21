@@ -24,7 +24,8 @@ PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
 INSERT {
   graph <http://beltrans-contributors> {
     ?authorityURI a schema:Person ;
-      rdfs:label ?authorityLabel ;
+      rdfs:label ?kbrAuthorityLabel ;
+      dcterms:identifier ?uuid ;
       schema:nationality ?kbrAuthorityNationality ;
       schema:familyName ?kbrAuthorityFamilyName ;
       schema:givenName ?kbrAuthorityGivenName ;
@@ -56,13 +57,13 @@ WHERE {
     #
     # Get some optional properties
     #
+    OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthority rdfs:label ?kbrAuthorityLabel . } }
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthority schema:familyName ?kbrAuthorityFamilyName . } }
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthority schema:givenName ?kbrAuthorityGivenName . } }
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthority schema:nationality ?kbrAuthorityNationality . } }
 
     BIND( STRUUID() as ?uuid)
     BIND( IRI( CONCAT( "http://kbr.be/id/data/", ?uuid ) ) as ?authorityURI)
-    BIND( CONCAT( "BELTRANS authority ", ?uuid ) as ?authorityLabel)
 
     #
     # Get optional VIAF
