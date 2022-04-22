@@ -35,6 +35,7 @@ INSERT {
                   marcrel:sce ?scenarist ;
                   schema:locationCreated ?manifestationLocation ;
                   schema:inLanguage lang:fre ;
+                  btm:sourceLanguage lang:dut ;
                   rdagroup1elements:publishersName ?publisherName ;
                   schema:publisher ?publisher ;
                   rdfs:comment ?note ;

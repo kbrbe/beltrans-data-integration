@@ -1413,11 +1413,11 @@ function loadBnF {
   bnfCleanedISBN10="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN10_FIXED_CSV"
   bnfCleanedISBN10Triples="$integrationName/bnf/rdf/$SUFFIX_BNF_ISBN10_HYPHEN_NT"
 
+  source ./py-integration-env/bin/activate
   echo "Fix BnF ISBN13 identifiers without hyphen - get malformed ISBN identifiers"
   queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN13MissingHyphen"
 
   echo "Fix BnF ISBN13 identifiers without hyphen - normalize ISBN identifiers"
-  source ../data-sources/py-etl-env/bin/activate
   time python $SCRIPT_FIX_ISBN13 -i $bnfISBN13MissingHyphen -o $bnfCleanedISBN13
 
   echo "Fix BnF ISBN13 identifiers without hyphen - upload normalized ISBN identifiers"
@@ -1431,7 +1431,6 @@ function loadBnF {
   queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10MissingHyphen"
 
   echo "Fix BnF ISBN10 identifiers without hyphen - normalize ISBN identifiers"
-  source ../data-sources/py-etl-env/bin/activate
   time python $SCRIPT_FIX_ISBN10 -i $bnfISBN10MissingHyphen -o $bnfCleanedISBN10
 
   echo "Fix BnF ISBN10 identifiers without hyphen - upload normalized ISBN identifiers"
@@ -1443,19 +1442,19 @@ function loadBnF {
 
 
   echo "Add dcterms:identifier to BnF contributors"
-  uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
   echo "Add dcterms:identifier to BnF manifestations"
-  uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
   echo "Add ISNI identifier according to the bibframe vocabulary to BnF contributors"
-  uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_ISNI" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$CREATE_QUERY_BNF_ISNI" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
   echo "Add VIAF identifier according to the bibframe vocabulary to BnF contributors"
-  uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_VIAF" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$CREATE_QUERY_BNF_VIAF" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
   echo "Add Wikidata identifier according to the bibframe vocabulary to BnF contributors"
-  uploadData "$TRIPLE_STORE_NAMEPSACE" "$CREATE_QUERY_BNF_WIKIDATA" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$CREATE_QUERY_BNF_WIKIDATA" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
 }
 
