@@ -339,6 +339,15 @@ mappings:
           parameters:
             - [grel:valueParameter, $(contributorRole)]
             - [grel:valueParameter2, "sce"] 
+      - p: marcrel:pbd
+        o: btid:authority_$(contributorID)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorRole)]
+            - [grel:valueParameter2, "pbd"] 
+
+
 
 
   # ---------------------------------------------------------------------------
