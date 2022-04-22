@@ -1739,6 +1739,13 @@ else
     transform $2 $3
     load $2 $3
 
+  elif [ "$1" = "etli" ];
+  then
+    extract $2 $3
+    transform $2 $3
+    load $2 $3
+    integrate $3
+
   elif [ "$1" = "e" ];
   then
     extract $2 $3
