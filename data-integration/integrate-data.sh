@@ -44,18 +44,18 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 #
 
 # KBR - translations
-#INPUT_KBR_TRL_NL="../data-sources/kbr/translations/ExportSyracuse_20211213_NL-FR_1970-2020_3866records.xml"
-#INPUT_KBR_TRL_FR="../data-sources/kbr/translations/ExportSyracuse_20211213_FR-NL_1970-2020_9239records.xml"
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-17_4745records.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-17_13126records.xml"
+#INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-17_4745records.xml"
+#INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-17_13126records.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-04-19_5011records.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-04-19_14168records.xml"
 
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-02-17_NL-FR_APEP_4015records.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-02-17_NL-FR_AORG_752records.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-02-17_FR-NL_APEP_8848records.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-02-17_FR-NL_AORG_764records.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-04-19_NL-FR_APEP_4068records.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-04-19_NL-FR_AORG_754records.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-04-19_FR-NL_APEP_9030records.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-04-19_FR-NL_AORG_765records.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
