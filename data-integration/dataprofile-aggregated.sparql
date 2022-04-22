@@ -27,11 +27,17 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetTextKBIdentifier)
 
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetTextThesaurusBB)
-    (group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
+    (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetTextCollectionIdentifier)
+    #(group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
 
     (group_concat(distinct ?kbrTitle;SEPARATOR=';') AS ?targetTextKBRTitle)
     (group_concat(distinct ?bnfTitle;SEPARATOR=';') AS ?targetTextBnFTitle)
     (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetTextKBTitle)
+
+    (group_concat(distinct ?authorNameID;SEPARATOR=';') AS ?authorIdentifiers)
+    (group_concat(distinct ?illustratorNameID;SEPARATOR=';') AS ?illustratorIdentifiers)
+    (group_concat(distinct ?scenaristNameID;SEPARATOR=';') AS ?scenaristIdentifiers)
+    (group_concat(distinct ?publishingDirectorNameID;SEPARATOR=';') AS ?publishingDirectorIdentifiers)
 
     (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceTextKBRIdentifier)
     (group_concat(distinct ?kbrSourceManifestationTtitle;SEPARATOR=';') AS ?sourceTextTitle)
@@ -41,8 +47,10 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     (group_concat(distinct ?kbTargetManifestationEdition;SEPARATOR=';') AS ?targetTextKBEdition)
 
     (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetTextBindingType)
-    (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetTextCollectionIdentifier)
     (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
+
+    (group_concat(distinct ?kbrTranslatorNameID;SEPARATOR=';') AS ?translatorIdentifier)
+    (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifier)
 
     (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetTextKBRYearOfPublication)
     (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetTextBnFYearOfPublication)
@@ -52,22 +60,18 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetTextBnFPlaceOfPublication)
     (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetTextKBPlaceOfPublication)
 
-    (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetTextKBRResponsibilityStatement)
-    (group_concat(distinct ?bnfResponsibilityStatement;SEPARATOR=';') AS ?targetTextBnFResponsibilityStatement)
-    (group_concat(distinct ?kbResponsibilityStatement;SEPARATOR=';') AS ?targetTextKBResponsibilityStatement)
 
     (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceTextISBN)
-
-    (group_concat(distinct ?authorNameID;SEPARATOR=';') AS ?authorIdentifiers)
-    (group_concat(distinct ?illustratorNameID;SEPARATOR=';') AS ?illustratorIdentifiers)
-    (group_concat(distinct ?scenaristNameID;SEPARATOR=';') AS ?scenaristIdentifiers)
 
     (group_concat(distinct ?authorNationality;SEPARATOR=';') AS ?authorNationalities)
     (group_concat(distinct ?illustratorNationality;SEPARATOR=';') AS ?illustratorNationalities)
     (group_concat(distinct ?scenaristNationality;SEPARATOR=';') AS ?scenaristNationalities)
+    (group_concat(distinct ?publishingDirectorNationality;SEPARATOR=';') AS ?publishingDirectorNationalities)
 
-    (group_concat(distinct ?kbrTranslatorNameID;SEPARATOR=';') AS ?translatorIdentifier)
-    (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifier)
+
+    (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetTextKBRResponsibilityStatement)
+    (group_concat(distinct ?bnfResponsibilityStatement;SEPARATOR=';') AS ?targetTextBnFResponsibilityStatement)
+    (group_concat(distinct ?kbResponsibilityStatement;SEPARATOR=';') AS ?targetTextKBResponsibilityStatement)
   WHERE {
 
     graph <http://beltrans-manifestations> { 
@@ -286,7 +290,32 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
       }
     }
 
+    # #########################################################################
+    #
+    # PUBLISHING DIRECTOR
+    #
+    OPTIONAL {
+      graph <http://beltrans-manifestations> { ?manifestation marcrel:pbd ?publishingDirector . }
+      OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector schema:nationality ?publishingDirectorNationality . } }
+      OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector rdfs:label ?publishingDirectorLabel . } }
+
+      BIND(CONCAT( COALESCE(?publishingDirectorLabel, "missing name"), " (", ?publishingDirectorIdentifiers, ")") as ?publishingDirectorNameID)
+      # This subquery retrieves the local identifiers of the author
+      {
+        SELECT DISTINCT ?manifestation ?publishingDirector (group_concat(distinct ?publishingDirectorIdentifier;SEPARATOR=',') as ?publishingDirectorIdentifiers)
+        WHERE { 
+          graph <http://beltrans-manifestations> {
+            ?manifestation schema:name ?title ;
+                           marcrel:sce ?publishingDirector .
+          }    
+          ?publishingDirector schema:sameAs/dcterms:identifier ?publishingDirectorIdentifier . 
+        }
+        group by ?manifestation ?publishingDirector
+      }
+    }
+
+
 
 }
 GROUP BY ?manifestationID
-HAVING(CONTAINS(str(?authorNationalities), "http://id.loc.gov/vocabulary/countries/be") || CONTAINS(str(?illustratorNationalities), "http://id.loc.gov/vocabulary/countries/be") || CONTAINS(str(?scenaristNationalities), "http://id.loc.gov/vocabulary/countries/be") ) 
+HAVING(CONTAINS(str(?authorNationalities), "http://id.loc.gov/vocabulary/countries/be") || CONTAINS(str(?illustratorNationalities), "http://id.loc.gov/vocabulary/countries/be") || CONTAINS(str(?scenaristNationalities), "http://id.loc.gov/vocabulary/countries/be") || CONTAINS(str(?publishingDirectorNationalities), "http://id.loc.gov/vocabulary/countries/be")) 
