@@ -43,7 +43,7 @@ WHERE {
     }
 
     OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:inLanguage ?targetLang . } }
-    OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:translationOfWork/schema:inLanguage ?sourceLang . } }
+    OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation btm:sourceLanguage ?sourceLang . } }
 
     BIND( STRUUID() as ?uuid)
     BIND( IRI( CONCAT( "http://kbr.be/id/data/", ?uuid ) ) as ?manifestationURI)
