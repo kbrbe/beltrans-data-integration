@@ -1274,6 +1274,7 @@ function loadKBR {
   local kbrTranslationsPubCountries="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
   local kbrTranslationsPubPlaces="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_PLACE_LD"
   local kbrBelgians="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
+  local kbrTranslationsISBNTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_ISBN_LD"
 
   echo "Load KBR translations and contributions ..."
   uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsAndContributions" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
@@ -1286,6 +1287,9 @@ function loadKBR {
 
   echo "Load KBR publication places relationships ..."
   uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsPubPlaces" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
+
+  echo "Load KBR ISBN10/ISBN13 relationships ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE"  "$kbrTranslationsISBNTurtle" "$FORMAT_TURTLE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
 
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_LA>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_LA"
