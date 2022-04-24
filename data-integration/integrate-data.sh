@@ -143,6 +143,8 @@ LINK_QUERY_CONT_TRANSLATORS="sparql-queries/link-beltrans-manifestations-transla
 LINK_QUERY_CONT_ILLUSTRATORS="sparql-queries/link-beltrans-manifestations-illustrators.sparql"
 LINK_QUERY_CONT_SCENARISTS="sparql-queries/link-beltrans-manifestations-scenarists.sparql"
 
+DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
+DATA_PROFILE_QUERY_FILE_CONT="dataprofile-contributors.sparql"
 DATA_PROFILE_QUERY_FILE_KBR="dataprofile-kbr.sparql"
 DATA_PROFILE_QUERY_FILE_BNF="dataprofile-bnf.sparql"
 DATA_PROFILE_AGG_QUERY_FILE_KBR="dataprofile-aggregated-kbr.sparql"
@@ -155,6 +157,9 @@ DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE="translations-per-country.sparql"
 DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 
+SUFFIX_DATA_PROFILE_FILE_AGG="integrated-data.csv"
+SUFFIX_DATA_PROFILE_CONT_ALL_DATA_FILE="contributors-all-info.csv"
+SUFFIX_DATA_PROFILE_CONT_FILE="contributors.csv"
 SUFFIX_DATA_PROFILE_FILE_KBR="integrated-data-kbr-not-filtered.csv"
 SUFFIX_DATA_PROFILE_FILE_BNF="integrated-data-bnf-not-filtered.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE="integrated-data-contributors-belgian-not-filtered.csv"
@@ -482,40 +487,17 @@ function query {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  queryFileKBR="$DATA_PROFILE_QUERY_FILE_KBR"
-  queryFileBnF="$DATA_PROFILE_QUERY_FILE_BNF"
-  queryFileAggKBR="$DATA_PROFILE_AGG_QUERY_FILE_KBR"
-  queryFileAggBnF="$DATA_PROFILE_AGG_QUERY_FILE_BNF"
-  queryFileContBE="$DATA_PROFILE_CONT_BE_QUERY_FILE"
-  queryFileContAll="$DATA_PROFILE_CONT_ALL_QUERY_FILE"
-  queryFilePubsPerYear="$DATA_PROFILE_PUBS_PER_YEAR_QUERY_FILE"
-  queryFilePubsPerCountry="$DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE"
-  queryFilePubsPerLoc="$DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE"
-  queryFilePubsPerPbl="$DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE"
+  queryFileAgg="$DATA_PROFILE_QUERY_FILE_AGG"
+  queryFileCont="$DATA_PROFILE_QUERY_FILE_CONT"
 
-  outputFileKBR="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_KBR"
-  outputFileBnF="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_BNF"
-  outputFileAggKBR="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_KBR"
-  outputFileAggBnF="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_BNF"
-  outputFileContBE="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_BE_FILE"
-  outputFileContAll="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_FILE"
-  outputFilePubsPerYear="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
-  outputFilePubsPerCountry="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE"
-  outputFilePubsPerLoc="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE"
-  outputFilePubsPerPbl="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE"
-  outputFileSourceStats="$integrationName/csv/$SUFFIX_DATA_PROFILE_SOURCE_STATS"
+  outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_AGG"
+  outputFileContAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_DATA_FILE"
 
-  echo "Creating the dataprofile CSV file - KBR ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileKBR" "$ENV_SPARQL_ENDPOINT" "$outputFileKBR"
+  echo "Creating the dataprofile CSV file ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
 
-  echo "Creating the dataprofile CSV file - BnF ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileBnF" "$ENV_SPARQL_ENDPOINT" "$outputFileBnF"
-
-  echo "Creating the dataprofile CSV file with aggregated values - KBR ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAggKBR" "$ENV_SPARQL_ENDPOINT" "$outputFileAggKBR"
-
-  echo "Creating the dataprofile CSV file with aggregated values - BnF ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAggBnF" "$ENV_SPARQL_ENDPOINT" "$outputFileAggBnF"
+  echo "Creating the contributor CSV file ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileCont" "$ENV_SPARQL_ENDPOINT" "$outputFileContAllData"
 
 }
 
@@ -523,41 +505,19 @@ function query {
 function postprocess {
   local integrationName=$1
 
-  integratedDataKBR="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_KBR"
-  integratedDataBnF="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_BNF"
-  integratedAggKBR="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_KBR"
-  integratedAggBnF="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_BNF"
-
-  processedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
-  processedAggData="$integrationName/csv/$SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED"
-
-  processedContributorsBE="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED"
-
-  outputFilePubsPerYear="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_YEAR_FILE"
-  outputFilePubsPerCountry="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE"
-  outputFilePubsPerLoc="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_LOC_FILE"
-  outputFilePubsPerPbl="$integrationName/csv/$SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE"
-  outputFileSourceStats="$integrationName/csv/$SUFFIX_DATA_PROFILE_SOURCE_STATS"
+  integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
+  contributorsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_DATA_FILE"
+  contributors="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_FILE"
 
   excelData="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_DATA"
-  excelStats="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_STATS"
 
   source ./py-integration-env/bin/activate
 
-  echo "Postprocess integrated data ..."
-  postprocessIntegratedData $integratedDataKBR $integratedDataBnF $processedData
-
-  echo "Postprocess aggregated data ..."
-  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -k $integratedAggKBR -b $integratedAggBnF -o $processedAggData
-
-  echo "Create contributor list ..."
-  time python $SCRIPT_CREATE_CONTRIBUTOR_LIST -i $processedData -d $SUFFIX_DATA_PROFILE_DTYPES -o $processedContributorsBE
+  echo "Postprocess contributor data ..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -i $contributorsAllData -o $contributors
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $processedAggData $processedData $processedContributorsBE -s "unique" -s "all-data" -s "contributors" -o $excelData
-
-  echo "Create Excel sheet for statistics ..."
-  python $SCRIPT_COMPUTE_STATS -i $processedData -a $processedAggData -d $SUFFIX_DATA_PROFILE_DTYPES -o $excelStats
+  time python $SCRIPT_CSV_TO_EXCEL $integratedData $contributors -s "translations" -s "contributors" -o $excelData
 
 }
 

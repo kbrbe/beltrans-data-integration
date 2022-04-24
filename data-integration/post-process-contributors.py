@@ -1,5 +1,5 @@
 #
-# (c) 2021 Sven Lieber
+# (c) 2022 Sven Lieber
 # KBR Brussels
 #
 import csv
@@ -31,28 +31,29 @@ def main():
 
     # In the output we only want a single birth date and a single death date column
     # thus first remove the respective columns from different data sources
-    headersToRemove = ['contributorBirthDateKBR', 'contributorBirthDateISNI', 'contributorDeathDateKBR', 'contributorDeathDateISNI']
+    headersToRemove = ['birthDateKBR', 'deathDateKBR', 'birthDateBnF', 'deathDateBnF', 'birthDateNTA', 'deathDateNTA', 'birthDateISNI', 'deathDateISNI']
 
     for r in headersToRemove:
       headers.remove(r)
 
     # and then add the single columns we want
-    headers.extend(['contributorBirthDate', 'contributorDeathDate'])
+    headers.insert(3, 'birthDate')
+    headers.insert(4, 'deathDate')
+    #headers.extend(['birthDate', 'deathDate'])
 
     outputWriter = csv.DictWriter(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, fieldnames=headers)
-
     outputWriter.writeheader()
 
     # used to parse certain columns based on their name, e.g. authorBirthDateKBR and authorBirthDateISNI
-    sources = ['KBR', 'ISNI']
+    sources = ['KBR', 'BnF', 'NTA', 'ISNI']
     mismatchLog = {}
 
     # write relevant data to output
     for row in inputReader:
 
       # This is a relevant row, we process it further before writing it
-      utils.selectDate(row, 'contributor', 'Birth', sources, 'contributorID', mismatchLog)
-      utils.selectDate(row, 'contributor', 'Death', sources, 'contributorID', mismatchLog)
+      utils.selectDate(row, 'birth', sources, 'contributorID', mismatchLog)
+      utils.selectDate(row, 'death', sources, 'contributorID', mismatchLog)
 
       outputWriter.writerow(row)
 
@@ -69,8 +70,10 @@ def main():
       for c in mismatchLog[dateType][contributorType]:
         d = mismatchLog[dateType][contributorType][c]
         kbrValue = next(iter(d['KBR'])) if 'KBR' in d else ''
+        bnfValue = next(iter(d['BnF'])) if 'BnF' in d else ''
+        ntaValue = next(iter(d['NTA'])) if 'NTA' in d else ''
         isniValue = next(iter(d['ISNI'])) if 'ISNI' in d else ''
-        print(f'{dateType}, {contributorType}, {c}, {kbrValue}, {isniValue}')
+        print(f'{dateType}, {contributorType}, {c}, {kbrValue}, {bnfValue}, {ntaValue}, {isniValue}')
       
 
 main()
