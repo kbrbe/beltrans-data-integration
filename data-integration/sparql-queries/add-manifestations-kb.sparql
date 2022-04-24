@@ -29,7 +29,7 @@ INSERT {
       schema:inLanguage ?targetLang ;
       btm:sourceLanguage ?sourceLang ;
       schema:sameAs ?kbManifestation ;
-      rdfs:comment "Created from KBR data" ;
+      rdfs:comment "Created from KB data" ;
       bibo:isbn10 ?isbn10 ;
       bibo:isbn13 ?isbn13 .
   }
