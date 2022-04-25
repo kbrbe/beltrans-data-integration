@@ -1,0 +1,11 @@
+PREFIX bibo: <http://purl.org/ontology/bibo/>
+PREFIX schema: <http://schema.org/>
+
+SELECT ?manifestation ?isbn10 ?isbn13
+WHERE {
+  graph <http://bnf-publications> { ?manifestation a schema:CreativeWork . }
+        
+  OPTIONAL { graph <http://bnf-publications> { ?manifestation bibo:isbn10 ?isbn10 . } }
+  OPTIONAL { graph <http://bnf-publications> { ?manifestation bibo:isbn13 ?isbn13 . } }
+
+}
