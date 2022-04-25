@@ -6,6 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
+## [20220425] - 2022-04-25
+
+This version includes also data from KB as well as fixes and improvements based on received corpus feedback.
+It corresponds to the milestone https://github.com/kbrbe/beltrans-data-integration/milestone/4.
+
+### Added
+
+- Besides KBR and BnF, we now also use data extracted from The Royal Library of the Netherlands (KB) via SPARQL and their public SPARQL endpoint ([#84](https://github.com/kbrbe/beltrans-data-integration/issues/84), [#2](https://github.com/kbrbe/beltrans-data-integration/issues/2), [#84](https://github.com/kbrbe/beltrans-data-integration/issues/84), [#102](https://github.com/kbrbe/beltrans-data-integration/issues/102))
+- We adapted the way of integrating data, instead of a very complex SPARQL query per data source and Python postprocessing to merge the results, we implemented a workflow in which we create URIs for own manifestations and own contributors in separated named graphs. These graphs we populate with `schema:sameAs` links in several update-cycles such that we have integrated records which we then query with a single SPARQL query ([89](https://github.com/kbrbe/beltrans-data-integration/issues/89))
+- Besides author, illustrator and scenarist, we now take also the role *publishing director* into account for the Belgian nationality filter ([#93](https://github.com/kbrbe/beltrans-data-integration/issues/93))
+- The contributor lists now shows integrated information, e.g. an author and related identifiers from different data sources ([#79](https://github.com/kbrbe/beltrans-data-integration/issues/79))
+- We represent ISNI identifiers for BnF data now using the BIBFRAME vocabulary (`bf:identifiedBy -> bf:Isni`) as we already do for the other data sources ([#68](https://github.com/kbrbe/beltrans-data-integration/issues/68))
+- For BnF data we use the `dcterms:identifier` property to link to the identifier as found in the data.bnf.fr link ([#92](https://github.com/kbrbe/beltrans-data-integration/issues/92) which may differ from the identifier represented in the RDF from BnF)
+- We added integration tests to verify that our dataprofile SPARQL query and postprocessing fetches all data correctly, therefore we added test data and Python tests ([#85](https://github.com/kbrbe/beltrans-data-integration/issues/85), [#97](https://github.com/kbrbe/beltrans-data-integration/issues/97))
+- Contribution relationships within KBR data are now additionally expressed using direct properties (as for BnF data), for example `ex:myBook marcrel:ill ex:illustrator1`. Before we only had these relationships expressed using W3C PROV qualified Associations which was more difficult to query ([#86](https://github.com/kbrbe/beltrans-data-integration/issues/86))
+- The country of publication was missing for several translations, a script from [Fabrizio Pascucci](https://be.linkedin.com/in/fabrizio-pascucci-bb950616a) was added to derive the country from the mentioned place of publication ([#101](https://github.com/kbrbe/beltrans-data-integration/issues/101))
+
+### Changed
+
+- We show the string normalized name of publishers ([#81](https://github.com/kbrbe/beltrans-data-integration/issues/81))
+- Instead of having two scripts to extract a semicolon-separated list of BelgianBibliography entries and country of publications, we added a generalized script (see [this commit](https://github.com/kbrbe/beltrans-data-integration/commit/f02499271062f8d998fb60886cc117f39ac641b4))
+- We explicitly add the source language for BnF records (before this only happened implicitly via the dataprofile SPARQL query) ([#100](https://github.com/kbrbe/beltrans-data-integration/issues/100))
+- The column names of the dataprofile CSV were simplified, e.g. `targetCountryOfPublication` instead of `targetTextCountryOfPublication` ([#78](https://github.com/kbrbe/beltrans-data-integration/issues/78))
+
+### Fixed
+
+- We normalize ISBN10/ISBN13 identifiers from BnF to increase matches with other sources (use of hyphens) ([#95](https://github.com/kbrbe/beltrans-data-integration/issues/95), [#103](https://github.com/kbrbe/beltrans-data-integration/issues/103))
+- The KBR catalogue may indicate more than one role per publisher, only the first was mapped to RDF, now all are mapped ([#87](https://github.com/kbrbe/beltrans-data-integration/issues/87))
+- The KBR catalogue may indicate more than one place of publication, only the first was mapped to RDF, now all are mapped ([#88](https://github.com/kbrbe/beltrans-data-integration/issues/88))
+- The KBR catalogue may indicate more than one ISBN10/ISBN13 identifier, for example for co-editions, but only the first was mapped to RDF, now all are mapped ([#73](https://github.com/kbrbe/beltrans-data-integration/issues/73))
+- The global lookup check to replace self-created publisher IDs with found IDs was improved and can be controlled by a CSV file  (see [this commit](https://github.com/kbrbe/beltrans-data-integration/commit/f7916602f1597e77f56179ba26ba135d2bf118da))
+- We fixed an issue in the linking to self-created publisher URIs ([#82](https://github.com/kbrbe/beltrans-data-integration/issues/82))
+- VIAF and Wikidata identifiers of BnF authorities were missing in our RDF, it is added now (see [this commit](https://github.com/kbrbe/beltrans-data-integration/commit/678c4c3f06b4f7bcbed9f0849d4a3ebac1ba250e))
+- We did not correctly indicate VIAF identifiers extracted from the ISNI SRU API, we changed the extraction method to fix it ([#98](https://github.com/kbrbe/beltrans-data-integration/issues/98))
+
 ## [20220217] - 2022-02-17
 
 This version includes also data from BnF as well as fixes and improvements based on received corpus feedback.
@@ -85,4 +120,4 @@ This version corresponds to the milestone https://github.com/SvenLieber/beltrans
 [20211129]: https://github.com/SvenLieber/beltrans-data/releases/tag/2021-11-29
 [20211223]: https://github.com/SvenLieber/beltrans-data/compare/2021-11-29...2021-12-23
 [20220217]: https://github.com/SvenLieber/beltrans-data/compare/2021-12-23...2022-02-17
-
+[20220425]: https://github.com/SvenLieber/beltrans-data/compare/2022-02-17...2022-04-25
