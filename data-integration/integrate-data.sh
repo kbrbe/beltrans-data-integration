@@ -1733,6 +1733,12 @@ else
     load $2 $3
     integrate $3
 
+  elif [ "$1" = "iqp" ];
+  then
+    integrate $2 $3
+    query $3
+    postprocess $3
+
   elif [ "$1" = "tliqp" ];
   then
     transform $2 $3
