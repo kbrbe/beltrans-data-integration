@@ -118,7 +118,7 @@ mappings:
         delimiter: ','
     s: $(manifestation)
     po:
-      - [schema:inLanguage, lang:fre~iri]
+      - [schema:inLanguage, lang:dut~iri]
 
 
   # ---------------------------------------------------------------------------
@@ -132,7 +132,7 @@ mappings:
         delimiter: ','
     s: $(manifestation)
     po:
-      - [schema:inLanguage, lang:dut~iri]
+      - [schema:inLanguage, lang:fre~iri]
 
 
 
@@ -152,7 +152,7 @@ mappings:
     s: $(manifestation)
     po:
       - p: schema:author
-        o: $(author)
+        o: $(author)~iri
         condition:
           function: grel:string_startsWith
           parameters:
