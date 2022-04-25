@@ -1,0 +1,9 @@
+PREFIX bibo: <http://purl.org/ontology/bibo/>
+
+WITH <http://bnf-publications>
+DELETE {
+  ?manifestation bibo:isbn10 ?isbn10 . 
+  ?manifestation bibo:isbn13 ?isbn13 .
+}
+INSERT {}
+WHERE {}
