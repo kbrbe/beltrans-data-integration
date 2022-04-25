@@ -16,52 +16,50 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
 
 
   SELECT DISTINCT 
-    (?manifestationID AS ?targetTextIdentifier)
-    (group_concat(distinct ?sourceLangLabel;SEPARATOR=';') AS ?sourceTextLanguage)
-    (group_concat(distinct ?targetLangLabel;SEPARATOR=';') AS ?targetTextLanguage)
-    (group_concat(distinct ?isbn10;SEPARATOR=';') AS ?targetTextISBN10) 
-    (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetTextISBN13) 
+    (?manifestationID AS ?targetIdentifier)
+    (group_concat(distinct ?sourceLangLabel;SEPARATOR=';') AS ?sourceLanguage)
+    (group_concat(distinct ?targetLangLabel;SEPARATOR=';') AS ?targetLanguage)
+    (group_concat(distinct ?isbn10;SEPARATOR=';') AS ?targetISBN10) 
+    (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetISBN13) 
 
-    (group_concat(distinct ?kbrManifestationID;SEPARATOR=';') AS ?targetTextKBRIdentifier)
-    (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetTextBnFIdentifier)
-    (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetTextKBIdentifier)
+    (group_concat(distinct ?kbrManifestationID;SEPARATOR=';') AS ?targetKBRIdentifier)
+    (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetBnFIdentifier)
+    (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
 
-    (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetTextThesaurusBB)
-    (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetTextCollectionIdentifier)
+    (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
+    (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetCollectionIdentifier)
     #(group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
 
-    (group_concat(distinct ?kbrTitle;SEPARATOR=';') AS ?targetTextKBRTitle)
-    (group_concat(distinct ?bnfTitle;SEPARATOR=';') AS ?targetTextBnFTitle)
-    (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetTextKBTitle)
+    (group_concat(distinct ?kbrTitle;SEPARATOR=';') AS ?targetKBRTitle)
+    (group_concat(distinct ?bnfTitle;SEPARATOR=';') AS ?targetBnFTitle)
+    (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetKBTitle)
 
     (group_concat(distinct ?authorNameID;SEPARATOR=';') AS ?authorIdentifiers)
     (group_concat(distinct ?illustratorNameID;SEPARATOR=';') AS ?illustratorIdentifiers)
     (group_concat(distinct ?scenaristNameID;SEPARATOR=';') AS ?scenaristIdentifiers)
     (group_concat(distinct ?publishingDirectorNameID;SEPARATOR=';') AS ?publishingDirectorIdentifiers)
 
-    (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceTextKBRIdentifier)
-    (group_concat(distinct ?kbrSourceManifestationTtitle;SEPARATOR=';') AS ?sourceTextTitle)
+    (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceKBRIdentifier)
+    (group_concat(distinct ?kbrSourceManifestationTtitle;SEPARATOR=';') AS ?sourceTitle)
+    (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceISBN)
 
-    (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetTextKBREdition)
-    (group_concat(distinct ?bnfTargetManifestationEdition;SEPARATOR=';') AS ?targetTextBnFEdition)
-    (group_concat(distinct ?kbTargetManifestationEdition;SEPARATOR=';') AS ?targetTextKBEdition)
+    (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetKBREdition)
+    (group_concat(distinct ?bnfTargetManifestationEdition;SEPARATOR=';') AS ?targetBnFEdition)
+    (group_concat(distinct ?kbTargetManifestationEdition;SEPARATOR=';') AS ?targetKBEdition)
 
-    (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetTextBindingType)
-    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetTextCountryOfPublication)
+    (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetBindingType)
+    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublication)
 
     (group_concat(distinct ?kbrTranslatorNameID;SEPARATOR=';') AS ?translatorIdentifier)
     (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifier)
 
-    (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetTextKBRYearOfPublication)
-    (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetTextBnFYearOfPublication)
-    (group_concat(distinct ?kbDatePublished;SEPARATOR=';') AS ?targetTextKBYearOfPublication)
+    (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetKBRYearOfPublication)
+    (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetBnFYearOfPublication)
+    (group_concat(distinct ?kbDatePublished;SEPARATOR=';') AS ?targetKBYearOfPublication)
 
-    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetTextKBRPlaceOfPublication)
-    (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetTextBnFPlaceOfPublication)
-    (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetTextKBPlaceOfPublication)
-
-
-    (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceTextISBN)
+    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetKBRPlaceOfPublication)
+    (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetBnFPlaceOfPublication)
+    (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetKBPlaceOfPublication)
 
     (group_concat(distinct ?authorNationality;SEPARATOR=';') AS ?authorNationalities)
     (group_concat(distinct ?illustratorNationality;SEPARATOR=';') AS ?illustratorNationalities)
@@ -69,9 +67,9 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     (group_concat(distinct ?publishingDirectorNationality;SEPARATOR=';') AS ?publishingDirectorNationalities)
 
 
-    (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetTextKBRResponsibilityStatement)
-    (group_concat(distinct ?bnfResponsibilityStatement;SEPARATOR=';') AS ?targetTextBnFResponsibilityStatement)
-    (group_concat(distinct ?kbResponsibilityStatement;SEPARATOR=';') AS ?targetTextKBResponsibilityStatement)
+    (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetKBRResponsibilityStatement)
+    (group_concat(distinct ?bnfResponsibilityStatement;SEPARATOR=';') AS ?targetBnFResponsibilityStatement)
+    (group_concat(distinct ?kbResponsibilityStatement;SEPARATOR=';') AS ?targetKBResponsibilityStatement)
   WHERE {
 
     graph <http://beltrans-manifestations> { 
