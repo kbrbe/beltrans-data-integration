@@ -1,0 +1,26 @@
+prefix schema: <http://schema.org/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+
+INSERT {
+  graph <http://beltrans-manifestations> {
+    ?manifestation marcrel:pbd ?author .
+  }
+}
+WHERE {
+  
+    # (1) follow sameAs links to get all local manifestations ...
+    #
+    graph <http://beltrans-manifestations> {
+      ?manifestation a schema:CreativeWork ;
+                     schema:name ?title ;
+                     schema:sameAs ?localManifestation .
+    } 
+
+    # (2) ... to get the local author ..
+    #
+    ?localManifestation marcrel:pbd ?localAuthor .
+  
+    # (3) ... which we follow to get the integrated author
+    #
+    graph <http://beltrans-contributors> { ?author schema:sameAs ?localAuthor . }  
+}
