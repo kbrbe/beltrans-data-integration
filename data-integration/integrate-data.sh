@@ -34,6 +34,8 @@ SCRIPT_QUERY_DATA="../utils/query-data.sh"
 SCRIPT_POSTPROCESS_QUERY_RESULT="post-process-integration-result.py"
 SCRIPT_POSTPROCESS_AGG_QUERY_RESULT="post-process-aggregation-result.py"
 SCRIPT_POSTPROCESS_QUERY_CONT_RESULT="post-process-contributors.py"
+SCRIPT_POSTPROCESS_DERIVE_COUNTRIES="add_country.py"
+
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
 KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
@@ -173,6 +175,7 @@ SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 SUFFIX_DATA_PROFILE_DTYPES="dataprofile-dtypes.csv"
 
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
+SUFFIX_DATA_PROFILE_FILE_ENRICHED="integrated-data-enriched.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED="integrated-data-contributors-belgian.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.csv"
@@ -506,6 +509,7 @@ function postprocess {
   local integrationName=$1
 
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
+  integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
   contributorsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_DATA_FILE"
   contributors="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_FILE"
 
@@ -516,8 +520,11 @@ function postprocess {
   echo "Postprocess contributor data ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -i $contributorsAllData -o $contributors
 
+  echo "Derive missing country names from place names ..."
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedData -o $integratedDataEnriched -g geonames/ -c targetCountryOfPublication -p targetKBRPlaceOfPublication
+
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedData $contributors -s "translations" -s "contributors" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributors -s "translations" -s "contributors" -o $excelData
 
 }
 
