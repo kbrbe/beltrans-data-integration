@@ -61,10 +61,10 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetBnFPlaceOfPublication)
     (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetKBPlaceOfPublication)
 
-    (group_concat(distinct ?authorNationality;SEPARATOR=';') AS ?authorNationalities)
-    (group_concat(distinct ?illustratorNationality;SEPARATOR=';') AS ?illustratorNationalities)
-    (group_concat(distinct ?scenaristNationality;SEPARATOR=';') AS ?scenaristNationalities)
-    (group_concat(distinct ?publishingDirectorNationality;SEPARATOR=';') AS ?publishingDirectorNationalities)
+    (group_concat(distinct ?authorNationalityLabel;SEPARATOR=';') AS ?authorNationalities)
+    (group_concat(distinct ?illustratorNationalityLabel;SEPARATOR=';') AS ?illustratorNationalities)
+    (group_concat(distinct ?scenaristNationalityLabel;SEPARATOR=';') AS ?scenaristNationalities)
+    (group_concat(distinct ?publishingDirectorNationalityLabel;SEPARATOR=';') AS ?publishingDirectorNationalities)
 
 
     (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetKBRResponsibilityStatement)
@@ -222,8 +222,12 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation schema:author ?author . }
-      OPTIONAL { graph <http://beltrans-contributors> { ?author schema:nationality ?authorNationality . } }
       OPTIONAL { graph <http://beltrans-contributors> { ?author rdfs:label ?authorLabel . } }
+      OPTIONAL {
+        graph <http://beltrans-contributors> { ?author schema:nationality ?authorNationality . } 
+        graph <http://master-data> { ?authorNationality mads:authoritativeLabel ?authorNationalityLabel . }
+        FILTER (lang(?authorNationalityLabel) = 'en')
+      }
 
       BIND(CONCAT( COALESCE(?authorLabel, "missing name"), " (", ?authorIdentifiers, ")") as ?authorNameID)
       # This subquery retrieves the local identifiers of the author
@@ -246,7 +250,11 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation marcrel:ill ?illustrator . }
-      OPTIONAL { graph <http://beltrans-contributors> { ?illustrator schema:nationality ?illustratorNationality . } }
+      OPTIONAL {
+        graph <http://beltrans-contributors> { ?illustrator schema:nationality ?illustratorNationality . } 
+        graph <http://master-data> { ?illustratorNationality mads:authoritativeLabel ?illustratorNationalityLabel . }
+        FILTER (lang(?illustratorNationalityLabel) = 'en')
+      }
       OPTIONAL { graph <http://beltrans-contributors> { ?illustrator rdfs:label ?illustratorLabel . } }
 
       BIND(CONCAT( COALESCE(?illustratorLabel, "missing name"), " (", ?illustratorIdentifiers, ")") as ?illustratorNameID)
@@ -270,7 +278,11 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation marcrel:sce ?scenarist . }
-      OPTIONAL { graph <http://beltrans-contributors> { ?scenarist schema:nationality ?scenaristNationality . } }
+      OPTIONAL {
+        graph <http://beltrans-contributors> { ?scenarist schema:nationality ?scenaristNationality . } 
+        graph <http://master-data> { ?scenaristNationality mads:authoritativeLabel ?scenaristNationalityLabel . }
+        FILTER (lang(?scenaristNationalityLabel) = 'en')
+      }
       OPTIONAL { graph <http://beltrans-contributors> { ?scenarist rdfs:label ?scenaristLabel . } }
 
       BIND(CONCAT( COALESCE(?scenaristLabel, "missing name"), " (", ?scenaristIdentifiers, ")") as ?scenaristNameID)
@@ -294,7 +306,11 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation marcrel:pbd ?publishingDirector . }
-      OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector schema:nationality ?publishingDirectorNationality . } }
+      OPTIONAL {
+        graph <http://beltrans-contributors> { ?publishingDirector schema:nationality ?publishingDirectorNationality . } 
+        graph <http://master-data> { ?publishingDirectorNationality mads:authoritativeLabel ?publishingDirectorNationalityLabel . }
+        FILTER (lang(?publishingDirectorNationalityLabel) = 'en')
+      }
       OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector rdfs:label ?publishingDirectorLabel . } }
 
       BIND(CONCAT( COALESCE(?publishingDirectorLabel, "missing name"), " (", ?publishingDirectorIdentifiers, ")") as ?publishingDirectorNameID)
@@ -304,7 +320,7 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
         WHERE { 
           graph <http://beltrans-manifestations> {
             ?manifestation schema:name ?title ;
-                           marcrel:sce ?publishingDirector .
+                           marcrel:pbd ?publishingDirector .
           }    
           ?publishingDirector schema:sameAs/dcterms:identifier ?publishingDirectorIdentifier . 
         }
@@ -316,4 +332,4 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
 
 }
 GROUP BY ?manifestationID
-HAVING(CONTAINS(str(?authorNationalities), "http://id.loc.gov/vocabulary/countries/be") || CONTAINS(str(?illustratorNationalities), "http://id.loc.gov/vocabulary/countries/be") || CONTAINS(str(?scenaristNationalities), "http://id.loc.gov/vocabulary/countries/be") || CONTAINS(str(?publishingDirectorNationalities), "http://id.loc.gov/vocabulary/countries/be")) 
+HAVING(CONTAINS(str(?authorNationalities), "Belgium") || CONTAINS(str(?illustratorNationalities), "Belgium") || CONTAINS(str(?scenaristNationalities), "Belgium") || CONTAINS(str(?publishingDirectorNationalities), "Belgium")) 
