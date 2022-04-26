@@ -13,6 +13,8 @@ PREFIX btisni: <http://kbr.be/isni/>
 PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 PREFIX up: <http://users.ugent.be/~tdenies/up/>
 PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
   SELECT DISTINCT 
@@ -35,23 +37,25 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetKBTitle)
 
     (group_concat(distinct ?authorNameID;SEPARATOR=';') AS ?authorIdentifiers)
+    (group_concat(distinct ?translatorNameID;SEPARATOR=';') AS ?translatorIdentifiers)
     (group_concat(distinct ?illustratorNameID;SEPARATOR=';') AS ?illustratorIdentifiers)
     (group_concat(distinct ?scenaristNameID;SEPARATOR=';') AS ?scenaristIdentifiers)
     (group_concat(distinct ?publishingDirectorNameID;SEPARATOR=';') AS ?publishingDirectorIdentifiers)
 
     (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceKBRIdentifier)
-    (group_concat(distinct ?kbrSourceManifestationTtitle;SEPARATOR=';') AS ?sourceTitle)
-    (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceISBN)
+    (group_concat(distinct ?kbrSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitle)
+    (group_concat(distinct ?kbrSourceManifestationISBN10;SEPARATOR=';') AS ?sourceISBN10)
+    (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceISBN13)
 
     (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetKBREdition)
     (group_concat(distinct ?bnfTargetManifestationEdition;SEPARATOR=';') AS ?targetBnFEdition)
     (group_concat(distinct ?kbTargetManifestationEdition;SEPARATOR=';') AS ?targetKBEdition)
 
     (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetBindingType)
-    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublication)
 
-    (group_concat(distinct ?kbrTranslatorNameID;SEPARATOR=';') AS ?translatorIdentifier)
-    (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifier)
+    (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierKBR)
+    (group_concat(distinct ?bnfPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierBnF)
+    (group_concat(distinct ?kbPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierKB)
 
     (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetKBRYearOfPublication)
     (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetBnFYearOfPublication)
@@ -60,6 +64,7 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
     (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetKBRPlaceOfPublication)
     (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetBnFPlaceOfPublication)
     (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetKBPlaceOfPublication)
+    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublication)
 
     (group_concat(distinct ?authorNationalityLabel;SEPARATOR=';') AS ?authorNationalities)
     (group_concat(distinct ?illustratorNationalityLabel;SEPARATOR=';') AS ?illustratorNationalities)
@@ -116,6 +121,17 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:locationCreated ?kbrLocationCreated . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation rdfs:comment ?kbrResponsibilityStatement . }}
+      OPTIONAL {
+        graph <http://kbr-syracuse> { ?kbrManifestation schema:publisher ?kbrPublisher . }
+        OPTIONAL {
+          graph <http://kbr-linked-authorities> {
+            ?kbrPublisher skos:prefLabel ?kbrPublisherName ;
+                          dcterms:identifier ?kbrPublisherID .
+          }
+        }
+        BIND(CONCAT(?kbrPublisherName, ' (', ?kbrPublisherID, ')') AS ?kbrPublisherNameID)
+      }
+   
 
       # COLLECTION INFORMATION
       OPTIONAL {
@@ -171,6 +187,7 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
           }
 
           # Optionally there is also an ISBN for the source
+          OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestationSource bibo:isbn10 ?kbrSourceManifestationISBN10 . } }
           OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestationSource bibo:isbn13 ?kbrSourceManifestationISBN13 . } }
         }
       }
@@ -192,6 +209,26 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:bookEdition ?bnfTargetManifestationEdition . }}
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:locationCreated ?bnfLocationCreated . }}
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation rdfs:comment ?bnfResponsibilityStatement . }}
+
+      OPTIONAL {
+        graph <http://bnf-publications> { ?bnfManifestation rdagroup1elements:publishersName ?bnfPublisherName . }
+
+#        OPTIONAL { 
+#          graph <http://bnf-publications> { ?bnfManifestation schema:publisher ?bnfPublisher . } 
+#          BIND(CONCAT(?bnfPublisherName, ' (', STRBEFORE(STRAFTER(str(?bnfPublisher), "12148/"), "#"), ')') as ?bnfPublisherNameID)
+
+          # within this optional publisher, check optional attributes from the linked authorities dataset
+#          OPTIONAL {   
+#            graph <http://bnf-contributors> { ?bnfPublisher foaf:name ?bnfPublisherResourceName . }
+#            graph <http://bnf-contributors> { ?bnfPublisher rdagroup2elements:placeAssociatedWithTheCorporateBody ?bnfPublisherCountry . }
+            # within this optional country check optionally for an English label in the master data
+#            OPTIONAL {
+#              graph <http://master-data> { ?bnfPublisherCountry mads:authoritativeLabel ?bnfPublisherCountryLabel . }
+#              FILTER (lang(?bnfPublisherCountryLabel) = 'en')
+#            }  
+#          }
+#        }
+      }
     }
 
     # #########################################################################
@@ -209,6 +246,7 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:bookEdition ?kbTargetManifestationEdition . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:locationCreated ?kbLocationCreated . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdfs:comment ?kbResponsibilityStatement . }}
+      OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:publisher ?kbPublisherName . }}
     }
         
     # determine if this manifestation is a multilingual work
@@ -243,6 +281,35 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
         group by ?manifestation ?author
       }
     }
+
+    # #########################################################################
+    #
+    # TRANSLATOR
+    #
+    OPTIONAL {
+      graph <http://beltrans-manifestations> { ?manifestation schema:translator ?translator . }
+      OPTIONAL { graph <http://beltrans-contributors> { ?translator rdfs:label ?translatorLabel . } }
+      OPTIONAL {
+        graph <http://beltrans-contributors> { ?translator schema:nationality ?translatorNationality . } 
+        graph <http://master-data> { ?translatorNationality mads:translatoritativeLabel ?translatorNationalityLabel . }
+        FILTER (lang(?translatorNationalityLabel) = 'en')
+      }
+
+      BIND(CONCAT( COALESCE(?translatorLabel, "missing name"), " (", ?translatorIdentifiers, ")") as ?translatorNameID)
+      # This subquery retrieves the local identifiers of the translator
+      {
+        SELECT DISTINCT ?manifestation ?translator (group_concat(distinct ?translatorIdentifier;SEPARATOR=',') as ?translatorIdentifiers)
+        WHERE { 
+          graph <http://beltrans-manifestations> {
+            ?manifestation schema:name ?title ;
+                           schema:translator ?translator .
+          }    
+          ?translator schema:sameAs/dcterms:identifier ?translatorIdentifier . 
+        }
+        group by ?manifestation ?translator
+      }
+    }
+
 
     # #########################################################################
     #

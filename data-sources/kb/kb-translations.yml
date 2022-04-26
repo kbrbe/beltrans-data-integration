@@ -105,6 +105,14 @@ mappings:
           parameters:
             - [grel:valueParameter, $(isbn13)]
             - [grel:valueParameter2, ""] 
+      - p: schema:publisher
+        o: $(publisherName)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(publisherName)]
+            - [grel:valueParameter2, ""] 
+
 
 
   # ---------------------------------------------------------------------------
