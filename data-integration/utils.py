@@ -3,6 +3,7 @@ from datetime import datetime
 import requests
 import rdflib
 import os
+import unicodedata as ud
 import pandas as pd
 from SPARQLWrapper import SPARQLWrapper, TURTLE, JSON, POST
 
@@ -453,6 +454,74 @@ def getContributorData(df, role, colNamesRaw):
 
   df = df.rename(columns=renameDict)
   return df[colNamesRaw]
+
+# -----------------------------------------------------------------------------
+def getNormalizedString(s):
+  """This function returns a normalized copy of the given string.
+
+  >>> getNormalizedString("HeLlO")
+  'hello'
+  >>> getNormalizedString("judaïsme, islam, christianisme, ET sectes apparentées")
+  'judaisme islam christianisme et sectes apparentees'
+  >>> getNormalizedString("chamanisme, de l’Antiquité…)")
+  'chamanisme de lantiquite...)'
+
+  >>> getNormalizedString("Abe Ce De ?")
+  'abe ce de'
+  >>> getNormalizedString("Abe Ce De !")
+  'abe ce de'
+  >>> getNormalizedString("Abe Ce De :")
+  'abe ce de'
+
+  >>> getNormalizedString("A. W. Bruna & zoon")
+  'a. w. bruna & zoon'
+  >>> getNormalizedString("A.W. Bruna & Zoon")
+  'a.w. bruna & zoon'
+  
+  """
+  noComma = s.replace(',', '')
+  noQuestionMark = noComma.replace('?', '')
+  noExclamationMark = noQuestionMark.replace('!', '')
+  noColon = noExclamationMark.replace(':', '')
+  return ud.normalize('NFKD', noColon).encode('ASCII', 'ignore').lower().strip().decode("utf-8")
+
+
+
+def extract_geonames(inputDataframe):
+    """This function creates a lookup dictionary based on geonames data where possible spellings of a place are the keys and their IDs the value.
+    >>> data1 = [
+    ... ["6693370","Bruxelles-Capitale","Bruxelles-Capitale","BRU,Brussel-Hoofdstad,Bruxelas-Capital","50.84877","4.34664","A","ADM2","BE","","BRU","BRU","","",0,"","26","Europe/Brussels","2016-12-19"],   
+    ... ["2797657","Gent","Gent","44021,Arrondissement de Gand,Gand,Gent,Ghent","51.07304","3.73664","A","ADM4","BE","","VLG","VOV","44","44021","262219","",4,"Europe/Brussels","2020-04-04"], 
+    ... ["2797659","Genovabeek","Genovabeek","Genovabeek,Genovevabeek","50.83222","5.01696","H","STM","BE","","VLG","","","",0,"","30","Europe/Brussels","2012-01-18"]]
+    >>> extract_geonames(pd.DataFrame(data1))
+    {'bru': '6693370', 'brussel-hoofdstad': '6693370', 'bruxelas-capital': '6693370', '44021': '2797657', 'arrondissement de gand': '2797657', 'gand': '2797657', 'gent': '2797657', 'ghent': '2797657', 'genovabeek': '2797659', 'genovevabeek': '2797659', 'bruxelles-capitale': '6693370'}
+
+    """ 
+    geo_ids = {}
+    g = inputDataframe
+
+    # Add the column with all the alternate spellings (comma-separated list) to the lookup
+    #
+    messy_column = dict(zip(g[3], g[0]))
+    for key, value in messy_column.items():
+        if isinstance(key, str):
+            new_keys = key.split(",")
+            for new_key in new_keys:
+                geo_ids[new_key] = value
+
+    # Also add the two main spellings to the lookup
+    #
+    geo_ids.update(dict(zip(g[1], g[0])))
+    geo_ids.update(dict(zip(g[2], g[0])))
+
+    geo_ids_normalized = {}
+
+    for key, value in geo_ids.items():
+        key_normalized = getNormalizedString(key)
+        geo_ids_normalized[key_normalized] = value
+
+    return geo_ids_normalized
+
 
 
 

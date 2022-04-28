@@ -10,34 +10,7 @@ import pandas as pd
 import re
 import glob
 import unicodedata as ud
-
-def getNormalizedString(s):
-    noComma = s.replace(',', '')
-    noQuestionMark = noComma.replace('?', '')
-    noExclamationMark = noQuestionMark.replace('!', '')
-    noColon = noExclamationMark.replace(':', '')
-    return ud.normalize('NFKD', noColon).encode('ASCII', 'ignore').lower().strip().decode("utf-8")
-
-def extract_geonames(filename):
-    geo_ids = {}
-    g = pd.read_csv(filename, delimiter='\t', header=None)
-    messy_column = dict(zip(g[3], g[0]))
-    for key, value in messy_column.items():
-        if isinstance(key, str):
-            new_keys = key.split(",")
-            for new_key in new_keys:
-                geo_ids[new_key] = value
-
-    geo_ids.update(dict(zip(g[1], g[0])))
-    geo_ids.update(dict(zip(g[2], g[0])))
-
-    geo_ids_normalized = {}
-
-    for key, value in geo_ids.items():
-        key_normalized = getNormalizedString(key)
-        geo_ids_normalized[key_normalized] = value
-
-    return geo_ids_normalized
+import utils
 
 def extract_places_tsv(df, columnname_places, columnname_countries):
     places = df[columnname_places].replace(to_replace=r'\[|\]|(\(.*?\))', value='', regex=True)
@@ -48,7 +21,7 @@ def extract_places_tsv(df, columnname_places, columnname_countries):
     places_clean = []
     for place in places:
         if type(place) is not float:
-            place = getNormalizedString(place)
+            place = utils.getNormalizedString(place)
             if ". - " in place:
                 place = place.replace(". - ", " ; ")
             elif " - " in place:
@@ -75,9 +48,12 @@ def main():
       parser.print_help()
       exit(1) 
 
-    be = extract_geonames(options.geonames_folder +"BE.txt")
-    fr = extract_geonames(options.geonames_folder +"FR.txt")
-    nl = extract_geonames(options.geonames_folder +"NL.txt")
+    beContent = pd.read_csv(options.geonames_folder + "BE.txt", delimiter='\t', header=None)
+    be = utils.extract_geonames(beContent)
+    frContent = pd.read_csv(options.geonames_folder + "FR.txt", delimiter='\t', header=None)
+    fr = utils.extract_geonames(frContent)
+    nlContent = pd.read_csv(options.geonames_folder + "NL.txt", delimiter='\t', header=None)
+    nl = utils.extract_geonames(nlContent)
 
 #    df = pd.read_csv(options.input_file, delimiter='\t', encoding= 'ISO-8859-1')
     df = pd.read_csv(options.input_file, delimiter=',', encoding= 'utf-8')
