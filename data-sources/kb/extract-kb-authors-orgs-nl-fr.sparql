@@ -1,0 +1,43 @@
+PREFIX kb: <http://data.bibliotheken.nl/def#>
+
+SELECT ?manifestation ?author ?authorID ?name ?isni ?viaf ?wikidata
+WHERE {
+
+  ?manifestation a schema:Book ;
+                 schema:inLanguage "fr" ;
+                 schema:translationOfWork/schema:inLanguage "nl" ;
+                 schema:author ?author .
+
+  OPTIONAL {
+    ?manifestation schema:publication ?publication .
+
+    OPTIONAL { ?publication schema:startDate ?publicationYear . }
+  }
+
+  ?author a schema:Organization .
+  OPTIONAL { ?author schema:mainEntityOfPage/kb:ppn ?authorID . }
+  OPTIONAL { ?author schema:name ?name . }
+
+  OPTIONAL { 
+    ?author schema:sameAs ?isniURI .
+    FILTER(regex(?isniURI, "isni", "i"))
+  }
+  BIND(STRAFTER(str(?isniURI), "isni.org/isni/") as ?isni)
+
+  OPTIONAL { 
+    ?author schema:sameAs ?viafURI .
+    FILTER(regex(?viafURI, "viaf", "i"))
+  }
+  BIND(STRAFTER(str(?viafURI), "viaf.org/viaf/") as ?viaf)
+
+  OPTIONAL { 
+    ?author schema:sameAs ?wdURI .
+    FILTER(regex(?wdURI, "wikidata", "i"))
+  }
+  BIND(STRAFTER(str(?wdURI), "wikidata.org/entity/") as ?wikidata)
+
+
+
+ 
+  FILTER( xsd:integer(str(?publicationYear)) > 1969 && xsd:integer(str(?publicationYear)) < 2021)
+}
