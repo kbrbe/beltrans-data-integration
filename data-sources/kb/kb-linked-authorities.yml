@@ -22,24 +22,28 @@ prefixes:
   up: "http://users.ugent.be/~tdenies/up/"
 
 variables:
-  sourceCONTFRNL: &sourceCONTFRNL ${RML_SOURCE_KB_CONT_FR_NL}
-  sourceCONTNLFR: &sourceCONTNLFR ${RML_SOURCE_KB_CONT_NL_FR}
-  sourceAUTFRNL: &sourceAUTFRNL ${RML_SOURCE_KB_AUT_FR_NL}
-  sourceAUTNLFR: &sourceAUTNLFR ${RML_SOURCE_KB_AUT_NL_FR}
+  sourceCONTPersonsFRNL: &sourceCONTPersonsFRNL ${RML_SOURCE_KB_CONT_PERSONS_FR_NL}
+  sourceCONTPersonsNLFR: &sourceCONTPersonsNLFR ${RML_SOURCE_KB_CONT_PERSONS_NL_FR}
+  sourceAUTPersonsFRNL: &sourceAUTPersonsFRNL ${RML_SOURCE_KB_AUT_PERSONS_FR_NL}
+  sourceAUTPersonsNLFR: &sourceAUTPersonsNLFR ${RML_SOURCE_KB_AUT_PERSONS_NL_FR}
+  sourceCONTOrgsFRNL: &sourceCONTOrgsFRNL ${RML_SOURCE_KB_CONT_ORGS_FR_NL}
+  sourceCONTOrgsNLFR: &sourceCONTOrgsNLFR ${RML_SOURCE_KB_CONT_ORGS_NL_FR}
+  sourceAUTOrgsFRNL: &sourceAUTOrgsFRNL ${RML_SOURCE_KB_AUT_ORGS_FR_NL}
+  sourceAUTOrgsNLFR: &sourceAUTOrgsNLFR ${RML_SOURCE_KB_AUT_ORGS_NL_FR}
 
 mappings:
 
 
   # ---------------------------------------------------------------------------
   #
-  authors:
+  authorsPersons:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates direct schema.org links for authors from the translated manifestation."
     sources:
-      - access: *sourceAUTFRNL
+      - access: *sourceAUTPersonsFRNL
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceAUTNLFR
+      - access: *sourceAUTPersonsNLFR
         referenceFormulation: csv
         delimiter: ',' 
     s: $(author)
@@ -106,14 +110,20 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  authorsISNI:
+  authorsPersonsISNI:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
     sources:
-      - access: *sourceAUTFRNL
+      - access: *sourceAUTPersonsFRNL
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceAUTNLFR
+      - access: *sourceAUTPersonsNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+      - access: *sourceAUTOrgsFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTOrgsNLFR
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:identifier_isni_p$(authorID)
@@ -128,14 +138,20 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  authorsVIAF:
+  authorsPersonsVIAF:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
     sources:
-      - access: *sourceAUTFRNL
+      - access: *sourceAUTPersonsFRNL
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceAUTNLFR
+      - access: *sourceAUTPersonsNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+      - access: *sourceAUTOrgsFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTOrgsNLFR
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:identifier_viaf_p$(authorID)
@@ -151,14 +167,20 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  authorsWikidata:
+  authorsPersonsWikidata:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for Wikidata identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated Wikidata subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'Wikidata' identifiers."
     sources:
-      - access: *sourceAUTFRNL
+      - access: *sourceAUTPersonsFRNL
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceAUTNLFR
+      - access: *sourceAUTPersonsNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+      - access: *sourceAUTOrgsFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTOrgsNLFR
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:identifier_wikidata_p$(authorID)
@@ -171,5 +193,57 @@ mappings:
       - [a, bf:Identifier]
       - [rdfs:label, "Wikidata"]
       - [rdf:value, $(wikidata)]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsOrgs:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates direct schema.org links for organizational authors from the translated manifestation."
+    sources:
+      - access: *sourceAUTOrgsFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTOrgsNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: $(author)
+    condition:
+      function: grel:string_startsWith
+      parameters:
+        - [grel:valueParameter, $(author)]
+        - [grel:string_sub, "http"] 
+    po:
+      - [a, schema:Organization]
+      - [dcterms:identifier, p$(authorID)]
+      - p: schema:name
+        o: $(name)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(name)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_isni_p$(authorID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isni)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_viaf_p$(authorID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(viaf)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_wikidata_p$(authorID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(wikidata)]
+            - [grel:valueParameter2, ""]
+
+
 
 

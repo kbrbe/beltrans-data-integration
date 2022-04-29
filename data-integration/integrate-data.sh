@@ -246,20 +246,28 @@ SUFFIX_KBR_BELGIANS_NORM="belgians-norm.csv"
 #
 SUFFIX_KB_TRL_FR_NL="kb-translations-fr-nl.csv"
 SUFFIX_KB_TRL_NL_FR="kb-translations-nl-fr.csv"
-SUFFIX_KB_CONT_FR_NL="kb-contributors-fr-nl.csv"
-SUFFIX_KB_CONT_NL_FR="kb-contributors-nl-fr.csv"
-SUFFIX_KB_AUT_FR_NL="kb-authors-fr-nl.csv"
-SUFFIX_KB_AUT_NL_FR="kb-authors-nl-fr.csv"
+SUFFIX_KB_CONT_PERSONS_FR_NL="kb-contributors-persons-fr-nl.csv"
+SUFFIX_KB_CONT_PERSONS_NL_FR="kb-contributors-persons-nl-fr.csv"
+SUFFIX_KB_CONT_ORGS_FR_NL="kb-contributors-orgs-fr-nl.csv"
+SUFFIX_KB_CONT_ORGS_NL_FR="kb-contributors-orgs-nl-fr.csv"
+SUFFIX_KB_AUT_PERSONS_FR_NL="kb-authors-persons-fr-nl.csv"
+SUFFIX_KB_AUT_PERSONS_NL_FR="kb-authors-persons-nl-fr.csv"
+SUFFIX_KB_AUT_ORGS_FR_NL="kb-authors-orgs-fr-nl.csv"
+SUFFIX_KB_AUT_ORGS_NL_FR="kb-authors-orgs-nl-fr.csv"
 
 SUFFIX_KB_TRL_ISBN_NL_FR="kb-translations-with-formatted-isbn-nl-fr.csv"
 SUFFIX_KB_TRL_ISBN_FR_NL="kb-translations-with-formatted-isbn-fr-nl.csv"
 
 GET_KB_TRL_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-manifestations-fr-nl.sparql"
 GET_KB_TRL_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-manifestations-nl-fr.sparql"
-GET_KB_CONT_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-contributors-fr-nl.sparql"
-GET_KB_CONT_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-contributors-nl-fr.sparql"
-GET_KB_AUT_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-authors-fr-nl.sparql"
-GET_KB_AUT_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-authors-nl-fr.sparql"
+GET_KB_CONT_PERSONS_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-contributors-persons-fr-nl.sparql"
+GET_KB_CONT_PERSONS_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-contributors-persons-nl-fr.sparql"
+GET_KB_CONT_ORGS_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-contributors-orgs-fr-nl.sparql"
+GET_KB_CONT_ORGS_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-contributors-orgs-nl-fr.sparql"
+GET_KB_AUT_PERSONS_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-authors-persons-fr-nl.sparql"
+GET_KB_AUT_PERSONS_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-authors-persons-nl-fr.sparql"
+GET_KB_AUT_ORGS_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-authors-orgs-fr-nl.sparql"
+GET_KB_AUT_ORGS_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-authors-orgs-nl-fr.sparql"
 
 # DATA SOURCE - BNF
 #
@@ -581,10 +589,14 @@ function extractKB {
   #
   kbTranslationsFRNL="$integrationName/kb/translations/$SUFFIX_KB_TRL_FR_NL"
   kbTranslationsNLFR="$integrationName/kb/translations/$SUFFIX_KB_TRL_NL_FR"
-  kbContributorsFRNL="$integrationName/kb/agents/$SUFFIX_KB_CONT_FR_NL"
-  kbContributorsNLFR="$integrationName/kb/agents/$SUFFIX_KB_CONT_NL_FR"
-  kbAuthorsFRNL="$integrationName/kb/agents/$SUFFIX_KB_AUT_FR_NL"
-  kbAuthorsNLFR="$integrationName/kb/agents/$SUFFIX_KB_AUT_NL_FR"
+  kbContributorsPersonsFRNL="$integrationName/kb/agents/$SUFFIX_KB_CONT_PERSONS_FR_NL"
+  kbContributorsPersonsNLFR="$integrationName/kb/agents/$SUFFIX_KB_CONT_PERSONS_NL_FR"
+  kbContributorsOrgsFRNL="$integrationName/kb/agents/$SUFFIX_KB_CONT_ORGS_FR_NL"
+  kbContributorsOrgsNLFR="$integrationName/kb/agents/$SUFFIX_KB_CONT_ORGS_NL_FR"
+  kbAuthorsPersonsFRNL="$integrationName/kb/agents/$SUFFIX_KB_AUT_PERSONS_FR_NL"
+  kbAuthorsPersonsNLFR="$integrationName/kb/agents/$SUFFIX_KB_AUT_PERSONS_NL_FR"
+  kbAuthorsOrgsFRNL="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_FR_NL"
+  kbAuthorsOrgsNLFR="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_NL_FR"
 
   kbTranslationsWithISBNFRNL="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_FR_NL"
   kbTranslationsWithISBNNLFR="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_NL_FR"
@@ -603,18 +615,32 @@ function extractKB {
   echo "EXTRACTION - Compute formatted ISBN10 and ISBN13 identifiers NL - FR"
   time python $SCRIPT_ADD_ISBN_10_13 -i $kbTranslationsNLFR -o $kbTranslationsWithISBNNLFR
 
-  echo "EXTRACTION - Extract KB translation contributors FR - NL"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_FR_NL_QUERY_FILE" "$kbContributorsFRNL"
+  echo "EXTRACTION - Extract KB translation contributors persons FR - NL"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_FR_NL_QUERY_FILE" "$kbContributorsPersonsFRNL"
 
-  echo "EXTRACTION - Extract KB translation contributors NL - FR"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_NL_FR_QUERY_FILE" "$kbContributorsNLFR"
+  echo "EXTRACTION - Extract KB translation contributors persons NL - FR"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_NL_FR_QUERY_FILE" "$kbContributorsPersonsNLFR"
 
-  echo "EXTRACTION - Extract KB translation authors FR - NL"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_FR_NL_QUERY_FILE" "$kbAuthorsFRNL"
+  echo "EXTRACTION - Extract KB translation authors persons FR - NL"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_FR_NL_QUERY_FILE" "$kbAuthorsPersonsFRNL"
 
-  echo "EXTRACTION - Extract KB translation authors NL - FR"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_NL_FR_QUERY_FILE" "$kbAuthorsNLFR"
+  echo "EXTRACTION - Extract KB translation authors persons NL - FR"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_NL_FR_QUERY_FILE" "$kbAuthorsPersonsNLFR"
+
+
+  echo "EXTRACTION - Extract KB translation contributors orgs FR - NL"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_FR_NL_QUERY_FILE" "$kbContributorsOrgsFRNL"
+
+  echo "EXTRACTION - Extract KB translation contributors orgs NL - FR"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_NL_FR_QUERY_FILE" "$kbContributorsOrgsNLFR"
+
+  echo "EXTRACTION - Extract KB translation authors orgs FR - NL"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_FR_NL_QUERY_FILE" "$kbAuthorsOrgsFRNL"
+
+  echo "EXTRACTION - Extract KB translation authors orgs NL - FR"
+  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_NL_FR_QUERY_FILE" "$kbAuthorsOrgsNLFR"
 }
+
 
 # -----------------------------------------------------------------------------
 function extractBnF {
@@ -777,10 +803,15 @@ function transformKB {
   export RML_SOURCE_KB_TRL_FR_NL="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_FR_NL"
   export RML_SOURCE_KB_TRL_NL_FR="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_NL_FR"
 
-  export RML_SOURCE_KB_CONT_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_CONT_FR_NL"
-  export RML_SOURCE_KB_CONT_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_CONT_NL_FR"
-  export RML_SOURCE_KB_AUT_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_AUT_FR_NL"
-  export RML_SOURCE_KB_AUT_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_AUT_NL_FR"
+  export RML_SOURCE_KB_CONT_PERSONS_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_CONT_PERSONS_FR_NL"
+  export RML_SOURCE_KB_CONT_PERSONS_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_CONT_PERSONS_NL_FR"
+  export RML_SOURCE_KB_AUT_PERSONS_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_AUT_PERSONS_FR_NL"
+  export RML_SOURCE_KB_AUT_PERSONS_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_AUT_PERSONS_NL_FR"
+
+  export RML_SOURCE_KB_CONT_ORGS_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_CONT_ORGS_FR_NL"
+  export RML_SOURCE_KB_CONT_ORGS_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_CONT_ORGS_NL_FR"
+  export RML_SOURCE_KB_AUT_ORGS_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_FR_NL"
+  export RML_SOURCE_KB_AUT_ORGS_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_NL_FR"
 
   # 2) execute the mapping
   echo "TRANSFORMATION - Map KB translations FR-NL ..."

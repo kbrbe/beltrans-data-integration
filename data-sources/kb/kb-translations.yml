@@ -24,10 +24,14 @@ prefixes:
 variables:
   sourceTRLFRNL: &sourceTRLFRNL ${RML_SOURCE_KB_TRL_FR_NL}
   sourceTRLNLFR: &sourceTRLNLFR ${RML_SOURCE_KB_TRL_NL_FR}
-  sourceCONTFRNL: &sourceCONTFRNL ${RML_SOURCE_KB_CONT_FR_NL}
-  sourceCONTNLFR: &sourceCONTNLFR ${RML_SOURCE_KB_CONT_NL_FR}
-  sourceAUTFRNL: &sourceAUTFRNL ${RML_SOURCE_KB_AUT_FR_NL}
-  sourceAUTNLFR: &sourceAUTNLFR ${RML_SOURCE_KB_AUT_NL_FR}
+  sourceCONTPersonsFRNL: &sourceCONTPersonsFRNL ${RML_SOURCE_KB_CONT_PERSONS_FR_NL}
+  sourceCONTPersonsNLFR: &sourceCONTPersonsNLFR ${RML_SOURCE_KB_CONT_PERSONS_NL_FR}
+  sourceAUTPersonsFRNL: &sourceAUTPersonsFRNL ${RML_SOURCE_KB_AUT_PERSONS_FR_NL}
+  sourceAUTPersonsNLFR: &sourceAUTPersonsNLFR ${RML_SOURCE_KB_AUT_PERSONS_NL_FR}
+  sourceCONTOrgsFRNL: &sourceCONTOrgsFRNL ${RML_SOURCE_KB_CONT_ORGS_FR_NL}
+  sourceCONTOrgsNLFR: &sourceCONTOrgsNLFR ${RML_SOURCE_KB_CONT_ORGS_NL_FR}
+  sourceAUTOrgsFRNL: &sourceAUTOrgsFRNL ${RML_SOURCE_KB_AUT_ORGS_FR_NL}
+  sourceAUTOrgsNLFR: &sourceAUTOrgsNLFR ${RML_SOURCE_KB_AUT_ORGS_NL_FR}
 
 mappings:
 
@@ -151,10 +155,16 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates direct schema.org links for authors from the translated manifestation."
     sources:
-      - access: *sourceAUTFRNL
+      - access: *sourceAUTPersonsFRNL
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceAUTNLFR
+      - access: *sourceAUTPersonsNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+      - access: *sourceAUTOrgsFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTOrgsNLFR
         referenceFormulation: csv
         delimiter: ',' 
     s: $(manifestation)
