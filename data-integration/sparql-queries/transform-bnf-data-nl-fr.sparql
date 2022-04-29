@@ -34,8 +34,8 @@ INSERT {
                   marcrel:ill ?illustrator ;
                   marcrel:sce ?scenarist ;
                   schema:locationCreated ?manifestationLocation ;
-                  schema:inLanguage lang:dut ;
-                  btm:sourceLanguage lang:fre ;
+                  schema:inLanguage lang:fre ;
+                  btm:sourceLanguage lang:dut ;
                   rdagroup1elements:publishersName ?publisherName ;
                   schema:publisher ?publisher ;
                   rdfs:comment ?note ;
