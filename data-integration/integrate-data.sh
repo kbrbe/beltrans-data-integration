@@ -1376,6 +1376,7 @@ function loadBnF {
   local bnfTranslationsFRNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_NL_LD"
   local bnfTranslationsNLFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_FR_LD"
   local bnfContributorData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_LD"
+  local bnfContributorDataOrgs="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_ORGS_LD"
   local bnfContributionLinksData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_CONT_LINKS_LD"
   local bnfContributorIsniData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_ISNI_LD"
   local bnfContributorVIAFData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
@@ -1387,8 +1388,11 @@ function loadBnF {
   echo "Load BNF translations NL-FR ..."
   uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfTranslationsNLFR" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR"
 
-  echo "Load BnF contributors ..."
+  echo "Load BnF contributors persons ..."
   uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT"
+
+  echo "Load BnF contributors organizations ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributorDataOrgs" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_CONT"
 
   echo "Load BnF publication-contributor links ..."
   uploadData "$TRIPLE_STORE_NAMESPACE" "$bnfContributionLinksData" "$FORMAT_RDF_XML" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS"

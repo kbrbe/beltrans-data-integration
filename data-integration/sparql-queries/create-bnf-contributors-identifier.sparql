@@ -27,7 +27,8 @@ WHERE {
   graph <http://bnf-contributors> {
     ?person foaf:focus ?personAbout .
 
-    ?personAbout a foaf:Person .
+    ?personAbout a ?contributorType .
+    FILTER( ?contributorType IN (foaf:Person, foaf:Organization) )
   }             
   BIND(strafter(str(?person), "12148/") AS ?identifier)
 }

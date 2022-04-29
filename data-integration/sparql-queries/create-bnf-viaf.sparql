@@ -32,9 +32,10 @@ WHERE {
 
   graph <http://bnf-contributors> { 
     ?person foaf:focus ?personAbout .
-    ?personAbout a foaf:Person ;
+    ?personAbout a ?contributorType ;
                  dcterms:identifier ?identifier .
   }
+  FILTER( ?contributorType IN (foaf:Person, foaf:Organization) )
 
   graph <http://bnf-contributors-viaf> { ?person skos:exactMatch ?viafURI . }            
 
