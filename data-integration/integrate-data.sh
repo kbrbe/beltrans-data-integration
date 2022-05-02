@@ -149,7 +149,8 @@ LINK_QUERY_CONT_ILLUSTRATORS="sparql-queries/link-beltrans-manifestations-illust
 LINK_QUERY_CONT_SCENARISTS="sparql-queries/link-beltrans-manifestations-scenarists.sparql"
 
 DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
-DATA_PROFILE_QUERY_FILE_CONT="dataprofile-contributors.sparql"
+DATA_PROFILE_QUERY_FILE_CONT_PERSONS="dataprofile-contributors-persons.sparql"
+DATA_PROFILE_QUERY_FILE_CONT_ORGS="dataprofile-contributors-orgs.sparql"
 DATA_PROFILE_QUERY_FILE_KBR="dataprofile-kbr.sparql"
 DATA_PROFILE_QUERY_FILE_BNF="dataprofile-bnf.sparql"
 DATA_PROFILE_AGG_QUERY_FILE_KBR="dataprofile-aggregated-kbr.sparql"
@@ -163,8 +164,9 @@ DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 
 SUFFIX_DATA_PROFILE_FILE_AGG="integrated-data.csv"
-SUFFIX_DATA_PROFILE_CONT_ALL_DATA_FILE="contributors-all-info.csv"
-SUFFIX_DATA_PROFILE_CONT_FILE="contributors.csv"
+SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-perons-all-info.csv"
+SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE="contributors-persons.csv"
+SUFFIX_DATA_PROFILE_CONT_ORGS_FILE="contributors-orgs.csv"
 SUFFIX_DATA_PROFILE_FILE_KBR="integrated-data-kbr-not-filtered.csv"
 SUFFIX_DATA_PROFILE_FILE_BNF="integrated-data-bnf-not-filtered.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE="integrated-data-contributors-belgian-not-filtered.csv"
@@ -504,16 +506,23 @@ function query {
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   queryFileAgg="$DATA_PROFILE_QUERY_FILE_AGG"
-  queryFileCont="$DATA_PROFILE_QUERY_FILE_CONT"
+  queryFileContPersons="$DATA_PROFILE_QUERY_FILE_CONT_PERSONS"
+  queryFileContOrgs="$DATA_PROFILE_QUERY_FILE_CONT_ORGS"
 
   outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_AGG"
-  outputFileContAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_DATA_FILE"
+
+  # persons will be "all data" as it contains several birth and death dates, it will be filtered in the postprocessing
+  outputFileContPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
+  outputFileContOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
 
   echo "Creating the dataprofile CSV file ..."
   queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
 
-  echo "Creating the contributor CSV file ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileCont" "$ENV_SPARQL_ENDPOINT" "$outputFileContAllData"
+  echo "Creating the contributor persons CSV file ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContPersons" "$ENV_SPARQL_ENDPOINT" "$outputFileContPersonsAllData"
+
+  echo "Creating the contributor orgs CSV file ..."
+  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContOrgs" "$ENV_SPARQL_ENDPOINT" "$outputFileContOrgs"
 
 }
 
@@ -523,21 +532,23 @@ function postprocess {
 
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
-  contributorsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_DATA_FILE"
-  contributors="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_FILE"
+  contributorsPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
+  contributorsPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE"
+
+  contributorsOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
 
   excelData="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_DATA"
 
   source ./py-integration-env/bin/activate
 
   echo "Postprocess contributor data ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -i $contributorsAllData -o $contributors
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -i $contributorsPersonsAllData -o $contributorsPersons
 
   echo "Derive missing country names from place names ..."
   time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedData -o $integratedDataEnriched -g geonames/ -c targetCountryOfPublication -p targetKBRPlaceOfPublication
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributors -s "translations" -s "contributors" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs -s "translations" -s "person contributors" "org contributors" -o $excelData
 
 }
 
