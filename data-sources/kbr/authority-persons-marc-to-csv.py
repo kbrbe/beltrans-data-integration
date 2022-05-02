@@ -32,7 +32,7 @@ def addAuthorityFieldsToCSV(elem, writer, natWriter, stats):
   gender = utils.getElementValue(elem.find('./marc:datafield[@tag="375"]/marc:subfield[@code="a"]', ALL_NS))
   birthDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="f"]', ALL_NS))
   deathDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="g"]', ALL_NS))
-  isniRaw = utils.getElementValue(elem.xpath('./marc:datafield[@tag="024"]/marc:subfield[@code="2" and text()="isni"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
+  isniRaw = utils.getElementValue(elem.xpath('./marc:datafield[@tag="024"]/marc:subfield[@code="2" and (text()="isni" or text()="ISNI")]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
   viafRaw = utils.getElementValue(elem.xpath('./marc:datafield[@tag="024"]/marc:subfield[@code="2" and text()="viaf"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
   countryCode = utils.getElementValue(elem.find('./marc:datafield[@tag="043"]/marc:subfield[@code="c"]', ALL_NS))
  
