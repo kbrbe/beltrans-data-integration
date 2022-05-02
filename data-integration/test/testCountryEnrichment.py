@@ -34,7 +34,9 @@ class TestCountryEnrichment(unittest.TestCase):
     with open(cls.tempEnriched, 'r') as fileIn:
       csvReader = csv.DictReader(fileIn, delimiter=',')
       csvData = [dict(d) for d in csvReader]
+      cls.rawData = csvData
       cls.data = CountryEnrichmentTestHelper(csvData)
+
 
   # ---------------------------------------------------------------------------
   def testEmptyLocationEmptyCountry(self):
@@ -46,16 +48,31 @@ class TestCountryEnrichment(unittest.TestCase):
   def testBelgiumFoundForGhent(self):
     """When the location is Ghent the country should be Belgium"""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("1")
-    self.assertEqual(foundCountry, "Belgium", msg= f'For the location Ghent the country was {foundCountry} instead of Belgium')
+    self.assertEqual(foundCountry, "Belgium", msg= f'For the location Ghent the country was "{foundCountry}" instead of Belgium')
 
   # ---------------------------------------------------------------------------
   def testBelgiumFoundForBruxeles(self):
     """When the location is Bruxeles the country should be Belgium"""
     foundCountry = TestCountryEnrichment.data.getKBRdentifierCountry("4")
-    self.assertEqual(foundCountry, "Belgium", msg= f'For the location Bruxeles the country was {foundCountry} instead of Belgium')
+    self.assertEqual(foundCountry, "Belgium", msg= f'For the location Bruxeles the country was "{foundCountry}" instead of Belgium')
 
   # ---------------------------------------------------------------------------
   def testBelgiumFoundForBruxeles(self):
     """When the location is Brussels the country should be Belgium"""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("4")
-    self.assertEqual(foundCountry, "Belgium", msg= f'For the location Brussels the country was {foundCountry} instead of Belgium')
+    self.assertEqual(foundCountry, "Belgium", msg= f'For the location Brussels the country was "{foundCountry}" instead of Belgium')
+
+  # ---------------------------------------------------------------------------
+  def testCorrectKBRIDs(self):
+    """The KBR identifiers of the input should be the same in the output."""
+    identifiers = []
+    for row in TestCountryEnrichment.rawData:
+      identifiers.append(row['targetKBRIdentifier'])
+    self.assertEqual(identifiers, ['1','2','3','4','5','123','6'], msg="Identifiers contain non expected values")
+
+  # ---------------------------------------------------------------------------
+  def testBelgiumFoundForGentWithCountryInParenthesis(self):
+    """When the location is 'Gent (Belgium)' the country should be Belgium"""
+    foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("6")
+    self.assertEqual(foundCountry, "Belgium", msg= f'For the location [Gent] the country was "{foundCountry}" instead of Belgium')
+
