@@ -76,3 +76,8 @@ class TestCountryEnrichment(unittest.TestCase):
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("6")
     self.assertEqual(foundCountry, "Belgium", msg= f'For the location [Gent] the country was "{foundCountry}" instead of Belgium')
 
+  # ---------------------------------------------------------------------------
+  def testKeepCountry(self):
+    """When the location is Bruges with country MyBelgium the country should not be altered"""
+    foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("3")
+    self.assertEqual(foundCountry, "MyBelgium", msg= f'For the location Bruges and country MyBelgium the country was "{foundCountry}" instead of the non-altered MyBelgium')
