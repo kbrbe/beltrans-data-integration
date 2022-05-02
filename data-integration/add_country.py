@@ -12,28 +12,6 @@ import glob
 import unicodedata as ud
 import utils
 
-def extract_places_tsv(df, columnname_places, columnname_countries):
-    places = df[columnname_places].replace(to_replace=r'\[|\]|(\(.*?\))', value='', regex=True)
-    countries = df[columnname_countries]
-    places = list(places)
-    countries = list(countries)
-
-    places_clean = []
-    for place in places:
-        if type(place) is not float:
-            place = utils.getNormalizedString(place)
-            if ". - " in place:
-                place = place.replace(". - ", " ; ")
-            elif " - " in place:
-                place = place.replace(" - ", " ; ")
-            places_clean.append(place.strip())
-        else:
-            places_clean.append("")
-
-    place_country = list(zip(places_clean, countries))
-
-    return place_country
-
 def main():
     """This script fills out missing countries based on the place name (for Belgium, France & The Netherlands)"""
     parser = OptionParser(usage="usage: %prog [options]")
@@ -64,7 +42,7 @@ def main():
 
     df = df.drop('country1', 1)
 
-    places = extract_places_tsv(df, options.column_with_places, options.column_with_country_names)
+    places = utils.extract_places_tsv(df, options.column_with_places, options.column_with_country_names)
 
     countries_new = []
     for place in places:

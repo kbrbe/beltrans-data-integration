@@ -522,6 +522,33 @@ def extract_geonames(inputDataframe):
 
     return geo_ids_normalized
 
+def extract_places_tsv(df, columnname_places, columnname_countries):
+    """This function extracts places from the given dataframe
+    >>> data1 = pd.DataFrame([{"place": "Arles;Montréal", "country": ""},{"place": "", "country": ""},{"place": "Gent", "country": ""}, {"place": "Brussels ; Paris", "country": ""}, {"place": "[Marcinelle]", "country": ""}])
+    >>> extract_places_tsv(data1, "place", "country")
+    [('arles;montreal', ''), ('', ''), ('gent', ''), ('brussels ; paris', ''), ('marcinelle', '')]
+    """
+    places = df[columnname_places].replace(to_replace=r'\[|\]|(\(.*?\))', value='', regex=True)
+    countries = df[columnname_countries]
+    places = list(places)
+    countries = list(countries)
+
+    places_clean = []
+    for place in places:
+        if type(place) is not float:
+            place = getNormalizedString(place)
+            if ". - " in place:
+                place = place.replace(". - ", " ; ")
+            elif " - " in place:
+                place = place.replace(" - ", " ; ")
+            places_clean.append(place.strip())
+        else:
+            places_clean.append("")
+
+    place_country = list(zip(places_clean, countries))
+
+    return place_country
+
 
 
 
