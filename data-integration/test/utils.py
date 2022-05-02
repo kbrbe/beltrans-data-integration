@@ -394,7 +394,53 @@ def getContributorData(df, role, colNamesRaw):
   df = df.rename(columns=renameDict)
   return df[colNamesRaw]
 
+# ---------------------------------------------------------------------------
+def getDfCellValue(df, idColName, idColValue, colName):
+    """Returns the value of a specific cell or raises errors in case the row isn't found or more than one value is found.
+    >>> data = pd.DataFrame([{"myID": 1, "name": "john", "myCol": "sven (12, 34)"},{"myID": 2, "name": "jane"}])
+    >>> getDfCellValue(data, "myID", 1, "myCol")
+    'sven (12, 34)'
+    >>> getDfCellValue(data, "myID", 11, "myCol")
+    Traceback (most recent call last):
+     ...
+    ValueError: No row with ID "11" in column "myID" found!
+    >>> getDfCellValue(data, "myIDColumnWhichDoesNotExist", 11, "myCol")
+    Traceback (most recent call last):
+     ...
+    KeyError: 'ID column "myIDColumnWhichDoesNotExist" does not exist!'
+    >>> getDfCellValue(data, "myID", 1, "myColWhichDoesNotExist")
+    Traceback (most recent call last):
+     ...
+    KeyError: 'Value column "myColWhichDoesNotExist" does not exist!'
+    >>> data2 = pd.DataFrame([{"myID": 1, "name": "john", "myCol": "sven (12, 34)"},{"myID": 1, "name": "jane"}])
+    >>> getDfCellValue(data2, "myID", 1, "myCol")
+    Traceback (most recent call last):
+     ...
+    ValueError: More than one row with ID "1" in column "myID" found!
+    >>> data3 = pd.DataFrame([{"targetTextKBRIdentifier": 1, "name": "john", "targetTextBnFIdentifier": "", "name": ""},{"targetTextKBRIdentifier": 2, "name": "jane"}, {"targetTextBnFIdentifier": "2", "name": "jane"}])
+    >>> getDfCellValue(data3, "targetTextKBRIdentifier", 2, "targetTextBnFIdentifier")
+    Traceback (most recent call last):
+     ...
+    KeyError: 'No value found in column "targetTextKBRIdentifier"'
+    """
+    if idColName not in df:
+      raise KeyError(f'ID column "{idColName}" does not exist!')
+    if colName not in df:
+      raise KeyError(f'Value column "{colName}" does not exist!')
+    
+    selection = (df.loc[df[idColName] == idColValue, colName])
 
+    if selection.size > 1:
+      raise ValueError(f'More than one row with ID "{idColValue}" in column "{idColName}" found!')
+    elif selection.size == 1:
+      if selection.isna().all():
+        raise KeyError(f'No value found in column "{idColName}"')
+      else:
+        return selection.item()
+      return selection
+    else:
+      raise ValueError(f'No row with ID "{idColValue}" in column "{idColName}" found!')
+ 
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":

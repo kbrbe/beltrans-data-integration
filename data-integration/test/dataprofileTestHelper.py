@@ -1,4 +1,5 @@
 import pandas as pd
+import utils
 
 class DataprofileTestHelper:
 
@@ -6,7 +7,7 @@ class DataprofileTestHelper:
   def __init__(self, data):
     self.df = pd.DataFrame(data)
     #print(self.df)
-    print(self.df[['targetTextIdentifier', 'authorIdentifiers', 'illustratorIdentifiers', 'scenaristIdentifiers']])
+    #print(self.df[['targetTextIdentifier', 'authorIdentifiers', 'illustratorIdentifiers', 'scenaristIdentifiers']])
 
   # ---------------------------------------------------------------------------
   def numberRows(self):
@@ -28,7 +29,7 @@ class DataprofileTestHelper:
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      value = self._getCellValue("targetTextIdentifier", identifier, "targetTextIdentifier")
+      value = utils.getDfCellValue(self.df, "targetTextIdentifier", identifier, "targetTextIdentifier")
       if value == identifier:
         return True
       else:
@@ -49,7 +50,7 @@ class DataprofileTestHelper:
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      value = self._getCellValue("targetTextKBRIdentifier", identifier, "targetTextKBRIdentifier")
+      value = utils.getDfCellValue(self.df, "targetTextKBRIdentifier", identifier, "targetTextKBRIdentifier")
       if value == identifier:
         return True
       else:
@@ -71,7 +72,7 @@ class DataprofileTestHelper:
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      value = self._getCellValue("targetTextBnFIdentifier", identifier, "targetTextBnFIdentifier")
+      value = utils.getDfCellValue(self.df, "targetTextBnFIdentifier", identifier, "targetTextBnFIdentifier")
       if value == identifier:
         return True
       else:
@@ -92,7 +93,7 @@ class DataprofileTestHelper:
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      value = self._getCellValue("targetTextKBIdentifier", identifier, "targetTextKBIdentifier")
+      value = utils.getDfCellValue(self.df, "targetTextKBIdentifier", identifier, "targetTextKBIdentifier")
       if value == identifier:
         return True
       else:
@@ -139,7 +140,7 @@ class DataprofileTestHelper:
      ...
     ValueError: More than one row with ID "2" in column "targetTextKBRIdentifier" found!
     """
-    value = self._getCellValue('targetTextKBRIdentifier', kbrIdentifier, 'targetTextBnFIdentifier')
+    value = utils.getDfCellValue(self.df, 'targetTextKBRIdentifier', kbrIdentifier, 'targetTextBnFIdentifier')
     if value == bnfIdentifier:
       return True
     else:
@@ -182,7 +183,7 @@ class DataprofileTestHelper:
      ...
     ValueError: More than one row with ID "2" in column "targetTextKBRIdentifier" found!
     """
-    value = self._getCellValue('targetTextKBRIdentifier', kbrIdentifier, 'targetTextKBIdentifier')
+    value = utils.getDfCellValue(self.df, 'targetTextKBRIdentifier', kbrIdentifier, 'targetTextKBIdentifier')
     if value == kbIdentifier:
       return True
     else:
@@ -225,7 +226,7 @@ class DataprofileTestHelper:
      ...
     ValueError: More than one row with ID "2" in column "targetTextKBIdentifier" found!
     """
-    value = self._getCellValue('targetTextKBIdentifier', kbIdentifier, 'targetTextBnFIdentifier')
+    value = utils.getDfCellValue(self.df, 'targetTextKBIdentifier', kbIdentifier, 'targetTextBnFIdentifier')
     if value == bnfIdentifier:
       return True
     else:
@@ -245,7 +246,7 @@ class DataprofileTestHelper:
     >>> data.targetIdentifierContainsAuthorString(1, "12")
     True
     """
-    selection = self._getCellValue('targetTextIdentifier', identifier, 'authorIdentifiers')
+    selection = utils.getDfCellValue(self.df, 'targetTextIdentifier', identifier, 'authorIdentifiers')
     return (authorString in selection)
 
   # ---------------------------------------------------------------------------
@@ -259,7 +260,7 @@ class DataprofileTestHelper:
     >>> data.targetIdentifierContainsIllustratorString(1, "12")
     True
     """
-    selection = self._getCellValue('targetTextIdentifier', identifier, 'illustratorIdentifiers')
+    selection = utils.getDfCellValue(self.df, 'targetTextIdentifier', identifier, 'illustratorIdentifiers')
     return (illustratorString in selection)
 
   # ---------------------------------------------------------------------------
@@ -273,60 +274,10 @@ class DataprofileTestHelper:
     >>> data.targetIdentifierContainsScenaristString(1, "12")
     True
     """
-    selection = self._getCellValue('targetTextIdentifier', identifier, 'scenaristIdentifiers')
+    selection = utils.getDfCellValue(self.df, 'targetTextIdentifier', identifier, 'scenaristIdentifiers')
     return (scenaristString in selection)
 
-
-
-
-  # ---------------------------------------------------------------------------
-  def _getCellValue(self, idColName, idColValue, colName):
-    """Returns the value of a specific cell or raises errors in case the row isn't found or more than one value is found.
-    >>> data = DataprofileTestHelper([{"myID": 1, "name": "john", "myCol": "sven (12, 34)"},{"myID": 2, "name": "jane"}])
-    >>> data._getCellValue("myID", 1, "myCol")
-    'sven (12, 34)'
-    >>> data._getCellValue("myID", 11, "myCol")
-    Traceback (most recent call last):
-     ...
-    ValueError: No row with ID "11" in column "myID" found!
-    >>> data._getCellValue("myIDColumnWhichDoesNotExist", 11, "myCol")
-    Traceback (most recent call last):
-     ...
-    KeyError: 'ID column "myIDColumnWhichDoesNotExist" does not exist!'
-    >>> data._getCellValue("myID", 1, "myColWhichDoesNotExist")
-    Traceback (most recent call last):
-     ...
-    KeyError: 'Value column "myColWhichDoesNotExist" does not exist!'
-    >>> data2 = DataprofileTestHelper([{"myID": 1, "name": "john", "myCol": "sven (12, 34)"},{"myID": 1, "name": "jane"}])
-    >>> data2._getCellValue("myID", 1, "myCol")
-    Traceback (most recent call last):
-     ...
-    ValueError: More than one row with ID "1" in column "myID" found!
-    >>> data3 = DataprofileTestHelper([{"targetTextKBRIdentifier": 1, "name": "john", "targetTextBnFIdentifier": "", "name": ""},{"targetTextKBRIdentifier": 2, "name": "jane"}, {"targetTextBnFIdentifier": "2", "name": "jane"}])
-    >>> data3._getCellValue("targetTextKBRIdentifier", 2, "targetTextBnFIdentifier")
-    Traceback (most recent call last):
-     ...
-    KeyError: 'No value found in column "targetTextKBRIdentifier"'
-    """
-    if idColName not in self.df:
-      raise KeyError(f'ID column "{idColName}" does not exist!')
-    if colName not in self.df:
-      raise KeyError(f'Value column "{colName}" does not exist!')
-    
-    selection = (self.df.loc[self.df[idColName] == idColValue, colName])
-
-    if selection.size > 1:
-      raise ValueError(f'More than one row with ID "{idColValue}" in column "{idColName}" found!')
-    elif selection.size == 1:
-      if selection.isna().all():
-        raise KeyError(f'No value found in column "{idColName}"')
-      else:
-        return selection.item()
-      return selection
-    else:
-      raise ValueError(f'No row with ID "{idColValue}" in column "{idColName}" found!')
  
-    
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
   import doctest
