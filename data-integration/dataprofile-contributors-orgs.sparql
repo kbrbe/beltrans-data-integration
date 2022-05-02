@@ -1,0 +1,103 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix bio: <http://vocab.org/bio/0.1/>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
+
+SELECT DISTINCT
+  ?contributorID
+  (group_concat(distinct ?contributorLabel;SEPARATOR=';') AS ?name)
+  (group_concat(distinct ?kbrID;SEPARATOR=';') AS ?kbrIDs)
+  (group_concat(distinct ?bnfID;SEPARATOR=';') AS ?bnfIDs)
+  (group_concat(distinct ?ntaID;SEPARATOR=';') AS ?ntaIDs)
+  (group_concat(distinct ?isni;SEPARATOR=';') AS ?isniIDs)
+  (group_concat(distinct ?viaf;SEPARATOR=';') AS ?viafIDs)
+  (group_concat(distinct ?wikidata;SEPARATOR=';') AS ?wikidataIDs)
+WHERE {
+  graph <http://beltrans-contributors> {
+    ?contributorURI a schema:Organization ;
+                    dcterms:identifier ?contributorID .
+  }
+
+  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabel . } }
+
+ 
+  # ISNI
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> {
+      ?contributorURI bf:identifiedBy ?isniEntity .
+      ?isniEntity a bf:Isni ;
+                  rdf:value ?isni .
+    } 
+
+    BIND( IRI(CONCAT("https://isni.org/isni/", str(?isni))) as ?isniURI)
+    OPTIONAL { graph <http://isni-rdf> { ?isniURI schema:birthDate ?isniBirthDate . } }
+    OPTIONAL { graph <http://isni-rdf> { ?isniURI schema:deathDate ?isniDeathDate . } }
+  }
+
+  # VIAF
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> {
+      ?contributorURI bf:identifiedBy ?viafEntity .
+      ?viafEntity a bf:Identifier ;
+                  rdfs:label "VIAF" ;
+                  rdf:value ?viaf .
+    } 
+  }
+
+  # Wikidata
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> {
+      ?contributorURI bf:identifiedBy ?wdEntity .
+      ?wdEntity a bf:Identifier ;
+                rdfs:label "Wikidata" ;
+                rdf:value ?wikidata .
+    } 
+  }
+
+
+  # SOURCE DATA: KBR
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?kbrURI . } 
+    graph <http://kbr-linked-authorities> {
+      ?kbrURI a schema:Person ;
+              dcterms:identifier ?kbrID .
+    }
+  }
+
+  # SOURCE DATA: BnF
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?bnfURI . } 
+    graph <http://bnf-contributors> {
+      ?bnfURI a foaf:Person ;
+              dcterms:identifier ?bnfID .
+    }
+  }
+
+  # SOURCE DATA: NTA
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?ntaURI . } 
+    graph <http://kb-linked-authorities> {
+      ?ntaURI a schema:Person ;
+              dcterms:identifier ?ntaID .
+    }
+  }
+}
+GROUP BY ?contributorID
