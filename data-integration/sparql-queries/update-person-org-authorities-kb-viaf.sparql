@@ -22,57 +22,67 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
 #
-# Add link to BnF via ISNI and also other identifiers as well as nationality information
+# Add link to KB via VIAF and also other identifiers as well as nationality information
 #
 INSERT {
   graph <http://beltrans-contributors> {
 
     ?authorityURI
-      schema:nationality ?bnfAuthorityNationality ;
+      schema:nationality ?kbAuthorityNationality ;
       bf:identifiedBy ?viafEntityURI ;
       bf:identifiedBy ?wdEntityURI ;
-      schema:sameAs ?bnfAuthority .
+      schema:sameAs ?kbAuthority .
 
-    ?viafEntityURI a bf:Identifier ;
-                   rdfs:comment "Added from BnF via ISNI" ;
-                   rdfs:label "VIAF" ;
-                   rdf:value ?viaf .
+    ?isniEntityURI a bf:Isni ;
+                   rdfs:comment "Added from KB via VIAF" ;
+                   rdf:value ?isni .
 
     ?wdEntityURI a bf:Identifier ;
-                 rdfs:comment "Added from BnF via ISNI" ;
                  rdfs:label "Wikidata" ;
+                 rdfs:comment "Added from KB via VIAF" ;
                  rdf:value ?wd .
   }
 }
 WHERE {
 
-    graph <http://bnf-contributors> { ?bnfAuthority a foaf:Person . }   
+    graph <http://kb-linked-authorities> { ?kbAuthority a ?contributorType . }   
+    FILTER( ?contributorType IN (schema:Person, schema:Organization) )
+
+    #
+    # Get the identifier we use to link: VIAF
+    #
+    graph <http://kb-linked-authorities> { 
+      ?kbAuthority bf:identifiedBy ?viafAuthorEntity . 
+      ?viafAuthorEntity a bf:Identifier ;
+                        rdfs:label "VIAF" ;
+                        rdf:value ?kbAuthorityVIAF . 
+    }
 
     #
     # Get the nationality we want to add to the aggregated URI
     #
-    OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthority rdagroup2elements:countryAssociatedWithThePerson ?bnfAuthorityNationality . } }
+    OPTIONAL { graph <http://kb-linked-authorities> { ?kbAuthority schema:nationality ?kbAuthorityNationality . } }
+
 
     #
-    # Get optional VIAF
+    # Get optional ISNI
     #
     OPTIONAL {
-      graph <http://bnf-contributors> {
-        ?bnfAuthority bf:identifiedBy ?viafEntity .
+      graph <http://kb-linked-authorities> {
+        ?kbAuthority bf:identifiedBy ?isniEntity .
 
-        ?viafEntity a bf:Identifier ;
-                    rdfs:label "VIAF" ;
-                    rdf:value ?viaf .
+        ?isniEntity a bf:Isni ;
+                    rdf:value ?isni .
       }
-      BIND(iri(concat("http://kbr.be/id/data/identifier_viaf_", ?viaf)) as ?viafEntityURI)
+      BIND(iri(concat("http://kbr.be/id/data/identifier_isni_", ?isni)) as ?isniEntityURI)
     }
 
     #
     # Get optional WIKIDATA
     #
     OPTIONAL {
-      graph <http://bnf-contributors> {
-        ?bnfAuthority bf:identifiedBy ?wdEntity .
+      graph <http://kb-linked-authorities> {
+        ?kbAuthority bf:identifiedBy ?wdEntity .
 
         ?wdEntity a bf:Identifier ;
                   rdfs:label "Wikidata" ;
@@ -81,32 +91,26 @@ WHERE {
       BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) as ?wdEntityURI)
     }
 
-    #
-    # Get the linked ISNI identifier
-    #
-    graph <http://bnf-contributors> { 
-      ?bnfAuthority bf:identifiedBy ?isniAuthorEntity . 
-      ?isniAuthorEntity a bf:Isni ;
-                  rdf:value ?bnfAuthorityISNI . 
-    }
 
     OPTIONAL {
       graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?isniEntity .
-        ?isniEntity a bf:Isni ;
-                    rdf:value ?bnfAuthorityISNI .
+        ?authorityURI bf:identifiedBy ?viafEntity .
+        ?viafEntity a bf:Identifier ;
+                    rdfs:label "VIAF" ;
+                    rdf:value ?kbAuthorityVIAF .
       }
     }
 
     #
-    # Find the link to an existing URI with the same ISNI instead of creating a new URI
+    # Find the link to an existing URI with the same VIAF instead of creating a new URI
     #
     FILTER EXISTS{
       graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?isniEntity .
+        ?authorityURI bf:identifiedBy ?viafEntity .
 
-        ?isniEntity a bf:Isni ;
-                  rdf:value ?bnfAuthorityISNI .
+        ?viafEntity a bf:Identifier ;
+                    rdfs:label "VIAF" ;
+                    rdf:value ?kbAuthorityVIAF .
       }
     }
 }

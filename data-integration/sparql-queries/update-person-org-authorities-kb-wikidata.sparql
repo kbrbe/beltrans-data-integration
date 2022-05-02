@@ -22,7 +22,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
 #
-# Add link to KB via ISNI and also other identifiers as well as nationality information
+# Add link to KB via Wikidata and also other identifiers as well as nationality information
 #
 INSERT {
   graph <http://beltrans-contributors> {
@@ -30,28 +30,52 @@ INSERT {
     ?authorityURI
       schema:nationality ?kbAuthorityNationality ;
       bf:identifiedBy ?viafEntityURI ;
-      bf:identifiedBy ?wdEntityURI ;
+      bf:identifiedBy ?isniEntityURI ;
       schema:sameAs ?kbAuthority .
 
-    ?viafEntityURI a bf:Identifier ;
-                   rdfs:comment "Added from KB via ISNI" ;
-                   rdfs:label "VIAF" ;
-                   rdf:value ?viaf .
+    ?isniEntityURI a bf:Isni ;
+                   rdfs:comment "Added from KB via Wikidata" ;
+                   rdf:value ?isni .
 
-    ?wdEntityURI a bf:Identifier ;
-                 rdfs:comment "Added from KB via ISNI" ;
-                 rdfs:label "Wikidata" ;
-                 rdf:value ?wd .
+    ?viafEntityURI a bf:Identifier ;
+                   rdfs:label "VIAF" ;
+                   rdfs:comment "Added from KB via Wikidata" ;
+                   rdf:value ?viaf .
   }
 }
 WHERE {
 
-    graph <http://kb-linked-authorities> { ?kbAuthority a schema:Person . }   
+    graph <http://kb-linked-authorities> { ?kbAuthority a ?contributorType . }   
+    FILTER( ?contributorType IN (schema:Person, schema:Organization) )
+
+    #
+    # Get the identifier we use to link: Wikidata
+    #
+    graph <http://kb-linked-authorities> { 
+      ?kbAuthority bf:identifiedBy ?wikidataAuthorEntity . 
+      ?wikidataAuthorEntity a bf:Identifier ;
+                            rdfs:label "Wikidata" ;
+                            rdf:value ?kbAuthorityWikidata . 
+    }
 
     #
     # Get the nationality we want to add to the aggregated URI
     #
     OPTIONAL { graph <http://kb-linked-authorities> { ?kbAuthority schema:nationality ?kbAuthorityNationality . } }
+
+
+    #
+    # Get optional ISNI
+    #
+    OPTIONAL {
+      graph <http://kb-linked-authorities> {
+        ?kbAuthority bf:identifiedBy ?isniEntity .
+
+        ?isniEntity a bf:Isni ;
+                    rdf:value ?isni .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_isni_", ?isni)) as ?isniEntityURI)
+    }
 
     #
     # Get optional VIAF
@@ -67,46 +91,25 @@ WHERE {
       BIND(iri(concat("http://kbr.be/id/data/identifier_viaf_", ?viaf)) as ?viafEntityURI)
     }
 
-    #
-    # Get optional WIKIDATA
-    #
-    OPTIONAL {
-      graph <http://kb-linked-authorities> {
-        ?kbAuthority bf:identifiedBy ?wdEntity .
-
-        ?wdEntity a bf:Identifier ;
-                  rdfs:label "Wikidata" ;
-                  rdf:value ?wd .
-      }
-      BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) as ?wdEntityURI)
-    }
-
-    #
-    # Get the linked ISNI identifier
-    #
-    graph <http://kb-linked-authorities> { 
-      ?kbAuthority bf:identifiedBy ?isniAuthorEntity . 
-      ?isniAuthorEntity a bf:Isni ;
-                  rdf:value ?kbAuthorityISNI . 
-    }
-
     OPTIONAL {
       graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?isniEntity .
-        ?isniEntity a bf:Isni ;
-                    rdf:value ?kbAuthorityISNI .
+        ?authorityURI bf:identifiedBy ?wdEntity .
+        ?wdEntity a bf:Identifier ;
+                  rdfs:label "Wikidata" ;
+                  rdf:value ?kbAuthorityWikidata .
       }
     }
 
     #
-    # Find the link to an existing URI with the same ISNI instead of creating a new URI
+    # Find the link to an existing URI with the same Wikidata identifier instead of creating a new URI
     #
     FILTER EXISTS{
       graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?isniEntity .
+        ?authorityURI bf:identifiedBy ?wdEntity .
 
-        ?isniEntity a bf:Isni ;
-                  rdf:value ?kbAuthorityISNI .
+        ?wdEntity a bf:Identifier ;
+                  rdfs:label "Wikidata" ;
+                  rdf:value ?kbAuthorityWikidata .
       }
     }
 }

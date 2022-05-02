@@ -22,7 +22,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
 #
-# Add link to KBR via VIAF and also other identifiers as well as nationality information
+# Add link to KBR via ISNI and also other identifiers as well as nationality information
 #
 INSERT {
   graph <http://beltrans-contributors> {
@@ -33,47 +33,39 @@ INSERT {
       bf:identifiedBy ?wdEntityURI ;
       schema:sameAs ?kbrAuthority .
 
-    ?isniEntityURI a bf:Isni ;
-                   rdfs:comment "Added from KBR via VIAF" ;
-                   rdf:value ?isni .
+    ?viafEntityURI a bf:Identifier ;
+                   rdfs:comment "Added from KBR via ISNI" ;
+                   rdfs:label "VIAF" ;
+                   rdf:value ?viaf .
 
     ?wdEntityURI a bf:Identifier ;
+                 rdfs:comment "Added from KBR via ISNI" ;
                  rdfs:label "Wikidata" ;
-                 rdfs:comment "Added from KBR via VIAF" ;
                  rdf:value ?wd .
   }
 }
 WHERE {
 
-    graph <http://kbr-linked-authorities> { ?kbrAuthority a schema:Person . }   
-
-    #
-    # Get the identifier we use to link: VIAF
-    #
-    graph <http://kbr-linked-authorities> { 
-      ?kbrAuthority bf:identifiedBy ?viafAuthorEntity . 
-      ?viafAuthorEntity a bf:Identifier ;
-                        rdfs:label "VIAF" ;
-                        rdf:value ?kbrAuthorityVIAF . 
-    }
+    graph <http://kbr-linked-authorities> { ?kbrAuthority a ?contributorType . }   
+    FILTER( ?contributorType IN (schema:Person, schema:Organization) )
 
     #
     # Get the nationality we want to add to the aggregated URI
     #
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthority schema:nationality ?kbrAuthorityNationality . } }
 
-
     #
-    # Get optional ISNI
+    # Get optional VIAF
     #
     OPTIONAL {
       graph <http://kbr-linked-authorities> {
-        ?kbrAuthority bf:identifiedBy ?isniEntity .
+        ?kbrAuthority bf:identifiedBy ?viafEntity .
 
-        ?isniEntity a bf:Isni ;
-                    rdf:value ?isni .
+        ?viafEntity a bf:Identifier ;
+                    rdfs:label "VIAF" ;
+                    rdf:value ?viaf .
       }
-      BIND(iri(concat("http://kbr.be/id/data/identifier_isni_", ?isni)) as ?isniEntityURI)
+      BIND(iri(concat("http://kbr.be/id/data/identifier_viaf_", ?viaf)) as ?viafEntityURI)
     }
 
     #
@@ -90,26 +82,32 @@ WHERE {
       BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) as ?wdEntityURI)
     }
 
+    #
+    # Get the linked ISNI identifier
+    #
+    graph <http://kbr-linked-authorities> { 
+      ?kbrAuthority bf:identifiedBy ?isniAuthorEntity . 
+      ?isniAuthorEntity a bf:Isni ;
+                  rdf:value ?kbrAuthorityISNI . 
+    }
 
     OPTIONAL {
       graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?viafEntity .
-        ?viafEntity a bf:Identifier ;
-                    rdfs:label "VIAF" ;
-                    rdf:value ?kbrAuthorityVIAF .
+        ?authorityURI bf:identifiedBy ?isniEntity .
+        ?isniEntity a bf:Isni ;
+                    rdf:value ?kbrAuthorityISNI .
       }
     }
 
     #
-    # Find the link to an existing URI with the same VIAF instead of creating a new URI
+    # Find the link to an existing URI with the same ISNI instead of creating a new URI
     #
     FILTER EXISTS{
       graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?viafEntity .
+        ?authorityURI bf:identifiedBy ?isniEntity .
 
-        ?viafEntity a bf:Identifier ;
-                    rdfs:label "VIAF" ;
-                    rdf:value ?kbrAuthorityVIAF .
+        ?isniEntity a bf:Isni ;
+                  rdf:value ?kbrAuthorityISNI .
       }
     }
 }

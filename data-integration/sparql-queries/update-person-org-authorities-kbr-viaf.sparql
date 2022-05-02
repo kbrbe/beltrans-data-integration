@@ -22,7 +22,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
 #
-# Add link to KBR via Wikidata and also other identifiers as well as nationality information
+# Add link to KBR via VIAF and also other identifiers as well as nationality information
 #
 INSERT {
   graph <http://beltrans-contributors> {
@@ -30,31 +30,32 @@ INSERT {
     ?authorityURI
       schema:nationality ?kbrAuthorityNationality ;
       bf:identifiedBy ?viafEntityURI ;
-      bf:identifiedBy ?isniEntityURI ;
+      bf:identifiedBy ?wdEntityURI ;
       schema:sameAs ?kbrAuthority .
 
     ?isniEntityURI a bf:Isni ;
-                   rdfs:comment "Added from KBR via Wikidata" ;
+                   rdfs:comment "Added from KBR via VIAF" ;
                    rdf:value ?isni .
 
-    ?viafEntityURI a bf:Identifier ;
-                   rdfs:label "VIAF" ;
-                   rdfs:comment "Added from KBR via Wikidata" ;
-                   rdf:value ?viaf .
+    ?wdEntityURI a bf:Identifier ;
+                 rdfs:label "Wikidata" ;
+                 rdfs:comment "Added from KBR via VIAF" ;
+                 rdf:value ?wd .
   }
 }
 WHERE {
 
-    graph <http://kbr-linked-authorities> { ?kbrAuthority a schema:Person . }   
+    graph <http://kbr-linked-authorities> { ?kbrAuthority a ?contributorType . }   
+    FILTER( ?contributorType IN (schema:Person, schema:Organization) )
 
     #
-    # Get the identifier we use to link: Wikidata
+    # Get the identifier we use to link: VIAF
     #
     graph <http://kbr-linked-authorities> { 
-      ?kbrAuthority bf:identifiedBy ?wikidataAuthorEntity . 
-      ?wikidataAuthorEntity a bf:Identifier ;
-                            rdfs:label "Wikidata" ;
-                            rdf:value ?kbrAuthorityWikidata . 
+      ?kbrAuthority bf:identifiedBy ?viafAuthorEntity . 
+      ?viafAuthorEntity a bf:Identifier ;
+                        rdfs:label "VIAF" ;
+                        rdf:value ?kbrAuthorityVIAF . 
     }
 
     #
@@ -77,38 +78,39 @@ WHERE {
     }
 
     #
-    # Get optional VIAF
+    # Get optional WIKIDATA
     #
     OPTIONAL {
       graph <http://kbr-linked-authorities> {
-        ?kbrAuthority bf:identifiedBy ?viafEntity .
+        ?kbrAuthority bf:identifiedBy ?wdEntity .
 
-        ?viafEntity a bf:Identifier ;
-                    rdfs:label "VIAF" ;
-                    rdf:value ?viaf .
+        ?wdEntity a bf:Identifier ;
+                  rdfs:label "Wikidata" ;
+                  rdf:value ?wd .
       }
-      BIND(iri(concat("http://kbr.be/id/data/identifier_viaf_", ?viaf)) as ?viafEntityURI)
+      BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) as ?wdEntityURI)
     }
+
 
     OPTIONAL {
       graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?wdEntity .
-        ?wdEntity a bf:Identifier ;
-                  rdfs:label "Wikidata" ;
-                  rdf:value ?kbrAuthorityWikidata .
+        ?authorityURI bf:identifiedBy ?viafEntity .
+        ?viafEntity a bf:Identifier ;
+                    rdfs:label "VIAF" ;
+                    rdf:value ?kbrAuthorityVIAF .
       }
     }
 
     #
-    # Find the link to an existing URI with the same Wikidata identifier instead of creating a new URI
+    # Find the link to an existing URI with the same VIAF instead of creating a new URI
     #
     FILTER EXISTS{
       graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?wdEntity .
+        ?authorityURI bf:identifiedBy ?viafEntity .
 
-        ?wdEntity a bf:Identifier ;
-                  rdfs:label "Wikidata" ;
-                  rdf:value ?kbrAuthorityWikidata .
+        ?viafEntity a bf:Identifier ;
+                    rdfs:label "VIAF" ;
+                    rdf:value ?kbrAuthorityVIAF .
       }
     }
 }
