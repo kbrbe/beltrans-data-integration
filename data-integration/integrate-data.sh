@@ -534,6 +534,8 @@ function postprocess {
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
   contributorsPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
   contributorsPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE"
+  tmp1="$integrationName/csv/kbr-enriched-not-yet-bnf-and-kb.csv"
+  tmp2="$integrationName/csv/kbr-and-bnf-enriched-not-yet-kb.csv"
 
   contributorsOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
 
@@ -544,11 +546,17 @@ function postprocess {
   echo "Postprocess contributor data ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -i $contributorsPersonsAllData -o $contributorsPersons
 
-  echo "Derive missing country names from place names ..."
-  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedData -o $integratedDataEnriched -g geonames/ -c targetCountryOfPublication -p targetKBRPlaceOfPublication
+  echo "Derive missing country names from place names - KBR ..."
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedData -o $tmp1 -g geonames/ -c targetCountryOfPublicationKBR -p targetPlaceOfPublicationKBR
+
+  echo "Derive missing country names from place names - BnF ..."
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp1 -o $tmp2 -g geonames/ -c targetCountryOfPublicationBnF -p targetPlaceOfPublicationBnF
+
+  echo "Derive missing country names from place names - KB ..."
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp2 -o $integratedDataEnriched -g geonames/ -c targetCountryOfPublicationKB -p targetPlaceOfPublicationKB
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs -s "translations" -s "person contributors" "org contributors" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs -s "translations" -s "person contributors" -s "org contributors" -o $excelData
 
 }
 

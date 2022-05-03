@@ -61,10 +61,13 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetBnFYearOfPublication)
     (group_concat(distinct ?kbDatePublished;SEPARATOR=';') AS ?targetKBYearOfPublication)
 
-    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetKBRPlaceOfPublication)
-    (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetBnFPlaceOfPublication)
-    (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetKBPlaceOfPublication)
-    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublication)
+    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKBR)
+    (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationBnF)
+    (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKB)
+
+    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublicationKBR)
+    ("" AS ?targetCountryOfPublicationBnF)
+    ("" AS ?targetCountryOfPublicationKB)
 
     (group_concat(distinct ?authorNationalityLabel;SEPARATOR=';') AS ?authorNationalities)
     (group_concat(distinct ?illustratorNationalityLabel;SEPARATOR=';') AS ?illustratorNationalities)
