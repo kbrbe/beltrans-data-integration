@@ -2,7 +2,8 @@
 """
 Created on Tue Apr 12 18:01:31 2022
 
-@author: FabrizioPascucci
+@author: Fabrizio Pascucci
+@author: Sven Lieber
 """
 import csv
 from optparse import OptionParser
