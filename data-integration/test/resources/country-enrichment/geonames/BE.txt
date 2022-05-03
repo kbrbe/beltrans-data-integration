@@ -7,7 +7,6 @@
 2800935	Brugge	Brugge	31005,Bruges,Brugge	51.25	3.21667	A	ADM4	BE	BE	VLG	VWV	31	31005	118325		4	Europe/Brussels	2020-04-04
 2797657	Gent	Gent	44021,Arrondissement de Gand,Gand,Gent,Ghent	51.07304	3.73664	A	ADM4	BE		VLG	VOV	44	44021	262219		4	Europe/Brussels	2020-04-04
 2797658	Gensterbloem	Gensterbloem	Gensterbloem,Gentsterbloem	50.69244	5.91952	P	PPL	BE		WAL	WLG	63	63088	0		277	Europe/Brussels	2017-03-25
-11876770	Ghent	Ghent		51.06421	3.73689	L	PRT	BE		VLG	VOV	44	44021	0		1	Europe/Brussels	2020-10-31
 2797659	Genovabeek	Genovabeek	Genovabeek,Genovevabeek	50.83222	5.01696	H	STM	BE		VLG				0		30	Europe/Brussels	2012-01-18
 2792482	Leuven	Leuven	L'oven,Leouben,Leuve,Leuven,Ljoven,Loewen,Louvain,Lovaina,Lovan,Lovanio,Lovanium,Lovaň,Loveno,Luven,Löwen,ZGK,lu wen,revuen,ruvuen,Λέουβεν,Лувен,Льовен,Лёвен,ルーヴェン,レーヴェン,鲁汶	50.87959	4.70093	P	PPL	BE		VLG	VBR	24	24062	92892		28	Europe/Brussels	2019-02-21
 2792483	Leuven	Leuven	24062,Gorad Ljoven,L'oven,Leiwen,Leouven,Leuve,Leuven,Leven,Levena,Levenas,Ljoven,Loeven,Loewen,Louvain,Lovain,Lovaina,Lovan,Lovanio,Lovanium,Lovaň,Loven,Loveno,Lováin,Lovén,Lyoven,Léiwen,Löven,Löwen,Lēvena,lex fein,loebeon,lu wen,lwfan,lwn,lwwn,ruvuen,Λέουβεν,Горад Лёвен,Левен,Льовен,Лёвен,Լյովեն,לוון,لوفان,لون,เลอเฟิน,ルーヴェン,鲁汶,뢰번	50.87967	4.70078	A	ADM4	BE	BE	VLG	VBR	24	24062	101624		28	Europe/Brussels	2020-04-04

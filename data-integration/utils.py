@@ -2,6 +2,7 @@ import itertools
 from datetime import datetime
 import requests
 import rdflib
+import re
 import os
 import unicodedata as ud
 import pandas as pd
@@ -485,8 +486,64 @@ def getNormalizedString(s):
   noColon = noExclamationMark.replace(':', '')
   return ud.normalize('NFKD', noColon).encode('ASCII', 'ignore').lower().strip().decode("utf-8")
 
+# -----------------------------------------------------------------------------
+def extractLocationFromLocationCountryString(value):
+  """This function extracts the location from a string where the country is additionally indicates.
+  >>> extractLocationFromLocationCountryString('Gent (Belgium)')
+  'Gent'
+  >>> extractLocationFromLocationCountryString('Gent')
+  'Gent'
+  >>> extractLocationFromLocationCountryString('(Belgium)')
+  '(Belgium)'
+  """
+  if value.endswith(')') and not value.startswith('('):
+    found = re.search('^(.*)\(.*', value)
+    if found:
+      return found.group(1).strip()
+  else:
+    return value
 
+# -----------------------------------------------------------------------------
+def getGeoNamesMainSpellingFromDataFrame(df, identifier):
+  """This function extracts the main spelling from a pandas dataframe filled with geonames data.
+  >>> data1 = [
+    ... ["6693370","Bruxelles-Capitale","Bruxelles-Capitale","BRU,Brussel-Hoofdstad,Bruxelas-Capital","50.84877","4.34664","A","ADM2","BE","","BRU","BRU","","",0,"","26","Europe/Brussels","2016-12-19"],
+    ... ["2797657","Gent","Gent","44021,Arrondissement de Gand,Gand,Gent,Ghent","51.07304","3.73664","A","ADM4","BE","","VLG","VOV","44","44021","262219","",4,"Europe/Brussels","2020-04-04"],
+    ... ["2797659","Genovabeek","Genovabeek","Genovabeek,Genovevabeek","50.83222","5.01696","H","STM","BE","","VLG","","","",0,"","30","Europe/Brussels","2012-01-18"]]
+  >>> getGeoNamesMainSpellingFromDataFrame(data1, "2797657")
+  'Gent'
+  """
+  return (df.loc[df[0] == identifier, 1]).item()
+# -----------------------------------------------------------------------------
+def extractStringFromBrackets(value):
+  """This function extracts a string in different brackets.
+  >>> extractStringFromBrackets('[Brussels]')
+  'Brussels'
+  >>> extractStringFromBrackets('(Ghent)')
+  'Ghent'
+  >>> extractStringFromBrackets('Gent')
+  'Gent'
+  >>> extractStringFromBrackets('')
+  ''
 
+  Nothing should be extracted when threre is content before the brackets
+  >>> extractStringFromBrackets('Gent (Belgium)')
+  'Gent (Belgium)'
+  """
+  found = None
+  if value.startswith('('):
+    found = re.search('^\((.*)\)', value)
+  elif value.startswith('['):
+    found = re.search('\[(.*)\]', value)
+  else:
+    return value
+
+  if found:
+    return found.group(1)
+  else:
+    return ''
+
+# -----------------------------------------------------------------------------
 def extract_geonames(inputDataframe):
     """This function creates a lookup dictionary based on geonames data where possible spellings of a place are the keys and their IDs the value.
     >>> data1 = [
@@ -521,6 +578,19 @@ def extract_geonames(inputDataframe):
         geo_ids_normalized[key_normalized] = value
 
     return geo_ids_normalized
+
+def normalizeDelimiters(value, delimiter=';'):
+  """This function replaces other found delimiters with the given.
+  >>> normalizeDelimiters('Leuven. - Paris')
+  'Leuven;Paris'
+  >>> normalizeDelimiters('Leuven - Paris')
+  'Leuven;Paris'
+  >>> normalizeDelimiters('Brussels')
+  'Brussels'
+  >>> normalizeDelimiters('Sint-Martens-Latem. - Paris')
+  'Sint-Martens-Latem;Paris'
+  """
+  return value.replace('. - ', delimiter).replace(' - ', delimiter)
 
 def extract_places_tsv(df, columnname_places, columnname_countries):
     """This function extracts places from the given dataframe

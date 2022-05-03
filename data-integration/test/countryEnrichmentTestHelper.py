@@ -25,3 +25,7 @@ class CountryEnrichmentTestHelper:
   # ---------------------------------------------------------------------------
   def getKBRIdentifierCountry(self, identifier):
     return utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetCountryOfPublication")
+
+  # ---------------------------------------------------------------------------
+  def getKBRIdentifierLocation(self, identifier):
+    return utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetPlaceOfPublication")

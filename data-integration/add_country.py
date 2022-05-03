@@ -4,7 +4,7 @@ Created on Tue Apr 12 18:01:31 2022
 
 @author: FabrizioPascucci
 """
-
+import csv
 from optparse import OptionParser
 import pandas as pd
 import re
@@ -33,58 +33,65 @@ def main():
     nlContent = pd.read_csv(options.geonames_folder + "NL.txt", delimiter='\t', header=None)
     nl = utils.extract_geonames(nlContent)
 
-#    df = pd.read_csv(options.input_file, delimiter='\t', encoding= 'ISO-8859-1')
-    df = pd.read_csv(options.input_file, delimiter=',', encoding= 'utf-8')
-    df['country1'] = df[options.column_with_places].str.extract('\((.*?)\)', expand=True)
-    df = df.fillna('')
+    with open(options.input_file, 'r', encoding='utf-8') as inFile, \
+         open(options.output_file, 'w', encoding='utf-8') as outFile:
 
-    df.loc[df[options.column_with_country_names] == '', options.column_with_country_names] = df['country1']
+        inputReader = csv.DictReader(inFile, delimiter=',')
+        outputWriter = csv.DictWriter(outFile, fieldnames=inputReader.fieldnames, delimiter=',')
+        outputWriter.writeheader()
 
-    df = df.drop('country1', 1)
+        locationDelimiter = ';'
+        for row in inputReader:
+            location = row[options.column_with_places]
+            locationListNorm = utils.normalizeDelimiters(location, delimiter=locationDelimiter)
 
-    places = utils.extract_places_tsv(df, options.column_with_places, options.column_with_country_names)
+            # create a list of locations, even if it just has one entry
+            locations = locationListNorm.split(locationDelimiter) if locationDelimiter in locationListNorm else [locationListNorm]
 
-    countries_new = []
-    for place in places:
-        country = place[1]
-        if country == '':
-            if " ; " in place[0]:
-                cities = place[0].split(" ; ")
-                countries = []
-                for city in cities:
-                    if city.strip() in be:
-                        countries.append("Belgium")
-                    elif city.strip() in fr:
-                         countries.append("France")
-                    elif city.strip() in nl:
-                        countries.append("Netherlands")
-                    else:
-                        countries.append("")
-                new_country = ' ; '.join(countries)
-                countries_new.append(new_country)
-            else:
-                city = place[0]
-                if city.strip() in be:
-                    countries_new.append("Belgium")
-                elif city.strip() in fr:
-                    countries_new.append("France")
-                elif city.strip() in nl:
-                    countries_new.append("Netherlands")
+            # we use a filter because otherwise an empty string becomes an array with one empty country
+            existingCountries = list(filter(None, row[options.column_with_country_names].split(';')))
+            foundCountries = set()
+
+            # For the end result we also need the non-normalized main spelling of the location
+            locationsMainSpelling = []
+
+            for l in locations:
+
+                # The location might be in brackets, e.g. "(Brussels)" or "[Brussels]"
+                noBrackets = utils.extractStringFromBrackets(l)
+                # The location may contain also a country, e.g. "Gent (Belgium)"
+                onlyLocation = utils.extractLocationFromLocationCountryString(noBrackets)
+                # The location needs to be normalized with respect to special characters
+                lNorm = utils.getNormalizedString(onlyLocation)
+                lNorm = lNorm.strip()
+
+                # ElseIf because some places exist in several countries, but we want to prioritize Belgium
+                # E.g. Hasselt exists in Belgium and in the Netherlands
+                if lNorm == '':
+                    pass
+                elif lNorm in be:
+                    foundCountries.add('Belgium')
+                    locationsMainSpelling.append(utils.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm]))
+                elif lNorm in fr:
+                    foundCountries.add('France')
+                    locationsMainSpelling.append(utils.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm]))
+                elif lNorm in nl:
+                    foundCountries.add('Netherlands')
+                    locationsMainSpelling.append(utils.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm]))
                 else:
-                    countries_new.append("")
-        else:
-            new_country = country
-            countries_new.append(new_country)
+                    locationsMainSpelling.append(onlyLocation)
 
-    places_clean = []
-    for x in places:
-        places_clean.append(x[0])
+            for foundC in foundCountries:
+                if foundC not in existingCountries:
+                    existingCountries.append(foundC)
 
-    df[str(options.column_with_country_names)] = countries_new
-    #df.drop(options.column_with_places, 1)
-    #df[str(options.column_with_places)] = places_clean
-    #df.to_csv(options.output_file, sep="\t", index=False, encoding = "ISO-8859-1")
-    df.to_csv(options.output_file, sep=",", index=False, encoding = "utf-8")
+            existingCountries.sort()
+            newLocationsString = ';'.join(locationsMainSpelling)
+            newCountriesString = ';'.join(existingCountries)
+            row[options.column_with_places] = newLocationsString
+            row[options.column_with_country_names] = newCountriesString
+            outputWriter.writerow(row)
+
 
 main()
 

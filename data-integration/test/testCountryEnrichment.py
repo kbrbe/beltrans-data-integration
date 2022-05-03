@@ -31,7 +31,6 @@ class TestCountryEnrichment(unittest.TestCase):
 
     # read the script output into an internal data structure
     #
-    print(f'FILE {cls.tempEnriched}')
     with open(cls.tempEnriched, 'r') as fileIn:
       csvReader = csv.DictReader(fileIn, delimiter=',')
       csvData = [dict(d) for d in csvReader]
@@ -80,13 +79,19 @@ class TestCountryEnrichment(unittest.TestCase):
   def testBelgiumFoundForGentWithCountryInParenthesis(self):
     """When the location is 'Gent (Belgium)' the country should be Belgium"""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("6")
-    self.assertEqual(foundCountry, "Belgium", msg= f'For the location [Gent] the country was "{foundCountry}" instead of Belgium')
+    self.assertEqual(foundCountry, "Belgium", msg= f'For the location "Gent (Belgium)" the country was "{foundCountry}" instead of Belgium')
+
+  # ---------------------------------------------------------------------------
+  def testGentLocationFoundForGentWithCountryInParenthesis(self):
+    """When the location is 'Gent (Belgium)' the location should be Gent"""
+    foundLocation = TestCountryEnrichment.data.getKBRIdentifierLocation("6")
+    self.assertEqual(foundLocation, "Gent", msg= f'For the location "Gent (Belgium)" the main spelling of the location was "{foundLocation}" instead of Gent')
 
   # ---------------------------------------------------------------------------
   def testKeepCountry(self):
     """When the location is Bruges with country MyBelgium the country should not be altered"""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("3")
-    self.assertEqual(foundCountry, "MyBelgium", msg= f'For the location Bruges and country MyBelgium the country was "{foundCountry}" instead of the non-altered MyBelgium')
+    self.assertEqual(foundCountry, "Belgium;MyBelgium", msg= f'For the location Bruges and country MyBelgium the country was "{foundCountry}" instead of "Belgium;MyBelgium"')
 
   # ---------------------------------------------------------------------------
   def testPlaceSeparatedWithPointHyphen(self):
@@ -98,7 +103,7 @@ class TestCountryEnrichment(unittest.TestCase):
   def testThreePlaceSeparatedWithSemicolon(self):
     """When the location is 'Paris;Tielt;Houten' the country should be 'France;Belgium;Netherlands'"""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("8")
-    self.assertEqual(foundCountry, "Belgium;France", msg= f'For the location "Paris;Tielt;Houten" the country was "{foundCountry}" instead of "France;Belgium;Netherlands"')
+    self.assertEqual(foundCountry, "Belgium;France;Netherlands", msg= f'For the location "Paris;Tielt;Houten" the country was "{foundCountry}" instead of "Belgium;France;Netherlands"')
 
   # ---------------------------------------------------------------------------
   def testPlaceSeparatedAndBrackets(self):
@@ -110,7 +115,7 @@ class TestCountryEnrichment(unittest.TestCase):
   def testPlaceInBrackets(self):
     """When the location is '[Brussel]' the country should be Belgium."""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("10")
-    self.assertEqual(foundCountry, "Belgium;France", msg= f'For the location "[Brussel]" the country was "{foundCountry}" instead of "Belgium;France"')
+    self.assertEqual(foundCountry, "Belgium", msg= f'For the location "[Brussel]" the country was "{foundCountry}" instead of "Belgium"')
 
   # ---------------------------------------------------------------------------
   def testOnlyFirstCountryGiven(self):
@@ -130,3 +135,20 @@ class TestCountryEnrichment(unittest.TestCase):
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("13")
     self.assertEqual(foundCountry, "Belgium;Germany", msg= f'For the location "Brussels;Berlin" the country was "{foundCountry}" instead of "Belgium;Germany"')
 
+  # ---------------------------------------------------------------------------
+  def testGentLocationNormalized(self):
+    """When the location is 'Ghent' the location should be altered to 'Gent'."""
+    foundLocation = TestCountryEnrichment.data.getKBRIdentifierLocation("123")
+    self.assertEqual(foundLocation, "Gent", msg= f'For the location "Ghent" the altered location was "{foundLocation}" instead of "Gent"')
+
+  # ---------------------------------------------------------------------------
+  def testBruxellesLocationNormalized(self):
+    """When the location is 'Bruxelles' the location should be altered to 'Brussels'."""
+    foundLocation = TestCountryEnrichment.data.getKBRIdentifierLocation("4")
+    self.assertEqual(foundLocation, "Brussels", msg= f'For the location "Bruxelles" the altered location was "{foundLocation}" instead of "Brussels"')
+
+  # ---------------------------------------------------------------------------
+  def testBerlinLocationNormalized(self):
+    """When the location is 'Brussels;Berlin' the location should stay 'Brussels;Berlin'."""
+    foundLocation = TestCountryEnrichment.data.getKBRIdentifierLocation("13")
+    self.assertEqual(foundLocation, "Brussels;Berlin", msg= f'For the location "Brussels;Berlin" the altered location was "{foundLocation}" instead of "Brussels;Berlin"')
