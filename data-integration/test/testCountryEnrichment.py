@@ -31,12 +31,18 @@ class TestCountryEnrichment(unittest.TestCase):
 
     # read the script output into an internal data structure
     #
+    print(f'FILE {cls.tempEnriched}')
     with open(cls.tempEnriched, 'r') as fileIn:
       csvReader = csv.DictReader(fileIn, delimiter=',')
       csvData = [dict(d) for d in csvReader]
       cls.rawData = csvData
       cls.data = CountryEnrichmentTestHelper(csvData)
 
+  # ---------------------------------------------------------------------------
+  @classmethod
+  def tearDownClass(cls):
+    if os.path.isfile(cls.tempEnriched):
+      os.remove(cls.tempEnriched)
 
   # ---------------------------------------------------------------------------
   def testEmptyLocationEmptyCountry(self):
@@ -68,7 +74,7 @@ class TestCountryEnrichment(unittest.TestCase):
     identifiers = []
     for row in TestCountryEnrichment.rawData:
       identifiers.append(row['targetKBRIdentifier'])
-    self.assertEqual(identifiers, ['1','2','3','4','5','123','6', '7', '8', '9', '10'], msg="Identifiers contain non expected values")
+    self.assertEqual(identifiers, ['1','2','3','4','5','123','6', '7', '8', '9', '10', '11','12', '13'], msg="Identifiers contain non expected values")
 
   # ---------------------------------------------------------------------------
   def testBelgiumFoundForGentWithCountryInParenthesis(self):
@@ -105,4 +111,22 @@ class TestCountryEnrichment(unittest.TestCase):
     """When the location is '[Brussel]' the country should be Belgium."""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("10")
     self.assertEqual(foundCountry, "Belgium;France", msg= f'For the location "[Brussel]" the country was "{foundCountry}" instead of "Belgium;France"')
+
+  # ---------------------------------------------------------------------------
+  def testOnlyFirstCountryGiven(self):
+    """When the location is 'Antwerpen;Amsterdam' the country should be 'Belgium;Netherlands'."""
+    foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("11")
+    self.assertEqual(foundCountry, "Belgium;Netherlands", msg= f'For the location "Antwerpen;Amsterdam" the country was "{foundCountry}" instead of "Belgium;Netherlands"')
+
+  # ---------------------------------------------------------------------------
+  def testOnlySecondCountryGiven(self):
+    """When the location is 'Antwerpen;Amsterdam' the country should be 'Belgium;Netherlands'."""
+    foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("12")
+    self.assertEqual(foundCountry, "Belgium;Netherlands", msg= f'For the location "Antwerpen;Amsterdam" the country was "{foundCountry}" instead of "Belgium;Netherlands"')
+
+  # ---------------------------------------------------------------------------
+  def testSeveralCountriesUnknownRemains(self):
+    """When the location is 'Brussels;Berlin' the country should be 'Belgium;Germany' even if we do not have data about Germany but Germany is already provided, i.e. Belgium only added."""
+    foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("13")
+    self.assertEqual(foundCountry, "Belgium;Germany", msg= f'For the location "Brussels;Berlin" the country was "{foundCountry}" instead of "Belgium;Germany"')
 
