@@ -204,6 +204,9 @@ def mostCompleteDate(dates):
 
   >>> mostCompleteDate(['1988'])
   '1988'
+
+  >>> mostCompleteDate(['1988', '1987'])
+  '1987 or 1988'
   """
 
   fullDates = set()
@@ -335,30 +338,30 @@ def selectDate(row, dateType, sources, rowIDCol, mismatchLog):
 
   Select the most complete date betwen the sources
   >>> row = {'birthDateKBR': '1988-04-25', 'birthDateISNI': '1988'}
-  >>> selectDate(row, 'birth', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['birthDate'] == '1988-04-25'
   True
 
   >>> row = {'birthDateKBR': '', 'birthDateISNI': '1988'}
-  >>> selectDate(row, 'birth', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['birthDate'] == '1988'
   True
 
   Keep it empty if none of the sources provide a date
   >>> row = {'birthDateKBR': '', 'birthDateISNI': ''}
-  >>> selectDate(row, 'birth', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['birthDate'] == ''
   True
 
   Log an error if a mismatch was found and keep both in the output
   >>> row = {'authorKBRIdentifier': '1234', 'birthDateKBR': '1988-04-25', 'birthDateISNI': '1989'}
-  >>> selectDate(row, 'birth', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['birthDate'] == '1988-04-25 or 1989'
   True
 
   The same works also for death dates
   >>> row = {'deathDateKBR': '1988-04-25', 'deathDateISNI': '1988'}
-  >>> selectDate(row, 'death', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'deathDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
   >>> row['deathDate'] == '1988-04-25'
   True
   """
@@ -366,11 +369,11 @@ def selectDate(row, dateType, sources, rowIDCol, mismatchLog):
   # extract all possible dates based on different sources
   dates = []
   for s in sources:
-    colName = f'{dateType}Date{s}'
+    colName = f'{dateType}{s}'
     if colName in row:
       dates.append(row[colName])
 
-  outputColName = f'{dateType}Date'
+  outputColName = f'{dateType}'
 
   # set the selected value
   row[outputColName] = mostCompleteDate(dates)
@@ -382,7 +385,7 @@ def selectDate(row, dateType, sources, rowIDCol, mismatchLog):
     contributorURI = row[rowIDCol]
     # log the mismatching data and then remove the initial sources
     for s in sources:
-      colName = f'{dateType}Date{s}'
+      colName = f'{dateType}{s}'
       value = row[colName]
       addToMismatchLog(mismatchLog, dateType, 'contributor', contributorURI, s, value)
       row.pop(colName)
@@ -390,7 +393,7 @@ def selectDate(row, dateType, sources, rowIDCol, mismatchLog):
   else:
     # only remove the initial sources
     for s in sources:
-      colName = f'{dateType}Date{s}'
+      colName = f'{dateType}{s}'
       if colName in row:
         row.pop(colName)
  
@@ -507,13 +510,14 @@ def extractLocationFromLocationCountryString(value):
 def getGeoNamesMainSpellingFromDataFrame(df, identifier):
   """This function extracts the main spelling from a pandas dataframe filled with geonames data.
   >>> data1 = [
-    ... ["6693370","Bruxelles-Capitale","Bruxelles-Capitale","BRU,Brussel-Hoofdstad,Bruxelas-Capital","50.84877","4.34664","A","ADM2","BE","","BRU","BRU","","",0,"","26","Europe/Brussels","2016-12-19"],
-    ... ["2797657","Gent","Gent","44021,Arrondissement de Gand,Gand,Gent,Ghent","51.07304","3.73664","A","ADM4","BE","","VLG","VOV","44","44021","262219","",4,"Europe/Brussels","2020-04-04"],
-    ... ["2797659","Genovabeek","Genovabeek","Genovabeek,Genovevabeek","50.83222","5.01696","H","STM","BE","","VLG","","","",0,"","30","Europe/Brussels","2012-01-18"]]
-  >>> getGeoNamesMainSpellingFromDataFrame(data1, "2797657")
+  ... ["6693370","Bruxelles-Capitale","Bruxelles-Capitale","BRU,Brussel-Hoofdstad,Bruxelas-Capital","50.84877","4.34664","A","ADM2","BE","","BRU","BRU","","",0,"","26","Europe/Brussels","2016-12-19"],
+  ... ["2797657","Gent","Gent","44021,Arrondissement de Gand,Gand,Gent,Ghent","51.07304","3.73664","A","ADM4","BE","","VLG","VOV","44","44021","262219","",4,"Europe/Brussels","2020-04-04"],
+  ... ["2797659","Genovabeek","Genovabeek","Genovabeek,Genovevabeek","50.83222","5.01696","H","STM","BE","","VLG","","","",0,"","30","Europe/Brussels","2012-01-18"]]
+  >>> getGeoNamesMainSpellingFromDataFrame(pd.DataFrame(data1), "2797657")
   'Gent'
   """
   return (df.loc[df[0] == identifier, 1]).item()
+
 # -----------------------------------------------------------------------------
 def extractStringFromBrackets(value):
   """This function extracts a string in different brackets.

@@ -24,23 +24,23 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?isbn10;SEPARATOR=';') AS ?targetISBN10) 
     (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetISBN13) 
 
-    (group_concat(distinct ?kbrManifestationID;SEPARATOR=';') AS ?targetKBRIdentifier)
-    (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetBnFIdentifier)
-    (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
+    (group_concat(distinct ?kbrTitle;SEPARATOR=';') AS ?targetKBRTitle)
+    (group_concat(distinct ?bnfTitle;SEPARATOR=';') AS ?targetBnFTitle)
+    (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetKBTitle)
 
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
     (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetCollectionIdentifier)
     #(group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
-
-    (group_concat(distinct ?kbrTitle;SEPARATOR=';') AS ?targetKBRTitle)
-    (group_concat(distinct ?bnfTitle;SEPARATOR=';') AS ?targetBnFTitle)
-    (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetKBTitle)
 
     (group_concat(distinct ?authorNameID;SEPARATOR=';') AS ?authorIdentifiers)
     (group_concat(distinct ?translatorNameID;SEPARATOR=';') AS ?translatorIdentifiers)
     (group_concat(distinct ?illustratorNameID;SEPARATOR=';') AS ?illustratorIdentifiers)
     (group_concat(distinct ?scenaristNameID;SEPARATOR=';') AS ?scenaristIdentifiers)
     (group_concat(distinct ?publishingDirectorNameID;SEPARATOR=';') AS ?publishingDirectorIdentifiers)
+
+    (group_concat(distinct ?kbrManifestationID;SEPARATOR=';') AS ?targetKBRIdentifier)
+    (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetBnFIdentifier)
+    (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
 
     (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceKBRIdentifier)
     (group_concat(distinct ?kbrSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitle)
@@ -57,9 +57,9 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?bnfPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierBnF)
     (group_concat(distinct ?kbPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierKB)
 
-    (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetKBRYearOfPublication)
-    (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetBnFYearOfPublication)
-    (group_concat(distinct ?kbDatePublished;SEPARATOR=';') AS ?targetKBYearOfPublication)
+    (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
+    (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
+    (group_concat(distinct ?kbDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationKB)
 
     (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKBR)
     (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationBnF)

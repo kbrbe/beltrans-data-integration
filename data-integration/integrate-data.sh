@@ -33,7 +33,7 @@ SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
 SCRIPT_QUERY_DATA="../utils/query-data.sh"
 SCRIPT_POSTPROCESS_QUERY_RESULT="post-process-integration-result.py"
-SCRIPT_POSTPROCESS_AGG_QUERY_RESULT="post-process-aggregation-result.py"
+SCRIPT_POSTPROCESS_AGG_QUERY_RESULT="post-process-manifestations.py"
 SCRIPT_POSTPROCESS_QUERY_CONT_RESULT="post-process-contributors.py"
 SCRIPT_POSTPROCESS_DERIVE_COUNTRIES="add_country.py"
 
@@ -163,8 +163,7 @@ DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE="translations-per-country.sparql"
 DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 
-SUFFIX_DATA_PROFILE_FILE_AGG="integrated-data.csv"
-SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-perons-all-info.csv"
+SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-persons-all-info.csv"
 SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE="contributors-persons.csv"
 SUFFIX_DATA_PROFILE_CONT_ORGS_FILE="contributors-orgs.csv"
 SUFFIX_DATA_PROFILE_FILE_KBR="integrated-data-kbr-not-filtered.csv"
@@ -180,6 +179,7 @@ SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 SUFFIX_DATA_PROFILE_DTYPES="dataprofile-dtypes.csv"
 
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
+SUFFIX_DATA_PROFILE_FILE_ALL="integrated-data-all-info.csv"
 SUFFIX_DATA_PROFILE_FILE_ENRICHED="integrated-data-enriched.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED="integrated-data-contributors-belgian.csv"
@@ -509,7 +509,7 @@ function query {
   queryFileContPersons="$DATA_PROFILE_QUERY_FILE_CONT_PERSONS"
   queryFileContOrgs="$DATA_PROFILE_QUERY_FILE_CONT_ORGS"
 
-  outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_AGG"
+  outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
 
   # persons will be "all data" as it contains several birth and death dates, it will be filtered in the postprocessing
   outputFileContPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
@@ -530,6 +530,7 @@ function query {
 function postprocess {
   local integrationName=$1
 
+  integratedAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
   contributorsPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
@@ -545,6 +546,10 @@ function postprocess {
 
   echo "Postprocess contributor data ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -i $contributorsPersonsAllData -o $contributorsPersons
+
+  echo "Postprocess manifestation data ..."
+  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedData
+
 
   echo "Derive missing country names from place names - KBR ..."
   time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedData -o $tmp1 -g geonames/ -c targetCountryOfPublicationKBR -p targetPlaceOfPublicationKBR
