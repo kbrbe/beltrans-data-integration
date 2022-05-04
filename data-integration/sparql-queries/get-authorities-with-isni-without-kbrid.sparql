@@ -1,0 +1,27 @@
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix schema: <http://schema.org/>
+
+SELECT ?isni
+WHERE {
+
+  graph <http://beltrans-contributors> {
+    ?person a schema:Person ;
+            schema:nationality <http://id.loc.gov/vocabulary/countries/be> ;
+            bf:identifiedBy ?isniEntity .
+
+    ?isniEntity a bf:Isni ;
+                rdf:value ?isniRaw .
+  }
+
+  # We need the ISNI with spaces
+  #
+  BIND( CONCAT( SUBSTR(?isniRaw, 1,4), " ", SUBSTR(?isniRaw, 5,4), " ", SUBSTR(?isniRaw, 9,4), " ", SUBSTR(?isniRaw, 13, 4) ) AS ?isni)
+
+  # We want authorities who are not yet linked to KBR authorities
+  #
+  FILTER NOT EXISTS {
+    graph <http://beltrans-contributors> { ?person schema:sameAs ?kbrURI . } 
+    graph <http://kbr-syracuse> { ?kbrURI a schema:Person . } 
+  }
+}
