@@ -1,9 +1,9 @@
-"Update data from BnF via ISNI",sparql-queries/update-person-authorities-bnf-isni.sparql
-"Update data from BnF via VIAF",sparql-queries/update-person-authorities-bnf-viaf.sparql
-"Update data from Bnf via Wikidata",sparql-queries/update-person-authorities-bnf-wikidata.sparql
-"Update data from KBR via ISNI",sparql-queries/update-person-authorities-kbr-isni.sparql
-"Update data from KBR via VIAF",sparql-queries/update-person-authorities-kbr-viaf.sparql
-"Update data from KBR via Wikidata",sparql-queries/update-person-authorities-kbr-wikidata.sparql
-"Update data from KB (NTA) via ISNI",sparql-queries/update-person-authorities-kb-isni.sparql
-"Update data from KB (NTA) via VIAF",sparql-queries/update-person-authorities-kb-viaf.sparql
-"Update data from KB (NTA) via Wikidata",sparql-queries/update-person-authorities-kb-wikidata.sparql
+"Update data from BnF via ISNI",sparql-queries/update-person-org-authorities-bnf-isni.sparql
+"Update data from BnF via VIAF",sparql-queries/update-person-org-authorities-bnf-viaf.sparql
+"Update data from Bnf via Wikidata",sparql-queries/update-person-org-authorities-bnf-wikidata.sparql
+"Update data from KBR via ISNI",sparql-queries/update-person-org-authorities-kbr-isni.sparql
+"Update data from KBR via VIAF",sparql-queries/update-person-org-authorities-kbr-viaf.sparql
+"Update data from KBR via Wikidata",sparql-queries/update-person-org-authorities-kbr-wikidata.sparql
+"Update data from KB (NTA) via ISNI",sparql-queries/update-person-org-authorities-kb-isni.sparql
+"Update data from KB (NTA) via VIAF",sparql-queries/update-person-org-authorities-kb-viaf.sparql
+"Update data from KB (NTA) via Wikidata",sparql-queries/update-person-org-authorities-kb-wikidata.sparql

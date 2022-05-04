@@ -75,7 +75,7 @@ WHERE {
   OPTIONAL {
     graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?kbrURI . } 
     graph <http://kbr-linked-authorities> {
-      ?kbrURI a schema:Person ;
+      ?kbrURI a schema:Organization ;
               dcterms:identifier ?kbrID .
     }
   }
@@ -85,7 +85,7 @@ WHERE {
   OPTIONAL {
     graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?bnfURI . } 
     graph <http://bnf-contributors> {
-      ?bnfURI a foaf:Person ;
+      ?bnfURI a foaf:Organization ;
               dcterms:identifier ?bnfID .
     }
   }
@@ -95,7 +95,7 @@ WHERE {
   OPTIONAL {
     graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?ntaURI . } 
     graph <http://kb-linked-authorities> {
-      ?ntaURI a schema:Person ;
+      ?ntaURI a schema:Organization ;
               dcterms:identifier ?ntaID .
     }
   }
