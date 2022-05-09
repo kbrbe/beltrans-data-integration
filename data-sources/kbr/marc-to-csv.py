@@ -2,7 +2,8 @@
 # (c) 2021 Sven Lieber
 # KBR Brussels
 #
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
+import lxml.etree as ET
 import os
 import json
 import itertools
@@ -16,15 +17,15 @@ import stdnum
 
 NS_MARCSLIM = 'http://www.loc.gov/MARC21/slim'
 
-ALL_NS = {'': NS_MARCSLIM}
+ALL_NS = {'marc': NS_MARCSLIM}
 
 # -----------------------------------------------------------------------------
 def getContributorData(elem):
   """This function extracts the ID, name, and role of a contributor and returns them."""
 
-  cID = utils.getElementValue(elem.find('./subfield[@code="*"]', ALL_NS))
-  cName = utils.getElementValue(elem.find('./subfield[@code="a"]', ALL_NS))
-  cRole = utils.getElementValue(elem.findall('./subfield[@code="4"]', ALL_NS))
+  cID = utils.getElementValue(elem.find('./marc:subfield[@code="*"]', ALL_NS))
+  cName = utils.getElementValue(elem.find('./marc:subfield[@code="a"]', ALL_NS))
+  cRole = utils.getElementValue(elem.findall('./marc:subfield[@code="4"]', ALL_NS))
 
   return (cID, cName, cRole)
   
@@ -32,7 +33,7 @@ def getContributorData(elem):
 def addContributorFieldsToContributorCSV(elem, writer, stats):
   """This function extracts contributor relevant data from the given XML element 'elem' and writes it to the given CSV file writer."""
 
-  kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
+  kbrID = utils.getElementValue(elem.find('./marc:controlfield[@tag="001"]', ALL_NS))
 
   foundContributors = []
   linkedOrganizationNames = set()
@@ -40,7 +41,7 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
   #
   # add person contributors from the field 100 (https://github.com/kbrbe/beltrans-data-integration/issues/71)
   #
-  field100Contributors = elem.findall('./datafield[@tag="100"]', ALL_NS)
+  field100Contributors = elem.findall('./marc:datafield[@tag="100"]', ALL_NS)
   for p in field100Contributors:
     c = PersonContributor.fromTuple(getContributorData(p))
     # every contributor may have several roles
@@ -50,7 +51,7 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
   #
   # add person contributors from the linked authorities field
   #
-  personContributors = elem.findall('./datafield[@tag="700"]', ALL_NS)
+  personContributors = elem.findall('./marc:datafield[@tag="700"]', ALL_NS)
   for p in personContributors:
     c = PersonContributor.fromTuple(getContributorData(p))
     cID = c.getIdentifier()
@@ -65,7 +66,7 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
   #
   # add organizational contributors such as publishers
   #
-  orgContributors = elem.findall('./datafield[@tag="710"]', ALL_NS)
+  orgContributors = elem.findall('./marc:datafield[@tag="710"]', ALL_NS)
   for o in orgContributors:
     uncertainty = 'no'
     c = OrganizationalContributor.fromTuple(getContributorData(o))
@@ -85,9 +86,9 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
   # Thus we have to identify publishers which are ONLY encoded in field 264
   # In the previous step we collected all the names of organizational contributors (field 710) of this record
   #
-  orgContributorsWithoutLink = elem.findall('./datafield[@tag="264"]', ALL_NS)
+  orgContributorsWithoutLink = elem.findall('./marc:datafield[@tag="264"]', ALL_NS)
   for ol in orgContributorsWithoutLink:
-    textName = utils.getElementValue(ol.find('./subfield[@code="b"]', ALL_NS))
+    textName = utils.getElementValue(ol.find('./marc:subfield[@code="b"]', ALL_NS))
     textNameNorm = utils.getNormalizedString(textName)
     if textName != '':
       foundMatch = False
@@ -139,22 +140,23 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
   #
   # extract relevant data from the current record
   #
-  kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
-  isbns = elem.findall('./datafield[@tag="020"]/subfield[@code="a"]', ALL_NS)
-  bindingType = utils.getElementValue(elem.find('./datafield[@tag="020"]/subfield[@code="q"]', ALL_NS))
-  title = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="a"]', ALL_NS))
-  responsibilityStatement = utils.getElementValue(elem.find('./datafield[@tag="245"]/subfield[@code="c"]', ALL_NS))
-  placesOfPublication = utils.getElementValue(elem.findall('./datafield[@tag="264"]/subfield[@code="a"]', ALL_NS))
-  yearOfPublication = utils.getElementValue(elem.find('./datafield[@tag="264"]/subfield[@code="c"]', ALL_NS))
-  edition = utils.getElementValue(elem.find('./datafield[@tag="250"]/subfield[@code="a"]', ALL_NS))
+  kbrID = utils.getElementValue(elem.find('./marc:controlfield[@tag="001"]', ALL_NS))
+  isbns = elem.findall('./marc:datafield[@tag="020"]/marc:subfield[@code="a"]', ALL_NS)
+  bindingType = utils.getElementValue(elem.find('./marc:datafield[@tag="020"]/marc:subfield[@code="q"]', ALL_NS))
+  title = utils.getElementValue(elem.find('./marc:datafield[@tag="245"]/marc:subfield[@code="a"]', ALL_NS))
+  responsibilityStatement = utils.getElementValue(elem.find('./marc:datafield[@tag="245"]/marc:subfield[@code="c"]', ALL_NS))
+  placesOfPublication = utils.getElementValue(elem.findall('./marc:datafield[@tag="264"]/marc:subfield[@code="a"]', ALL_NS))
+  yearOfPublication = utils.getElementValue(elem.find('./marc:datafield[@tag="264"]/marc:subfield[@code="c"]', ALL_NS))
+  edition = utils.getElementValue(elem.find('./marc:datafield[@tag="250"]/marc:subfield[@code="a"]', ALL_NS))
+  originalTitle = utils.getElementValue(elem.xpath('./marc:datafield[@tag="246"]/marc:subfield[@code="i" and text()="Titre original / oorspronkelijke titel"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
 
-  sourceKBRID = utils.getElementValue(elem.find('./datafield[@tag="765"]/subfield[@code="*"]', ALL_NS))
-  sourceTitle = utils.getElementValue(elem.find('./datafield[@tag="765"]/subfield[@code="t"]', ALL_NS))
-  sourceISBN = utils.getElementValue(elem.find('./datafield[@tag="765"]/subfield[@code="z"]', ALL_NS))
+  sourceKBRID = utils.getElementValue(elem.find('./marc:datafield[@tag="765"]/marc:subfield[@code="*"]', ALL_NS))
+  sourceTitle = utils.getElementValue(elem.find('./marc:datafield[@tag="765"]/marc:subfield[@code="t"]', ALL_NS))
+  sourceISBN = utils.getElementValue(elem.find('./marc:datafield[@tag="765"]/marc:subfield[@code="z"]', ALL_NS))
 
-  languagesString = utils.getElementValue(elem.findall('./datafield[@tag="041"]/subfield[@code="a"]', ALL_NS))
-  countryOfPublicationString = utils.getElementValue(elem.findall('./datafield[@tag="044"]/subfield[@code="a"]', ALL_NS))
-  belgianBibliographyClassificationsString = utils.getElementValue(elem.findall('./datafield[@tag="911"]/subfield[@code="a"]', ALL_NS))
+  languagesString = utils.getElementValue(elem.findall('./marc:datafield[@tag="041"]/marc:subfield[@code="a"]', ALL_NS))
+  countryOfPublicationString = utils.getElementValue(elem.findall('./marc:datafield[@tag="044"]/marc:subfield[@code="a"]', ALL_NS))
+  belgianBibliographyClassificationsString = utils.getElementValue(elem.findall('./marc:datafield[@tag="911"]/marc:subfield[@code="a"]', ALL_NS))
 
   
   # create a URI for all languages
@@ -215,7 +217,8 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
     'sourceKBRID': sourceKBRID,
     'sourceISBN10': sourceISBN10,
     'sourceISBN13': sourceISBN13,
-    'sourceTitle': sourceTitle
+    'sourceTitle': sourceTitle,
+    'originalTitle': originalTitle
   }
 
   writer.writerow(newRecord)
@@ -226,12 +229,12 @@ def addCollectionLinksToCSV(elem, writer, stats):
   """This function extracts links to collections and writes the id of the publication, the id of the collection and name of the collection to the given CSV file writer."""
 
   
-  kbrID = utils.getElementValue(elem.find('./controlfield[@tag="001"]', ALL_NS))
-  collectionLinks = elem.findall('./datafield[@tag="773"]', ALL_NS)
+  kbrID = utils.getElementValue(elem.find('./marc:controlfield[@tag="001"]', ALL_NS))
+  collectionLinks = elem.findall('./marc:datafield[@tag="773"]', ALL_NS)
 
   for cl in collectionLinks:
-    collectionID = utils.getElementValue(cl.find('./subfield[@code="*"]', ALL_NS))
-    collectionName = utils.getElementValue(cl.find('./subfield[@code="t"]', ALL_NS))
+    collectionID = utils.getElementValue(cl.find('./marc:subfield[@code="*"]', ALL_NS))
+    collectionName = utils.getElementValue(cl.find('./marc:subfield[@code="t"]', ALL_NS))
 
     newRecord = {
       'KBRID': kbrID,
@@ -266,7 +269,7 @@ def main():
        open(options.output_collection_links_file, 'w') as outCollectionLinksFile, \
        open(options.output_work_file, 'w') as outWorkFile:
 
-    workFields = ['KBRID', 'sourceKBRID', 'isbn10', 'isbn13', 'sourceISBN10', 'sourceISBN13', 'title', 'sourceTitle', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
+    workFields = ['KBRID', 'sourceKBRID', 'isbn10', 'isbn13', 'sourceISBN10', 'sourceISBN13', 'title', 'sourceTitle', 'originalTitle', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
     contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
     collectionLinksFields = ['KBRID', 'collectionID', 'collection-name']
 

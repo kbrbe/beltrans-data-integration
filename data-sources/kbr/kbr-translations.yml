@@ -411,6 +411,37 @@ mappings:
     po:
       - [prov:qualifiedAssociation, btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)~iri]
 
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsSourcesWithoutSource:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates creative works representing the source text of a translation when no source ID exists, currently on the LRM level of manifestations."
+    sources:
+      - access: *sourceWorksFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceWorksNL
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:manifestation_source_$(KBRID)
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, $(sourceKBRID)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [a, schema:CreativeWork]
+      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
+      - p: schema:name
+        o: $(originalTitle)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(originalTitle)]
+            - [grel:valueParameter2, ""] 
+
+
   # ---------------------------------------------------------------------------
   #
   manifestationsSourcesWithoutSourceFR:
@@ -427,9 +458,7 @@ mappings:
         - [grel:valueParameter, $(sourceKBRID)]
         - [grel:valueParameter2, ""] 
     po:
-      - [a, schema:CreativeWork]
       - [schema:inLanguage, lang:fre~iri]
-      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
 
   # ---------------------------------------------------------------------------
   #
@@ -447,9 +476,7 @@ mappings:
         - [grel:valueParameter, $(sourceKBRID)]
         - [grel:valueParameter2, ""] 
     po:
-      - [a, schema:CreativeWork]
       - [schema:inLanguage, lang:dut~iri]
-      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
 
 
   # ---------------------------------------------------------------------------
