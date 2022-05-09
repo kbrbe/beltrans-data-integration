@@ -511,8 +511,20 @@ mappings:
       - [a, schema:CreativeWork]
       - [dcterms:identifier, $(sourceKBRID)]
       - [schema:name, $(sourceTitle)]
-      - [bibo:isbn10, $(sourceISBN10)]
-      - [bibo:isbn13, $(sourceISBN13)]
+      - p: bibo:isbn10
+        o: $(sourceISBN10)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(sourceISBN10)]
+            - [grel:valueParameter2, ""] 
+      - p: bibo:isbn13
+        o: $(sourceISBN13)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(sourceISBN13)]
+            - [grel:valueParameter2, ""] 
       - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
 
 
