@@ -624,7 +624,75 @@ def extract_places_tsv(df, columnname_places, columnname_countries):
     return place_country
 
 
+# -----------------------------------------------------------------------------
+def countRowsWithValueForColumn(df, column):
+  """This function returns the number of rows for the provided column in the provided pandas dataframe which are not empty (or are not NaN).
+  >>> data1 = pd.DataFrame([{'id': '1', 'value': ''},{'id': '2', 'value': '2'},{'id': 3},{'id': '4', 'value': '4'},{'id': '5', 'value': 5}])
+  >>> countRowsWithValueForColumn(data1, 'value')
+  3
+  """
+  myDf = df.fillna('')
+  return (myDf[column].values != '').sum()
 
+# -----------------------------------------------------------------------------
+def countRowsWithMultipleValuesForColumn(df, column, delimiter=';'):
+  """This function returns the number of rows in the given dataframe and column containing the given delimiter string.
+  >>> data1 = pd.DataFrame([{'id': '1', 'value': 'hello'},{'id': '2', 'value': 'hello;world'},{'id': '3', 'value': '12;34'}])
+  >>> countRowsWithMultipleValuesForColumn(data1, 'value')
+  2
+  """
+  myDf = df.fillna('')
+  return (myDf[column].str.contains(delimiter)).sum()
+
+# -----------------------------------------------------------------------------
+def createCorpusMeasurements(corpus, identifier, comment):
+  timestamp = datetime.now()
+
+  measurement = {
+    'date': timestamp,
+    'corpus': identifier,
+    'numberTranslations': len(corpus.index),
+    'withTargetISBN10': countRowsWithValueForColumn(corpus, 'targetISBN10'),
+    'withTargetISBN13': countRowsWithValueForColumn(corpus, 'targetISBN13'),
+    'withKBRIdentifier': countRowsWithValueForColumn(corpus, 'targetKBRIdentifier'),
+    'withBnFIdentifier': countRowsWithValueForColumn(corpus, 'targetBnFIdentifier'),
+    'withKBIdentifier': countRowsWithValueForColumn(corpus, 'targetKBIdentifier'),
+    'withBBThesaurusID': countRowsWithValueForColumn(corpus, 'targetThesaurusBB'),
+    'withSourceKBRIdentifier': countRowsWithValueForColumn(corpus, 'sourceKBRIdentifier'),
+    'withSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitle'),
+    'withSourceISBN10': countRowsWithValueForColumn(corpus, 'sourceISBN10'),
+    'withSourceISBN13': countRowsWithValueForColumn(corpus, 'sourceISBN13'),
+    'comment': comment
+  }
+  return measurement
+
+# -----------------------------------------------------------------------------
+def createContributorCorpusMeasurements(corpus, comment):
+  timestamp = datetime.now()
+
+  measurement = {
+    'date': timestamp,
+    'numberContributors': len(corpus.index),
+    'withKBRIdentifier': countRowsWithValueForColumn(corpus, 'kbrIDs'),
+    'withBnFIdentifier': countRowsWithValueForColumn(corpus, 'bnfIDs'),
+    'withKBIdentifier': countRowsWithValueForColumn(corpus, 'ntaIDs'),
+    'withISNIIdentifier': countRowsWithValueForColumn(corpus, 'isniIDs'),
+    'withVIAFIdentifier': countRowsWithValueForColumn(corpus, 'viafIDs'),
+    'withWikidataIdentifier': countRowsWithValueForColumn(corpus, 'wikidataIDs'),
+    'withBirthDate': countRowsWithValueForColumn(corpus, 'birthDate'),
+    'withDeathDate': countRowsWithValueForColumn(corpus, 'deathDate'),
+    'withNationality': countRowsWithValueForColumn(corpus, 'nationalities'),
+    'withMultipleKBRIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'kbrIDs'),
+    'withMultipleBnFIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'bnfIDs'),
+    'withMultipleNTAIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'ntaIDs'),
+    'withMultipleISNIIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'isniIDs'),
+    'withMultipleVIAFIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'viafIDs'),
+    'withMultipleWikidataIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'wikidataIDs'),
+    'withMultipleBirthDates': countRowsWithMultipleValuesForColumn(corpus, 'birthDate', delimiter='or'),
+    'withMultipleDeathDates': countRowsWithMultipleValuesForColumn(corpus, 'deathDate', delimiter='or'),
+    'withMultipleNationalities': countRowsWithMultipleValuesForColumn(corpus, 'nationalities')
+  }
+  return measurement
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
