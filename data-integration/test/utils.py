@@ -395,6 +395,16 @@ def getContributorData(df, role, colNamesRaw):
   return df[colNamesRaw]
 
 # ---------------------------------------------------------------------------
+def getDfValues(df, idColName, idColValue, colName):
+    """"Returns an array of values of a row with given identifier.
+    >>> data1 = pd.DataFrame([{"targetTextKBRIdentifier": "2", "name": "john", "targetTextBnFIdentifier": ""},{"targetTextBnFIdentifier": 2, "name": "jane"}, {"targetTextKBRIdentifier": "2", "name": "jane"}])
+    >>> getDfValues(data1, "targetTextKBRIdentifier", "2", "name")
+    ['john', 'jane']
+    """
+    selection = (df.loc[df[idColName] == idColValue, colName])
+    return selection.tolist()
+
+# ---------------------------------------------------------------------------
 def getDfCellValue(df, idColName, idColValue, colName):
     """Returns the value of a specific cell or raises errors in case the row isn't found or more than one value is found.
     >>> data = pd.DataFrame([{"myID": 1, "name": "john", "myCol": "sven (12, 34)"},{"myID": 2, "name": "jane"}])
