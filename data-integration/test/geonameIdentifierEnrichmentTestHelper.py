@@ -66,7 +66,7 @@ class GeonameIdentifierEnrichmentTestHelper:
     # reuse the getCellValue function so also some checks are performed
     try:
       values = utils.getDfValues(self.df, "targetKBRIdentifier", kbrIdentifier, "targetPlaceOfPublicationLongitude")
-      if placeIdentifier in values:
+      if longitude in values:
         return True
       else:
         return False
@@ -90,7 +90,7 @@ class GeonameIdentifierEnrichmentTestHelper:
     # reuse the getCellValue function so also some checks are performed
     try:
       values = utils.getDfValues(self.df, "targetKBRIdentifier", kbrIdentifier, "targetPlaceOfPublicationLatitude")
-      if placeIdentifier in values:
+      if latitude in values:
         return True
       else:
         return False

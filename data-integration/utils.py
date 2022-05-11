@@ -519,6 +519,30 @@ def getGeoNamesMainSpellingFromDataFrame(df, identifier):
   return (df.loc[df[0] == identifier, 1]).item()
 
 # -----------------------------------------------------------------------------
+def getGeoNamesLatitude(df, identifier):
+  """This function extracts the main spelling from a pandas dataframe filled with geonames data.
+  >>> data1 = [
+  ... ["6693370","Bruxelles-Capitale","Bruxelles-Capitale","BRU,Brussel-Hoofdstad,Bruxelas-Capital","50.84877","4.34664","A","ADM2","BE","","BRU","BRU","","",0,"","26","Europe/Brussels","2016-12-19"],
+  ... ["2797657","Gent","Gent","44021,Arrondissement de Gand,Gand,Gent,Ghent","51.07304","3.73664","A","ADM4","BE","","VLG","VOV","44","44021","262219","",4,"Europe/Brussels","2020-04-04"],
+  ... ["2797659","Genovabeek","Genovabeek","Genovabeek,Genovevabeek","50.83222","5.01696","H","STM","BE","","VLG","","","",0,"","30","Europe/Brussels","2012-01-18"]]
+  >>> getGeoNamesLatitude(pd.DataFrame(data1), "2797657")
+  '51.07304'
+  """
+  return (df.loc[df[0] == identifier, 4]).item()
+
+# -----------------------------------------------------------------------------
+def getGeoNamesLongitude(df, identifier):
+  """This function extracts the main spelling from a pandas dataframe filled with geonames data.
+  >>> data1 = [
+  ... ["6693370","Bruxelles-Capitale","Bruxelles-Capitale","BRU,Brussel-Hoofdstad,Bruxelas-Capital","50.84877","4.34664","A","ADM2","BE","","BRU","BRU","","",0,"","26","Europe/Brussels","2016-12-19"],
+  ... ["2797657","Gent","Gent","44021,Arrondissement de Gand,Gand,Gent,Ghent","51.07304","3.73664","A","ADM4","BE","","VLG","VOV","44","44021","262219","",4,"Europe/Brussels","2020-04-04"],
+  ... ["2797659","Genovabeek","Genovabeek","Genovabeek,Genovevabeek","50.83222","5.01696","H","STM","BE","","VLG","","","",0,"","30","Europe/Brussels","2012-01-18"]]
+  >>> getGeoNamesLongitude(pd.DataFrame(data1), "2797657")
+  '3.73664'
+  """
+  return (df.loc[df[0] == identifier, 5]).item()
+
+# -----------------------------------------------------------------------------
 def extractStringFromBrackets(value):
   """This function extracts a string in different brackets.
   >>> extractStringFromBrackets('[Brussels]')
@@ -551,19 +575,28 @@ def extractStringFromBrackets(value):
 def extract_geonames(inputDataframe):
     """This function creates a lookup dictionary based on geonames data where possible spellings of a place are the keys and their IDs the value.
     >>> data1 = [
-    ... ["6693370","Bruxelles-Capitale","Bruxelles-Capitale","BRU,Brussel-Hoofdstad,Bruxelas-Capital","50.84877","4.34664","A","ADM2","BE","","BRU","BRU","","",0,"","26","Europe/Brussels","2016-12-19"],   
-    ... ["2797657","Gent","Gent","44021,Arrondissement de Gand,Gand,Gent,Ghent","51.07304","3.73664","A","ADM4","BE","","VLG","VOV","44","44021","262219","",4,"Europe/Brussels","2020-04-04"], 
+    ... ["2800866","Brussels","Brussels","An Bhruiseil,An Bhruiséil,BRU,Brasels,Breissel,Brisel,Brisele,Briuselis,Brjuksel,Brjusel',Brjussel',Brueksel,Bruessel,Bruesszel,Bruiseal,Bruksel,Bruksela,Brukseli,Brukselo,Brusehl',Brusel,Brusela,Bruselas,Bruseles,Bruselj,Bruselo,Brusel·les,Brussel,Brussele,Brussels,Brussel·les,Bruxel,Bruxelas,Bruxellae,Bruxelles,Brwsel,Bryssel,Bryusel,Bryxelles,Bréissel,Brüksel,Brüssel,Brüsszel,Citta di Bruxelles,Città di Bruxelles,City of Brussels,Kota Brusel,beulwisel,bi lu xi,braselasa,braselsa,brassels,briuseli,brwksl,brysl,bu lu sai er,buryusseru,Βρυξέλλες,Брисел,Брусэль,Брюксел,Брюсель,Брюссель,Բրյուսել,בריסל,ﺏﺭﻮﻜﺴﻟ,ﺏﺭﻮﮑﺴﻟ,ﺏﺮﻳۇﺲﺳېﻝ,ܒܪܘܟܣܠ,ब्रसेल्स,ব্রাসেলস,บรัสเซลส์,ბრიუსელი,ブリュッセル,布魯塞爾,布鲁塞尔,比律悉,브뤼셀","50.85045","4.34878","P","PPLC","BE","BRU","BRU","21","21004","1019022","28","Europe/Brussels","2022-03-09"],
+    ... ["2797656","Gent","Gent","GNE,Gaent,Gand,Gandavum,Gandawa,Gande,Gant,Gante,Ganti,Gent,Gentas,Gente,Gento,Ghent,Gint,Gænt,gen te,genta,ghnt,gnt,henteu,hento,jenta,jnt,ken t,khenta,khnt,Γάνδη,Гент,Գենտ,גנט,ﺞﻨﺗ,ﺦﻨﺗ,ﻎﻨﺗ,ﻎﯿﻧٹ,खेंट,गेंट,জেন্ট,เกนต์,ဂင့်မြိ,გენტი,ヘント,根特,헨트","51.05","3.71667","P","PPL","BE","VLG","VOV","44","44021","231493","10","Europe/Brussels","2019-09-"],
+    ... ["2797657","Gent","Gent","44021,Arrondissement de Gand,Gand,Gent,Ghent","51.07304","3.73664","A","ADM4","BE","","VLG","VOV","44","44021","262219","",4,"Europe/Brussels","2020-04-04"],
     ... ["2797659","Genovabeek","Genovabeek","Genovabeek,Genovevabeek","50.83222","5.01696","H","STM","BE","","VLG","","","",0,"","30","Europe/Brussels","2012-01-18"]]
-    >>> extract_geonames(pd.DataFrame(data1))
-    {'bru': '6693370', 'brussel-hoofdstad': '6693370', 'bruxelas-capital': '6693370', '44021': '2797657', 'arrondissement de gand': '2797657', 'gand': '2797657', 'gent': '2797657', 'ghent': '2797657', 'genovabeek': '2797659', 'genovevabeek': '2797659', 'bruxelles-capitale': '6693370'}
-
+    >>> mapping = extract_geonames(pd.DataFrame(data1))
+    >>> mapping['gent']
+    '2797656'
+    >>> mapping['ghent']
+    '2797656'
+    >>> mapping['bruxelles']
+    '2800866'
     """ 
     geo_ids = {}
-    g = inputDataframe
+
+    # we are only interested in cities not administrative units (starting with AD)
+    # for example we want PPL (place), PPLC (capital of political entity) or PPLA2 (seat of second-order administrative division)
+    g = inputDataframe[inputDataframe[7].str.startswith('PP')]
 
     # Add the column with all the alternate spellings (comma-separated list) to the lookup
     #
     messy_column = dict(zip(g[3], g[0]))
+
     for key, value in messy_column.items():
         if isinstance(key, str):
             new_keys = key.split(",")

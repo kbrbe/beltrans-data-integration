@@ -63,7 +63,7 @@ class TestGeonamesIdentifierEnrichment(unittest.TestCase):
   # ---------------------------------------------------------------------------
   def testIdentifierFoundForGhent(self):
     """When the location is Ghent the correct geoname identifier should be found"""
-    foundIdentifier = TestGeonamesIdentifierEnrichment.data.getKBRIdentifierCountry("1")
+    foundIdentifier = TestGeonamesIdentifierEnrichment.data.getKBRIdentifierPlaceOfPublicationIdentifier("1")
     self.assertEqual(foundIdentifier, "2797656", msg= f'For the location Ghent the identifier was "{foundIdentifier}" instead of 2797656')
 
   def testLongitudeFoundForGhent(self):
@@ -102,7 +102,7 @@ class TestGeonamesIdentifierEnrichment(unittest.TestCase):
     identifiers = []
     for row in TestGeonamesIdentifierEnrichment.rawData:
       identifiers.append(row['targetKBRIdentifier'])
-    self.assertEqual(identifiers, ['1','2','3','4','5','123','6', '7', '8', '9', '10', '11','12', '13'], msg="Identifiers contain non expected values")
+    self.assertEqual(identifiers, ['1','2','3','4','5','123','6', '7', '7', '8', '8', '8', '9', '9', '10', '11', '11', '12', '12', '13', '13'], msg="Identifiers contain non expected values")
 
 
   # ---------------------------------------------------------------------------
@@ -145,7 +145,7 @@ class TestGeonamesIdentifierEnrichment(unittest.TestCase):
 
   def testLatitudeFoundForPlaceSeparatedWithPointHyphen(self):
     """When the location is 'Leuven. - Paris' the correct latitudes should be found"""
-    expectedLatitudes = ['50.87967', '48.85341']
+    expectedLatitudes = ['50.87959', '48.85341']
     results = {}
     for i in expectedLatitudes:
       results[i] = TestGeonamesIdentifierEnrichment.data.placeOfPublicationLatitudeExistsforKBRIdentifier(i, "7")

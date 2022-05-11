@@ -1,83 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 @author: Fabrizio Pascucci
+@author: Sven Lieber
 """
-
+import csv
+from optparse import OptionParser
 import pandas as pd
 import re
-from optparse import OptionParser
+import glob
 import unicodedata as ud
-
-def getNormalizedString(s):
-    noComma = s.replace(',', '')
-    noQuestionMark = noComma.replace('?', '')
-    noExclamationMark = noQuestionMark.replace('!', '')
-    noColon = noExclamationMark.replace(':', '')
-    return ud.normalize('NFKD', noColon).encode('ASCII', 'ignore').lower().strip().decode("utf-8")
-
-def extract_geonames(filename):
-    geo_ids = {}
-    g = pd.read_csv(filename, delimiter='\t', header=None)
-    messy_column = dict(zip(g[3], g[0]))
-    for key, value in messy_column.items():
-        if isinstance(key, str):
-            new_keys = key.split(",")
-            for new_key in new_keys:
-                geo_ids[new_key] = value
-
-    geo_ids.update(dict(zip(g[1], g[0])))
-    geo_ids.update(dict(zip(g[2], g[0])))
-
-    geo_ids_normalized = {}
-
-    for key, value in geo_ids.items():
-        key_normalized = getNormalizedString(key)
-        geo_ids_normalized[key_normalized] = value
-
-    return geo_ids_normalized
-
-def extract_places(df, columnname_places, columnname_countries):
-    places = df[columnname_places].replace(to_replace=r'\[|\]|(\(.*?\))', value='', regex=True)
-    countries = df[columnname_countries]
-    places = list(places)
-    countries = list(countries)
-
-    places_clean = []
-    for place in places:
-        if type(place) is not float:
-            place = getNormalizedString(place)
-            if ". - " in place:
-                place = place.replace(". - ", " ; ")
-            elif " - " in place:
-                place = place.replace(" - ", " ; ")
-            places_clean.append(place.strip())
-        else:
-            places_clean.append("")
-
-    place_country = list(zip(places_clean, countries))
-
-    return place_country
-
-def get_coordinates(geonames):
-    coordinates = {}
-    filenames = []
-    filenames.append(geonames + "BE.txt")
-    filenames.append(geonames + "FR.txt")
-    filenames.append(geonames + "NL.txt")
-    for filename in filenames:
-        df = pd.read_csv(filename, delimiter = '\t', header=None)
-        country = df[8].tolist()
-        geonamesid = df[0].tolist()
-        latitudes = df[4].tolist()
-        longitudes = df[5].tolist()
-        place = df[1].tolist()
-        placecountrylatlong = list(zip(place, country, latitudes, longitudes))
-        coordinates.update(dict(zip(geonamesid, placecountrylatlong)))
-    return coordinates
+import utils
 
 def main():
-    """This script fills out missing countries based on the place name (for Belgium, France & The Netherlands)"""
+    """This script selects geoname identifeirs and longitude/latidude coordindates
+    based on the place name (for Belgium, France & The Netherlands)"""
     parser = OptionParser(usage="usage: %prog [options]")
-    parser.add_option('-i', '--input-file', action='store', help='The input file as CSV')
+    parser.add_option('-i', '--input-file', action='store', help='The input file as TSV')
     parser.add_option('-c', '--column-with-country-names', action='store', help='The name of the column that contains the countries')
     parser.add_option('-p', '--column-with-places', action='store', help='The name of the column that contains the place names')
     parser.add_option('-g', '--geonames-folder', action='store', help='The filepath to the the geonames (insert the "/" at the end) folder. In this folder the geonames files for the three countries must be named "BE.txt", "FR.txt" and "NL.txt"')
@@ -86,76 +24,91 @@ def main():
 
     if( ( not options.geonames_folder) or (not options.input_file) or (not options.column_with_country_names) or (not options.column_with_places) or (not options.geonames_folder) or (not options.output_file) ):
       parser.print_help()
-      exit(1)
+      exit(1) 
 
-    be = extract_geonames(options.geonames_folder +"BE.txt")
-    fr = extract_geonames(options.geonames_folder +"FR.txt")
-    nl = extract_geonames(options.geonames_folder +"NL.txt")
+    beContent = pd.read_csv(options.geonames_folder + "BE.txt", delimiter='\t', header=None)
+    be = utils.extract_geonames(beContent)
+    frContent = pd.read_csv(options.geonames_folder + "FR.txt", delimiter='\t', header=None)
+    fr = utils.extract_geonames(frContent)
+    nlContent = pd.read_csv(options.geonames_folder + "NL.txt", delimiter='\t', header=None)
+    nl = utils.extract_geonames(nlContent)
 
-    df = pd.read_csv(options.input_file, delimiter=',', encoding= 'utf-8')
-    df = df.fillna('')
+    with open(options.input_file, 'r', encoding='utf-8') as inFile, \
+         open(options.output_file, 'w', encoding='utf-8') as outFile:
 
-    places = extract_places(df, options.column_with_places, options.column_with_country_names)
+        inputReader = csv.DictReader(inFile, delimiter=',')
 
-    ids = []
-    wrong_country = []
-    for place in places:
-        city = place[0]
-        country = place[1]
-        if ";" in city or ";" in country:
-            ids.append("")
-            wrong_country.append("")
-        elif "Bel" in country and city in be:
-            ids.append(be[city])
-            wrong_country.append("")
-        elif country == "France" and city in fr:
-            ids.append(fr[city])
-            wrong_country.append("")
-        elif country == "Netherlands" and city in nl:
-            ids.append(nl[city])
-            wrong_country.append("")
-        elif city in be:
-            ids.append(be[city])
-            wrong_country.append("yes")
-        elif city in fr:
-            ids.append(fr[city])
-            wrong_country.append("yes")
-        elif city in nl:
-            ids.append(nl[city])
-            wrong_country.append("yes")
-        else:
-            ids.append("")
-            wrong_country.append("")
+        # prepare slightly different output headers to include derived data
+        outputHeaders = inputReader.fieldnames.copy()
+        placeOfPublicationIndex = outputHeaders.index('targetPlaceOfPublication')
+        outputHeaders.insert(placeOfPublicationIndex+1, 'targetPlaceOfPublicationIdentifier')
+        outputHeaders.insert(placeOfPublicationIndex+2, 'targetPlaceOfPublicationLongitude')
+        outputHeaders.insert(placeOfPublicationIndex+3, 'targetPlaceOfPublicationLatitude')
+        outputWriter = csv.DictWriter(outFile, fieldnames=outputHeaders, delimiter=',')
+        outputWriter.writeheader()
 
-    d = get_coordinates(options.geonames_folder)
+        locationDelimiter = ';'
+        numRows = 0
+        numLocations = 0
+        for row in inputReader:
+            numRows += 1
+            location = row[options.column_with_places]
+            locationListNorm = utils.normalizeDelimiters(location, delimiter=locationDelimiter)
 
-    geonames_place = []
-    geonames_country = []
-    geonames_lat = []
-    geonames_long = []
+            # create a list of locations, even if it just has one entry
+            locations = locationListNorm.split(locationDelimiter) if locationDelimiter in locationListNorm else [locationListNorm]
 
-    for id in ids:
-        if id in d:
-            geonames_place.append((d[id])[0])
-            geonames_country.append((d[id])[1])
-            geonames_lat.append((d[id])[2])
-            geonames_long.append((d[id])[3])
-        else:
-            geonames_place.append("")
-            geonames_country.append("")
-            geonames_lat.append("")
-            geonames_long.append("")
+            for l in locations:
+                numLocations += 1
+                # The location might be in brackets, e.g. "(Brussels)" or "[Brussels]"
+                noBrackets = utils.extractStringFromBrackets(l)
+                # The location may contain also a country, e.g. "Gent (Belgium)"
+                onlyLocation = utils.extractLocationFromLocationCountryString(noBrackets)
+                # The location needs to be normalized with respect to special characters
+                lNorm = utils.getNormalizedString(onlyLocation)
+                lNorm = lNorm.strip()
 
-    df['targetPlaceOfPublicationIdentifier'] = ids
-    df['wrong_country'] = wrong_country
-    df['geonames_place'] = geonames_place
-    df['geonames_country'] = geonames_country
-    df['targetPlaceOfPublicationLatitude'] = geonames_lat
-    df['targetPlaceOfPublicationLongitude'] = geonames_long
+                locationMainSpelling = ''
+                locationIdentifier = ''
+                locationLongitude = ''
+                locationLatitude = ''
+                locationCountry = ''
+                # ElseIf because some places exist in several countries, but we want to prioritize Belgium
+                # E.g. Hasselt exists in Belgium and in the Netherlands
+                if lNorm == '':
+                    pass
+                elif lNorm in be:
+                    locationMainSpelling = utils.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm])
+                    locationCountry = 'Belgium'
+                    locationIdentifier = be[lNorm]
+                    locationLongitude = utils.getGeoNamesLongitude(beContent, be[lNorm])
+                    locationLatitude = utils.getGeoNamesLatitude(beContent, be[lNorm])
+                elif lNorm in fr:
+                    locationMainSpelling = utils.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm])
+                    locationCountry = 'France'
+                    locationIdentifier = fr[lNorm]
+                    locationLongitude = utils.getGeoNamesLongitude(frContent, fr[lNorm])
+                    locationLatitude = utils.getGeoNamesLatitude(frContent, fr[lNorm])
+                elif lNorm in nl:
+                    locationMainSpelling = utils.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm])
+                    locationCountry = 'Netherlands'
+                    locationIdentifier = nl[lNorm]
+                    locationLongitude = utils.getGeoNamesLongitude(nlContent, nl[lNorm])
+                    locationLatitude = utils.getGeoNamesLatitude(nlContent, nl[lNorm])
+                else:
+                    # use the filtered one we got from the input (e.g. without country in brackets)
+                    locationMainSpelling = onlyLocation
 
-    df.to_csv(options.output_file, sep=",", index=False, encoding="utf-8")
+                outputRow = row.copy()
+                outputRow['targetPlaceOfPublication'] = locationMainSpelling
+                outputRow['targetCountryOfPublication'] = locationCountry
+                outputRow['targetPlaceOfPublicationIdentifier'] = locationIdentifier
+                outputRow['targetPlaceOfPublicationLongitude'] = locationLongitude
+                outputRow['targetPlaceOfPublicationLatitude'] = locationLatitude
+
+                outputWriter.writerow(outputRow)
+        print(f'processed {numRows} rows and {numLocations} locations')
 
 
 main()
 
-# python add_coordinates.py -i input.txt -c targetTextCountryOfPublication -p targetTextPlaceOfPublication -g geonames/ -o output.txt
