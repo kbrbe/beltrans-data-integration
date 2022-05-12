@@ -73,7 +73,7 @@ class TestCountryEnrichment(unittest.TestCase):
     identifiers = []
     for row in TestCountryEnrichment.rawData:
       identifiers.append(row['targetKBRIdentifier'])
-    self.assertEqual(identifiers, ['1','2','3','4','5','123','6', '7', '8', '9', '10', '11','12', '13'], msg="Identifiers contain non expected values")
+    self.assertEqual(identifiers, ['1','2','3','4','5','123','6', '7', '8', '9', '10', '11','12', '13', '14', '15', '16'], msg="Identifiers contain non expected values")
 
   # ---------------------------------------------------------------------------
   def testBelgiumFoundForGentWithCountryInParenthesis(self):
@@ -151,4 +151,46 @@ class TestCountryEnrichment(unittest.TestCase):
   def testBerlinLocationNormalized(self):
     """When the location is 'Brussels;Berlin' the location should stay 'Brussels;Berlin'."""
     foundLocation = TestCountryEnrichment.data.getKBRIdentifierLocation("13")
-    self.assertEqual(foundLocation, "Brussels;Berlin", msg= f'For the location "Brussels;Berlin" the altered location was "{foundLocation}" instead of "Brussels;Berlin"')
+    expectedLocation="Berlin;Brussels"
+    self.assertEqual(foundLocation, expectedLocation, msg=f'For the location "Brussels;Berlin" the altered location was "{foundLocation}" instead of "{expectedLocation}"')
+
+  # ---------------------------------------------------------------------------
+  def testAartselaarRoubaixBracketsMixCountry(self):
+    """When the location is '[Aartselaar (Belgique)]. - [Roubaix]' the country should be 'Belgium'."""
+    foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("14")
+    self.assertEqual(foundCountry, "Belgium;France", msg=f'For the location "[Aartselaar (Belgique)]. - [Roubaix]" the country was "{foundCountry}" instead of "Belgium"')
+
+  # ---------------------------------------------------------------------------
+  def testAartselaarRoubaixBracketsMixLocationNormalized(self):
+    """When the location is '[Aartselaar (Belgique)]. - [Roubaix]' the location should be altered to 'Aartselaar;Roubaix'."""
+    foundLocation = TestCountryEnrichment.data.getKBRIdentifierLocation("14")
+    expectedLocation = "Aartselaar;Roubaix"
+    self.assertEqual(foundLocation, expectedLocation, msg=f'For the location "[Aartselaar (Belgique)]. - [Roubaix]" the altered location was "{foundLocation}" instead of "{expectedLocation}"')
+
+  # ---------------------------------------------------------------------------
+  def testDoubleParisCountry(self):
+    """When the location is 'Paris. - [Paris]' the country should be 'Belgium'."""
+    foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("15")
+    expectedCountry = "France"
+    self.assertEqual(foundCountry, expectedCountry, msg=f'For the location "[Aartselaar (Belgique)]. - [Roubaix]" the country was "{foundCountry}" instead of "{expectedCountry}"')
+
+  # ---------------------------------------------------------------------------
+  def testDoubleParisNormalized(self):
+    """When the location is 'Paris. - [Paris]' the location should be altered to 'Paris'."""
+    foundLocation = TestCountryEnrichment.data.getKBRIdentifierLocation("15")
+    expectedLocation = 'Paris'
+    self.assertEqual(foundLocation, expectedLocation, msg=f'For the location "Paris. - [Paris]" the altered location was "{foundLocation}" instead of "{expectedLocation}"')
+
+  # ---------------------------------------------------------------------------
+  def testMontrealQuebecCountry(self):
+    """When the location is '[Montréal (Québec)]' the country should be 'Belgium'."""
+    foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("16")
+    expectedCountry = ""
+    self.assertEqual(foundCountry, expectedCountry, msg=f'For the location "[Aartselaar (Belgique)]. - [Roubaix]" the country was "{foundCountry}" instead of "{expectedCountry}"')
+
+  # ---------------------------------------------------------------------------
+  def testMontrealQuebecLocationNormalized(self):
+    """When the location is '[Montréal (Québec)]' the location should be altered to 'Paris'."""
+    foundLocation = TestCountryEnrichment.data.getKBRIdentifierLocation("16")
+    expectedLocation = 'Montréal (Québec)'
+    self.assertEqual(foundLocation, expectedLocation, msg=f'For the location "[Montréal (Québec)]" the altered location was "{foundLocation}" instead of "{expectedLocation}"')

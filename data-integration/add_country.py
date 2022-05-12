@@ -54,7 +54,7 @@ def main():
             foundCountries = set()
 
             # For the end result we also need the non-normalized main spelling of the location
-            locationsMainSpelling = []
+            locationsMainSpelling = set()
 
             for l in locations:
 
@@ -72,22 +72,22 @@ def main():
                     pass
                 elif lNorm in be:
                     foundCountries.add('Belgium')
-                    locationsMainSpelling.append(utils.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm]))
+                    locationsMainSpelling.add(utils.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm]))
                 elif lNorm in fr:
                     foundCountries.add('France')
-                    locationsMainSpelling.append(utils.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm]))
+                    locationsMainSpelling.add(utils.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm]))
                 elif lNorm in nl:
                     foundCountries.add('Netherlands')
-                    locationsMainSpelling.append(utils.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm]))
+                    locationsMainSpelling.add(utils.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm]))
                 else:
-                    locationsMainSpelling.append(onlyLocation)
+                    locationsMainSpelling.add(onlyLocation)
 
             for foundC in foundCountries:
                 if foundC not in existingCountries:
                     existingCountries.append(foundC)
 
             existingCountries.sort()
-            newLocationsString = ';'.join(locationsMainSpelling)
+            newLocationsString = ';'.join(sorted(locationsMainSpelling))
             newCountriesString = ';'.join(existingCountries)
             row[options.column_with_places] = newLocationsString
             row[options.column_with_country_names] = newCountriesString
