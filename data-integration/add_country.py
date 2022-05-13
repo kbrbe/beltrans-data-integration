@@ -64,6 +64,8 @@ def main():
                 onlyLocation = utils.extractLocationFromLocationCountryString(noBrackets)
                 # The location needs to be normalized with respect to special characters
                 lNorm = utils.getNormalizedString(onlyLocation)
+                lNorm = lNorm.replace(' etc.', '')
+                lNorm = lNorm.replace('[etc.]', '')
                 lNorm = lNorm.strip()
 
                 # ElseIf because some places exist in several countries, but we want to prioritize Belgium
@@ -80,7 +82,8 @@ def main():
                     foundCountries.add('Netherlands')
                     locationsMainSpelling.add(utils.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm]))
                 else:
-                    locationsMainSpelling.add(onlyLocation)
+                    usedSpelling = onlyLocation.replace(' etc.', '').replace('[etc.]', '').strip()
+                    locationsMainSpelling.add(usedSpelling)
 
             for foundC in foundCountries:
                 if foundC not in existingCountries:
