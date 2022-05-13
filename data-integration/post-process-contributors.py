@@ -52,8 +52,8 @@ def main():
     for row in inputReader:
 
       # This is a relevant row, we process it further before writing it
-      utils.selectDate(row, 'birthDate', sources, 'contributorID', mismatchLog)
-      utils.selectDate(row, 'deathDate', sources, 'contributorID', mismatchLog)
+      utils.selectDate(row, 'birthDate', sources, 'contributorID', mismatchLog, 'date')
+      utils.selectDate(row, 'deathDate', sources, 'contributorID', mismatchLog, 'date')
 
       outputWriter.writerow(row)
 

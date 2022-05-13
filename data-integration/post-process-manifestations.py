@@ -29,16 +29,26 @@ def main():
     inputReader = csv.DictReader(inFile, delimiter=',')
     headers = inputReader.fieldnames.copy()
 
-    # In the output we only want a single birth date and a single death date column
+    # In the output we only want a single publication year column
     # thus first remove the respective columns from different data sources
-    headersToRemove = ['targetYearOfPublicationKBR', 'targetYearOfPublicationBnF', 'targetYearOfPublicationKB']
+    yearHeadersToRemove = ['targetYearOfPublicationKBR', 'targetYearOfPublicationBnF', 'targetYearOfPublicationKB']
+    placeHeadersToRemove = ['targetPlaceOfPublicationKBR', 'targetPlaceOfPublicationBnF', 'targetPlaceOfPublicationKB']
+    countryHeadersToRemove = ['targetCountryOfPublicationKBR', 'targetCountryOfPublicationBnF', 'targetCountryOfPublicationKB']
 
-    for r in headersToRemove:
-      headers.remove(r)
 
-    # and then add the single columns we want
-    headers.insert(8, 'targetYearOfPublication')
-    #headers.extend(['birthDate', 'deathDate'])
+    # and then add the single output columns we want per type
+    yearHeaderIndex = headers.index(yearHeadersToRemove[0])
+    placeHeaderIndex = headers.index(placeHeadersToRemove[0])
+    countryHeaderIndex = headers.index(countryHeadersToRemove[0])
+    headers.insert(yearHeaderIndex, 'targetYearOfPublication')
+    headers.insert(placeHeaderIndex, 'targetPlaceOfPublication')
+    headers.insert(countryHeaderIndex, 'targetCountryOfPublication')
+
+    for (y,p,c) in zip(yearHeadersToRemove, placeHeadersToRemove, countryHeadersToRemove):
+      headers.remove(y)
+      headers.remove(p)
+      headers.remove(c)
+
 
     outputWriter = csv.DictWriter(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, fieldnames=headers)
     outputWriter.writeheader()
@@ -50,7 +60,10 @@ def main():
     # write relevant data to output
     for row in inputReader:
 
-      utils.selectDate(row, 'targetYearOfPublication', sources, 'targetIdentifier', mismatchLog)
+      utils.selectDate(row, 'targetYearOfPublication', sources, 'targetIdentifier', mismatchLog, 'publicationYear')
+      utils.mergeValues(row, 'targetPlaceOfPublication', sources)
+      utils.mergeValues(row, 'targetCountryOfPublication', sources)
+
       outputWriter.writerow(row)
 
   # print statistics

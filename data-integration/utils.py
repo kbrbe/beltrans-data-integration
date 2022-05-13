@@ -333,35 +333,35 @@ def selectDateFromRole(row, role, dateType, sources, rowIDCol, mismatchLog):
   
 
 # -----------------------------------------------------------------------------
-def selectDate(row, dateType, sources, rowIDCol, mismatchLog):
+def selectDate(row, dateType, sources, rowIDCol, mismatchLog, mismatchLogKey):
   """This function chooses the most complete date for the given row, possible dateTypes are 'Birth' and 'death'.
 
   Select the most complete date betwen the sources
   >>> row = {'birthDateKBR': '1988-04-25', 'birthDateISNI': '1988'}
-  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {}, 'key')
   >>> row['birthDate'] == '1988-04-25'
   True
 
   >>> row = {'birthDateKBR': '', 'birthDateISNI': '1988'}
-  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {}, 'key')
   >>> row['birthDate'] == '1988'
   True
 
   Keep it empty if none of the sources provide a date
   >>> row = {'birthDateKBR': '', 'birthDateISNI': ''}
-  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {}, 'key')
   >>> row['birthDate'] == ''
   True
 
   Log an error if a mismatch was found and keep both in the output
   >>> row = {'authorKBRIdentifier': '1234', 'birthDateKBR': '1988-04-25', 'birthDateISNI': '1989'}
-  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {}, 'key')
   >>> row['birthDate'] == '1988-04-25 or 1989'
   True
 
   The same works also for death dates
   >>> row = {'deathDateKBR': '1988-04-25', 'deathDateISNI': '1988'}
-  >>> selectDate(row, 'deathDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {})
+  >>> selectDate(row, 'deathDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {}, 'key')
   >>> row['deathDate'] == '1988-04-25'
   True
   """
@@ -387,7 +387,7 @@ def selectDate(row, dateType, sources, rowIDCol, mismatchLog):
     for s in sources:
       colName = f'{dateType}{s}'
       value = row[colName]
-      addToMismatchLog(mismatchLog, dateType, 'contributor', contributorURI, s, value)
+      addToMismatchLog(mismatchLog, dateType, mismatchLogKey, contributorURI, s, value)
       row.pop(colName)
 
   else:
@@ -396,7 +396,46 @@ def selectDate(row, dateType, sources, rowIDCol, mismatchLog):
       colName = f'{dateType}{s}'
       if colName in row:
         row.pop(colName)
- 
+
+# -----------------------------------------------------------------------------
+def mergeValues(row, dateType, sources, delimiter=';'):
+  """This function merges locations of different input columns.
+
+  >>> row = {'targetPlaceOfPublicationKBR': 'Antwerpen;Amsterdam', 'targetPlaceOfPublicationBnF': 'Brussels'}
+  >>> mergeValues(row, 'targetPlaceOfPublication', ['KBR', 'BnF'])
+  >>> row['targetPlaceOfPublication']
+  'Amsterdam;Antwerpen;Brussels'
+
+  >>> row2 = {'targetPlaceOfPublicationKBR': 'Antwerpen;Amsterdam', 'targetPlaceOfPublicationBnF': 'Antwerpen'}
+  >>> mergeValues(row2, 'targetPlaceOfPublication', ['KBR', 'BnF'])
+  >>> row2['targetPlaceOfPublication']
+  'Amsterdam;Antwerpen'
+
+  >>> row3 = {'targetPlaceOfPublicationKBR': 'Antwerpen;Amsterdam', 'targetPlaceOfPublicationBnF': 'Antwerpen', 'targetPlaceOfPublicationKB': ''}
+  >>> mergeValues(row3, 'targetPlaceOfPublication', ['KBR', 'BnF', 'KB'])
+  >>> row3['targetPlaceOfPublication']
+  'Amsterdam;Antwerpen'
+  """
+  # extract all possible dates based on different sources
+  locations = set()
+  for s in sources:
+    colName = f'{dateType}{s}'
+    if colName in row:
+      # the value of this source column might be already a delimited string
+      splittedValues = row[colName].split(delimiter)
+      if len(splittedValues) > 0 and splittedValues[0] != '':
+        locations.update(splittedValues)
+
+  outputColName = f'{dateType}'
+
+  # merge the values and store them in the output column
+  row[outputColName] = delimiter.join(sorted(locations))
+
+  # remove the initial sources
+  for s in sources:
+    colName = f'{dateType}{s}'
+    if colName in row:
+      row.pop(colName)
 
 # -----------------------------------------------------------------------------
 def addKeysWithoutValueToDict(valDict, keyArray):
@@ -591,7 +630,7 @@ def extract_geonames(inputDataframe):
 
     # we are only interested in cities not administrative units (starting with AD)
     # for example we want PPL (place), PPLC (capital of political entity) or PPLA2 (seat of second-order administrative division)
-    g = inputDataframe[inputDataframe[7].str.startswith('PP')]
+    g = inputDataframe[inputDataframe[7].astype(str).str.startswith('PP')]
 
     # Add the column with all the alternate spellings (comma-separated list) to the lookup
     #

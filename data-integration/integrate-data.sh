@@ -547,18 +547,18 @@ function postprocess {
   echo "Postprocess contributor data ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -i $contributorsPersonsAllData -o $contributorsPersons
 
-  echo "Postprocess manifestation data ..."
-  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedData
-
 
   echo "Derive missing country names from place names - KBR ..."
-  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedData -o $tmp1 -g geonames/ -c targetCountryOfPublicationKBR -p targetPlaceOfPublicationKBR
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedAllData -o $tmp1 -g geonames/ -c targetCountryOfPublicationKBR -p targetPlaceOfPublicationKBR
 
   echo "Derive missing country names from place names - BnF ..."
   time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp1 -o $tmp2 -g geonames/ -c targetCountryOfPublicationBnF -p targetPlaceOfPublicationBnF
 
   echo "Derive missing country names from place names - KB ..."
-  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp2 -o $integratedDataEnriched -g geonames/ -c targetCountryOfPublicationKB -p targetPlaceOfPublicationKB
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp2 -o $integratedData -g geonames/ -c targetCountryOfPublicationKB -p targetPlaceOfPublicationKB
+
+  echo "Postprocess manifestation data ..."
+  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedData -o $integratedDataEnriched
 
   echo "Create Excel sheet for data ..."
   time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs -s "translations" -s "person contributors" -s "org contributors" -o $excelData
