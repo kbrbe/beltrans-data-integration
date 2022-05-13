@@ -6,6 +6,7 @@ import csv
 from optparse import OptionParser
 import utils
 import json
+import itertools
 import xlsxwriter
 
 # -----------------------------------------------------------------------------
@@ -40,17 +41,29 @@ def main():
     parser.print_help()
     exit(1)
 
-  wb = xlsxwriter.Workbook(options.output_file)
+  wb = xlsxwriter.Workbook(options.output_file, {'strings_to_formulas': False})
 
   for filename in args:
     with open(filename, 'r', encoding="utf-8") as inFile:
 
-      inputReader = csv.reader(inFile, delimiter=',')
+      rowCountReader, colCountReader, inputReader = itertools.tee(csv.reader(inFile, delimiter=','), 3)
+
+      rowCount = sum(1 for row in rowCountReader)
+      header = next(colCountReader)
+      colCount = len(header)
+      del rowCountReader
+      del colCountReader
+      print(f'{filename} has {rowCount} rows and {colCount} cols')
+
       sheet = wb.add_worksheet(options.sheet_names.pop(0))
 
+      headerDict = [ {'header': e} for e in header]
+      table = sheet.add_table(0,0,rowCount,colCount-1, {'style': 'Table Style Light 11', 'header_row': True, 'columns': headerDict})
       for r, row in enumerate(inputReader):
-        for c, val in enumerate(row):
-          sheet.write(r, c, val)
+        #print(f'r {r} and row {row}')
+        #for c, val in enumerate(row):
+        #  sheet.write_row(r, c, row)
+        sheet.write_row(r, 0, row)
 
   wb.close()
 
