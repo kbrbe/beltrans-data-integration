@@ -11,12 +11,27 @@ import glob
 import unicodedata as ud
 import utils
 
+def createMapping(filename):
+
+    mapping = {}
+    # Input file example: "Brussel = Bruxelles,Belgium,2800866,4.34878,50.85045"
+    with open(filename, 'r', encoding='utf-8') as inFile:
+        inputReader = csv.reader(inFile, delimiter=',')
+
+        # skip header
+        next(inputReader)
+
+        for row in inputReader:
+            mapping[row[0]] = [row[1], row[2], row[3], row[4], row[5]]
+    return mapping
+
 def main():
     """This script selects geoname identifeirs and longitude/latidude coordindates
     based on the place name (for Belgium, France & The Netherlands)"""
     parser = OptionParser(usage="usage: %prog [options]")
     parser.add_option('-i', '--input-file', action='store', help='The input file as TSV')
     parser.add_option('-p', '--column-with-places', action='store', help='The name of the column that contains the place names')
+    parser.add_option('-m', '--mapping_file', action='store', help='An optional CSV file with a mapping between place names and correct identifier/longitude/latitude combination')
     parser.add_option('-g', '--geonames-folder', action='store', help='The filepath to the the geonames (insert the "/" at the end) folder. In this folder the geonames files for the three countries must be named "BE.txt", "FR.txt" and "NL.txt"')
     parser.add_option('-o', '--output-file', action='store', help='The output as TSV')
     (options, args) = parser.parse_args()
@@ -31,6 +46,10 @@ def main():
     fr = utils.extract_geonames(frContent)
     nlContent = pd.read_csv(options.geonames_folder + "NL.txt", delimiter='\t', header=None)
     nl = utils.extract_geonames(nlContent)
+
+    mapping = {}
+    if options.mapping_file:
+        mapping = createMapping(options.mapping_file)
 
     with open(options.input_file, 'r', encoding='utf-8') as inFile, \
          open(options.output_file, 'w', encoding='utf-8') as outFile:
@@ -100,8 +119,16 @@ def main():
                     locationLongitude = utils.getGeoNamesLongitude(nlContent, nl[lNorm])
                     locationLatitude = utils.getGeoNamesLatitude(nlContent, nl[lNorm])
                 else:
-                    # use the filtered one we got from the input (e.g. without country in brackets)
-                    locationMainSpelling = onlyLocation
+                    # if not found in the BE/Fr/NL geonames dump check if a manual mapping was provided
+                    if onlyLocation in mapping:
+                        locationMainSpelling = mapping[onlyLocation][0]
+                        locationCountry = mapping[onlyLocation][1]
+                        locationIdentifier = mapping[onlyLocation][2]
+                        locationLongitude = mapping[onlyLocation][3]
+                        locationLatitude = mapping[onlyLocation][4]
+                    else:
+                        # use the filtered one we got from the input (e.g. without country in brackets)
+                        locationMainSpelling = onlyLocation
 
                 #outputRow = row.copy()
                 outputRow = {}

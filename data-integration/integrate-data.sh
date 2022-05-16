@@ -189,6 +189,7 @@ SUFFIX_DATA_PROFILE_EXCEL_DATA="corpus-data.xlsx"
 SUFFIX_DATA_PROFILE_EXCEL_STATS="corpus-stats.xlsx"
 
 SUFFIX_PLACE_OF_PUBLICATION_GEONAMES="place-of-publications-geonames.csv"
+SUFFIX_UNKNOWN_GEONAMES_MAPPING="missing-geonames-mapping.csv"
 
 #
 # Filenames used within an integration directory 
@@ -536,6 +537,7 @@ function postprocess {
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
   placeOfPublicationsGeonames="$integrationName/csv/$SUFFIX_PLACE_OF_PUBLICATION_GEONAMES"
+  unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
   contributorsPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
   contributorsPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE"
   tmp1="$integrationName/csv/kbr-enriched-not-yet-bnf-and-kb.csv"
@@ -564,7 +566,7 @@ function postprocess {
   time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedData -o $integratedDataEnriched
 
   echo "Create geonames relationships for place of publications ..."
-  time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION -i $integratedDataEnriched -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonames
+  time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonames
 
   echo "Create Excel sheet for data ..."
   time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -o $excelData
