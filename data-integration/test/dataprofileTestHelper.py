@@ -6,8 +6,11 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def __init__(self, data):
     self.df = pd.DataFrame(data)
+    print('DATA START')
+    print(data)
+    print('DATA END')
     #print(self.df)
-    #print(self.df[['targetTextIdentifier', 'authorIdentifiers', 'illustratorIdentifiers', 'scenaristIdentifiers']])
+    #print(self.df[['targetIdentifier', 'authorIdentifiers', 'illustratorIdentifiers', 'scenaristIdentifiers']])
 
   # ---------------------------------------------------------------------------
   def numberRows(self):
@@ -21,7 +24,7 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def targetIdentifierExists(self, identifier):
     """Returns True if a manifestation with the given ID exists.
-    >>> data = DataprofileTestHelper([{"targetTextIdentifier": 1, "name": "john"},{"targetTextIdentifier": 2, "name": "jane"}])
+    >>> data = DataprofileTestHelper([{"targetIdentifier": 1, "name": "john"},{"targetIdentifier": 2, "name": "jane"}])
     >>> data.targetIdentifierExists(2)
     True
     >>> data.targetIdentifierExists(4)
@@ -29,7 +32,7 @@ class DataprofileTestHelper:
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      value = utils.getDfCellValue(self.df, "targetTextIdentifier", identifier, "targetTextIdentifier")
+      value = utils.getDfCellValue(self.df, "targetIdentifier", identifier, "targetIdentifier")
       if value == identifier:
         return True
       else:
@@ -238,7 +241,7 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def targetIdentifierContainsAuthorString(self, identifier, authorString):
     """Returns True if a manifestation with the given ID contains the given author string.
-    >>> data = DataprofileTestHelper([{"targetTextIdentifier": 1, "name": "myBook", "authorIdentifiers": "sven (12, 34)"},{"targetTextIdentifier": 2, "name": "otherBook"}])
+    >>> data = DataprofileTestHelper([{"targetIdentifier": 1, "name": "myBook", "authorIdentifiers": "sven (12, 34)"},{"targetIdentifier": 2, "name": "otherBook"}])
     >>> data.targetIdentifierContainsAuthorString(1, "sven (12, 34)")
     True
     >>> data.targetIdentifierContainsAuthorString(1, "john")
@@ -246,13 +249,13 @@ class DataprofileTestHelper:
     >>> data.targetIdentifierContainsAuthorString(1, "12")
     True
     """
-    selection = utils.getDfCellValue(self.df, 'targetTextIdentifier', identifier, 'authorIdentifiers')
+    selection = utils.getDfCellValue(self.df, 'targetIdentifier', identifier, 'authorIdentifiers')
     return (authorString in selection)
 
   # ---------------------------------------------------------------------------
   def targetIdentifierContainsIllustratorString(self, identifier, illustratorString):
     """Returns True if a manifestation with the given ID contains the given illustrator string.
-    >>> data = DataprofileTestHelper([{"targetTextIdentifier": 1, "name": "myBook", "illustratorIdentifiers": "sven (12, 34)"},{"targetTextIdentifier": 2, "name": "otherBook"}])
+    >>> data = DataprofileTestHelper([{"targetIdentifier": 1, "name": "myBook", "illustratorIdentifiers": "sven (12, 34)"},{"targetIdentifier": 2, "name": "otherBook"}])
     >>> data.targetIdentifierContainsIllustratorString(1, "sven (12, 34)")
     True
     >>> data.targetIdentifierContainsIllustratorString(1, "john")
@@ -260,13 +263,13 @@ class DataprofileTestHelper:
     >>> data.targetIdentifierContainsIllustratorString(1, "12")
     True
     """
-    selection = utils.getDfCellValue(self.df, 'targetTextIdentifier', identifier, 'illustratorIdentifiers')
+    selection = utils.getDfCellValue(self.df, 'targetIdentifier', identifier, 'illustratorIdentifiers')
     return (illustratorString in selection)
 
   # ---------------------------------------------------------------------------
   def targetIdentifierContainsScenaristString(self, identifier, scenaristString):
     """Returns True if a manifestation with the given ID contains the given scenarist string.
-    >>> data = DataprofileTestHelper([{"targetTextIdentifier": 1, "name": "myBook", "scenaristIdentifiers": "sven (12, 34)"},{"targetTextIdentifier": 2, "name": "otherBook"}])
+    >>> data = DataprofileTestHelper([{"targetIdentifier": 1, "name": "myBook", "scenaristIdentifiers": "sven (12, 34)"},{"targetIdentifier": 2, "name": "otherBook"}])
     >>> data.targetIdentifierContainsScenaristString(1, "sven (12, 34)")
     True
     >>> data.targetIdentifierContainsScenaristString(1, "john")
@@ -274,7 +277,7 @@ class DataprofileTestHelper:
     >>> data.targetIdentifierContainsScenaristString(1, "12")
     True
     """
-    selection = utils.getDfCellValue(self.df, 'targetTextIdentifier', identifier, 'scenaristIdentifiers')
+    selection = utils.getDfCellValue(self.df, 'targetIdentifier', identifier, 'scenaristIdentifiers')
     return (scenaristString in selection)
 
  

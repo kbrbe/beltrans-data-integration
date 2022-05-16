@@ -6,42 +6,41 @@ class GeonameIdentifierEnrichmentTestHelper:
   # ---------------------------------------------------------------------------
   def __init__(self, data):
     self.df = pd.DataFrame(data)
-    print(self.df)
 
   # ---------------------------------------------------------------------------
-  def getKBRIdentifierCountry(self, identifier):
-    return utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetCountryOfPublication")
+  def getTargetIdentifierCountry(self, identifier):
+    return utils.getDfCellValue(self.df, "targetIdentifier", identifier, "targetCountryOfPublication")
 
   # ---------------------------------------------------------------------------
-  def getKBRIdentifierLocation(self, identifier):
-    return utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetPlaceOfPublication")
+  def getTargetIdentifierLocation(self, identifier):
+    return utils.getDfCellValue(self.df, "targetIdentifier", identifier, "targetPlaceOfPublication")
 
 # ---------------------------------------------------------------------------
-  def getKBRIdentifierPlaceOfPublicationIdentifier(self, identifier):
-    return utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetPlaceOfPublicationIdentifier")
+  def getTargetIdentifierPlaceOfPublicationIdentifier(self, identifier):
+    return utils.getDfCellValue(self.df, "targetIdentifier", identifier, "targetPlaceOfPublicationIdentifier")
 
   # ---------------------------------------------------------------------------
-  def getKBRIdentifierPlaceOfPublicationIdentifiers(self, identifier):
+  def getTargetIdentifierPlaceOfPublicationIdentifiers(self, identifier):
     """Get an array of found identifiers (useful if there are more than one row with given identifier)."""
-    return utils.getDfValues(self.df, "targetKBRIdentifier", identifier, "targetPlaceOfPublicationIdentifier")
+    return utils.getDfValues(self.df, "targetIdentifier", identifier, "targetPlaceOfPublicationIdentifier")
 
   # ---------------------------------------------------------------------------
-  def placeOfPublicationIdentifierExistsforKBRIdentifier(self, placeIdentifier, kbrIdentifier):
+  def placeOfPublicationIdentifierExistsforTargetIdentifier(self, placeIdentifier, kbrIdentifier):
     """Returns True if a relationship between kbrIdentifier and placeIdentifier exists.
     >>> data = GeonameIdentifierEnrichmentTestHelper([
-    ... {"targetKBRIdentifier": "1", "targetPlaceOfPublicationIdentifier": "111"},
-    ... {"targetKBRIdentifier": "1", "targetPlaceOfPublicationIdentifier": "222"},
-    ... {"targetKBRIdentifier": "2", "targetPlaceOfPublicationIdentifier": "333"}])
-    >>> data.placeOfPublicationIdentifierExistsforKBRIdentifier("111", "1")
+    ... {"targetIdentifier": "1", "targetPlaceOfPublicationIdentifier": "111"},
+    ... {"targetIdentifier": "1", "targetPlaceOfPublicationIdentifier": "222"},
+    ... {"targetIdentifier": "2", "targetPlaceOfPublicationIdentifier": "333"}])
+    >>> data.placeOfPublicationIdentifierExistsforTargetIdentifier("111", "1")
     True
-    >>> data.placeOfPublicationIdentifierExistsforKBRIdentifier("222", "1")
+    >>> data.placeOfPublicationIdentifierExistsforTargetIdentifier("222", "1")
     True
-    >>> data.placeOfPublicationIdentifierExistsforKBRIdentifier("111", "2")
+    >>> data.placeOfPublicationIdentifierExistsforTargetIdentifier("111", "2")
     False
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      values = utils.getDfValues(self.df, "targetKBRIdentifier", kbrIdentifier, "targetPlaceOfPublicationIdentifier")
+      values = utils.getDfValues(self.df, "targetIdentifier", kbrIdentifier, "targetPlaceOfPublicationIdentifier")
       if placeIdentifier in values:
         return True
       else:
@@ -50,22 +49,22 @@ class GeonameIdentifierEnrichmentTestHelper:
       return False
 
   # ---------------------------------------------------------------------------
-  def placeOfPublicationLongitudeExistsforKBRIdentifier(self, longitude, kbrIdentifier):
+  def placeOfPublicationLongitudeExistsforTargetIdentifier(self, longitude, kbrIdentifier):
     """Returns True if a relationship between kbrIdentifier and longitude exists.
     >>> data = GeonameIdentifierEnrichmentTestHelper([
-    ... {"targetKBRIdentifier": "1", "targetPlaceOfPublicationLongitude": "111"},
-    ... {"targetKBRIdentifier": "1", "targetPlaceOfPublicationLongitude": "222"},
-    ... {"targetKBRIdentifier": "2", "targetPlaceOfPublicationLongitude": "333"}])
-    >>> data.placeOfPublicationLongitudeExistsforKBRIdentifier("111", "1")
+    ... {"targetIdentifier": "1", "targetPlaceOfPublicationLongitude": "111"},
+    ... {"targetIdentifier": "1", "targetPlaceOfPublicationLongitude": "222"},
+    ... {"targetIdentifier": "2", "targetPlaceOfPublicationLongitude": "333"}])
+    >>> data.placeOfPublicationLongitudeExistsforTargetIdentifier("111", "1")
     True
-    >>> data.placeOfPublicationLongitudeExistsforKBRIdentifier("222", "1")
+    >>> data.placeOfPublicationLongitudeExistsforTargetIdentifier("222", "1")
     True
-    >>> data.placeOfPublicationLongitudeExistsforKBRIdentifier("111", "2")
+    >>> data.placeOfPublicationLongitudeExistsforTargetIdentifier("111", "2")
     False
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      values = utils.getDfValues(self.df, "targetKBRIdentifier", kbrIdentifier, "targetPlaceOfPublicationLongitude")
+      values = utils.getDfValues(self.df, "targetIdentifier", kbrIdentifier, "targetPlaceOfPublicationLongitude")
       if longitude in values:
         return True
       else:
@@ -74,22 +73,22 @@ class GeonameIdentifierEnrichmentTestHelper:
       return False
 
   # ---------------------------------------------------------------------------
-  def placeOfPublicationLatitudeExistsforKBRIdentifier(self, latitude, kbrIdentifier):
+  def placeOfPublicationLatitudeExistsforTargetIdentifier(self, latitude, kbrIdentifier):
     """Returns True if a relationship between kbrIdentifier and latitude exists.
     >>> data = GeonameIdentifierEnrichmentTestHelper([
-    ... {"targetKBRIdentifier": "1", "targetPlaceOfPublicationLatitude": "111"},
-    ... {"targetKBRIdentifier": "1", "targetPlaceOfPublicationLatitude": "222"},
-    ... {"targetKBRIdentifier": "2", "targetPlaceOfPublicationLatitude": "333"}])
-    >>> data.placeOfPublicationLatitudeExistsforKBRIdentifier("111", "1")
+    ... {"targetIdentifier": "1", "targetPlaceOfPublicationLatitude": "111"},
+    ... {"targetIdentifier": "1", "targetPlaceOfPublicationLatitude": "222"},
+    ... {"targetIdentifier": "2", "targetPlaceOfPublicationLatitude": "333"}])
+    >>> data.placeOfPublicationLatitudeExistsforTargetIdentifier("111", "1")
     True
-    >>> data.placeOfPublicationLatitudeExistsforKBRIdentifier("222", "1")
+    >>> data.placeOfPublicationLatitudeExistsforTargetIdentifier("222", "1")
     True
-    >>> data.placeOfPublicationLatitudeExistsforKBRIdentifier("111", "2")
+    >>> data.placeOfPublicationLatitudeExistsforTargetIdentifier("111", "2")
     False
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      values = utils.getDfValues(self.df, "targetKBRIdentifier", kbrIdentifier, "targetPlaceOfPublicationLatitude")
+      values = utils.getDfValues(self.df, "targetIdentifier", kbrIdentifier, "targetPlaceOfPublicationLatitude")
       if latitude in values:
         return True
       else:
@@ -98,22 +97,22 @@ class GeonameIdentifierEnrichmentTestHelper:
       return False
 
 # ---------------------------------------------------------------------------
-  def getKBRIdentifierPlaceOfPublicationLatitude(self, identifier):
-    return utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetPlaceOfPublicationLatitude")
+  def getTargetIdentifierPlaceOfPublicationLatitude(self, identifier):
+    return utils.getDfCellValue(self.df, "targetIdentifier", identifier, "targetPlaceOfPublicationLatitude")
 
   # ---------------------------------------------------------------------------
-  def getKBRIdentifierPlaceOfPublicationLatitudes(self, identifier):
+  def getTargetIdentifierPlaceOfPublicationLatitudes(self, identifier):
     """Get an array of found latitudes (useful if there are more than one row with given identifier)."""
-    return utils.getDfValues(self.df, "targetKBRIdentifier", identifier, "targetPlaceOfPublicationLatitude")
+    return utils.getDfValues(self.df, "targetIdentifier", identifier, "targetPlaceOfPublicationLatitude")
 
 # ---------------------------------------------------------------------------
-  def getKBRIdentifierPlaceOfPublicationLongitude(self, identifier):
-    return utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetPlaceOfPublicationLongitude")
+  def getTargetIdentifierPlaceOfPublicationLongitude(self, identifier):
+    return utils.getDfCellValue(self.df, "targetIdentifier", identifier, "targetPlaceOfPublicationLongitude")
 
   # ---------------------------------------------------------------------------
-  def getKBRIdentifierPlaceOfPublicationLongitudes(self, identifier):
+  def getTargetIdentifierPlaceOfPublicationLongitudes(self, identifier):
     """Get an array of found longitudes (useful if there are more than one row with given identifier)."""
-    return utils.getDfValues(self.df, "targetKBRIdentifier", identifier, "targetPlaceOfPublicationLongitude")
+    return utils.getDfValues(self.df, "targetIdentifier", identifier, "targetPlaceOfPublicationLongitude")
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":

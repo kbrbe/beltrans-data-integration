@@ -72,7 +72,7 @@ class TestCountryEnrichment(unittest.TestCase):
     """The KBR identifiers of the input should be the same in the output."""
     identifiers = []
     for row in TestCountryEnrichment.rawData:
-      identifiers.append(row['targetKBRIdentifier'])
+      identifiers.append(row['targetIdentifier'])
     self.assertEqual(identifiers, ['1','2','3','4','5','123','6', '7', '8', '9', '10', '11','12', '13', '14', '15', '16'], msg="Identifiers contain non expected values")
 
   # ---------------------------------------------------------------------------
@@ -158,7 +158,8 @@ class TestCountryEnrichment(unittest.TestCase):
   def testAartselaarRoubaixBracketsMixCountry(self):
     """When the location is '[Aartselaar (Belgique)]. - [Roubaix]' the country should be 'Belgium'."""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("14")
-    self.assertEqual(foundCountry, "Belgium;France", msg=f'For the location "[Aartselaar (Belgique)]. - [Roubaix]" the country was "{foundCountry}" instead of "Belgium"')
+    expectedCountries = "Belgium;France"
+    self.assertEqual(foundCountry, expectedCountries, msg=f'For the location "[Aartselaar (Belgique)]. - [Roubaix]" the country was "{foundCountry}" instead of "{expectedCountries}"')
 
   # ---------------------------------------------------------------------------
   def testAartselaarRoubaixBracketsMixLocationNormalized(self):
@@ -172,7 +173,7 @@ class TestCountryEnrichment(unittest.TestCase):
     """When the location is 'Paris. - [Paris]' the country should be 'Belgium'."""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("15")
     expectedCountry = "France"
-    self.assertEqual(foundCountry, expectedCountry, msg=f'For the location "[Aartselaar (Belgique)]. - [Roubaix]" the country was "{foundCountry}" instead of "{expectedCountry}"')
+    self.assertEqual(foundCountry, expectedCountry, msg=f'For the location "Paris. - [Paris]" the country was "{foundCountry}" instead of "{expectedCountry}"')
 
   # ---------------------------------------------------------------------------
   def testDoubleParisNormalized(self):
@@ -186,7 +187,7 @@ class TestCountryEnrichment(unittest.TestCase):
     """When the location is '[Montréal (Québec)]' the country should be 'Belgium'."""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("16")
     expectedCountry = ""
-    self.assertEqual(foundCountry, expectedCountry, msg=f'For the location "[Aartselaar (Belgique)]. - [Roubaix]" the country was "{foundCountry}" instead of "{expectedCountry}"')
+    self.assertEqual(foundCountry, expectedCountry, msg=f'For the location "[Montréal (Québec)]" the country was "{foundCountry}" instead of "{expectedCountry}"')
 
   # ---------------------------------------------------------------------------
   def testMontrealQuebecLocationNormalized(self):

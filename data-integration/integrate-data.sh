@@ -36,7 +36,7 @@ SCRIPT_POSTPROCESS_QUERY_RESULT="post-process-integration-result.py"
 SCRIPT_POSTPROCESS_AGG_QUERY_RESULT="post-process-manifestations.py"
 SCRIPT_POSTPROCESS_QUERY_CONT_RESULT="post-process-contributors.py"
 SCRIPT_POSTPROCESS_DERIVE_COUNTRIES="add_country.py"
-
+SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION="add_coordinates.py"
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
 KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
@@ -187,6 +187,8 @@ SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.cs
 SUFFIX_DATA_PROFILE_SOURCE_STATS="source-translation-stats.csv"
 SUFFIX_DATA_PROFILE_EXCEL_DATA="corpus-data.xlsx"
 SUFFIX_DATA_PROFILE_EXCEL_STATS="corpus-stats.xlsx"
+
+SUFFIX_PLACE_OF_PUBLICATION_GEONAMES="place-of-publications-geonames.csv"
 
 #
 # Filenames used within an integration directory 
@@ -533,6 +535,7 @@ function postprocess {
   integratedAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
+  placeOfPublicationsGeonames="$integrationName/csv/$SUFFIX_PLACE_OF_PUBLICATION_GEONAMES"
   contributorsPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
   contributorsPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE"
   tmp1="$integrationName/csv/kbr-enriched-not-yet-bnf-and-kb.csv"
@@ -560,8 +563,11 @@ function postprocess {
   echo "Postprocess manifestation data ..."
   time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedData -o $integratedDataEnriched
 
+  echo "Create geonames relationships for place of publications ..."
+  time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION -i $integratedDataEnriched -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonames
+
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs -s "translations" -s "person contributors" -s "org contributors" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -o $excelData
 
 }
 

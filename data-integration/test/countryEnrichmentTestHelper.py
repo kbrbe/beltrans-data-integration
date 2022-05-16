@@ -10,7 +10,7 @@ class CountryEnrichmentTestHelper:
   # ---------------------------------------------------------------------------
   def kbrIdentifierHasCountry(self, identifier, country):
     """
-    >>> data = CountryEnrichmentTestHelper([{"targetKBRIdentifier": "1", "targetCountryOfPublication": "Belgium"},{"targetKBRIdentifier": "2", "targetCountryOfPublication": "Germany"}, {"targetKBRIdentifier": "3", "targetCountryOfPublication": ""}])
+    >>> data = CountryEnrichmentTestHelper([{"targetIdentifier": "1", "targetCountryOfPublication": "Belgium"},{"targetIdentifier": "2", "targetCountryOfPublication": "Germany"}, {"targetIdentifier": "3", "targetCountryOfPublication": ""}])
     >>> data.kbrIdentifierHasCountry("1", "Belgium")
     True
     >>> data.kbrIdentifierHasCountry("2", "Germany")
@@ -20,12 +20,12 @@ class CountryEnrichmentTestHelper:
     >>> data.kbrIdentifierHasCountry("3", "")
     True
     """
-    foundCountry = utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetCountryOfPublication")
+    foundCountry = utils.getDfCellValue(self.df, "targetIdentifier", identifier, "targetCountryOfPublication")
 
   # ---------------------------------------------------------------------------
   def getKBRIdentifierCountry(self, identifier):
-    return utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetCountryOfPublication")
+    return utils.getDfCellValue(self.df, "targetIdentifier", identifier, "targetCountryOfPublication")
 
   # ---------------------------------------------------------------------------
   def getKBRIdentifierLocation(self, identifier):
-    return utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetPlaceOfPublication")
+    return utils.getDfCellValue(self.df, "targetIdentifier", identifier, "targetPlaceOfPublication")

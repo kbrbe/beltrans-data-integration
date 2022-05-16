@@ -1,4 +1,4 @@
-targetKBRIdentifier,targetPlaceOfPublication,targetCountryOfPublication,targetPlaceOfPublicationIdentifier,targetPlaceOfPublicationLatitude,targetPlaceOfPublicationLongitude
+targetIdentifier,targetPlaceOfPublication,targetCountryOfPublication,targetPlaceOfPublicationIdentifier,targetPlaceOfPublicationLatitude,targetPlaceOfPublicationLongitude
 1,"Gent",""
 2,"",""
 3,"Bruges","MyBelgium"
@@ -13,3 +13,6 @@ targetKBRIdentifier,targetPlaceOfPublication,targetCountryOfPublication,targetPl
 11,"Antwerpen;Amsterdam","Belgium"
 12,"Antwerpen;Amsterdam","Netherlands"
 13,"Brussels;Berlin","Germany"
+14,"[Aartselaar (Belgique)]. - [Roubaix]","Belgium"
+15,"Paris. - [Paris]","France"
+16,"[Montréal (Québec)]",""

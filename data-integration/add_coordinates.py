@@ -16,13 +16,12 @@ def main():
     based on the place name (for Belgium, France & The Netherlands)"""
     parser = OptionParser(usage="usage: %prog [options]")
     parser.add_option('-i', '--input-file', action='store', help='The input file as TSV')
-    parser.add_option('-c', '--column-with-country-names', action='store', help='The name of the column that contains the countries')
     parser.add_option('-p', '--column-with-places', action='store', help='The name of the column that contains the place names')
     parser.add_option('-g', '--geonames-folder', action='store', help='The filepath to the the geonames (insert the "/" at the end) folder. In this folder the geonames files for the three countries must be named "BE.txt", "FR.txt" and "NL.txt"')
     parser.add_option('-o', '--output-file', action='store', help='The output as TSV')
     (options, args) = parser.parse_args()
 
-    if( ( not options.geonames_folder) or (not options.input_file) or (not options.column_with_country_names) or (not options.column_with_places) or (not options.geonames_folder) or (not options.output_file) ):
+    if( ( not options.geonames_folder) or (not options.input_file) or (not options.column_with_places) or (not options.geonames_folder) or (not options.output_file) ):
       parser.print_help()
       exit(1) 
 
@@ -39,11 +38,9 @@ def main():
         inputReader = csv.DictReader(inFile, delimiter=',')
 
         # prepare slightly different output headers to include derived data
-        outputHeaders = inputReader.fieldnames.copy()
-        placeOfPublicationIndex = outputHeaders.index('targetPlaceOfPublication')
-        outputHeaders.insert(placeOfPublicationIndex+1, 'targetPlaceOfPublicationIdentifier')
-        outputHeaders.insert(placeOfPublicationIndex+2, 'targetPlaceOfPublicationLongitude')
-        outputHeaders.insert(placeOfPublicationIndex+3, 'targetPlaceOfPublicationLatitude')
+        outputHeaders = ['targetIdentifier', 'targetPlaceOfPublication',
+                         'targetCountryOfPublication', 'targetPlaceOfPublicationIdentifier',
+                         'targetPlaceOfPublicationLongitude', 'targetPlaceOfPublicationLatitude']
         outputWriter = csv.DictWriter(outFile, fieldnames=outputHeaders, delimiter=',')
         outputWriter.writeheader()
 
@@ -55,9 +52,10 @@ def main():
             location = row[options.column_with_places]
             locationListNorm = utils.normalizeDelimiters(location, delimiter=locationDelimiter)
 
-            # create a list of locations, even if it just has one entry
+            # create a set of locations, even if it just has one entry
             locations = locationListNorm.split(locationDelimiter) if locationDelimiter in locationListNorm else [locationListNorm]
 
+            alreadySeenLocations = set()
             for l in locations:
                 numLocations += 1
                 # The location might be in brackets, e.g. "(Brussels)" or "[Brussels]"
@@ -67,6 +65,12 @@ def main():
                 # The location needs to be normalized with respect to special characters
                 lNorm = utils.getNormalizedString(onlyLocation)
                 lNorm = lNorm.strip()
+
+                # it could be the same location exists twice in a string, e.g. "Paris. - [Paris]"
+                if lNorm in alreadySeenLocations:
+                    break
+                else:
+                    alreadySeenLocations.add(lNorm)
 
                 locationMainSpelling = ''
                 locationIdentifier = ''
@@ -99,7 +103,9 @@ def main():
                     # use the filtered one we got from the input (e.g. without country in brackets)
                     locationMainSpelling = onlyLocation
 
-                outputRow = row.copy()
+                #outputRow = row.copy()
+                outputRow = {}
+                outputRow['targetIdentifier'] = row['targetIdentifier']
                 outputRow['targetPlaceOfPublication'] = locationMainSpelling
                 outputRow['targetCountryOfPublication'] = locationCountry
                 outputRow['targetPlaceOfPublicationIdentifier'] = locationIdentifier
