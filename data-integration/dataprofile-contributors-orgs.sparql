@@ -25,6 +25,9 @@ SELECT DISTINCT
   (group_concat(distinct ?viaf;SEPARATOR=';') AS ?viafIDs)
   (group_concat(distinct ?wikidata;SEPARATOR=';') AS ?wikidataIDs)
 WHERE {
+
+  graph <http://beltrans-manifestations> { ?manifestation schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?contributorURI . }
+
   graph <http://beltrans-contributors> {
     ?contributorURI a schema:Organization ;
                     dcterms:identifier ?contributorID .

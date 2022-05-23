@@ -762,7 +762,8 @@ def createContributorCorpusMeasurements(corpus, comment):
     'withMultipleWikidataIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'wikidataIDs'),
     'withMultipleBirthDates': countRowsWithMultipleValuesForColumn(corpus, 'birthDate', delimiter='or'),
     'withMultipleDeathDates': countRowsWithMultipleValuesForColumn(corpus, 'deathDate', delimiter='or'),
-    'withMultipleNationalities': countRowsWithMultipleValuesForColumn(corpus, 'nationalities')
+    'withMultipleNationalities': countRowsWithMultipleValuesForColumn(corpus, 'nationalities'),
+    'comment': comment
   }
   return measurement
 
