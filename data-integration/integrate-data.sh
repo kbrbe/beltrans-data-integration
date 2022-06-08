@@ -147,6 +147,7 @@ LINK_QUERY_CONT_AUTHORS="sparql-queries/link-beltrans-manifestations-authors.spa
 LINK_QUERY_CONT_TRANSLATORS="sparql-queries/link-beltrans-manifestations-translators.sparql"
 LINK_QUERY_CONT_ILLUSTRATORS="sparql-queries/link-beltrans-manifestations-illustrators.sparql"
 LINK_QUERY_CONT_SCENARISTS="sparql-queries/link-beltrans-manifestations-scenarists.sparql"
+LINK_QUERY_CONT_PUBLISHING_DIRECTORS="sparql-queries/link-beltrans-manifestations-publishing-directors.sparql"
 
 DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
 DATA_PROFILE_QUERY_FILE_CONT_PERSONS="dataprofile-contributors-persons.sparql"
@@ -498,6 +499,9 @@ function integrate {
 
   echo "Establish links between integrated manifestations and contributors - scenarists ..."
   uploadData "$TRIPLE_STORE_NAMESPACE" "$LINK_QUERY_CONT_SCENARISTS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+
+  echo "Establish links between integrated manifestations and contributors - publishing directors ..."
+  uploadData "$TRIPLE_STORE_NAMESPACE" "$LINK_QUERY_CONT_PUBLISHING_DIRECTORS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 }
 
 # -----------------------------------------------------------------------------
@@ -549,9 +553,6 @@ function postprocess {
 
   source ./py-integration-env/bin/activate
 
-  echo "Postprocess contributor data ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -i $contributorsPersonsAllData -o $contributorsPersons
-
 
   echo "Derive missing country names from place names - KBR ..."
   time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedAllData -o $tmp1 -g geonames/ -c targetCountryOfPublicationKBR -p targetPlaceOfPublicationKBR
@@ -567,6 +568,9 @@ function postprocess {
 
   echo "Create geonames relationships for place of publications ..."
   time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonames
+
+  echo "Postprocess contributor data ..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllData -m $integratedDataEnriched -o $contributorsPersons
 
   echo "Create Excel sheet for data ..."
   time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -o $excelData

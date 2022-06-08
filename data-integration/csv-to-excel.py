@@ -41,7 +41,7 @@ def main():
     parser.print_help()
     exit(1)
 
-  wb = xlsxwriter.Workbook(options.output_file, {'strings_to_formulas': False})
+  wb = xlsxwriter.Workbook(options.output_file, {'strings_to_formulas': False, 'strings_to_numbers': True})
 
   for filename in args:
     with open(filename, 'r', encoding="utf-8") as inFile:

@@ -768,6 +768,24 @@ def createContributorCorpusMeasurements(corpus, comment):
   return measurement
 
 # -----------------------------------------------------------------------------
+def countColumnOccurrence(df, columnName, value):
+  """This function counts in how many rows 'value' is part of the column with the given name.
+  >>> data1 = pd.DataFrame([{'myCol': ''},{'myCol': 'Sven (1234)'},{'myCol': 'John (abc)'},{'myCol': 'Sven (abc, 1234)'}])
+  >>> countColumnOccurrence(data1, 'myCol', '1234')
+  2
+  >>> data2 = pd.DataFrame([{'myCol': ''},{'myCol': 'Sven (111)'},{'myCol': 'John (abc)'},{'myCol': 'Sven (abc, 111)'}])
+  >>> countColumnOccurrence(data2, 'myCol', '1234')
+  0
+
+  Only one occurrence per cell is counted, for example 'Sven' is counted one in the second row even though
+  it mentions Sven twice, one time as "Sven Lieber" and one time as "Lieber, Sven"
+  >>> data3 = pd.DataFrame([{'myCol': ''},{'myCol': 'Sven Lieber (111); Lieber, Sven (abc)'},{'myCol': 'John (abc)'},{'myCol': 'Sven (abc, 111)'}])
+  >>> countColumnOccurrence(data2, 'myCol', 'Sven')
+  2
+  """
+  return df[df[columnName].str.contains(value)].shape[0]
+
+# -----------------------------------------------------------------------------
 if __name__ == "__main__":
   import doctest
   doctest.testmod()

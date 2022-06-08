@@ -16,11 +16,11 @@ WHERE {
                      schema:sameAs ?localManifestation .
     } 
 
-    # (2) ... to get the local author ..
+    # (2) ... to get the local publishing director ..
     #
     ?localManifestation marcrel:pbd ?localAuthor .
   
-    # (3) ... which we follow to get the integrated author
+    # (3) ... which we follow to get the integrated publishing director
     #
     graph <http://beltrans-contributors> { ?author schema:sameAs ?localAuthor . }  
 }
