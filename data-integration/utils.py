@@ -731,7 +731,8 @@ def createCorpusMeasurements(corpus, identifier, comment):
     'withKBIdentifier': countRowsWithValueForColumn(corpus, 'targetKBIdentifier'),
     'withBBThesaurusID': countRowsWithValueForColumn(corpus, 'targetThesaurusBB'),
     'withSourceKBRIdentifier': countRowsWithValueForColumn(corpus, 'sourceKBRIdentifier'),
-    'withSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitle'),
+    'withKBRSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKBR'),
+    'withKBSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKB'),
     'withSourceISBN10': countRowsWithValueForColumn(corpus, 'sourceISBN10'),
     'withSourceISBN13': countRowsWithValueForColumn(corpus, 'sourceISBN13'),
     'comment': comment

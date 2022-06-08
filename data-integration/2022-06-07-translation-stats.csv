@@ -1,0 +1,4 @@
+date,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
+2022-06-08 15:36:08.638846,FR-NL,7091,6445,6447,6325,58,1961,6168,116,2467,1961,84,101,Added publishing directors and included a column for source titles from KB.
+2022-06-08 15:36:08.786324,NL-FR,3772,3240,3264,3290,1211,725,2727,150,1134,725,134,135,Added publishing directors and included a column for source titles from KB.
+2022-06-08 15:36:08.876427,OTHER,246,200,200,240,65,11,211,1,9,11,1,1,Added publishing directors and included a column for source titles from KB.

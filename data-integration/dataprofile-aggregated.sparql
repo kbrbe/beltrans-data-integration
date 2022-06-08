@@ -43,7 +43,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
 
     (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceKBRIdentifier)
-    (group_concat(distinct ?kbrSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitle)
+    (group_concat(distinct ?kbrSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleKBR)
+    (group_concat(distinct ?kbSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleKB)
     (group_concat(distinct ?kbrSourceManifestationISBN10;SEPARATOR=';') AS ?sourceISBN10)
     (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceISBN13)
 
@@ -250,12 +251,14 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:locationCreated ?kbLocationCreated . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdfs:comment ?kbResponsibilityStatement . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:publisher ?kbPublisherName . }}
-    }
-        
-    # determine if this manifestation is a multilingual work
-    #BIND(exists{ graph <http://beltrans-manifestations> { ?manifestation a btm:MultiLingualManifestation . } } AS ?classExists)
-    #BIND(IF(?classExists, "multilingual", "translation") AS ?translationType)
 
+      #
+      # SOURCE INFORMATION
+      #
+      OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:translationOfWork/schema:name ?kbSourceManifestationTitle . } }
+
+    } # end optional KB
+        
 
     # #########################################################################
     #
