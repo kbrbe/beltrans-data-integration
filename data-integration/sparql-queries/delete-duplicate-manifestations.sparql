@@ -1,0 +1,36 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix bibo: <http://purl.org/ontology/bibo/>
+prefix schema: <http://schema.org/>
+
+DELETE {
+  graph <http://beltrans-manifestations> { ?duplicateManifestation ?p ?o . }
+}
+WHERE {
+  
+  # select all properties from all duplicates
+  #
+  graph <http://beltrans-manifestations> { 
+    ?duplicateManifestation bibo:isbn13 ?isbn13 ;
+                            ?p ?o . 
+  }  
+
+  # duplicates are identified by not being the selected survivor
+  # for a group of manifestations with the same ISBN13 identifier
+  #
+  FILTER(?duplicateManifestation != ?survivor)
+
+  # sub select which is executed first:
+  # select one representative of a group of manifestations with the same ISBN13 identifier
+  # this will be the survivor which will NOT be deleted (see filter above)
+  {
+    SELECT ?isbn13 (MIN(?manifestation) as ?survivor) (COUNT(?manifestation) AS ?number)
+    WHERE {
+      graph <http://beltrans-manifestations> { 
+      ?manifestation a schema:CreativeWork ;
+                     bibo:isbn13 ?isbn13 .
+      }
+    }
+    GROUP BY ?isbn13
+    HAVING (?number > 1)
+  }
+}
