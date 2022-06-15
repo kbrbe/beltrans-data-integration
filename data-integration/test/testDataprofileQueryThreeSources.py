@@ -27,15 +27,15 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
       time.sleep(10)      
 
       loadConfig = {
-        'http://beltrans-manifestations': './test/resources/beltrans-graph-data-three-sources/integrated-data.ttl',
-        'http://beltrans-contributors': './test/resources/beltrans-graph-data-three-sources/integrated-contributors.ttl',
-        'http://kbr-syracuse': './test/resources/beltrans-graph-data-three-sources/kbr-data.ttl',
-        'http://kbr-linked-authorities': './test/resources/beltrans-graph-data-three-sources/kbr-contributors.ttl',
-        'http://bnf-publications': './test/resources/beltrans-graph-data-three-sources/bnf-data.ttl',
-        'http://bnf-contributors': './test/resources/beltrans-graph-data-three-sources/bnf-contributors.ttl',
-        'http://kb-publications': './test/resources/beltrans-graph-data-three-sources/kb-data.ttl',
-        'http://kb-contributors': './test/resources/beltrans-graph-data-three-sources/kb-contributors.ttl',
-        'http://master-data': './test/resources/beltrans-graph-data-three-sources/master-data.ttl',
+        'http://beltrans-manifestations': ['./test/resources/beltrans-graph-data-three-sources/integrated-data.ttl'],
+        'http://beltrans-contributors': ['./test/resources/beltrans-graph-data-three-sources/integrated-contributors.ttl'],
+        'http://kbr-syracuse': ['./test/resources/beltrans-graph-data-three-sources/kbr-data.ttl'],
+        'http://kbr-linked-authorities': ['./test/resources/beltrans-graph-data-three-sources/kbr-contributors.ttl'],
+        'http://bnf-publications': ['./test/resources/beltrans-graph-data-three-sources/bnf-data.ttl'],
+        'http://bnf-contributors': ['./test/resources/beltrans-graph-data-three-sources/bnf-contributors.ttl'],
+        'http://kb-publications': ['./test/resources/beltrans-graph-data-three-sources/kb-data.ttl'],
+        'http://kb-contributors': ['./test/resources/beltrans-graph-data-three-sources/kb-contributors.ttl'],
+        'http://master-data': ['./test/resources/beltrans-graph-data-three-sources/master-data.ttl'],
       }
       #uploadURL = 'http://' + internalBlazegraphHostname + '/namespace/kb'
       uploadURL = 'http://localhost:8080/bigdata/namespace/kb/sparql'

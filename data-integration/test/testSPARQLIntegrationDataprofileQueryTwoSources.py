@@ -29,13 +29,13 @@ class TestAggregatedDataKBRAndBnF(unittest.TestCase):
       time.sleep(10)      
 
       loadConfig = {
-        'http://kbr-syracuse': './test/resources/source-graph-data-two-sources/kbr-data.ttl',
-        'http://master-data': './test/resources/source-graph-data-two-sources/master-data.ttl',
-        'http://bnf-publications': './test/resources/source-graph-data-two-sources/bnf-data.ttl',
-        'http://bnf-contributors': './test/resources/source-graph-data-two-sources/bnf-contributors.ttl',
-        'http://kbr-linked-authorities': './test/resources/source-graph-data-two-sources/kbr-contributors.ttl',
-  #      'http://isni-sru': './test/resources/isni-sru.ttl',
-  #      'http://isni-rdf': './test/resources/isni-rdf.ttl'
+        'http://kbr-syracuse': ['./test/resources/source-graph-data-two-sources/kbr-data.ttl'],
+        'http://master-data': ['./test/resources/source-graph-data-two-sources/master-data.ttl'],
+        'http://bnf-publications': ['./test/resources/source-graph-data-two-sources/bnf-data.ttl'],
+        'http://bnf-contributors': ['./test/resources/source-graph-data-two-sources/bnf-contributors.ttl'],
+        'http://kbr-linked-authorities': ['./test/resources/source-graph-data-two-sources/kbr-contributors.ttl'],
+  #      'http://isni-sru': ['./test/resources/isni-sru.ttl'],
+  #      'http://isni-rdf': ['./test/resources/isni-rdf.ttl']
       }
       #uploadURL = 'http://' + internalBlazegraphHostname + '/namespace/kb'
       uploadURL = 'http://localhost:8080/bigdata/namespace/kb/sparql'

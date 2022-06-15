@@ -11,19 +11,20 @@ from SPARQLWrapper import SPARQLWrapper, TURTLE, JSON, POST
 # -----------------------------------------------------------------------------
 def addTestData(target, loadConfig):
   """This function reads the test data and stores it into several named graphs (one file for one named graph).
-  The config looks like the following: {'http://first-named-graph': 'filename1', 'http://second-named-graph': 'filename2'}
+  The config looks like the following: 'http://first-named-graph': ['filename1'], 'http://second-named-graph': ['filename2']}
 
   The data could already be in quad format, but we are more flexible if we can configure which data is stored in which named graph.
   """
   for ng in loadConfig:
-    filename = loadConfig[ng]
-    if os.path.isfile(filename):
-      with open(filename, 'r') as dataIn:
-        if isinstance(target, rdflib.ConjunctiveGraph):
-          namedGraphURI = rdflib.URIRef(ng)
-          target.get_context(namedGraphURI).parse(filename, format='turtle')
-        else:
-          addDataToBlazegraph(url=target, namedGraph=ng, filename=filename, fileFormat='text/turtle')
+    files = loadConfig[ng]
+    for filename in files:
+      if os.path.isfile(filename):
+        with open(filename, 'r') as dataIn:
+          if isinstance(target, rdflib.ConjunctiveGraph):
+            namedGraphURI = rdflib.URIRef(ng)
+            target.get_context(namedGraphURI).parse(filename, format='turtle')
+          else:
+            addDataToBlazegraph(url=target, namedGraph=ng, filename=filename, fileFormat='text/turtle')
 
 # -----------------------------------------------------------------------------
 def loadData(url, loadConfig):
