@@ -10,27 +10,27 @@ WHERE {
   # select all properties from all duplicates
   #
   graph <http://beltrans-manifestations> { 
-    ?duplicateManifestation bibo:isbn13 ?isbn13 ;
+    ?duplicateManifestation bibo:isbn10|bibo:isbn13 ?isbn ;
                             ?p ?o . 
   }  
 
   # duplicates are identified by not being the selected survivor
-  # for a group of manifestations with the same ISBN13 identifier
+  # for a group of manifestations with the same ISBN10/ISBN13 identifier
   #
   FILTER(?duplicateManifestation != ?survivor)
 
   # sub select which is executed first:
-  # select one representative of a group of manifestations with the same ISBN13 identifier
+  # select one representative of a group of manifestations with the same ISBN10/ISBN13 identifier
   # this will be the survivor which will NOT be deleted (see filter above)
   {
-    SELECT ?isbn13 (MIN(?manifestation) as ?survivor) (COUNT(?manifestation) AS ?number)
+    SELECT ?isbn (MIN(?manifestation) as ?survivor) (COUNT(?manifestation) AS ?number)
     WHERE {
       graph <http://beltrans-manifestations> { 
       ?manifestation a schema:CreativeWork ;
-                     bibo:isbn13 ?isbn13 .
+                     bibo:isbn10|bibo:isbn13 ?isbn .
       }
     }
-    GROUP BY ?isbn13
+    GROUP BY ?isbn
     HAVING (?number > 1)
   }
 }
