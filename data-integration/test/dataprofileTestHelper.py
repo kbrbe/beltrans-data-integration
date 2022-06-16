@@ -6,9 +6,6 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def __init__(self, data):
     self.df = pd.DataFrame(data)
-    print('DATA START')
-    print(data)
-    print('DATA END')
     #print(self.df)
     #print(self.df[['targetIdentifier', 'authorIdentifiers', 'illustratorIdentifiers', 'scenaristIdentifiers']])
 
@@ -280,7 +277,22 @@ class DataprofileTestHelper:
     selection = utils.getDfCellValue(self.df, 'targetIdentifier', identifier, 'scenaristIdentifiers')
     return (scenaristString in selection)
 
- 
+  # ---------------------------------------------------------------------------
+  def targetIdentifierContainsKBIdentifierString(self, identifier, kbIdentifierString):
+    """Returns True if a manifestation with the given ID contains the given KBIdentifier string.
+    >>> data = DataprofileTestHelper([{"targetIdentifier": 1, "name": "myBook", "targetKBIdentifier": "sven (12, 34)"},{"targetIdentifier": 2, "name": "otherBook"}])
+    >>> data.targetIdentifierContainsKBIdentifierString(1, "sven (12, 34)")
+    True
+    >>> data.targetIdentifierContainsKBIdentifierString(1, "john")
+    False
+    >>> data.targetIdentifierContainsKBIdentifierString(1, "12")
+    True
+    """
+    selection = utils.getDfCellValue(self.df, 'targetIdentifier', identifier, 'targetKBIdentifier')
+    return (kbIdentifierString in selection)
+
+
+
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
   import doctest
