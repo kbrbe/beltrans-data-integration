@@ -1,7 +1,7 @@
 "id","title","isbn10","isbn13","edition","comment","author"
 "1","My book","0-00000-000-1","","1st edition","Single, only ISBN10","author1"
 "2","My book","","000-0-00000-000-2","1st edition","Single, only ISBN13","author1"
-"3","My book","0-00000-000-3","000-0-00000-000-1","1st edition","Single, both ISBN10 and ISBN13","author1"
+"3","My book","0-00000-000-3","000-0-00000-000-3","1st edition","Single, both ISBN10 and ISBN13","author1"
 "4","My book","0-00000-000-4","","1st edition","Double, only ISBN10","author1"
 "5","My book","0-00000-000-4","","2nd edition","Double, only ISBN10","author1"
 "6","My book","","000-0-00000-000-5","1st edition","Double, only ISBN13","author1"
