@@ -1,0 +1,4 @@
+date,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
+2022-06-17 15:38:54.559944,FR-NL,6715,6069,6071,5980,57,1873,5842,112,2384,1873,80,97,"Removed duplicate manifestations with the same ISBN10/ISBN13 (different editions)."
+2022-06-17 15:38:54.793447,NL-FR,3597,3065,3089,3115,1141,631,2601,142,1060,631,127,127,"Removed duplicate manifestations with the same ISBN10/ISBN13 (different editions)."
+2022-06-17 15:38:54.916224,OTHER,231,185,185,225,58,10,201,1,7,10,1,1,"Removed duplicate manifestations with the same ISBN10/ISBN13 (different editions)."
