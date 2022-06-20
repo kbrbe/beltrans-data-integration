@@ -841,6 +841,37 @@ def plotTranslationStatsSources(df, statsName):
   df[selectionSourceInfo].plot(title=statsName, kind='line', alpha=0.75, rot=25).legend(loc='center left', bbox_to_anchor=(1.0, 0.5), prop={'size': 10})
 
 # -----------------------------------------------------------------------------
+def countContribution(value, counter, valueDelimiter=';'):
+  """This function counts contributors.
+  >>> counter = {}
+  >>> countContribution('Lieber, Sven (123,456)', counter)
+  >>> counter['Lieber, Sven']
+  1
+  >>> countContribution('Sven Lieber (123,456)', counter)
+  >>> counter['Sven Lieber']
+  1
+  >>> countContribution('Lieber, Sven (123,456)', counter)
+  >>> counter['Lieber, Sven']
+  2
+  >>> countContribution('"_$C(128,129)_"y!"_$C(138,139"', counter)
+  >>> counter['"_$C']
+  1
+  """
+  if value != '':
+    contributors = value.split(valueDelimiter) if valueDelimiter in value else [value]
+    alreadyProcessed = set()
+    for c in contributors:
+      contributorName = c.split('(')[0] if '(' in c else c
+      contributorName = contributorName.strip()
+      if contributorName not in alreadyProcessed:
+        alreadyProcessed.add(contributorName)
+        if contributorName in counter:
+          counter[contributorName] = counter[contributorName] + 1
+        else:
+          counter[contributorName] = 1
+
+
+# -----------------------------------------------------------------------------
 if __name__ == "__main__":
   import doctest
   doctest.testmod()

@@ -26,6 +26,7 @@ def main():
     exit(1)
 
   with open(options.input_contributors, 'r', encoding="utf-8") as inFileContributors, \
+       open(options.input_manifestations, 'r', encoding="utf-8") as inFileManifestations, \
        open(options.output_file, 'w', encoding="utf-8") as outFile:
 
     contributorsReader = csv.DictReader(inFileContributors, delimiter=',')
@@ -56,12 +57,17 @@ def main():
     sources = ['KBR', 'BnF', 'NTA', 'ISNI']
     mismatchLog = {}
 
-    manifestationsDf = pd.read_csv(options.input_manifestations)
-    manifestationsDf = manifestationsDf.fillna('')
+    contributions = {'authors': {}, 'translators': {}, 'illustrators': {}, 'scenarists': {}, 'publishingDirectors': {}}
+    manifestationsReader = csv.DictReader(inFileManifestations, delimiter=',')
+    for row in manifestationsReader:
+      utils.countContribution(row['authorIdentifiers'], contributions['authors'])
+      utils.countContribution(row['translatorIdentifiers'], contributions['translators'])
+      utils.countContribution(row['illustratorIdentifiers'], contributions['illustrators'])
+      utils.countContribution(row['scenaristIdentifiers'], contributions['scenarists'])
+      utils.countContribution(row['publishingDirectorIdentifiers'], contributions['publishingDirectors'])
 
     # write relevant data to output
     for row in contributorsReader:
-
       rowID = row['contributorID']
       contributorName = row['name']
 
@@ -70,16 +76,17 @@ def main():
       utils.selectDate(row, 'deathDate', sources, 'contributorID', mismatchLog, 'date')
 
       if contributorName != '':
+        contributorName = contributorName.strip()
         # add statistics about how many manifestations the contributor contributed to
         # manifestation data is looked up using the provided manifestations file residing in a Pandas dataframe
-        numberAuthord = utils.countColumnOccurrence(manifestationsDf, 'authorIdentifiers', contributorName)
-        numberTransltaed = utils.countColumnOccurrence(manifestationsDf, 'translatorIdentifiers', contributorName)
-        numberIllustrated = utils.countColumnOccurrence(manifestationsDf, 'illustratorIdentifiers', contributorName)
-        numberScened = utils.countColumnOccurrence(manifestationsDf, 'scenaristIdentifiers', contributorName)
-        numberDirected = utils.countColumnOccurrence(manifestationsDf, 'publishingDirectorIdentifiers', contributorName)
+        numberAuthored = contributions['authors'][contributorName] if contributorName in contributions['authors'] else 0
+        numberTranslated = contributions['translators'][contributorName] if contributorName in contributions['translators'] else 0
+        numberIllustrated = contributions['illustrators'][contributorName] if contributorName in contributions['illustrators'] else 0
+        numberScened = contributions['scenarists'][contributorName] if contributorName in contributions['scenarists'] else 0
+        numberDirected = contributions['publishingDirectors'][contributorName] if contributorName in contributions['publishingDirectors'] else 0
 
-        row['authorIn'] = numberAuthord
-        row['translatorIn'] = numberTransltaed
+        row['authorIn'] = numberAuthored
+        row['translatorIn'] = numberTranslated
         row['illustratorIn'] = numberIllustrated
         row['scenaristIn'] = numberScened
         row['publishingDirectorIn'] = numberDirected
@@ -90,7 +97,10 @@ def main():
         row['scenaristIn'] = 0
         row['publishingDirectorIn'] = 0
 
-      outputWriter.writerow(row)
+      if row['authorIn'] > 0 or row['translatorIn'] > 0\
+              or row['illustratorin'] > 0 or row['scenaristIn'] > 0\
+              or row['publishingDirectorIn'] > 0:
+        outputWriter.writerow(row)
 
   # print statistics
   for dateType in mismatchLog:
