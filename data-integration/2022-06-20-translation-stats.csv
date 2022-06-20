@@ -1,0 +1,4 @@
+date,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
+2022-06-20 16:11:44.719421,FR-NL,8491,1377,1377,6999,69,1427,6857,130,2476,1427,95,113,New KBR data dump with plenty of additions and refinements.
+2022-06-20 16:11:44.867943,NL-FR,3726,3172,3196,3244,1141,632,2716,183,1107,632,163,164,New KBR data dump with plenty of additions and refinements.
+2022-06-20 16:11:44.919267,OTHER,270,157,157,264,46,8,237,3,11,8,2,2,New KBR data dump with plenty of additions and refinements.
