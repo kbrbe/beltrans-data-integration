@@ -98,7 +98,7 @@ def main():
         row['publishingDirectorIn'] = 0
 
       if row['authorIn'] > 0 or row['translatorIn'] > 0\
-              or row['illustratorin'] > 0 or row['scenaristIn'] > 0\
+              or row['illustratorIn'] > 0 or row['scenaristIn'] > 0\
               or row['publishingDirectorIn'] > 0:
         outputWriter.writerow(row)
 
