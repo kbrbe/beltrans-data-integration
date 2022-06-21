@@ -1011,10 +1011,10 @@ function extractKBRTranslationsAndContributions {
   extractISBN13 "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsISBN13"
 
   echo "Extract (possibly multiple) ISBN10 identifiers per translation - FR-NL"
-  extractISBN10 "$kbrDutchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN10"
+  extractISBN10 "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN10"
 
   echo "Extract (possibly multiple) ISBN13 identifiers per translation - FR-NL"
-  extractISBN13 "$kbrDutchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN13"
+  extractISBN13 "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN13"
 
 
   echo "Extract newly identified contributors ..."
