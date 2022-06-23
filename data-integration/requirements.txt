@@ -1,4 +1,4 @@
-numpy==1.21.2
+numpy==1.22.0
 pandas==1.3.2
 pyenchant==3.2.2
 pyisbn==1.3.1
