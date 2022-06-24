@@ -709,6 +709,34 @@ def countRowsWithValueForColumn(df, column):
   return (myDf[column].values != '').sum()
 
 # -----------------------------------------------------------------------------
+def countRowsWithValueForColumns(df, columns):
+  """This function returns the number of rows for the provided columns in the provided pandas dataframe which are not empty (or are not NaN).
+  >>> data1 = pd.DataFrame([{'id': '1', 'value': ''},{'id': '2', 'value': '2'},{'id': 3},{'id': '4', 'value': '4'},{'id': '5', 'value': 5}])
+  >>> countRowsWithValueForColumn(data1, ['value'])
+  3
+
+  >>> data1 = pd.DataFrame([{'id': '1', 'KBRID': '1', 'BnFID': '1'},{'id': '2', 'KBRID': '2', 'BnFID': '2', 'KBID': '2'},{'id': 3},{'id': '4', 'KBRID': '', 'KBID': '4'},{'id': '5', 'value': 5}])
+  >>> countRowsWithValueForColumns(data1, ['KBRID'])
+  2
+  >>> countRowsWithValueForColumns(data1, ['BnFID'])
+  2
+  >>> countRowsWithValueForColumns(data1, ['KBID'])
+  2
+  >>> countRowsWithValueForColumns(data1, ['KBRID', 'BnFID'])
+  2
+  >>> countRowsWithValueForColumns(data1, ['KBRID', 'BnFID', 'KBID'])
+  1
+  """
+  myDf = df.fillna('')
+  booleanValues = myDf[columns].values != ''
+  rowBoolean = []
+  for row in booleanValues:
+    rowBoolean.append(all(row))
+  return sum(rowBoolean)
+
+
+
+# -----------------------------------------------------------------------------
 def countRowsWithMultipleValuesForColumn(df, column, delimiter=';'):
   """This function returns the number of rows in the given dataframe and column containing the given delimiter string.
   >>> data1 = pd.DataFrame([{'id': '1', 'value': 'hello'},{'id': '2', 'value': 'hello;world'},{'id': '3', 'value': '12;34'}])
@@ -731,6 +759,10 @@ def createCorpusMeasurements(corpus, identifier, comment):
     'withKBRIdentifier': countRowsWithValueForColumn(corpus, 'targetKBRIdentifier'),
     'withBnFIdentifier': countRowsWithValueForColumn(corpus, 'targetBnFIdentifier'),
     'withKBIdentifier': countRowsWithValueForColumn(corpus, 'targetKBIdentifier'),
+    'withKBRBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetBnFIdentifier', 'targetKBIdentifier']),
+    'withKBRAndBnFIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetBnFIdentifier']),
+    'withKBRAndKBIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetKBIdentifier']),
+    'withBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['targetBnFIdentifier', 'targetKBIdentifier']),
     'withBBThesaurusID': countRowsWithValueForColumn(corpus, 'targetThesaurusBB'),
     'withSourceKBRIdentifier': countRowsWithValueForColumn(corpus, 'sourceKBRIdentifier'),
     'withKBRSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKBR'),
@@ -751,6 +783,11 @@ def createContributorCorpusMeasurements(corpus, comment):
     'withKBRIdentifier': countRowsWithValueForColumn(corpus, 'kbrIDs'),
     'withBnFIdentifier': countRowsWithValueForColumn(corpus, 'bnfIDs'),
     'withKBIdentifier': countRowsWithValueForColumn(corpus, 'ntaIDs'),
+    'withKBRBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'bnfIDs',
+                                                                       'ntaIDs']),
+    'withKBRAndBnFIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'bnfIDs']),
+    'withKBRAndKBIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'ntaIDs']),
+    'withBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'ntaIDs']),
     'withISNIIdentifier': countRowsWithValueForColumn(corpus, 'isniIDs'),
     'withVIAFIdentifier': countRowsWithValueForColumn(corpus, 'viafIDs'),
     'withWikidataIdentifier': countRowsWithValueForColumn(corpus, 'wikidataIDs'),
