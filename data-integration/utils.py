@@ -829,7 +829,7 @@ def countColumnOccurrence(df, columnName, value):
 def mergeMeasurementsToDataFrame(folder, files):
   """This function reads the content of the given CSV files and merges them into a Pandas dataframe."""
 
-  filePaths = [os.path.join(f) for f in files]
+  filePaths = [os.path.join(folder, f) for f in files]
   df = pd.concat(map(pd.read_csv, filePaths), ignore_index=True)
   df['date'] = pd.to_datetime(df['date'])
   df['date'] = df['date'].dt.date
@@ -843,9 +843,9 @@ def plotTranslationStats(df, statsName):
   selectionTargetISBN = ['numberTranslations', 'withTargetISBN10', 'withTargetISBN13']
   selectionSourceInfo = ['numberTranslations', 'withKBRSourceTitle', 'withKBSourceTitle', 'withSourceISBN10', 'withSourceISBN13']
 
-  df[selectionSources].plot(ax=axs[0, 0], kind='line', alpha=0.75, rot=25, legend=None)
-  df[selectionTargetISBN].plot(ax=axs[0,1], kind='line', alpha=0.75, rot=25, legend=None)
-  df[selectionSourceInfo].plot(ax=axs[1,0], kind='line', alpha=0.75, rot=25, legend=None)
+  df[selectionSources].plot(ax=axs[0, 0], marker='o', kind='line', alpha=0.75, rot=25, legend=None)
+  df[selectionTargetISBN].plot(ax=axs[0,1], marker='o', kind='line', alpha=0.75, rot=25, legend=None)
+  df[selectionSourceInfo].plot(ax=axs[1,0], marker='o', kind='line', alpha=0.75, rot=25, legend=None)
 
   #plt.subplots_adjust(bottom=0.5)
   fig.suptitle(statsName)
@@ -857,8 +857,23 @@ def plotTranslationStatsIdentifiers(df, statsName):
   """This function plots different graphs related to statistics of the corpus."""
 
   selectionSources = ['numberTranslations', 'withKBRIdentifier', 'withBnFIdentifier', 'withKBIdentifier']
-  df[selectionSources].plot(title=statsName, kind='line', alpha=0.75, rot=25).legend(loc='center left', bbox_to_anchor=(1.0, 0.5), prop={'size': 10})
+  df[selectionSources].plot(title=statsName, marker='o', kind='line', alpha=0.75, rot=25).legend(loc='center left', bbox_to_anchor=(1.0, 0.5), prop={'size': 10})
 
+# -----------------------------------------------------------------------------
+def plotTranslationStatsIdentifiersOverlap(df, statsName):
+  """This function plots different graphs related to statistics of the corpus."""
+
+  selectionSources = ['withKBRBnFAndKBIdentifier', 'withKBRAndBnFIdentifier', 'withKBRAndKBIdentifier',
+                      'withBnFAndKBIdentifier']
+  df[selectionSources].plot(title=statsName, marker='o', kind='line', alpha=0.75, rot=25).legend(loc='center left', bbox_to_anchor=(1.0, 0.5), prop={'size': 10})
+
+# -----------------------------------------------------------------------------
+def plotTranslationStatsIdentifiersOverlapWithoutKBRAndKB(df, statsName):
+  """This function plots different graphs related to statistics of the corpus."""
+
+  selectionSources = ['withKBRBnFAndKBIdentifier', 'withKBRAndBnFIdentifier',
+                      'withBnFAndKBIdentifier']
+  df[selectionSources].plot(title=statsName, marker='o', kind='line', alpha=0.75, rot=25).legend(loc='center left', bbox_to_anchor=(1.0, 0.5), prop={'size': 10})
 
 
 # -----------------------------------------------------------------------------
@@ -866,7 +881,7 @@ def plotTranslationStatsISBN(df, statsName):
   """This function plots different graphs related to statistics of the corpus."""
 
   selectionTargetISBN = ['numberTranslations', 'withTargetISBN10', 'withTargetISBN13']
-  df[selectionTargetISBN].plot(title=statsName, kind='line', alpha=0.75, rot=25).legend(loc='center left', bbox_to_anchor=(1.0, 0.5), prop={'size': 10})
+  df[selectionTargetISBN].plot(title=statsName, marker='o', kind='line', alpha=0.75, rot=25).legend(loc='center left', bbox_to_anchor=(1.0, 0.5), prop={'size': 10})
 
 # -----------------------------------------------------------------------------
 def plotTranslationStatsSources(df, statsName):
@@ -875,7 +890,7 @@ def plotTranslationStatsSources(df, statsName):
   selectionSourceInfo = ['numberTranslations', 'withKBRSourceTitle', 'withKBSourceTitle', 'withSourceISBN10',
                          'withSourceISBN13']
 
-  df[selectionSourceInfo].plot(title=statsName, kind='line', alpha=0.75, rot=25).legend(loc='center left', bbox_to_anchor=(1.0, 0.5), prop={'size': 10})
+  df[selectionSourceInfo].plot(title=statsName, marker='o', kind='line', alpha=0.75, rot=25).legend(loc='center left', bbox_to_anchor=(1.0, 0.5), prop={'size': 10})
 
 # -----------------------------------------------------------------------------
 def countContribution(value, counter, valueDelimiter=';'):
