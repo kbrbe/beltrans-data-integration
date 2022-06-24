@@ -488,8 +488,8 @@ function integrate {
   echo "Integrate manifestations ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2
 
-  echo "Remove duplicate manifestations (due to clustered editions) ..."
-  uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_DUPLICATE_MANIFESTATIONS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
+  #echo "Remove duplicate manifestations (due to clustered editions) ..."
+  #uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_DUPLICATE_MANIFESTATIONS" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
   echo "Integrate contributors ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3
