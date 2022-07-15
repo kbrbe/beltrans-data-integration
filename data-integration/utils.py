@@ -1,5 +1,6 @@
 import itertools
 from datetime import datetime
+import lxml.etree as ET
 import requests
 import rdflib
 import re
@@ -941,7 +942,14 @@ def sparqlUpdate(url, filename, fileFormat, queryName, auth=None):
         mutations = m.group(2)
         print(f'\t{queryName}: {mutations} changes in {timeElapsed}ms')
       except Exception as e:
-        print(f'Unexpected answer' + response[0:200])
+        # if the content was a file and no query the answer might be XML
+        try:
+          responseXML = ET.fromstring(response)
+          modified = responseXML.get('modified')
+          timeElapsed = responseXML.get('milliseconds')
+          print(f'\t{queryName}: {modified} changes in {timeElapsed}ms')
+        except Exception as e:
+          print(f'Unexpected answer, first 200 characters of answer:' + response[0:200])
 
     except requests.HTTPError as he:
       statusCode = he.response.status_code

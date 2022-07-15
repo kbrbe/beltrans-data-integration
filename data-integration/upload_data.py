@@ -43,7 +43,12 @@ def main(url, contentType, namedGraph, files):
     auth=(user,password)
  
   for inputFile in files:
-    utils.sparqlUpdate(url, inputFile, contentType, inputFile, auth=auth)
+    queryName = ''
+    if contentType == 'application/sparql-update':
+      queryName = f'SPARQL-UPDATE (named graph "{namedGraph}")' if namedGraph else 'SPARQL-UPDATE'
+    else:
+      queryName = f'file uploaded (named graph "{namedGraph}")' if namedGraph else 'file uploaded'
+    utils.sparqlUpdate(url, inputFile, contentType, queryName, auth=auth)
 
 if __name__ == '__main__':
   (options, args) = parseArguments()
