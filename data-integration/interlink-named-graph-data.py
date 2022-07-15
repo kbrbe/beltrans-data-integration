@@ -59,4 +59,5 @@ def main():
         for u in updateQueries:
           utils_sparql.sparqlUpdate(options.url, u[1], 'application/sparql-update', u[0], auth=auth)
 
-main()
+if __name__ == '__main__':
+  main()

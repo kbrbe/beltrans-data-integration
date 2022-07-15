@@ -26,4 +26,5 @@ def main():
 
   integration.combineAggregatedResults(options.input_file_kbr, options.input_file_bnf, options.output_file)
 
-main()
+if __name__ == '__main__':
+  main()

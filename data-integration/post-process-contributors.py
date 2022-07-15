@@ -122,4 +122,5 @@ def main():
         print(f'{dateType}, {contributorType}, {c}, {kbrValue}, {bnfValue}, {ntaValue}, {isniValue}')
       
 
-main()
+if __name__ == '__main__':
+  main()

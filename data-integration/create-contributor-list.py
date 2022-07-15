@@ -69,4 +69,5 @@ def main():
   #authorData['numberAuthored'] = authorData.groupby('authorIdentifier')['values'].transform(np.sum)
 
 
-main()
+if __name__ == '__main__':
+  main()
