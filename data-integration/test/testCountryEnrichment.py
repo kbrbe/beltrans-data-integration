@@ -184,14 +184,14 @@ class TestCountryEnrichment(unittest.TestCase):
 
   # ---------------------------------------------------------------------------
   def testMontrealQuebecCountry(self):
-    """When the location is '[Montréal (Québec)]' the country should be 'Belgium'."""
+    """When the location is '[Montréal (Québec)]' the country should be 'Canada'."""
     foundCountry = TestCountryEnrichment.data.getKBRIdentifierCountry("16")
-    expectedCountry = ""
+    expectedCountry = "Canada"
     self.assertEqual(foundCountry, expectedCountry, msg=f'For the location "[Montréal (Québec)]" the country was "{foundCountry}" instead of "{expectedCountry}"')
 
   # ---------------------------------------------------------------------------
   def testMontrealQuebecLocationNormalized(self):
-    """When the location is '[Montréal (Québec)]' the location should be altered to 'Paris'."""
+    """When the location is '[Montréal (Québec)]' the location should be altered to 'Montréal'."""
     foundLocation = TestCountryEnrichment.data.getKBRIdentifierLocation("16")
-    expectedLocation = 'Montréal (Québec)'
+    expectedLocation = 'Montréal'
     self.assertEqual(foundLocation, expectedLocation, msg=f'For the location "[Montréal (Québec)]" the altered location was "{foundLocation}" instead of "{expectedLocation}"')

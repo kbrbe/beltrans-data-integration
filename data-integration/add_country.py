@@ -77,8 +77,12 @@ def main():
                     foundCountries.add('Belgium')
                     locationsMainSpelling.add(utils_geo.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm]))
                 elif lNorm in fr:
-                    foundCountries.add('France')
-                    locationsMainSpelling.add(utils_geo.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm]))
+                    if 'montreal' in lNorm and 'Québec' in noBrackets:
+                      foundCountries.add('Canada')
+                      locationsMainSpelling.add('Montréal')
+                    else:
+                      foundCountries.add('France')
+                      locationsMainSpelling.add(utils_geo.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm]))
                 elif lNorm in nl:
                     foundCountries.add('Netherlands')
                     locationsMainSpelling.add(utils_geo.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm]))
@@ -98,5 +102,6 @@ def main():
             outputWriter.writerow(row)
 
 
-main()
+if __name__ == '__main__':
+  main()
 
