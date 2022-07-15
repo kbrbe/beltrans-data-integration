@@ -317,21 +317,21 @@ class TestGeonamesIdentifierEnrichment(unittest.TestCase):
     self.assertEqual(foundLatitude, expectedLatitude, msg=f'For the location "Paris. - [Paris]","Belgium" the longitude was "{foundLatitude}" instead of "{expectedLatitude}"')
 
   # ---------------------------------------------------------------------------
-  def testIdentifierShouldNotBeFoundForMontrealQuebec(self):
-    """When the location is '[Montréal (Québec)]' and we only have an identifier for Brussels, Berlin should get an empty identifier."""
+  def testIdentifierShouldBeFoundForMontrealQuebec(self):
+    """When the location is '[Montréal (Québec)]' the correct identifier from Canada should be found."""
     foundIdentifier = TestGeonamesIdentifierEnrichment.data.getTargetIdentifierPlaceOfPublicationIdentifier("16")
-    expectedIdentifier = ''
+    expectedIdentifier = '6077243'
     self.assertEqual(foundIdentifier, expectedIdentifier, msg=f'For the location "[Montréal (Québec)]","Belgium" the identifier was "{foundIdentifier}" instead of left empty')
 
-  def testIdentifierShouldNotBeFoundForMontrealQuebec(self):
+  def testIdentifierShouldBeFoundForMontrealQuebec(self):
     """When the location is '[Montréal (Québec)]' the correct longitude should be found"""
     foundLongitude = TestGeonamesIdentifierEnrichment.data.getTargetIdentifierPlaceOfPublicationLongitude("16")
-    expectedLongitude = ''
+    expectedLongitude = '-73.58781'
     self.assertEqual(foundLongitude, expectedLongitude, msg=f'For the location "[Montréal (Québec)]","Belgium" the longitude was "{foundLongitude}" instead of left empty')
 
-  def testIdentifierShouldNotBeFoundForMontrealQuebec(self):
+  def testIdentifierShouldBeFoundForMontrealQuebec(self):
     """When the location is '[Montréal (Québec)]' the correct latitudes should be found"""
     foundLatitude = TestGeonamesIdentifierEnrichment.data.getTargetIdentifierPlaceOfPublicationLatitude("16")
-    expectedLatitude = ''
+    expectedLatitude = '45.50884'
     self.assertEqual(foundLatitude, expectedLatitude, msg=f'For the location "[Montréal (Québec)]","Belgium" the longitude was "{foundLatitude}" instead of left empty')
 

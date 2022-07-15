@@ -108,11 +108,18 @@ def main():
                     locationLongitude = utils_geo.getGeoNamesLongitude(beContent, be[lNorm])
                     locationLatitude = utils_geo.getGeoNamesLatitude(beContent, be[lNorm])
                 elif lNorm in fr:
-                    locationMainSpelling = utils_geo.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm])
-                    locationCountry = 'France'
-                    locationIdentifier = fr[lNorm]
-                    locationLongitude = utils_geo.getGeoNamesLongitude(frContent, fr[lNorm])
-                    locationLatitude = utils_geo.getGeoNamesLatitude(frContent, fr[lNorm])
+                    if 'montreal' in lNorm and 'Montréal' in noBrackets:
+                      locationMainSpelling = 'Montréal'
+                      locationCountry = 'Canada'
+                      locationIdentifier = '6077243'
+                      locationLongitude = '-73.58781'
+                      locationLatitude = '45.50884'
+                    else:
+                      locationMainSpelling = utils_geo.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm])
+                      locationCountry = 'France'
+                      locationIdentifier = fr[lNorm]
+                      locationLongitude = utils_geo.getGeoNamesLongitude(frContent, fr[lNorm])
+                      locationLatitude = utils_geo.getGeoNamesLatitude(frContent, fr[lNorm])
                 elif lNorm in nl:
                     locationMainSpelling = utils_geo.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm])
                     locationCountry = 'Netherlands'
@@ -144,5 +151,6 @@ def main():
         print(f'processed {numRows} rows and {numLocations} locations')
 
 
-main()
+if __name__ == '__main__':
+  main()
 
