@@ -11,3 +11,5 @@ yarrrml-parser
 !manifestations-update-queries.csv
 !contributors-create-queries.csv
 !contributors-update-queries.csv
+!missing-geonames-mapping.csv
+!*stats.csv
