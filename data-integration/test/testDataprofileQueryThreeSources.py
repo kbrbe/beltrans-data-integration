@@ -53,6 +53,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
         csvReader = csv.DictReader(allIn, delimiter=',')
         csvData = [dict(d) for d in csvReader]
         cls.data = DataprofileTestHelper(csvData)
+        print(cls.data.df[['targetIdentifier', 'targetKBRIdentifier', 'targetBnFIdentifier', 'targetKBIdentifier', 'authorIdentifiers']])
     
   # ---------------------------------------------------------------------------
   @classmethod

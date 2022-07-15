@@ -42,7 +42,7 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def kbrTargetIdentifierExists(self, identifier):
     """Returns True if a KBR manifestation with the given ID exists.
-    >>> data = DataprofileTestHelper([{"targetTextKBRIdentifier": 1, "name": "john"},{"targetTextKBRIdentifier": 2, "name": "jane"}])
+    >>> data = DataprofileTestHelper([{"targetKBRIdentifier": 1, "name": "john"},{"targetKBRIdentifier": 2, "name": "jane"}])
     >>> data.kbrTargetIdentifierExists(2)
     True
     >>> data.kbrTargetIdentifierExists(4)
@@ -50,7 +50,7 @@ class DataprofileTestHelper:
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      value = utils.getDfCellValue(self.df, "targetTextKBRIdentifier", identifier, "targetTextKBRIdentifier")
+      value = utils.getDfCellValue(self.df, "targetKBRIdentifier", identifier, "targetKBRIdentifier")
       if value == identifier:
         return True
       else:
@@ -62,7 +62,7 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def bnfTargetIdentifierExists(self, identifier):
     """Returns True if a BnF manifestation with the given ID exists.
-    >>> data = DataprofileTestHelper([{"targetTextBnFIdentifier": 1, "name": "john"}, {"targetTextBnFIdentifier": 2, "name": "jane"}, {"targetTextKBRIdentifier": 3, "name": "test", "targetTextBnFIdentifier": ""}, {"targetTextKBRIdentifier": 4}, {"targetTextBnFIdentifier": "BnF book 22"}])
+    >>> data = DataprofileTestHelper([{"targetBnFIdentifier": 1, "name": "john"}, {"targetBnFIdentifier": 2, "name": "jane"}, {"targetKBRIdentifier": 3, "name": "test", "targetBnFIdentifier": ""}, {"targetKBRIdentifier": 4}, {"targetBnFIdentifier": "BnF book 22"}])
     >>> data.bnfTargetIdentifierExists(2)
     True
     >>> data.bnfTargetIdentifierExists(4)
@@ -72,7 +72,7 @@ class DataprofileTestHelper:
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      value = utils.getDfCellValue(self.df, "targetTextBnFIdentifier", identifier, "targetTextBnFIdentifier")
+      value = utils.getDfCellValue(self.df, "targetBnFIdentifier", identifier, "targetBnFIdentifier")
       if value == identifier:
         return True
       else:
@@ -83,7 +83,7 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def kbTargetIdentifierExists(self, identifier):
     """Returns True if a KB manifestation with the given ID exists.
-    >>> data = DataprofileTestHelper([{"targetTextKBIdentifier": 1, "name": "john"}, {"targetTextKBIdentifier": 2, "name": "jane"}, {"targetTextKBRIdentifier": 3, "name": "test", "targetTextKBIdentifier": ""}, {"targetTextKBRIdentifier": 4}, {"targetTextKBIdentifier": "KB book 22"}])
+    >>> data = DataprofileTestHelper([{"targetKBIdentifier": 1, "name": "john"}, {"targetKBIdentifier": 2, "name": "jane"}, {"targetKBRIdentifier": 3, "name": "test", "targetKBIdentifier": ""}, {"targetKBRIdentifier": 4}, {"targetKBIdentifier": "KB book 22"}])
     >>> data.kbTargetIdentifierExists(2)
     True
     >>> data.kbTargetIdentifierExists(4)
@@ -93,7 +93,7 @@ class DataprofileTestHelper:
     """
     # reuse the getCellValue function so also some checks are performed
     try:
-      value = utils.getDfCellValue(self.df, "targetTextKBIdentifier", identifier, "targetTextKBIdentifier")
+      value = utils.getDfCellValue(self.df, "targetKBIdentifier", identifier, "targetKBIdentifier")
       if value == identifier:
         return True
       else:
@@ -106,7 +106,7 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def kbrAndBnFIdentifierOnSameRow(self, kbrIdentifier, bnfIdentifier):
     """Returns True if a KBR manifestation with the given KBR ID exists on the same row as a BnF manifestation with the given BnF ID.
-    >>> data = DataprofileTestHelper([{"targetTextKBRIdentifier": "KBR book 4", "name": "john", "targetTextBnFIdentifier": "BnF book 4"},{"targetTextKBRIdentifier": 2, "name": "jane"}])
+    >>> data = DataprofileTestHelper([{"targetKBRIdentifier": "KBR book 4", "name": "john", "targetBnFIdentifier": "BnF book 4"},{"targetKBRIdentifier": 2, "name": "jane"}])
 
     Returns True if a row is found where both identifiers are present
     >>> data.kbrAndBnFIdentifierOnSameRow("KBR book 4", "BnF book 4")
@@ -120,9 +120,9 @@ class DataprofileTestHelper:
     >>> data.kbrAndBnFIdentifierOnSameRow(11,22)
     Traceback (most recent call last):
      ...
-    ValueError: No row with ID "11" in column "targetTextKBRIdentifier" found!
+    ValueError: No row with ID "11" in column "targetKBRIdentifier" found!
 
-    >>> data2 = DataprofileTestHelper([{"targetTextKBRIdentifier": 1, "name": "john", "targetTextBnFIdentifier": ""},{"targetTextKBRIdentifier": 2, "targetTextBnFIdentifier": 2, "name": "jane"}])
+    >>> data2 = DataprofileTestHelper([{"targetKBRIdentifier": 1, "name": "john", "targetBnFIdentifier": ""},{"targetKBRIdentifier": 2, "targetBnFIdentifier": 2, "name": "jane"}])
 
     If there is no BnF identifier (empty value) then False is returned
     >>> data2.kbrAndBnFIdentifierOnSameRow(1,1)
@@ -132,15 +132,15 @@ class DataprofileTestHelper:
     >>> data2.kbrAndBnFIdentifierOnSameRow(2,2)
     True
 
-    >>> data3 = DataprofileTestHelper([{"targetTextKBRIdentifier": 1, "name": "john", "targetTextBnFIdentifier": "", "name": ""},{"targetTextKBRIdentifier": 2, "targetTextBnFIdentifier": "2", "name": "jane"}, {"targetTextKBRIdentifier": 2, "targetTextBnFIdentifier": 2}])
+    >>> data3 = DataprofileTestHelper([{"targetKBRIdentifier": 1, "name": "john", "targetBnFIdentifier": "", "name": ""},{"targetKBRIdentifier": 2, "targetBnFIdentifier": "2", "name": "jane"}, {"targetKBRIdentifier": 2, "targetBnFIdentifier": 2}])
 
     If a KBR identifier is found more than once an error is raised
     >>> data3.kbrAndBnFIdentifierOnSameRow(2,2)
     Traceback (most recent call last):
      ...
-    ValueError: More than one row with ID "2" in column "targetTextKBRIdentifier" found!
+    ValueError: More than one row with ID "2" in column "targetKBRIdentifier" found!
     """
-    value = utils.getDfCellValue(self.df, 'targetTextKBRIdentifier', kbrIdentifier, 'targetTextBnFIdentifier')
+    value = utils.getDfCellValue(self.df, 'targetKBRIdentifier', kbrIdentifier, 'targetBnFIdentifier')
     if value == bnfIdentifier:
       return True
     else:
@@ -149,7 +149,7 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def kbrAndKBIdentifierOnSameRow(self, kbrIdentifier, kbIdentifier):
     """Returns True if a KBR manifestation with the given KBR ID exists on the same row as a KB manifestation with the given BnF ID.
-    >>> data = DataprofileTestHelper([{"targetTextKBRIdentifier": "KBR book 4", "name": "john", "targetTextKBIdentifier": "KB book 4"},{"targetTextKBRIdentifier": 2, "name": "jane"}])
+    >>> data = DataprofileTestHelper([{"targetKBRIdentifier": "KBR book 4", "name": "john", "targetKBIdentifier": "KB book 4"},{"targetKBRIdentifier": 2, "name": "jane"}])
 
     Returns True if a row is found where both identifiers are present
     >>> data.kbrAndKBIdentifierOnSameRow("KBR book 4", "KB book 4")
@@ -163,9 +163,9 @@ class DataprofileTestHelper:
     >>> data.kbrAndKBIdentifierOnSameRow(11,22)
     Traceback (most recent call last):
      ...
-    ValueError: No row with ID "11" in column "targetTextKBRIdentifier" found!
+    ValueError: No row with ID "11" in column "targetKBRIdentifier" found!
 
-    >>> data2 = DataprofileTestHelper([{"targetTextKBRIdentifier": 1, "name": "john", "targetTextKBIdentifier": ""},{"targetTextKBRIdentifier": 2, "targetTextKBIdentifier": 2, "name": "jane"}])
+    >>> data2 = DataprofileTestHelper([{"targetKBRIdentifier": 1, "name": "john", "targetKBIdentifier": ""},{"targetKBRIdentifier": 2, "targetKBIdentifier": 2, "name": "jane"}])
 
     If there is no KB identifier (empty value) then False is returned
     >>> data2.kbrAndKBIdentifierOnSameRow(1,1)
@@ -175,15 +175,15 @@ class DataprofileTestHelper:
     >>> data2.kbrAndKBIdentifierOnSameRow(2,2)
     True
 
-    >>> data3 = DataprofileTestHelper([{"targetTextKBRIdentifier": 1, "name": "john", "targetTextKBIdentifier": "", "name": ""},{"targetTextKBRIdentifier": 2, "targetTextKBIdentifier": "2", "name": "jane"}, {"targetTextKBRIdentifier": 2, "targetTextKBIdentifier": 2}])
+    >>> data3 = DataprofileTestHelper([{"targetKBRIdentifier": 1, "name": "john", "targetKBIdentifier": "", "name": ""},{"targetKBRIdentifier": 2, "targetKBIdentifier": "2", "name": "jane"}, {"targetKBRIdentifier": 2, "targetKBIdentifier": 2}])
 
     If a KBR identifier is found more than once an error is raised
     >>> data3.kbrAndKBIdentifierOnSameRow(2,2)
     Traceback (most recent call last):
      ...
-    ValueError: More than one row with ID "2" in column "targetTextKBRIdentifier" found!
+    ValueError: More than one row with ID "2" in column "targetKBRIdentifier" found!
     """
-    value = utils.getDfCellValue(self.df, 'targetTextKBRIdentifier', kbrIdentifier, 'targetTextKBIdentifier')
+    value = utils.getDfCellValue(self.df, 'targetKBRIdentifier', kbrIdentifier, 'targetKBIdentifier')
     if value == kbIdentifier:
       return True
     else:
@@ -192,7 +192,7 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def kbAndBnFIdentifierOnSameRow(self, kbIdentifier, bnfIdentifier):
     """Returns True if a KB manifestation with the given KB ID exists on the same row as a BnF manifestation with the given BnF ID.
-    >>> data = DataprofileTestHelper([{"targetTextKBIdentifier": "KB book 4", "name": "john", "targetTextBnFIdentifier": "BnF book 4"},{"targetTextKBIdentifier": 2, "name": "jane"}])
+    >>> data = DataprofileTestHelper([{"targetKBIdentifier": "KB book 4", "name": "john", "targetBnFIdentifier": "BnF book 4"},{"targetKBIdentifier": 2, "name": "jane"}])
 
     Returns True if a row is found where both identifiers are present
     >>> data.kbAndBnFIdentifierOnSameRow("KB book 4", "BnF book 4")
@@ -206,9 +206,9 @@ class DataprofileTestHelper:
     >>> data.kbAndBnFIdentifierOnSameRow(11,22)
     Traceback (most recent call last):
      ...
-    ValueError: No row with ID "11" in column "targetTextKBIdentifier" found!
+    ValueError: No row with ID "11" in column "targetKBIdentifier" found!
 
-    >>> data2 = DataprofileTestHelper([{"targetTextKBIdentifier": 1, "name": "john", "targetTextBnFIdentifier": ""},{"targetTextKBIdentifier": 2, "targetTextBnFIdentifier": 2, "name": "jane"}])
+    >>> data2 = DataprofileTestHelper([{"targetKBIdentifier": 1, "name": "john", "targetBnFIdentifier": ""},{"targetKBIdentifier": 2, "targetBnFIdentifier": 2, "name": "jane"}])
 
     If there is no BnF identifier (empty value) then False is returned
     >>> data2.kbAndBnFIdentifierOnSameRow(1,1)
@@ -218,15 +218,15 @@ class DataprofileTestHelper:
     >>> data2.kbAndBnFIdentifierOnSameRow(2,2)
     True
 
-    >>> data3 = DataprofileTestHelper([{"targetTextKBIdentifier": 1, "name": "john", "targetTextBnFIdentifier": "", "name": ""},{"targetTextKBIdentifier": 2, "targetTextBnFIdentifier": "2", "name": "jane"}, {"targetTextKBIdentifier": 2, "targetTextBnFIdentifier": 2}])
+    >>> data3 = DataprofileTestHelper([{"targetKBIdentifier": 1, "name": "john", "targetBnFIdentifier": "", "name": ""},{"targetKBIdentifier": 2, "targetBnFIdentifier": "2", "name": "jane"}, {"targetKBIdentifier": 2, "targetBnFIdentifier": 2}])
 
     If a KB identifier is found more than once an error is raised
     >>> data3.kbAndBnFIdentifierOnSameRow(2,2)
     Traceback (most recent call last):
      ...
-    ValueError: More than one row with ID "2" in column "targetTextKBIdentifier" found!
+    ValueError: More than one row with ID "2" in column "targetKBIdentifier" found!
     """
-    value = utils.getDfCellValue(self.df, 'targetTextKBIdentifier', kbIdentifier, 'targetTextBnFIdentifier')
+    value = utils.getDfCellValue(self.df, 'targetKBIdentifier', kbIdentifier, 'targetBnFIdentifier')
     if value == bnfIdentifier:
       return True
     else:
