@@ -1,6 +1,7 @@
 import itertools
 from datetime import datetime
 import lxml.etree as ET
+import time
 import requests
 import rdflib
 import re
@@ -922,6 +923,36 @@ def countContribution(value, counter, valueDelimiter=';'):
           counter[contributorName] = counter[contributorName] + 1
         else:
           counter[contributorName] = 1
+
+# -----------------------------------------------------------------------------
+def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
+
+  if not os.path.isfile(queryFilename):
+    print(f'"{filename}" is not a file!')
+    return
+  with open(queryFilename, 'rb') as query:
+    print(f'\tProcessing query {queryFilename}')
+    r = None
+    try:
+      start = time.time()
+      r = requests.post(url, data=query.read(), headers={'Content-Type': 'application/sparql-query', 'Accept': acceptFormat}, auth=auth)
+      end = time.time()
+      r.raise_for_status()
+
+      queryTime = time.strftime('%H:%M:%S', time.gmtime(end - start))
+      response = r.content.decode('utf-8')
+
+      with open(outputFilename, 'w', encoding='utf-8') as outputFile:
+        numberChars = outputFile.write(response)
+        print(f'successfully queried in time {queryTime} and wrote {numberChars} characters to file {outputFilename}!')
+
+    except requests.HTTPError as he:
+      statusCode = he.response.status_code
+      print(f'{statusCode} error while updating {filename} (first 40 characters): ' + he.response.content.decode('utf-8')[0:40])
+    except Exception as e:
+      print('Error while queryting {url} with {queryFilename} and acceptFormat {acceptFormat}')
+      print(e)
+
 
 # -----------------------------------------------------------------------------
 def sparqlUpdate(url, filename, fileFormat, queryName, auth=None):
