@@ -4,7 +4,8 @@
 #
 import csv
 from optparse import OptionParser
-import utils
+import utils_stats
+import utils_date
 import pandas as pd
 import json
 
@@ -60,11 +61,11 @@ def main():
     contributions = {'authors': {}, 'translators': {}, 'illustrators': {}, 'scenarists': {}, 'publishingDirectors': {}}
     manifestationsReader = csv.DictReader(inFileManifestations, delimiter=',')
     for row in manifestationsReader:
-      utils.countContribution(row['authorIdentifiers'], contributions['authors'])
-      utils.countContribution(row['translatorIdentifiers'], contributions['translators'])
-      utils.countContribution(row['illustratorIdentifiers'], contributions['illustrators'])
-      utils.countContribution(row['scenaristIdentifiers'], contributions['scenarists'])
-      utils.countContribution(row['publishingDirectorIdentifiers'], contributions['publishingDirectors'])
+      utils_stats.countContribution(row['authorIdentifiers'], contributions['authors'])
+      utils_stats.countContribution(row['translatorIdentifiers'], contributions['translators'])
+      utils_stats.countContribution(row['illustratorIdentifiers'], contributions['illustrators'])
+      utils_stats.countContribution(row['scenaristIdentifiers'], contributions['scenarists'])
+      utils_stats.countContribution(row['publishingDirectorIdentifiers'], contributions['publishingDirectors'])
 
     # write relevant data to output
     for row in contributorsReader:
@@ -72,8 +73,8 @@ def main():
       contributorName = row['name']
 
       # add a single column for birth date respectively death date
-      utils.selectDate(row, 'birthDate', sources, 'contributorID', mismatchLog, 'date')
-      utils.selectDate(row, 'deathDate', sources, 'contributorID', mismatchLog, 'date')
+      utils_date.selectDate(row, 'birthDate', sources, 'contributorID', mismatchLog, 'date')
+      utils_date.selectDate(row, 'deathDate', sources, 'contributorID', mismatchLog, 'date')
 
       if contributorName != '':
         contributorName = contributorName.strip()

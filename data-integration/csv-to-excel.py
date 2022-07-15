@@ -4,7 +4,6 @@
 #
 import csv
 from optparse import OptionParser
-import utils
 import json
 import itertools
 import xlsxwriter

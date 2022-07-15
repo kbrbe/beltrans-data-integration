@@ -6,7 +6,7 @@ import os
 import re
 import requests
 import sys
-import utils
+import utils_sparql
 from optparse import OptionParser
 from dotenv import load_dotenv
 
@@ -45,7 +45,7 @@ def main(url, queryFilename, outputFilename, acceptFormat, namedGraph):
   else:
     auth=(user,password)
  
-  utils.sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=auth)
+  utils_sparql.sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=auth)
 
 if __name__ == '__main__':
   (options, args) = parseArguments()

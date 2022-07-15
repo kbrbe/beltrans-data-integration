@@ -11,7 +11,8 @@ import pandas as pd
 import re
 import glob
 import unicodedata as ud
-import utils
+import utils_geo
+import utils_string
 
 def main():
     """This script fills out missing countries based on the place name (for Belgium, France & The Netherlands)"""
@@ -28,11 +29,11 @@ def main():
       exit(1) 
 
     beContent = pd.read_csv(options.geonames_folder + "BE.txt", delimiter='\t', header=None)
-    be = utils.extract_geonames(beContent)
+    be = utils_geo.extract_geonames(beContent)
     frContent = pd.read_csv(options.geonames_folder + "FR.txt", delimiter='\t', header=None)
-    fr = utils.extract_geonames(frContent)
+    fr = utils_geo.extract_geonames(frContent)
     nlContent = pd.read_csv(options.geonames_folder + "NL.txt", delimiter='\t', header=None)
-    nl = utils.extract_geonames(nlContent)
+    nl = utils_geo.extract_geonames(nlContent)
 
     with open(options.input_file, 'r', encoding='utf-8') as inFile, \
          open(options.output_file, 'w', encoding='utf-8') as outFile:
@@ -44,7 +45,7 @@ def main():
         locationDelimiter = ';'
         for row in inputReader:
             location = row[options.column_with_places]
-            locationListNorm = utils.normalizeDelimiters(location, delimiter=locationDelimiter)
+            locationListNorm = utils_string.normalizeDelimiters(location, delimiter=locationDelimiter)
 
             # create a list of locations, even if it just has one entry
             locations = locationListNorm.split(locationDelimiter) if locationDelimiter in locationListNorm else [locationListNorm]
@@ -59,11 +60,11 @@ def main():
             for l in locations:
 
                 # The location might be in brackets, e.g. "(Brussels)" or "[Brussels]"
-                noBrackets = utils.extractStringFromBrackets(l)
+                noBrackets = utils_string.extractStringFromBrackets(l)
                 # The location may contain also a country, e.g. "Gent (Belgium)"
-                onlyLocation = utils.extractLocationFromLocationCountryString(noBrackets)
+                onlyLocation = utils_geo.extractLocationFromLocationCountryString(noBrackets)
                 # The location needs to be normalized with respect to special characters
-                lNorm = utils.getNormalizedString(onlyLocation)
+                lNorm = utils_string.getNormalizedString(onlyLocation)
                 lNorm = lNorm.replace(' etc.', '')
                 lNorm = lNorm.replace('[etc.]', '')
                 lNorm = lNorm.strip()
@@ -74,13 +75,13 @@ def main():
                     pass
                 elif lNorm in be:
                     foundCountries.add('Belgium')
-                    locationsMainSpelling.add(utils.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm]))
+                    locationsMainSpelling.add(utils_geo.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm]))
                 elif lNorm in fr:
                     foundCountries.add('France')
-                    locationsMainSpelling.add(utils.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm]))
+                    locationsMainSpelling.add(utils_geo.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm]))
                 elif lNorm in nl:
                     foundCountries.add('Netherlands')
-                    locationsMainSpelling.add(utils.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm]))
+                    locationsMainSpelling.add(utils_geo.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm]))
                 else:
                     usedSpelling = onlyLocation.replace(' etc.', '').replace('[etc.]', '').strip()
                     locationsMainSpelling.add(usedSpelling)

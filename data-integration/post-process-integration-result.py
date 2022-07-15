@@ -5,6 +5,7 @@
 import csv
 from optparse import OptionParser
 import utils
+import utils_date
 import json
 
 # -----------------------------------------------------------------------------
@@ -78,15 +79,15 @@ def main():
         if( row['authorNationality'] == belgian or row['illustratorNationality'] == belgian or row['scenaristNationality'] == belgian):
 
           # This is a relevant row, we process it further before writing it
-          utils.selectDate(row, 'author', 'Birth', source, 'authorKBRIdentifier', mismatchLog)
-          utils.selectDate(row, 'illustrator', 'Birth', source, 'illustratorKBRIdentifier', mismatchLog)
-          utils.selectDate(row, 'translator', 'Birth', source, 'translatorKBRIdentifier', mismatchLog)
-          utils.selectDate(row, 'scenarist', 'Birth', source, 'scenaristKBRIdentifier', mismatchLog)
+          utils_date.selectDate(row, 'author', 'Birth', source, 'authorKBRIdentifier', mismatchLog)
+          utils_date.selectDate(row, 'illustrator', 'Birth', source, 'illustratorKBRIdentifier', mismatchLog)
+          utils_date.selectDate(row, 'translator', 'Birth', source, 'translatorKBRIdentifier', mismatchLog)
+          utils_date.selectDate(row, 'scenarist', 'Birth', source, 'scenaristKBRIdentifier', mismatchLog)
 
-          utils.selectDate(row, 'author', 'Death', source, 'authorKBRIdentifier', mismatchLog)
-          utils.selectDate(row, 'illustrator', 'Death', source, 'illustratorKBRIdentifier', mismatchLog)
-          utils.selectDate(row, 'translator', 'Death', source, 'translatorKBRIdentifier', mismatchLog)
-          utils.selectDate(row, 'scenarist', 'Death', source, 'scenaristKBRIdentifier', mismatchLog)
+          utils_date.selectDate(row, 'author', 'Death', source, 'authorKBRIdentifier', mismatchLog)
+          utils_date.selectDate(row, 'illustrator', 'Death', source, 'illustratorKBRIdentifier', mismatchLog)
+          utils_date.selectDate(row, 'translator', 'Death', source, 'translatorKBRIdentifier', mismatchLog)
+          utils_date.selectDate(row, 'scenarist', 'Death', source, 'scenaristKBRIdentifier', mismatchLog)
 
           outputWriter.writerow(utils.addKeysWithoutValueToDict(row, allOutputHeaders))
       sourceCount += 1

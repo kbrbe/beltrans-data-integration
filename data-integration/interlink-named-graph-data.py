@@ -51,12 +51,12 @@ def main():
     for c in createQueries:
       # create data
       print(f'CREATE data from {c[0]}')
-      utils.sparqlUpdate(options.url, c[1], 'application/sparql-update', c[0], auth=auth)
+      utils_sparql.sparqlUpdate(options.url, c[1], 'application/sparql-update', c[0], auth=auth)
 
       # perform update query per source to link found data to created URIs via sameAs
       for i in range(options.number_updates):
         print(f'Update cycle {i}/{options.number_updates}')
         for u in updateQueries:
-          utils.sparqlUpdate(options.url, u[1], 'application/sparql-update', u[0], auth=auth)
+          utils_sparql.sparqlUpdate(options.url, u[1], 'application/sparql-update', u[0], auth=auth)
 
 main()

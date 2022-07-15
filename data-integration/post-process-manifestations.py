@@ -5,6 +5,7 @@
 import csv
 from optparse import OptionParser
 import utils
+import utils_date
 import json
 
 # -----------------------------------------------------------------------------
@@ -60,7 +61,7 @@ def main():
     # write relevant data to output
     for row in inputReader:
 
-      utils.selectDate(row, 'targetYearOfPublication', sources, 'targetIdentifier', mismatchLog, 'publicationYear')
+      utils_date.selectDate(row, 'targetYearOfPublication', sources, 'targetIdentifier', mismatchLog, 'publicationYear')
       utils.mergeValues(row, 'targetPlaceOfPublication', sources)
       utils.mergeValues(row, 'targetCountryOfPublication', sources)
 

@@ -6,7 +6,6 @@ import csv
 from optparse import OptionParser
 import pandas as pd
 import numpy as np
-import utils
 import json
 import xlsxwriter
 

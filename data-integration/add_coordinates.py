@@ -9,7 +9,8 @@ import pandas as pd
 import re
 import glob
 import unicodedata as ud
-import utils
+import utils_geo
+import utils_string
 
 def createMapping(filename):
 
@@ -41,11 +42,11 @@ def main():
       exit(1) 
 
     beContent = pd.read_csv(options.geonames_folder + "BE.txt", delimiter='\t', header=None)
-    be = utils.extract_geonames(beContent)
+    be = utils_geo.extract_geonames(beContent)
     frContent = pd.read_csv(options.geonames_folder + "FR.txt", delimiter='\t', header=None)
-    fr = utils.extract_geonames(frContent)
+    fr = utils_geo.extract_geonames(frContent)
     nlContent = pd.read_csv(options.geonames_folder + "NL.txt", delimiter='\t', header=None)
-    nl = utils.extract_geonames(nlContent)
+    nl = utils_geo.extract_geonames(nlContent)
 
     mapping = {}
     if options.mapping_file:
@@ -69,7 +70,7 @@ def main():
         for row in inputReader:
             numRows += 1
             location = row[options.column_with_places]
-            locationListNorm = utils.normalizeDelimiters(location, delimiter=locationDelimiter)
+            locationListNorm = utils_string.normalizeDelimiters(location, delimiter=locationDelimiter)
 
             # create a set of locations, even if it just has one entry
             locations = locationListNorm.split(locationDelimiter) if locationDelimiter in locationListNorm else [locationListNorm]
@@ -78,11 +79,11 @@ def main():
             for l in locations:
                 numLocations += 1
                 # The location might be in brackets, e.g. "(Brussels)" or "[Brussels]"
-                noBrackets = utils.extractStringFromBrackets(l)
+                noBrackets = utils_string.extractStringFromBrackets(l)
                 # The location may contain also a country, e.g. "Gent (Belgium)"
-                onlyLocation = utils.extractLocationFromLocationCountryString(noBrackets)
+                onlyLocation = utils_geo.extractLocationFromLocationCountryString(noBrackets)
                 # The location needs to be normalized with respect to special characters
-                lNorm = utils.getNormalizedString(onlyLocation)
+                lNorm = utils_string.getNormalizedString(onlyLocation)
                 lNorm = lNorm.strip()
 
                 # it could be the same location exists twice in a string, e.g. "Paris. - [Paris]"
@@ -101,23 +102,23 @@ def main():
                 if lNorm == '':
                     pass
                 elif lNorm in be:
-                    locationMainSpelling = utils.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm])
+                    locationMainSpelling = utils_geo.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm])
                     locationCountry = 'Belgium'
                     locationIdentifier = be[lNorm]
-                    locationLongitude = utils.getGeoNamesLongitude(beContent, be[lNorm])
-                    locationLatitude = utils.getGeoNamesLatitude(beContent, be[lNorm])
+                    locationLongitude = utils_geo.getGeoNamesLongitude(beContent, be[lNorm])
+                    locationLatitude = utils_geo.getGeoNamesLatitude(beContent, be[lNorm])
                 elif lNorm in fr:
-                    locationMainSpelling = utils.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm])
+                    locationMainSpelling = utils_geo.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm])
                     locationCountry = 'France'
                     locationIdentifier = fr[lNorm]
-                    locationLongitude = utils.getGeoNamesLongitude(frContent, fr[lNorm])
-                    locationLatitude = utils.getGeoNamesLatitude(frContent, fr[lNorm])
+                    locationLongitude = utils_geo.getGeoNamesLongitude(frContent, fr[lNorm])
+                    locationLatitude = utils_geo.getGeoNamesLatitude(frContent, fr[lNorm])
                 elif lNorm in nl:
-                    locationMainSpelling = utils.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm])
+                    locationMainSpelling = utils_geo.getGeoNamesMainSpellingFromDataFrame(nlContent, nl[lNorm])
                     locationCountry = 'Netherlands'
                     locationIdentifier = nl[lNorm]
-                    locationLongitude = utils.getGeoNamesLongitude(nlContent, nl[lNorm])
-                    locationLatitude = utils.getGeoNamesLatitude(nlContent, nl[lNorm])
+                    locationLongitude = utils_geo.getGeoNamesLongitude(nlContent, nl[lNorm])
+                    locationLatitude = utils_geo.getGeoNamesLatitude(nlContent, nl[lNorm])
                 else:
                     # if not found in the BE/Fr/NL geonames dump check if a manual mapping was provided
                     if onlyLocation in mapping:
