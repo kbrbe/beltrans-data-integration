@@ -6,7 +6,7 @@ import csv
 import os
 import re
 import requests
-import utils
+import utils_sparql
 from optparse import OptionParser
 from dotenv import load_dotenv
 

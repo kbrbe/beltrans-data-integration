@@ -1,4 +1,5 @@
 import os
+import re
 import lxml.etree as ET
 import requests
 
@@ -126,6 +127,7 @@ def sparqlUpdate(url, filename, fileFormat, queryName, auth=None):
         except Exception as e:
           print(f'Unexpected answer, first 200 characters of answer:' + response[0:200])
           print(e)
+          print(response)
 
     except requests.HTTPError as he:
       statusCode = he.response.status_code

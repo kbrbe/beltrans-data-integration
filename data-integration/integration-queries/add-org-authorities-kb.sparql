@@ -27,10 +27,14 @@ INSERT {
       rdfs:label ?kbAuthorityLabel ;
       dcterms:identifier ?uuid ;
       schema:sameAs ?kbAuthority ;
+      schema:location ?countryEntityURI ;
       rdfs:comment "Created from KB data" ;
       bf:identifiedBy ?authorityURIISNI ;
       bf:identifiedBy ?viafEntityURI ;
       bf:identifiedBy ?wdEntityURI .
+
+    ?countryEntityURI a schema:PostalAddress ;
+                      schema:addressCountry ?country .
 
     ?authorityURIISNI a bf:Isni ;
       rdf:value ?kbAuthorityISNI .
@@ -42,9 +46,6 @@ INSERT {
     ?wdEntityURI a bf:Identifier ;
                  rdfs:label "Wikidata" ;
                  rdf:value ?wd .
-
-
-
   }
 }
 WHERE {
@@ -58,6 +59,14 @@ WHERE {
 
     BIND( STRUUID() as ?uuid)
     BIND( IRI( CONCAT( "http://kbr.be/id/data/", ?uuid ) ) as ?authorityURI)
+
+    # get optional location
+    OPTIONAL {
+      graph <http://kb-linked-authorities> {
+        ?kbAuthority schema:location/schema:addressCountry ?country .
+      }
+    }
+    BIND(iri(concat("http://kbr.be/id/data/location_", ?uuid)) as ?countryEntityURI)
 
     #
     # Get optional VIAF
