@@ -2,6 +2,7 @@ import os
 import re
 import lxml.etree as ET
 import requests
+import time
 
 # -----------------------------------------------------------------------------
 def addTestData(target, loadConfig):

@@ -268,7 +268,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       graph <http://beltrans-manifestations> { ?manifestation schema:author ?author . }
       OPTIONAL { graph <http://beltrans-contributors> { ?author rdfs:label ?authorLabel . } }
       OPTIONAL {
-        graph <http://beltrans-contributors> { ?author schema:nationality ?authorNationality . } 
+        graph <http://beltrans-contributors> { ?author schema:nationality|schema:location/schema:addressCountry ?authorNationality . } 
         graph <http://master-data> { ?authorNationality mads:authoritativeLabel ?authorNationalityLabel . }
         FILTER (lang(?authorNationalityLabel) = 'en')
       }
@@ -296,7 +296,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       graph <http://beltrans-manifestations> { ?manifestation schema:translator ?translator . }
       OPTIONAL { graph <http://beltrans-contributors> { ?translator rdfs:label ?translatorLabel . } }
       OPTIONAL {
-        graph <http://beltrans-contributors> { ?translator schema:nationality ?translatorNationality . } 
+        graph <http://beltrans-contributors> { ?translator schema:nationality|schema:location/schema:addressCountry ?translatorNationality . } 
         graph <http://master-data> { ?translatorNationality mads:translatoritativeLabel ?translatorNationalityLabel . }
         FILTER (lang(?translatorNationalityLabel) = 'en')
       }
@@ -324,7 +324,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation marcrel:ill ?illustrator . }
       OPTIONAL {
-        graph <http://beltrans-contributors> { ?illustrator schema:nationality ?illustratorNationality . } 
+        graph <http://beltrans-contributors> { ?illustrator schema:nationality|schema:location/schema:addressCountry ?illustratorNationality . } 
         graph <http://master-data> { ?illustratorNationality mads:authoritativeLabel ?illustratorNationalityLabel . }
         FILTER (lang(?illustratorNationalityLabel) = 'en')
       }
@@ -352,7 +352,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation marcrel:sce ?scenarist . }
       OPTIONAL {
-        graph <http://beltrans-contributors> { ?scenarist schema:nationality ?scenaristNationality . } 
+        graph <http://beltrans-contributors> { ?scenarist schema:nationality|schema:location/schema:addressCountry ?scenaristNationality . } 
         graph <http://master-data> { ?scenaristNationality mads:authoritativeLabel ?scenaristNationalityLabel . }
         FILTER (lang(?scenaristNationalityLabel) = 'en')
       }
@@ -380,7 +380,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation marcrel:pbd ?publishingDirector . }
       OPTIONAL {
-        graph <http://beltrans-contributors> { ?publishingDirector schema:nationality ?publishingDirectorNationality . } 
+        graph <http://beltrans-contributors> { ?publishingDirector schema:nationality|schema:location/schema:addressCountry ?publishingDirectorNationality . } 
         graph <http://master-data> { ?publishingDirectorNationality mads:authoritativeLabel ?publishingDirectorNationalityLabel . }
         FILTER (lang(?publishingDirectorNationalityLabel) = 'en')
       }
@@ -405,4 +405,4 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 }
 GROUP BY ?manifestationID
-HAVING(CONTAINS(str(?authorNationalities), "Belgium") || CONTAINS(str(?illustratorNationalities), "Belgium") || CONTAINS(str(?scenaristNationalities), "Belgium") || CONTAINS(str(?publishingDirectorNationalities), "Belgium")) 
+HAVING(CONTAINS(str(?authorNationalities), "Belgium") || CONTAINS(str(?illustratorNationalities), "Belgium") || CONTAINS(str(?scenaristNationalities), "Belgium") || CONTAINS(str(?publishingDirectorNationalities), "Belgium"))
