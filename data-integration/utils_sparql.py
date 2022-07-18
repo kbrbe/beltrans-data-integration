@@ -1,3 +1,6 @@
+import os
+import lxml.etree as ET
+import requests
 
 # -----------------------------------------------------------------------------
 def addTestData(target, loadConfig):
@@ -122,6 +125,7 @@ def sparqlUpdate(url, filename, fileFormat, queryName, auth=None):
           print(f'\t{queryName}: {modified} changes in {timeElapsed}ms')
         except Exception as e:
           print(f'Unexpected answer, first 200 characters of answer:' + response[0:200])
+          print(e)
 
     except requests.HTTPError as he:
       statusCode = he.response.status_code
