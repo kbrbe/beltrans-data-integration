@@ -1,6 +1,6 @@
 PREFIX kb: <http://data.bibliotheken.nl/def#>
 
-SELECT ?manifestation ?author ?authorID ?name ?isni ?viaf ?wikidata
+SELECT ?manifestation ?author ?authorID ?name ?country ?isni ?viaf ?wikidata
 WHERE {
 
   ?manifestation a schema:Book ;
@@ -17,6 +17,7 @@ WHERE {
   ?author a schema:Organization .
   OPTIONAL { ?author schema:mainEntityOfPage/kb:ppn ?authorID . }
   OPTIONAL { ?author schema:name ?name . }
+  OPTIONAL { ?author schema:location/schema:addressCountry ?country . }
 
   OPTIONAL { 
     ?author schema:sameAs ?isniURI .

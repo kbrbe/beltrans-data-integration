@@ -222,6 +222,13 @@ mappings:
           parameters:
             - [grel:valueParameter, $(name)]
             - [grel:valueParameter2, ""]
+      - p: schema:location
+        o: btid:location_p$(authorID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(country)]
+            - [grel:valueParameter2, ""]
       - p: bf:identifiedBy
         o: btid:identifier_isni_p$(authorID)~iri
         condition:
@@ -245,5 +252,24 @@ mappings:
             - [grel:valueParameter2, ""]
 
 
-
-
+  # ---------------------------------------------------------------------------
+  #
+  authorsOrgsLocation:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates optional location information for organizational authors from the translated manifestation."
+    sources:
+      - access: *sourceAUTOrgsFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceAUTOrgsNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:location_p$(authorID)
+    condition:
+      function: grel:string_startsWith
+      parameters:
+        - [grel:valueParameter, $(author)]
+        - [grel:string_sub, "http"] 
+    po:
+      - [schema:addressCountry, countries:$(country)~iri]
+ 
