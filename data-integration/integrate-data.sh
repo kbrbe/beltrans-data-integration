@@ -146,11 +146,11 @@ CREATE_QUERY_BNF_ISNI="sparql-queries/create-bnf-isni.sparql"
 CREATE_QUERY_BNF_VIAF="sparql-queries/create-bnf-viaf.sparql"
 CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 
-LINK_QUERY_CONT_AUTHORS="sparql-queries/link-beltrans-manifestations-authors.sparql"
-LINK_QUERY_CONT_TRANSLATORS="sparql-queries/link-beltrans-manifestations-translators.sparql"
-LINK_QUERY_CONT_ILLUSTRATORS="sparql-queries/link-beltrans-manifestations-illustrators.sparql"
-LINK_QUERY_CONT_SCENARISTS="sparql-queries/link-beltrans-manifestations-scenarists.sparql"
-LINK_QUERY_CONT_PUBLISHING_DIRECTORS="sparql-queries/link-beltrans-manifestations-publishing-directors.sparql"
+LINK_QUERY_CONT_AUTHORS="integration-queries/link-beltrans-manifestations-authors.sparql"
+LINK_QUERY_CONT_TRANSLATORS="integration-queries/link-beltrans-manifestations-translators.sparql"
+LINK_QUERY_CONT_ILLUSTRATORS="integration-queries/link-beltrans-manifestations-illustrators.sparql"
+LINK_QUERY_CONT_SCENARISTS="integration-queries/link-beltrans-manifestations-scenarists.sparql"
+LINK_QUERY_CONT_PUBLISHING_DIRECTORS="integration-queries/link-beltrans-manifestations-publishing-directors.sparql"
 
 DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
 DATA_PROFILE_QUERY_FILE_CONT_PERSONS="dataprofile-contributors-persons.sparql"
@@ -492,10 +492,6 @@ function integrate {
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3
 
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists and publishing directors) ..."
-
-  echo "upload_data.py -u" "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" \
-    "$LINK_QUERY_CONT_AUTHORS" "$LINK_QUERY_CONT_TRANSLATORS" "$LINK_QUERY_CONT_ILLUSTRATORS" \
-    "$LINK_QUERY_CONT_SCENARISTS" "$LINK_QUERY_CONT_PUBLISHING_DIRECTORS"
 
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" \
     "$LINK_QUERY_CONT_AUTHORS" "$LINK_QUERY_CONT_TRANSLATORS" "$LINK_QUERY_CONT_ILLUSTRATORS" \
