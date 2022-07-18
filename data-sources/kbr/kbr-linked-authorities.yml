@@ -311,7 +311,7 @@ mappings:
           function: grel:string_startsWith
           parameters:
             - [grel:valueParameter, $(country_code)]
-            - [grel:string_sub, "be"]
+            - [grel:string_sub, "BE"]
 
   # ---------------------------------------------------------------------------
   #
@@ -334,3 +334,10 @@ mappings:
       - [rdfs:label, "Address of authority $(IDN)"]
       - [schema:addressRegion, $(REGION)]
       - [schema:addressLocality, $(place)]
+      - p: schema:addressCountry
+        o: countries:be~iri
+        condition:
+          function: grel:string_startsWith
+          parameters:
+            - [grel:valueParameter, $(REGION)]
+            - [grel:string_sub, "BE"]
