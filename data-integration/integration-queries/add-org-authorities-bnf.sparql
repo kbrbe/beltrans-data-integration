@@ -28,10 +28,14 @@ INSERT {
       rdfs:label ?bnfAuthorityLabel ;
       dcterms:identifier ?uuid ;
       schema:sameAs ?bnfAuthority ;
+      schema:location ?countryEntityURI ;
       rdfs:comment "Created from BnF data" ;
       bf:identifiedBy ?authorityURIISNI ;
       bf:identifiedBy ?viafEntityURI ;
       bf:identifiedBy ?wdEntityURI .
+
+    ?countryEntityURI a schema:PostalAddress ;
+                      schema:addressCountry ?country .
 
     ?authorityURIISNI a bf:Isni ;
       rdf:value ?bnfAuthorityISNI .
@@ -57,6 +61,14 @@ WHERE {
 
     BIND( STRUUID() as ?uuid)
     BIND( IRI( CONCAT( "http://kbr.be/id/data/", ?uuid ) ) as ?authorityURI)
+
+    # get optional location
+    OPTIONAL {
+      graph <http://bnf-contributors> {
+        ?bnfAuthority rdagroup2elements:placeAssociatedWithTheCorporateBody ?country .
+      }
+    }
+    BIND(iri(concat("http://kbr.be/id/data/location_", ?uuid)) as ?countryEntityURI)
 
     #
     # Get optional VIAF
