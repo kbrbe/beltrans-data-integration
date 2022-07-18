@@ -1,4 +1,7 @@
 import pandas as pd
+import numpy as np
+from datetime import datetime
+import os
 
 # -----------------------------------------------------------------------------
 def countRowsWithValueForColumn(df, column):
@@ -11,8 +14,9 @@ def countRowsWithValueForColumn(df, column):
   return (myDf[column].values != '').sum()
 
 # -----------------------------------------------------------------------------
-def countRowsWithValueForColumns(df, columns):
+def countRowsWithValueForColumns(df, columns, whereColumnsEmpty=None):
   """This function returns the number of rows for the provided columns in the provided pandas dataframe which are not empty (or are not NaN).
+  If an optional list of columns is given, only the number of rows is returned with values for the given values, but where the whereColumnsEmpty columns have to be empty
   >>> data1 = pd.DataFrame([{'id': '1', 'value': ''},{'id': '2', 'value': '2'},{'id': 3},{'id': '4', 'value': '4'},{'id': '5', 'value': 5}])
   >>> countRowsWithValueForColumn(data1, ['value'])
   3
@@ -28,13 +32,28 @@ def countRowsWithValueForColumns(df, columns):
   2
   >>> countRowsWithValueForColumns(data1, ['KBRID', 'BnFID', 'KBID'])
   1
+  >>> data3 = pd.DataFrame([
+  ... {'id': '1', 'KBRID': '1', 'BnFID': '1', 'nationality': ''},
+  ... {'id': '2', 'KBRID': '2', 'BnFID': '2', 'KBID': '2', 'nationality': 'Belgium'},
+  ... {'id': 3},{'id': '4', 'KBRID': '', 'KBID': '4', 'nationality': 'Dutch'},
+  ... {'id': '5', 'value': 5},
+  ... {'id': '6', 'KBRID': '6', 'BnFID': '1', 'nationality': ''}])
+  >>> countRowsWithValueForColumns(data3, ['KBRID'], ['nationality'])
+  2
   """
-  myDf = df.fillna('')
-  booleanValues = myDf[columns].values != ''
-  rowBoolean = []
-  for row in booleanValues:
-    rowBoolean.append(all(row))
-  return sum(rowBoolean)
+
+  # set empty values to nan such that the isnull()/notnull() approach below will work properly
+  myDf = df.replace('', np.nan)
+
+  # filter step: rows with the optionally given column should have an empty value for that column
+  if whereColumnsEmpty is not None:
+    if pd.Series(whereColumnsEmpty).isin(myDf.columns).all():
+      preSelection = myDf[whereColumnsEmpty].isnull().all(1)
+      myDf = myDf[preSelection]
+
+  # get the number of rows where the given columns have a value (based on possibly already pre-filtered data)
+  return sum(myDf[columns].notnull().all(1))
+
 
 
 
@@ -93,6 +112,12 @@ def createContributorCorpusMeasurements(corpus, comment):
     'withISNIIdentifier': countRowsWithValueForColumn(corpus, 'isniIDs'),
     'withVIAFIdentifier': countRowsWithValueForColumn(corpus, 'viafIDs'),
     'withWikidataIdentifier': countRowsWithValueForColumn(corpus, 'wikidataIDs'),
+    'withISNIButWithoutNationality': countRowsWithValueForColumns(corpus, ['isniIDs'],
+                                                                  whereColumnsEmpty=['nationality']),
+    'withWikidataButWithoutNationality': countRowsWithValueForColumns(corpus, ['wikidataIDs'],
+                                                                      whereColumnsEmpty=['nationality']),
+    'withISNIAndWikidataButWithoutNationality': countRowsWithValueForColumns(corpus, ['isniIDs', 'wikidataIDs'],
+                                                                             whereColumnsEmpty=['nationality']),
     'withBirthDate': countRowsWithValueForColumn(corpus, 'birthDate'),
     'withDeathDate': countRowsWithValueForColumn(corpus, 'deathDate'),
     'withNationality': countRowsWithValueForColumn(corpus, 'nationalities'),
