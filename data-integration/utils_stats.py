@@ -17,29 +17,42 @@ def countRowsWithValueForColumn(df, column):
 def countRowsWithValueForColumns(df, columns, whereColumnsEmpty=None):
   """This function returns the number of rows for the provided columns in the provided pandas dataframe which are not empty (or are not NaN).
   If an optional list of columns is given, only the number of rows is returned with values for the given values, but where the whereColumnsEmpty columns have to be empty
-  >>> data1 = pd.DataFrame([{'id': '1', 'value': ''},{'id': '2', 'value': '2'},{'id': 3},{'id': '4', 'value': '4'},{'id': '5', 'value': 5}])
+  >>> data1 = pd.DataFrame([
+  ... {'id': '1', 'value': ''},
+  ... {'id': '2', 'value': '2'},
+  ... {'id': 3},
+  ... {'id': '4', 'value': '4'},
+  ... {'id': '5', 'value': 5}])
   >>> countRowsWithValueForColumn(data1, ['value'])
   3
 
-  >>> data1 = pd.DataFrame([{'id': '1', 'KBRID': '1', 'BnFID': '1'},{'id': '2', 'KBRID': '2', 'BnFID': '2', 'KBID': '2'},{'id': 3},{'id': '4', 'KBRID': '', 'KBID': '4'},{'id': '5', 'value': 5}])
-  >>> countRowsWithValueForColumns(data1, ['KBRID'])
+  >>> data2 = pd.DataFrame([
+  ... {'id': '1', 'KBRID': '1', 'BnFID': '1'},
+  ... {'id': '2', 'KBRID': '2', 'BnFID': '2', 'KBID': '2'},
+  ... {'id': 3},
+  ... {'id': '4', 'KBRID': '', 'KBID': '4'},
+  ... {'id': '5', 'value': 5}])
+  >>> countRowsWithValueForColumns(data2, ['KBRID'])
   2
-  >>> countRowsWithValueForColumns(data1, ['BnFID'])
+  >>> countRowsWithValueForColumns(data2, ['BnFID'])
   2
-  >>> countRowsWithValueForColumns(data1, ['KBID'])
+  >>> countRowsWithValueForColumns(data2, ['KBID'])
   2
-  >>> countRowsWithValueForColumns(data1, ['KBRID', 'BnFID'])
+  >>> countRowsWithValueForColumns(data2, ['KBRID', 'BnFID'])
   2
-  >>> countRowsWithValueForColumns(data1, ['KBRID', 'BnFID', 'KBID'])
+  >>> countRowsWithValueForColumns(data2, ['KBRID', 'BnFID', 'KBID'])
   1
   >>> data3 = pd.DataFrame([
   ... {'id': '1', 'KBRID': '1', 'BnFID': '1', 'nationality': ''},
   ... {'id': '2', 'KBRID': '2', 'BnFID': '2', 'KBID': '2', 'nationality': 'Belgium'},
-  ... {'id': 3},{'id': '4', 'KBRID': '', 'KBID': '4', 'nationality': 'Dutch'},
+  ... {'id': 3},
+  ... {'id': '4', 'KBRID': '', 'KBID': '4', 'nationality': 'Dutch'},
   ... {'id': '5', 'value': 5},
-  ... {'id': '6', 'KBRID': '6', 'BnFID': '1', 'nationality': ''}])
+  ... {'id': '6', 'KBRID': '6', 'BnFID': '6', 'nationality': ''},
+  ... {'id': '7', 'KBRID': '7', 'BnFID': '7', 'nationality': ''},
+  ... {'id': '8', 'KBRID': '8', 'BnFID': '8'}])
   >>> countRowsWithValueForColumns(data3, ['KBRID'], ['nationality'])
-  2
+  4
   """
 
   # set empty values to nan such that the isnull()/notnull() approach below will work properly
@@ -95,11 +108,12 @@ def createCorpusMeasurements(corpus, identifier, comment):
   return measurement
 
 # -----------------------------------------------------------------------------
-def createContributorCorpusMeasurements(corpus, comment):
+def createContributorCorpusMeasurements(corpus, corpusDate, comment):
   timestamp = datetime.now()
 
   measurement = {
-    'date': timestamp,
+    'date': corpusDate,
+    'measurementTime': timestamp,
     'numberContributors': len(corpus.index),
     'withKBRIdentifier': countRowsWithValueForColumn(corpus, 'kbrIDs'),
     'withBnFIdentifier': countRowsWithValueForColumn(corpus, 'bnfIDs'),
@@ -109,15 +123,30 @@ def createContributorCorpusMeasurements(corpus, comment):
     'withKBRAndBnFIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'bnfIDs']),
     'withKBRAndKBIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'ntaIDs']),
     'withBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'ntaIDs']),
+    'withKBRAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'isniIDs']),
+    'withKBRAndVIAFIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'viafIDs']),
+    'withKBRAndWikidataIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'wikidataIDs']),
+    'withBnFAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'isniIDs']),
+    'withBnFAndVIAFIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'viafIDs']),
+    'withBnFAndWikidataIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'wikidataIDs']),
+    'withKBAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'isniIDs']),
+    'withKBAndVIAFIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'viafIDs']),
+    'withKBAndWikidataIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'wikidataIDs']),
     'withISNIIdentifier': countRowsWithValueForColumn(corpus, 'isniIDs'),
     'withVIAFIdentifier': countRowsWithValueForColumn(corpus, 'viafIDs'),
     'withWikidataIdentifier': countRowsWithValueForColumn(corpus, 'wikidataIDs'),
+    'withKBRButWithoutNationality': countRowsWithValueForColumns(corpus, ['kbrIDs'],
+                                                                  whereColumnsEmpty=['nationalities']),
+    'withBnFButWithoutNationality': countRowsWithValueForColumns(corpus, ['bnfIDs'],
+                                                                  whereColumnsEmpty=['nationalities']),
+    'withKBButWithoutNationality': countRowsWithValueForColumns(corpus, ['ntaIDs'],
+                                                                  whereColumnsEmpty=['nationalities']),
     'withISNIButWithoutNationality': countRowsWithValueForColumns(corpus, ['isniIDs'],
-                                                                  whereColumnsEmpty=['nationality']),
+                                                                  whereColumnsEmpty=['nationalities']),
     'withWikidataButWithoutNationality': countRowsWithValueForColumns(corpus, ['wikidataIDs'],
-                                                                      whereColumnsEmpty=['nationality']),
+                                                                      whereColumnsEmpty=['nationalities']),
     'withISNIAndWikidataButWithoutNationality': countRowsWithValueForColumns(corpus, ['isniIDs', 'wikidataIDs'],
-                                                                             whereColumnsEmpty=['nationality']),
+                                                                             whereColumnsEmpty=['nationalities']),
     'withBirthDate': countRowsWithValueForColumn(corpus, 'birthDate'),
     'withDeathDate': countRowsWithValueForColumn(corpus, 'deathDate'),
     'withNationality': countRowsWithValueForColumn(corpus, 'nationalities'),
