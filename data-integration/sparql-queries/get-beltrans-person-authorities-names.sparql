@@ -1,0 +1,80 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+
+SELECT
+  ?person 
+  (group_concat(distinct ?nationality;SEPARATOR=';') as ?nationalities)
+  (group_concat(distinct ?familyName;SEPARATOR=';') as ?familyNames)
+  (group_concat(distinct ?givenName;SEPARATOR=';') as ?givenNames)
+  (group_concat(distinct ?kbrID;SEPARATOR=';') as ?kbrIDs)
+  (group_concat(distinct ?bnfID;SEPARATOR=';') as ?bnfIDs)
+  (group_concat(distinct ?ntaID;SEPARATOR=';') as ?ntaIDs)
+  (group_concat(distinct ?isni;SEPARATOR=';') as ?isnis)
+  (group_concat(distinct ?viaf;SEPARATOR=';') as ?viafs)
+  (group_concat(distinct ?wd;SEPARATOR=';') as ?wikidataIDs)
+WHERE {
+
+  graph <http://beltrans-contributors> { ?person a schema:Person . }
+
+  OPTIONAL { graph <http://beltrans-contributors> {?person schema:nationality ?nationality . } }
+  OPTIONAL { graph <http://beltrans-contributors> {?person schema:familyName ?familyName . } }
+  OPTIONAL { graph <http://beltrans-contributors> {?person schema:givenName ?givenName . } }
+
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?person schema:sameAs ?kbrURI . }
+    graph <http://kbr-linked-authorities> {
+      ?kbrURI a schema:Person ;
+              dcterms:identifier ?kbrID .
+    }
+  }
+
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?person schema:sameAs ?bnfURI . }
+    graph <http://bnf-contributors> {
+      ?bnfURI a foaf:Person ;
+              dcterms:identifier ?bnfID .
+    }
+  }
+
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?person schema:sameAs ?ntaURI . }
+    graph <http://kb-linked-authorities> {
+      ?ntaURI a schema:Person ;
+              dcterms:identifier ?ntaID .
+    }
+  }
+
+
+
+  OPTIONAL {
+    graph <http://beltrans-contributors> {
+      ?person bf:identifiedBy ?isniEntity .
+      ?isniEntity a bf:Isni ;
+                  rdf:value ?isni .
+      }
+  }
+
+  OPTIONAL {
+    graph <http://beltrans-contributors> {
+      ?person bf:identifiedBy ?viafEntity .
+      ?viafEntity a bf:Identifier ;
+                  rdfs:label "VIAF" ;
+                  rdf:value ?viaf .
+      }
+  }
+
+  OPTIONAL {
+    graph <http://beltrans-contributors> {
+      ?person bf:identifiedBy ?wdEntity .
+      ?wdEntity a bf:Identifier ;
+                rdfs:label "Wikidata" ;
+                rdf:value ?wd .
+      }
+  }
+
+
+}
+group by ?person

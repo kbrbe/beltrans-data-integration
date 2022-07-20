@@ -1,10 +1,26 @@
+
+# no data files (exceptions for csv configs, see at the end of this file)
 *.csv
+*.xlsx
+
+# no log files
 *.log
+
+# no Python environments
 py-*
+
+# no temporary RML mappings generated from source controlled YARRRML mappings
 *-rml.ttl
+yarrrml-parser
+
+# no corpus versions
 2021-*
 2022-*
-yarrrml-parser
+
+# not the geonames dump
+geonames/
+
+# keep specific config files
 !test/resources/*csv
 !dataprofile-dtypes.csv
 !manifestations-create-queries.csv
@@ -13,3 +29,4 @@ yarrrml-parser
 !contributors-update-queries.csv
 !missing-geonames-mapping.csv
 !*stats.csv
+

@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
+## [20220624] - 2022-06-24
+
+Todo: finish listing all changes based on commit log and issues
+
+### Added
+
+### Changed
+
+### Fixed
+
+- For BnF and KB no publisher name information existed because of a mistake in a SPARQL query (BnF) and a missing RML mapping for KB. This was fixed with the commits https://github.com/kbrbe/beltrans-data-integration/commit/603d51786c897e9d01355267014c15a652510815 https://github.com/kbrbe/beltrans-data-integration/commit/cd0c6e61f72aa95b809a7d7e02d6436f284e75ad and was added to the dataprofile query 
+
 ## [20220425] - 2022-04-25
 
 This version includes also data from KB as well as fixes and improvements based on received corpus feedback.
@@ -121,3 +133,4 @@ This version corresponds to the milestone https://github.com/SvenLieber/beltrans
 [20211223]: https://github.com/SvenLieber/beltrans-data/compare/2021-11-29...2021-12-23
 [20220217]: https://github.com/SvenLieber/beltrans-data/compare/2021-12-23...2022-02-17
 [20220425]: https://github.com/SvenLieber/beltrans-data/compare/2022-02-17...2022-04-25
+[20220624]: https://github.com/SvenLieber/beltrans-data/compare/2022-04-25...2022-06-24

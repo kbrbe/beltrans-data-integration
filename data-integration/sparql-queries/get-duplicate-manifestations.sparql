@@ -1,0 +1,240 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+
+
+  SELECT DISTINCT 
+    (?manifestationID AS ?targetIdentifier)
+    (group_concat(distinct ?sourceLangLabel;SEPARATOR=';') AS ?sourceLanguage)
+    (group_concat(distinct ?targetLangLabel;SEPARATOR=';') AS ?targetLanguage)
+    (group_concat(distinct ?isbn10;SEPARATOR=';') AS ?targetISBN10) 
+    (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetISBN13) 
+
+    (group_concat(distinct ?kbrTitle;SEPARATOR=';') AS ?targetKBRTitle)
+    (group_concat(distinct ?bnfTitle;SEPARATOR=';') AS ?targetBnFTitle)
+    (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetKBTitle)
+
+    (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
+    (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetCollectionIdentifier)
+    #(group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
+
+    (group_concat(distinct ?authorNameID;SEPARATOR=';') AS ?authorIdentifiers)
+    (group_concat(distinct ?translatorNameID;SEPARATOR=';') AS ?translatorIdentifiers)
+    (group_concat(distinct ?illustratorNameID;SEPARATOR=';') AS ?illustratorIdentifiers)
+    (group_concat(distinct ?scenaristNameID;SEPARATOR=';') AS ?scenaristIdentifiers)
+    (group_concat(distinct ?publishingDirectorNameID;SEPARATOR=';') AS ?publishingDirectorIdentifiers)
+
+    (group_concat(distinct ?kbrManifestationID;SEPARATOR=';') AS ?targetKBRIdentifier)
+    (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetBnFIdentifier)
+    (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
+
+    (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceKBRIdentifier)
+    (group_concat(distinct ?kbrSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleKBR)
+    (group_concat(distinct ?kbSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleKB)
+    (group_concat(distinct ?kbrSourceManifestationISBN10;SEPARATOR=';') AS ?sourceISBN10)
+    (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceISBN13)
+
+    (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetKBREdition)
+    (group_concat(distinct ?bnfTargetManifestationEdition;SEPARATOR=';') AS ?targetBnFEdition)
+    (group_concat(distinct ?kbTargetManifestationEdition;SEPARATOR=';') AS ?targetKBEdition)
+
+    (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetBindingType)
+
+    (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierKBR)
+    (group_concat(distinct ?bnfPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierBnF)
+    (group_concat(distinct ?kbPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierKB)
+
+    (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
+    (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
+    (group_concat(distinct ?kbDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationKB)
+
+    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKBR)
+    (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationBnF)
+    (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKB)
+    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublicationKBR)
+
+    (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetKBRResponsibilityStatement)
+    (group_concat(distinct ?bnfResponsibilityStatement;SEPARATOR=';') AS ?targetBnFResponsibilityStatement)
+    (group_concat(distinct ?kbResponsibilityStatement;SEPARATOR=';') AS ?targetKBResponsibilityStatement)
+
+WHERE {
+  
+  # select all properties from all duplicates
+  #
+  graph <http://beltrans-manifestations> { ?duplicateManifestation a schema:CreativeWork . }  
+
+  OPTIONAL { graph <http://beltrans-manifestations> { ?duplicateManifestation dcterms:identifier ?manifestationID . } }
+  OPTIONAL { graph <http://beltrans-manifestations> { ?duplicateManifestation schema:name ?manifestationTitle . } }
+  OPTIONAL { graph <http://beltrans-manifestations> { ?duplicateManifestation bibo:isbn10 ?isbn10 . } }
+  OPTIONAL { graph <http://beltrans-manifestations> { ?duplicateManifestation bibo:isbn13 ?isbn13 . } }
+  OPTIONAL { graph <http://beltrans-manifestations> { ?duplicateManifestation schema:inLanguage ?targetLang . } }
+  OPTIONAL { graph <http://beltrans-manifestations> { ?duplicateManifestation btm:sourceLanguage ?sourceLang . } }
+
+  # #########################################################################
+  #
+  # DATA OF THIS MANIFESTATION WE HAVE FROM KBR
+  #
+  OPTIONAL {
+    graph <http://beltrans-manifestations> { ?duplicateManifestation schema:sameAs ?kbrManifestation . }
+    graph <http://kbr-syracuse> { ?kbrManifestation a schema:CreativeWork . }
+
+    # optional attributes of the translation itself
+    OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation dcterms:identifier ?kbrManifestationID . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:name ?kbrTitle . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:datePublished ?kbrDatePublished . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:locationCreated ?kbrLocationCreated . }}
+    OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation rdfs:comment ?kbrResponsibilityStatement . }}
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?kbrManifestation schema:publisher ?kbrPublisher . }
+      OPTIONAL {
+        graph <http://kbr-linked-authorities> {
+          ?kbrPublisher skos:prefLabel ?kbrPublisherName ;
+                        dcterms:identifier ?kbrPublisherID .
+        }
+      }
+      BIND(CONCAT(?kbrPublisherName, ' (', ?kbrPublisherID, ')') AS ?kbrPublisherNameID)
+    }
+ 
+
+    # COLLECTION INFORMATION
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?kbrManifestation schema:isPartOf ?kbrTargetManifestationCollectionURI . }
+      OPTIONAL { graph <http://kbr-syracuse> { ?kbrTargetManifestationCollectionURI dcterms:identifier ?kbrTargetManifestationCollectionID . } }
+      OPTIONAL { graph <http://kbr-syracuse> { ?kbrTargetManifestationCollectionURI schema:name ?kbrTargetManifestationCollectionName . } }
+      BIND(CONCAT(?kbrTargetManifestationCollectionName, ' (', ?kbrTargetManifestationCollectionID, ')') AS ?kbrTargetManifestationCollectionNameID)
+    }
+
+    # BELGIAN BIBLIOGRAPHY
+    #
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?kbrManifestation schema:about ?kbrTargetManifestationBB . }
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetManifestationBB skos:prefLabel ?kbrTargetManifestationBBLabel . }
+        FILTER(lang(?kbrTargetManifestationBBLabel) = 'en')
+      }
+    }
+
+    # BINDING TYPE
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?kbrManifestation schema:bookFormat ?kbrTargetManifestationBindingType . }
+      OPTIONAL {
+        graph <http://master-data> { ?kbrTargetManifestationBindingType rdfs:label ?kbrTargetManifestationBindingTypeLabel .}
+        FILTER(lang(?kbrTargetManifestationBindingTypeLabel) = 'en')
+      }
+    }
+
+    # COUNTRY OF ORIGIN
+    #
+    OPTIONAL { 
+      graph <http://kbr-syracuse> { ?kbrManifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }
+      OPTIONAL {
+        graph <http://master-data> { ?kbrCountryOfOrigin mads:authoritativeLabel ?kbrCountryOfOriginLabel . } 
+        FILTER (lang(?kbrCountryOfOriginLabel) = 'en')
+      }
+    }
+
+    #
+    # SOURCE INFORMATION
+    #
+    OPTIONAL {
+      graph <http://kbr-syracuse> { ?kbrManifestation schema:translationOfWork ?kbrManifestationSource . }
+
+      # there might be a title (from a 246 text field or linked 765 work)
+      OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestationSource schema:name ?kbrSourceManifestationTitle . } }
+
+      #
+      # In case it is not a dummy source entry just with the language, there is an identifier
+      #
+      OPTIONAL {
+        graph <http://kbr-syracuse> { ?kbrManifestationSource dcterms:identifier ?kbrSourceManifestationID . }
+
+        # Optionally there is also an ISBN for the source
+        OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestationSource bibo:isbn10 ?kbrSourceManifestationISBN10 . } }
+        OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestationSource bibo:isbn13 ?kbrSourceManifestationISBN13 . } }
+      }
+    }
+
+  } # end optional KBR
+
+  # #########################################################################
+  #
+  # DATA OF THIS MANIFESTATION WE HAVE FROM BnF
+  #
+  OPTIONAL {
+    graph <http://beltrans-manifestations> { ?duplicateManifestation schema:sameAs ?bnfManifestation . }
+    graph <http://bnf-publications> { ?bnfManifestation a schema:CreativeWork . }
+
+    # optional attributes of the translation itself
+    OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation dcterms:identifier ?bnfManifestationID . }}
+    OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:name ?bnfTitle . }}
+    OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:datePublished ?bnfDatePublished . }}
+    OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:bookEdition ?bnfTargetManifestationEdition . }}
+    OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:locationCreated ?bnfLocationCreated . }}
+    OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation rdfs:comment ?bnfResponsibilityStatement . }}
+
+  }
+
+  # #########################################################################
+  #
+  # DATA OF THIS MANIFESTATION WE HAVE FROM KB
+  #
+  OPTIONAL {
+    graph <http://beltrans-manifestations> { ?duplicateManifestation schema:sameAs ?kbManifestation . }
+    graph <http://kb-publications> { ?kbManifestation a schema:CreativeWork . }
+
+    # optional attributes of the translation itself
+    OPTIONAL { graph <http://kb-publications> { ?kbManifestation dcterms:identifier ?kbManifestationID . }}
+    OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:name ?kbTitle . }}
+    OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:datePublished ?kbDatePublished . }}
+    OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:bookEdition ?kbTargetManifestationEdition . }}
+    OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:locationCreated ?kbLocationCreated . }}
+    OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdfs:comment ?kbResponsibilityStatement . }}
+    OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:publisher ?kbPublisherName . }}
+
+    #
+    # SOURCE INFORMATION
+    #
+    OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:translationOfWork/schema:name ?kbSourceManifestationTitle . } }
+
+  } # end optional KB
+      
+
+
+  # duplicates are identified by not being the selected survivor
+  # for a group of manifestations with the same ISBN10/ISBN13 identifier
+  #
+  FILTER(?duplicateManifestation != ?survivor)
+
+  # sub select which is executed first:
+  # select one representative of a group of manifestations with the same ISBN10/ISBN13 identifier
+  # this will be the survivor which will NOT be deleted (see filter above)
+  {
+    SELECT ?isbn (MIN(?manifestation) as ?survivor) (COUNT(?manifestation) AS ?number)
+    WHERE {
+      graph <http://beltrans-manifestations> { 
+      ?manifestation a schema:CreativeWork ;
+                     bibo:isbn10|bibo:isbn13 ?isbn .
+      }
+    }
+    GROUP BY ?isbn
+    HAVING (?number > 1)
+  }
+}
+GROUP BY ?manifestationID
