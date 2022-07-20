@@ -48,7 +48,7 @@ def main():
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-o', '--output-name-pattern', action='store', help='Files with this name pattern are created in which the downloaded data is stored')
   parser.add_option('-r', '--number-records', action='store', type='int', help='The number of records requested per API call, max is 1000')
-  parser.add_option('-m', '--max-records', action='store', type='int', help='The maximum number of records which should be requested in total, e.g. 60000 in steps of "--number-records", it cannot be bigger than number-records')
+  parser.add_option('-m', '--max-records', action='store', type='int', help='The maximum number of records which should be requested in total, e.g. 60000 in steps of "--number-records", it cannot be smaller than number-records')
   (options, args) = parser.parse_args()
 
   #
@@ -62,7 +62,10 @@ def main():
   maxRecords = options.max_records
   secondsBetweenAPIRequests = 5
   baseURL = 'https://isni-m.oclc.org/sru'
-  query = 'pica.noi="BE"'
+  # query = 'pica.noi="BE"'
+  # query = 'pica.cn="KBR"'
+  # it should not be already url encoded query = 'pica.cn%3D+%22KBR+%22'
+  query='pica.cn=KBR and pica.st=a'
   dateString = date.today().strftime('%Y-%m-%d')
   outputFilePrefix = dateString + "-sru-result"
 
@@ -143,7 +146,8 @@ def main():
     #
     # create a new file for the current paginated output
     # 
-    outputFilename = f'{outputFilePrefix}-{options.output_name_pattern}-{i}-{numberRecords}.xml'
+    paginatedNumber = i+numberRecords
+    outputFilename = f'{outputFilePrefix}-{options.output_name_pattern}-{i}-{paginatedNumber}_{maxRecords}.xml'
     with open(outputFilename, 'wb') as outFile:
       outFile.write(b'<collection>')
       numRecordsWritten = writeResponseRecords(r.content, outFile)
