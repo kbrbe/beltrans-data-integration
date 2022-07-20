@@ -21,10 +21,14 @@ else
   url=$4/namespace/$1/sparql?context-uri=$5
 fi
 
+
 curl -X POST \
   --user $ENV_SPARQL_ENDPOINT_USER:$ENV_SPARQL_ENDPOINT_PASSWORD \
   --header "Content-Type: $3" \
+  --header "Connection: close" \
+  --header "Expect: 100-continue" \
   --upload-file $2 \
+  --verbose \
 $url
 
 # if in quad mode a named graph could be specified by attaching the following to the namespace/<ns>/sparql?context-uri=https://my-namespace
