@@ -118,6 +118,7 @@ TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
 TRIPLE_STORE_GRAPH_KB_TRL="http://kb-publications"
 TRIPLE_STORE_GRAPH_KB_LA="http://kb-linked-authorities"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
+TRIPLE_STORE_GRAPH_WIKIDATA="http://wikidata"
 
 # if it is a blazegraph triple store
 TRIPLE_STORE_NAMESPACE="integration"
@@ -311,7 +312,7 @@ SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
 
 # DATA SOURCE - WIKIDATA
 #
-SUFFIX_WIKIDATA_ENRICHED="wikidata-links.csv"
+SUFFIX_WIKIDATA_ENRICHED="manually-enriched-wikidata.csv"
 
 #
 # LINKED DATA - KBR TRANSLATIONS
@@ -357,6 +358,11 @@ SUFFIX_BNF_CONT_WIKIDATA_LD="bnf-contributor-wikidata.xml"
 # LINKED DATA - MASTER DATA
 #
 SUFFIX_MASTER_LD="master-data.ttl"
+
+#
+# LINKED DATA - WIKIDATA
+#
+SUFFIX_WIKIDATA_LD="from-manually-enriched-wikidata.ttl"
 
 # -----------------------------------------------------------------------------
 function extract {
@@ -453,12 +459,16 @@ function load {
   elif [ "$dataSource" = "kb" ];
   then
     loadKB $integrationFolderName
+  elif [ "$dataSource" = "wikidata" ];
+  then
+    loadWikidata $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
     loadBnF $integrationFolderName
     loadKBR $integrationFolderName
     loadKB $integrationFolderName
+    loadWikidata $integrationFolderName
   fi
 
 }
@@ -880,12 +890,12 @@ function transformWikidata {
   local integrationName=$1
 
   # create the folder to place the transformed data
-  mkdir -p $integrationName/wikiata/rdf 
+  mkdir -p $integrationName/wikidata/rdf 
 
-  wikidataTurtle="$integrationName/wikidata/rdf/$SUFFIX_MASTER_LD"
+  wikidataTurtle="$integrationName/wikidata/rdf/$SUFFIX_WIKIDATA_LD"
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_WIKIDATA_ENRICHED="$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
+  export RML_SOURCE_WIKIDATA_ENRICHED="$integrationName/wikidata/$SUFFIX_WIKIDATA_ENRICHED"
 
   # 2) execute the mapping
   echo "Map enriched Wikidata dump ..."
@@ -1483,6 +1493,24 @@ function loadBnF {
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" \
     "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA"
 
+}
+
+# -----------------------------------------------------------------------------
+function loadWikidata {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # first delete content of the named graph in case it already exists
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_WIKIDATA>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_WIKIDATA"
+
+  local wikidataTurtle="$integrationName/wikidata/rdf/$SUFFIX_WIKIDATA_LD"
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  echo "Load wikidata data"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_WIKIDATA $wikidataTurtle
 }
 
 # -----------------------------------------------------------------------------

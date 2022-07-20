@@ -33,20 +33,27 @@ INSERT {
       rdfs:comment "Created from KB data" ;
       bf:identifiedBy ?authorityURIISNI ;
       bf:identifiedBy ?viafEntityURI ;
-      bf:identifiedBy ?wdEntityURI .
+      bf:identifiedBy ?wdEntityURI ;
+      bf:identifiedBy ?ownIDEntityURI .
 
     ?authorityURIISNI a bf:Isni ;
-      rdf:value ?kbAuthorityISNI .
+                      rdfs:comment "Created from KB data" ;
+                      rdf:value ?kbAuthorityISNI .
 
     ?viafEntityURI a bf:Identifier ;
+                   rdfs:comment "Created from KB data" ;
                    rdfs:label "VIAF" ;
                    rdf:value ?viaf .
 
     ?wdEntityURI a bf:Identifier ;
+                 rdfs:comment "Created from KB data" ;
                  rdfs:label "Wikidata" ;
                  rdf:value ?wd .
 
-
+    ?ownIDEntityURI a bf:Identifier ;
+                    rdfs:comment "Created from KB data" ;
+                    rdfs:label "NTA" ;
+                    rdf:value ?ownID .
 
   }
 }
@@ -64,6 +71,12 @@ WHERE {
 
     BIND( STRUUID() as ?uuid)
     BIND( IRI( CONCAT( "http://kbr.be/id/data/", ?uuid ) ) as ?authorityURI)
+
+    # Get optional own ID
+    OPTIONAL {
+      graph <http://kb-linked-authorities> { ?kbAuthority dcterms:identifier ?ownID . } 
+      BIND(iri(concat("http://kbr.be/id/data/identifier_nta_", ?ownID)) as ?ownIDEntityURI)
+    }
 
     #
     # Get optional VIAF

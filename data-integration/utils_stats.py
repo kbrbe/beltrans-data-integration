@@ -81,11 +81,12 @@ def countRowsWithMultipleValuesForColumn(df, column, delimiter=';'):
   return (myDf[column].str.contains(delimiter)).sum()
 
 # -----------------------------------------------------------------------------
-def createCorpusMeasurements(corpus, identifier, comment):
+def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
   timestamp = datetime.now()
 
   measurement = {
-    'date': timestamp,
+    'date': corpusDate,
+    'measurementTime': timestamp,
     'corpus': identifier,
     'numberTranslations': len(corpus.index),
     'withTargetISBN10': countRowsWithValueForColumn(corpus, 'targetISBN10'),
@@ -188,7 +189,7 @@ def mergeMeasurementsToDataFrame(folder, files):
   filePaths = [os.path.join(folder, f) for f in files]
   df = pd.concat(map(pd.read_csv, filePaths), ignore_index=True)
   df['date'] = pd.to_datetime(df['date'])
-  df['date'] = df['date'].dt.date
+  #df['date'] = df['date'].dt.date
   return df.set_index('date')
 
 

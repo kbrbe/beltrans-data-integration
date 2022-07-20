@@ -1,0 +1,166 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+
+#
+# Add link to Wikidata via KB (NTA) and also other identifiers as well as nationality information
+#
+INSERT {
+  graph <http://beltrans-contributors> {
+
+    ?authorityURI
+      schema:nationality ?wikidataAuthorityNationality ;
+      bf:identifiedBy ?isniEntityURI ;
+      bf:identifiedBy ?kbrEntityURI ;
+      bf:identifiedBy ?bnfEntityURI ;
+      bf:identifiedBy ?viafEntityURI ;
+      bf:identifiedBy ?ownIDEntityURI ;
+      schema:sameAs ?wikidataAuthority .
+
+    ?isniEntityURI a bf:Isni ;
+                   rdfs:comment "Added from Wikidata via NTA" ;
+                   rdf:value ?isni .
+
+    ?kbrEntityURI a bf:Identifier ;
+                  rdfs:comment "Added from Wikidata via NTA" ;
+                  rdfs:label "KBR" ;
+                  rdf:value ?kbr .
+ 
+    ?bnfEntityURI a bf:Identifier ;
+                  rdfs:comment "Added from Wikidata via NTA" ;
+                  rdfs:label "BnF" ;
+                  rdf:value ?bnf .
+
+    ?viafEntityURI a bf:Identifier ;
+                  rdfs:comment "Added from Wikidata via NTA" ;
+                  rdfs:label "VIAF" ;
+                  rdf:value ?viaf .
+
+    ?ownIDEntityURI a bf:Identifier ;
+                    rdfs:comment "Added from Wikidata via VIAF" ;
+                    rdfs:label "Wikidata" ;
+                    rdf:value ?ownID .
+  }
+}
+WHERE {
+
+    graph <http://wikidata> { ?wikidataAuthority a ?contributorType . }   
+    FILTER( ?contributorType IN (schema:Person, schema:Organization) )
+
+    #
+    # Get the identifier we use to link: NTA
+    #
+    graph <http://wikidata> { 
+      ?wikidataAuthority bf:identifiedBy ?ntaAuthorEntity . 
+      ?ntaAuthorEntity a bf:Identifier ;
+                       rdfs:label "NTA" ;
+                       rdf:value ?wikidataAuthorityNTA . 
+    }
+
+    #
+    # Get the nationality we want to add to the aggregated URI
+    #
+    OPTIONAL { graph <http://wikidata> { ?wikidataAuthority schema:nationality ?wikidataAuthorityNationality . } }
+
+    # Get optional own ID
+    OPTIONAL {
+      graph <http://wikidata> { ?wikidataAuthority dcterms:identifier ?ownID . } 
+      BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?ownID)) as ?ownIDEntityURI)
+    }
+
+    #
+    # Get optional ISNI
+    #
+    OPTIONAL {
+      graph <http://wikidata> {
+        ?wikidataAuthority bf:identifiedBy ?isniEntity .
+
+        ?isniEntity a bf:Isni ;
+                    rdf:value ?isni .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_isni_", ?isni)) as ?isniEntityURI)
+    }
+
+    #
+    # Get optional KBR
+    #
+    OPTIONAL {
+      graph <http://wikidata> {
+        ?wikidataAuthority bf:identifiedBy ?kbrEntity .
+
+        ?kbrEntity a bf:Identifier ;
+                   rdfs:label "KBR" ;
+                   rdf:value ?kbr .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_kbr_", ?kbr)) as ?kbrEntityURI)
+    }
+
+    #
+    # Get optional BnF
+    #
+    OPTIONAL {
+      graph <http://wikidata> {
+        ?wikidataAuthority bf:identifiedBy ?bnfEntity .
+
+        ?bnfEntity a bf:Identifier ;
+                   rdfs:label "BnF" ;
+                   rdf:value ?bnf .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_bnf_", ?bnf)) as ?bnfEntityURI)
+    }
+
+    #
+    # Get optional VIAF
+    #
+    OPTIONAL {
+      graph <http://wikidata> {
+        ?wikidataAuthority bf:identifiedBy ?viafEntity .
+
+        ?viafEntity a bf:Identifier ;
+                   rdfs:label "VIAF" ;
+                   rdf:value ?viaf .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_viaf_", ?viaf)) as ?viafEntityURI)
+    }
+
+    OPTIONAL {
+      graph <http://beltrans-contributors> {
+        ?authorityURI bf:identifiedBy ?ntaEntity .
+        ?ntaEntity a bf:Identifier ;
+                   rdfs:label "NTA" ;
+                   rdf:value ?wikidataAuthorityNTA .
+      }
+    }
+
+    #
+    # Find the link to an existing URI with the same NTA instead of creating a new URI
+    #
+    FILTER EXISTS{
+      graph <http://beltrans-contributors> {
+        ?authorityURI bf:identifiedBy ?ntaEntity .
+
+        ?ntaEntity a bf:Identifier ;
+                   rdfs:label "NTA" ;
+                   rdf:value ?wikidataAuthorityNTA .
+      }
+    }
+}

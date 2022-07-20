@@ -22,31 +22,32 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
 #
-# Add link to KBR via Wikidata and also other identifiers as well as nationality information
+# Add link to KBR via KBR and also other identifiers as well as nationality information
 #
 INSERT {
   graph <http://beltrans-contributors> {
 
     ?authorityURI
       schema:nationality ?kbrAuthorityNationality ;
-      bf:identifiedBy ?viafEntityURI ;
       bf:identifiedBy ?isniEntityURI ;
-      bf:identifiedBy ?ownIDEntityURI ;
+      bf:identifiedBy ?wdEntityURI ;
+      bf:identifiedBy ?viafEntityURI ;
       schema:sameAs ?kbrAuthority .
 
     ?isniEntityURI a bf:Isni ;
-                   rdfs:comment "Added from KBR via Wikidata" ;
+                   rdfs:comment "Added from KBR via KBR" ;
                    rdf:value ?isni .
 
     ?viafEntityURI a bf:Identifier ;
+                   rdfs:comment "Added from KBR via KBR" ;
                    rdfs:label "VIAF" ;
-                   rdfs:comment "Added from KBR via Wikidata" ;
                    rdf:value ?viaf .
 
-    ?ownIDEntityURI a bf:Identifier ;
-                    rdfs:comment "Created from KBR via Wikidata" ;
-                    rdfs:label "KBR" ;
-                    rdf:value ?ownID .
+    ?wdEntityURI a bf:Identifier ;
+                 rdfs:label "Wikidata" ;
+                 rdfs:comment "Added from KBR via KBR" ;
+                 rdf:value ?wd .
+
   }
 }
 WHERE {
@@ -55,25 +56,14 @@ WHERE {
     FILTER( ?contributorType IN (schema:Person, schema:Organization) )
 
     #
-    # Get the identifier we use to link: Wikidata
+    # Get the identifier we use to link: our own KBR ID
     #
-    graph <http://kbr-linked-authorities> { 
-      ?kbrAuthority bf:identifiedBy ?wikidataAuthorEntity . 
-      ?wikidataAuthorEntity a bf:Identifier ;
-                            rdfs:label "Wikidata" ;
-                            rdf:value ?kbrAuthorityWikidata . 
-    }
+    graph <http://kbr-linked-authorities> { ?kbrAuthority dcterms:identifier ?ownID . }
 
     #
     # Get the nationality we want to add to the aggregated URI
     #
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthority schema:nationality ?kbrAuthorityNationality . } }
-
-    # Get optional own ID
-    OPTIONAL {
-      graph <http://kbr-linked-authorities> { ?kbrAuthority dcterms:identifier ?ownID . } 
-      BIND(iri(concat("http://kbr.be/id/data/identifier_kbr_", ?ownID)) as ?ownIDEntityURI)
-    }
 
     #
     # Get optional ISNI
@@ -102,25 +92,41 @@ WHERE {
       BIND(iri(concat("http://kbr.be/id/data/identifier_viaf_", ?viaf)) as ?viafEntityURI)
     }
 
+
+    #
+    # Get optional WIKIDATA
+    #
     OPTIONAL {
-      graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?wdEntity .
+      graph <http://kbr-linked-authorities> {
+        ?kbrAuthority bf:identifiedBy ?wdEntity .
+
         ?wdEntity a bf:Identifier ;
                   rdfs:label "Wikidata" ;
-                  rdf:value ?kbrAuthorityWikidata .
+                  rdf:value ?wd .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) as ?wdEntityURI)
+    }
+
+
+    OPTIONAL {
+      graph <http://beltrans-contributors> {
+        ?authorityURI bf:identifiedBy ?kbrEntity .
+        ?kbrEntity a bf:Identifier ;
+                    rdfs:label "KBR" ;
+                    rdf:value ?ownID .
       }
     }
 
     #
-    # Find the link to an existing URI with the same Wikidata identifier instead of creating a new URI
+    # Find the link to an existing URI with the same KBR ID instead of creating a new URI
     #
     FILTER EXISTS{
       graph <http://beltrans-contributors> {
-        ?authorityURI bf:identifiedBy ?wdEntity .
+        ?authorityURI bf:identifiedBy ?kbrEntity .
 
-        ?wdEntity a bf:Identifier ;
-                  rdfs:label "Wikidata" ;
-                  rdf:value ?kbrAuthorityWikidata .
+        ?kbrEntity a bf:Identifier ;
+                   rdfs:label "KBR" ;
+                   rdf:value ?ownID .
       }
     }
 }

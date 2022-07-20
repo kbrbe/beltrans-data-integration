@@ -41,19 +41,19 @@ INSERT {
       rdf:value ?isniAuthorityISNI .
 
     ?viafEntityURI a bf:Identifier ;
-                   rdfs:value "VIAF" ;
+                   rdfs:label "VIAF" ;
                    rdf:value ?viaf .
 
     ?ntaEntityURI a bf:Identifier ;
-                  rdfs:value "NTA" ;
+                  rdfs:label "NTA" ;
                   rdf:value ?nta .
 
     ?dnbEntityURI a bf:Identifier ;
-                  rdfs:value "DNB" ;
+                  rdfs:label "DNB" ;
                   rdf:value ?dnb .
 
     ?wdEntityURI a bf:Identifier ;
-                 rdfs:value "Wikidata" ;
+                 rdfs:label "Wikidata" ;
                  rdf:value ?wd .
   }
 }

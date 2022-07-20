@@ -95,6 +95,7 @@ def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
     except requests.HTTPError as he:
       statusCode = he.response.status_code
       print(f'{statusCode} error while updating {filename} (first 40 characters): ' + he.response.content.decode('utf-8')[0:40])
+      print(he.response.content.decode('utf-8'))
     except Exception as e:
       print('Error while queryting {url} with {queryFilename} and acceptFormat {acceptFormat}')
       print(e)
@@ -133,6 +134,7 @@ def sparqlUpdate(url, filename, fileFormat, queryName, auth=None):
     except requests.HTTPError as he:
       statusCode = he.response.status_code
       print(f'{statusCode} error while updating {filename}: ' + he.response.content.decode('utf-8')[0:40])
+      print(he.response.content.decode('utf-8'))
     except Exception as e:
       print('Error while updating {url} with {filename} and type {fileFormat}')
       print(e)
