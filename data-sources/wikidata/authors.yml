@@ -18,8 +18,8 @@ prefixes:
   countries: "http://id.loc.gov/vocabulary/countries/"
   schema: "http://schema.org/"
 
-#targets:
-#  subject-target: ["${SPARQL_ENDPOINT_WIKIDATA_BELGIANS}~sd"]
+variables:
+  sourceWikidataEnriched: &sourceWikidataEnriched ${RML_SOURCE_WIKIDATA_ENRICHED}
 
 mappings:
 
@@ -29,15 +29,14 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates authorities represented as schema Person."
     sources:
-      - access: "wikidata/wikidata-belgians-kbr.csv"
+      - access: *sourceWikidataEnriched
         referenceFormulation: csv
         delimiter: ','
-    s: btid:wikidata_dump_$(rowID)
+    s: $(item)
     po:
       - [a, schema:Person]
-      - [rdfs:label, $(Nom complet)]
+      - [rdfs:label, $(itemLabel)]
       - [schema:nationality, countries:be~iri] 
-      - [foaf:isPrimaryTopicOf, btabout:wikidata_dump_$(rowID)~iri]
       - p: schema:sameAs
         o: $(Lien Wikidata)~iri
         condition:
@@ -98,21 +97,6 @@ mappings:
           parameters:
             - [grel:valueParameter, $(DNB)]
             - [grel:valueParameter2, ""]
-
-
-  # ---------------------------------------------------------------------------
-  #
-  authorsAbout:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates descriptions of authorities represented as schema WebPage."
-    sources:
-      - access: "wikidata/wikidata-belgians-kbr.csv"
-        referenceFormulation: csv
-        delimiter: ';'
-    s: btabout:wikidata_dump_$(rowID)
-    po:
-      - [a, schema:WebPage]
-      - [foaf:primaryTopic, btid:wikidata_dump_$(rowID)~iri]
 
   # ---------------------------------------------------------------------------
   #
