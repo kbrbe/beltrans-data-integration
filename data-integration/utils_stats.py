@@ -101,7 +101,7 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withBBThesaurusID': countRowsWithValueForColumn(corpus, 'targetThesaurusBB'),
     'withSourceKBRIdentifier': countRowsWithValueForColumn(corpus, 'sourceKBRIdentifier'),
     'withKBRSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKBR'),
-    'withKBSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKB'),
+    'withKBSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKB') if 'sourceTitleKB' in corpus else 0,
     'withSourceISBN10': countRowsWithValueForColumn(corpus, 'sourceISBN10'),
     'withSourceISBN13': countRowsWithValueForColumn(corpus, 'sourceISBN13'),
     'comment': comment
@@ -223,6 +223,43 @@ def countContribution(value, counter, valueDelimiter=';'):
           counter[contributorName] = counter[contributorName] + 1
         else:
           counter[contributorName] = 1
+
+# -----------------------------------------------------------------------------
+def redoManifestationsCorpusMeasurements(config, rawDataFilename, measurementFilenameSuffix):
+
+  for corpusVersion in config:
+    contributorFile = f'./corpus-versions/{corpusVersion}/csv/{rawDataFilename}'
+    corpusVersionDate = config[corpusVersion][0]
+    corpusVersionComment = config[corpusVersion][1]
+    outputFile = f'./measurements/{corpusVersion}_{measurementFilenameSuffix}.csv'
+    corpus = pd.read_csv(contributorFile, index_col='targetIdentifier')
+
+    corpusNLFR = corpus[(corpus['sourceLanguage'] == 'Dutch') & (corpus['targetLanguage'] == 'French')]
+    corpusFRNL = corpus[(corpus['sourceLanguage'] == 'French') & (corpus['targetLanguage'] == 'Dutch')]
+    corpusOther = corpus[((corpus['sourceLanguage'] != 'Dutch') & (corpus['sourceLanguage'] != 'French')) | (
+              (corpus['targetLanguage'] != 'Dutch') & (corpus['targetLanguage'] != 'French'))]
+
+    measurements = pd.DataFrame([
+      createCorpusMeasurements(corpusFRNL, corpusVersionDate, 'FR-NL', corpusVersionComment),
+      createCorpusMeasurements(corpusNLFR, corpusVersionDate, 'NL-FR', corpusVersionComment),
+      createCorpusMeasurements(corpusOther, corpusVersionDate, 'OTHER', corpusVersionComment)
+    ])
+
+    measurements.to_csv(outputFile, index=False)
+
+# -----------------------------------------------------------------------------
+def redoContributorCorpusMeasurements(config, rawDataFilename, measurementFilenameSuffix):
+
+  for corpusVersion in config:
+    contributorFile = f'./corpus-versions/{corpusVersion}/csv/{rawDataFilename}'
+    corpusVersionDate = config[corpusVersion][0]
+    corpusVersionComment = config[corpusVersion][1]
+    outputFile = f'./measurements/{corpusVersion}_{measurementFilenameSuffix}.csv'
+    contributors = pd.read_csv(contributorFile, index_col='contributorID')
+    measurements = pd.DataFrame([
+      createContributorCorpusMeasurements(contributors, corpusVersionDate, corpusVersionComment)
+    ])
+    measurements.to_csv(outputFile, index=False)
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":

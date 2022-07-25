@@ -1,0 +1,4 @@
+date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
+2022-06-16,2022-07-25 11:50:02.844565,FR-NL,6715,6069,6071,5980,57,1873,4,12,1183,4,5842,112,2384,1873,80,97,Removed duplicate manifestations with the same ISBN10/ISBN13
+2022-06-16,2022-07-25 11:50:03.073747,NL-FR,3597,3065,3089,3115,1141,631,174,858,393,213,2601,142,1060,631,127,127,Removed duplicate manifestations with the same ISBN10/ISBN13
+2022-06-16,2022-07-25 11:50:03.315438,OTHER,231,185,185,225,58,10,1,52,9,2,201,1,7,10,1,1,Removed duplicate manifestations with the same ISBN10/ISBN13

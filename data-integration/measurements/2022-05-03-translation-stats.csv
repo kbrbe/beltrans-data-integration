@@ -1,4 +1,0 @@
-date,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-05-03 15:08:17.692880,FR-NL,6891,6250,6252,6125,58,1817,0,0,0,0,5970,111,111,0,80,97,"Data integrated from KBR, BnF and KB based on ISBN10 and ISBN13 identifiers."
-2022-05-03 15:08:17.908694,NL-FR,3731,3204,3228,3249,1211,724,0,0,0,0,2687,149,149,0,133,134,"Data integrated from KBR, BnF and KB based on ISBN10 and ISBN13 identifiers."
-2022-05-03 15:08:17.996023,OTHER,236,190,190,230,65,11,0,0,0,0,201,1,1,0,1,1,"Data integrated from KBR, BnF and KB based on ISBN10 and ISBN13 identifiers."
