@@ -32,7 +32,7 @@ mappings:
       - access: *sourceWikidataEnriched
         referenceFormulation: csv
         delimiter: ','
-    s: btid:wikidata_$(item)
+    s: http://www.wikidata.org/entity/$(item)
     po:
       - [a, schema:Person]
       - [rdfs:label, $(itemLabel)]
