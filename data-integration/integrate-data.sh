@@ -170,6 +170,7 @@ DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 
 SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-persons-all-info.csv"
 SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE="contributors-persons.csv"
+SUFFIX_DATA_PROFILE_CONT_ALL_PERSONS="all-persons.csv"
 SUFFIX_DATA_PROFILE_CONT_ORGS_FILE="contributors-orgs.csv"
 SUFFIX_DATA_PROFILE_FILE_KBR="integrated-data-kbr-not-filtered.csv"
 SUFFIX_DATA_PROFILE_FILE_BNF="integrated-data-bnf-not-filtered.csv"
@@ -549,6 +550,7 @@ function postprocess {
   unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
   contributorsPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
   contributorsPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE"
+  allPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_PERSONS"
   tmp1="$integrationName/csv/kbr-enriched-not-yet-bnf-and-kb.csv"
   tmp2="$integrationName/csv/kbr-and-bnf-enriched-not-yet-kb.csv"
 
@@ -577,8 +579,11 @@ function postprocess {
   echo "Postprocess contributor data ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllData -m $integratedDataEnriched -o $contributorsPersons
 
+  echo "Postprocess contributor data ..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllData -m $integratedDataEnriched -o $allPersons --keep-non-contributors
+
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -o $excelData
 
 }
 
