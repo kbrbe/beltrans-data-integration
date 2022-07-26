@@ -227,6 +227,8 @@ from an `7.5 GB` n-triples dump
 
 ## Nationality enrichment via ISNI and BnF
 
+**TL;DR: extracting the nationality of 5,034 person authorities from BnF data dumps, based on an initial list of 9,065 ISNI identifiers from which 5,593 were found in the Bnf dumps.**
+
 From our SPARQL endpoint we queried all ISNI identifiers from person authorities with missing nationality information.
 This resulted in 9,065 identifiers which were stored in the file `missing-nationality-isnis.csv`.
 
@@ -263,7 +265,7 @@ sys	0m2.125s
 ```
 
 To finally obtain a list of the found nationalities, we performed a SPARQL query which took 18 seconds (including parsing/loading the RDF/XML file generated in the last step).
-This resulted in 5,34 found nationalities (one of them Belgian).
+This resulted in 5,034 found nationalities (one of them Belgian).
 
 ```
 time python queryFiles.py -q ../../data-integration/sparql-queries/get-bnf-nationalities.sparql -o missing-isni-nationalities-from-bnf.csv missing-nationality-information.xml 
