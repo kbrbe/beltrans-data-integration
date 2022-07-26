@@ -134,6 +134,8 @@ GET_BNF_ISBN10_ISBN13_QUERY_FILE="sparql-queries/get-bnf-isbn10-13.sparql"
 GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn10-without-hyphen.sparql"
 GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn13-without-hyphen.sparql"
 
+GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE="sparql-queries/get-missing-nationality-isni.sparql"
+
 DELETE_QUERY_BNF_ISBN="sparql-queries/delete-bnf-isbn.sparql"
 DELETE_QUERY_BNF_ISBN10_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn10-without-hyphen.sparql"
 DELETE_QUERY_BNF_ISBN13_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn13-without-hyphen.sparql"
@@ -315,6 +317,13 @@ SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
 #
 SUFFIX_WIKIDATA_ENRICHED="manually-enriched-wikidata.csv"
 
+# DATA SOURCE - BNFISNI enrichment
+#
+SUFFIX_BNFISNI_IDENTIFIERS_ISNI="isni-identifiers-without-nationality.csv"
+SUFFIX_BNFISNI_CONFIG_ISNI_EXTRACTION="config-bnf-isni-extraction.csv"
+SUFFIX_BNFISNI_IDENTIFIERS_BNF="bnf-identifiers.csv"
+SUFFIX_BNFISNI_CONT_LD="bnf-data-of-missing-nationalities.xml"
+
 #
 # LINKED DATA - KBR TRANSLATIONS
 #
@@ -395,6 +404,9 @@ function extract {
   elif [ "$dataSource" = "wikidata" ];
   then
     extractWikidata $integrationFolderName
+  elif [ "$dataSource" = "bnfisni" ];
+  then
+    extractNationalityFromBnFViaISNI $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
@@ -402,6 +414,7 @@ function extract {
     extractBnF $integrationFolderName
     extractMasterData $integrationFolderName
     extractWikidata $integrationFolderName
+    extractNationalityFromBnFViaISNI $integrationFolderName
   fi
   
 }
@@ -773,6 +786,45 @@ function extractBnF {
 
   echo "EXTRACTION - Extract links between BnF contributors and Wikidata"
   time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfPersonsBELTRANS
+}
+
+# -----------------------------------------------------------------------------
+function extractNationalityFromBnFViaISNI {
+
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  source ./py-integration-env/bin/activate
+
+  mkdir -p $integrationName/bnfisni/agents
+  mkdir -p $integrationName/bnfisni/rdf
+
+
+  isniIdentifiers="$integrationName/bnfisni/agents/$SUFFIX_BNFISNI_IDENTIFIERS_ISNI"
+  configISNIExtraction="$integrationName/bnfisni/agents/$SUFFIX_BNFISNI_CONFIG_ISNI_EXTRACTION"
+  bnfIdentifiers="$integrationName/bnfisni/agents/$SUFFIX_BNFISNI_IDENTIFIERS_BNF"
+  bnfContributorData="$integrationName/bnfisni/rdf/$SUFFIX_BNFISNI_CONT_LD"
+
+  # Query ISNI identifiers with missing nationality information
+  echo "EXTRACTION - Extract ISNI identifier with missing nationality information"
+  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$isniIdentifiers"
+
+  echo "EXTRACTION - Create configuration file for following step"
+  echo "skos:exactMatch,inFile,$isniIdentifiers" > $configISNIExtraction
+
+  # Extract BnF identifier from BnF dump via queried ISNI
+  echo "EXTRACTION - Extract BnF identifier from BnF dump via queried ISNI"
+  getSubjects "$INPUT_BNF_CONT_ISNI" "$configISNIExtraction" "$bnfIdentifiers"
+
+  # Extract BnF contributor data via BnF identifier
+  echo "EXTRACTION - Extract BnF contributor data via BnF identifier"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i "$INPUT_BNF_PERSON_AUTHORS"  -o "$bnfContributorData" -f "$bnfIdentifiers"
+
+  # We could query nationality which is used to immediately enrich integrated persons,
+  # but we can also get all data of the newly found contributors to increase the overlap with other sources
+
 }
 
 # -----------------------------------------------------------------------------
