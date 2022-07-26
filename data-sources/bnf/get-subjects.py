@@ -106,20 +106,29 @@ def main():
     outputWriter = csv.writer(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
     #
-    # read ISNI RDF records from input RDF/XML
+    # read RDF records from input RDF/XML
     #
-    inputFiles = os.listdir(options.input_folder)
+    inputFiles = []
+    if os.path.isdir(options.input_folder):
+      inputFiles = os.listdir(options.input_folder)
+    elif os.path.isfile(options.input_folder):
+      inputFiles = [options.input_folder]
+    else:
+      print(f'Error: input has to be an existing folder or file')
 
     numberParsedFiles = 0
     numberXMLFiles = 0
     numberRecords = 0
     filteredRecordIDs = set()
 
+    
     for inputFile in inputFiles:
       numberParsedFiles += 1
       if inputFile.endswith('.xml'):
+        print(f'Processing file "{inputFile}"')
         numberXMLFiles += 1
-        for event, elem in ET.iterparse(os.path.join(options.input_folder, inputFile), events=('start', 'end')):
+        inputFilePath = os.path.join(options.input_folder, inputFile) if os.path.isdir(options.input_folder) else options.input_folder
+        for event, elem in ET.iterparse(inputFilePath, events=('start', 'end')):
 
           #
           # The parser finished reading one subject containing one or more predicates
