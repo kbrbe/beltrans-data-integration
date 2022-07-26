@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import csv
 
 class PredicateObjectFilter(ABC):
 
@@ -25,14 +26,22 @@ class PredicateObjectConfigFilter(PredicateObjectFilter):
   def __init__(self, filterArray):
 
     self.filterCriteria = []
+    self.lookupFileValues = set()
     self.numberChecked = 0
     self.numberPassed = 0
 
-    for row in filterArray:
-      if ';' in row[2]:
-        self.filterCriteria.append((row[0], row[1], row[2].split(';')))
+    for (predicate, criteria, value) in filterArray:
+      if criteria == 'inFile':
+        with open(value, 'r', encoding='utf-8') as inFile:
+          csvReader = csv.reader(inFile)
+          for fileRowValue in csvReader:
+            self.lookupFileValues.add(fileRowValue[0])
+          self.filterCriteria.append((predicate, criteria, value))
       else:
-        self.filterCriteria.append((row[0], row[1], row[2]))
+        if ';' in value:
+          self.filterCriteria.append((predicate, criteria, value.split(';')))
+        else:
+          self.filterCriteria.append((predicate, criteria, value))
 
   # --------------------------------------------------------------------------
   def getPredicates(self):
@@ -124,6 +133,9 @@ class PredicateObjectConfigFilter(PredicateObjectFilter):
           filterPass = True
       elif operator == 'stringContains':
         if filterValue in value:
+          filterPass = True
+      elif operator == 'inFile':
+        if value in self.lookupFileValues:
           filterPass = True
       else:
         print(f'Error: unknown operator {operator}')
