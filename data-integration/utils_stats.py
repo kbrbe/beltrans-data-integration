@@ -136,6 +136,8 @@ def createContributorCorpusMeasurements(corpus, corpusDate, comment):
     'withISNIIdentifier': countRowsWithValueForColumn(corpus, 'isniIDs'),
     'withVIAFIdentifier': countRowsWithValueForColumn(corpus, 'viafIDs'),
     'withWikidataIdentifier': countRowsWithValueForColumn(corpus, 'wikidataIDs'),
+    'withWikidataButWithoutISNI': countRowsWithValueForColumns(corpus, ['wikidataIDs'],
+                                                               whereColumnsEmpty=['isniIDs']),
     'withKBRButWithoutNationality': countRowsWithValueForColumns(corpus, ['kbrIDs'],
                                                                   whereColumnsEmpty=['nationalities']),
     'withBnFButWithoutNationality': countRowsWithValueForColumns(corpus, ['bnfIDs'],
