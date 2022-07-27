@@ -1,4 +1,4 @@
 date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-06-07,2022-07-27 13:46:52.957525,FR-NL,7091,6445,6447,6325,58,1961,4,13,1240,4,6168,116,2467,1961,84,101,Added publishing directors and included a collumn for source titles from KB
-2022-06-07,2022-07-27 13:46:53.141292,NL-FR,3772,3240,3264,3290,1211,725,208,928,487,247,2727,150,1134,725,134,135,Added publishing directors and included a collumn for source titles from KB
-2022-06-07,2022-07-27 13:46:53.542782,OTHER,246,200,200,240,65,11,2,59,10,3,211,1,9,11,1,1,Added publishing directors and included a collumn for source titles from KB
+2022-06-07,2022-07-27 16:44:39.552741,FR-NL,7091,6445,6447,6325,58,1961,4,13,1240,4,6168,116,2467,1961,84,101,Added publishing directors and included a collumn for source titles from KB
+2022-06-07,2022-07-27 16:44:39.771381,NL-FR,3772,3240,3264,3290,1211,725,208,928,487,247,2727,150,1134,725,134,135,Added publishing directors and included a collumn for source titles from KB
+2022-06-07,2022-07-27 16:44:39.857259,OTHER,246,200,200,240,65,11,2,59,10,3,211,1,9,11,1,1,Added publishing directors and included a collumn for source titles from KB

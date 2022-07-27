@@ -24,41 +24,39 @@ PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 INSERT {
 
   graph <http://wikidata> {
-    ?wikidataURI a ?contributorType ;
-                 bf:identifiedBy ?newISNIEntity ;
+    ?wikidataURI a schema:Person ;
+                 dcterms:identifier ?wd ;
+                 schema:nationality ?wikidataNationality ;
                  bf:identifiedBy ?newWikidataEntity .
     
     ?newWikidataEntity a bf:Identifier ;
                  rdfs:label "Wikidata" ;
                  rdf:value ?wd .
 
-    ?newISNIEntity a bf:Isni ;
-                   rdfs:comment "Added via federated Wikidata query" ;
-                   rdf:value ?isniFormatted .
   }
 }
 WHERE {
   
-  BIND(iri(concat("http://kbr.be/id/data/identifier_isni_", ?isniFormatted)) AS ?newISNIEntity)
   BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) AS ?newWikidataEntity)
   BIND(iri(concat("http://www.wikidata.org/entity/", ?wd)) AS ?wikidataURI)
+  BIND(iri(concat("http://id.loc.gov/vocabulary/", ?countryCode)) AS ?wikidataNationality)
   
   #
   # Federated query: retrieve missing ISNI from wikidata
   #
   SERVICE <https://query.wikidata.org/sparql> {
-    ?wikidataURI wdt:P213 ?isni .
+    ?wikidataURI wdt:P27/wdt:P4801 ?countryCode .
   }
   BIND(REPLACE(?isni, " ", "", "i") AS ?isniFormatted)
   
   #
-  # The sub select which is executed first: get all our authorities with Wikidata identifier but without ISNI
+  # The sub select which is executed first: get all our authorities with Wikidata identifier but without nationality
   {
    SELECT ?contributorType ?wd
    WHERE {
      
      graph <http://beltrans-contributors> { 
-        ?contributor a ?contributorType ;
+        ?contributor a schema:Person ;
                      bf:identifiedBy ?wdEntity .
     
         ?wdEntity a bf:Identifier ;
@@ -68,22 +66,16 @@ WHERE {
      
      OPTIONAL { 
         graph <http://beltrans-contributors> {
-          ?contributor bf:identifiedBy ?isniEntity .
-          ?isniEntity a bf:Isni .
+          ?contributor schema:nationality ?nationality .
         }
      }
 
-     FILTER( ?contributorType IN (schema:Person, schema:Organization) )
 
      FILTER NOT EXISTS {
        graph <http://beltrans-contributors> {
-         ?contributor bf:identifiedBy ?isniEntity .
-         ?isniEntity a bf:Isni .
+          ?contributor schema:nationality ?nationality .
        }
      } 
     }
   } # end sub select
 }
-
-
-
