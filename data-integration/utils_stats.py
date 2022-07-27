@@ -227,10 +227,10 @@ def countContribution(value, counter, valueDelimiter=';'):
           counter[contributorName] = 1
 
 # -----------------------------------------------------------------------------
-def redoManifestationsCorpusMeasurements(config, rawDataFilename, measurementFilenameSuffix):
+def redoManifestationsCorpusMeasurements(config, corpusDirectory, rawDataFilename, measurementFilenameSuffix):
 
   for corpusVersion in config:
-    contributorFile = f'./corpus-versions/{corpusVersion}/csv/{rawDataFilename}'
+    contributorFile = f'{corpusDirectory}/{corpusVersion}/csv/{rawDataFilename}'
     corpusVersionDate = config[corpusVersion][0]
     corpusVersionComment = config[corpusVersion][1]
     outputFile = f'./measurements/{corpusVersion}_{measurementFilenameSuffix}.csv'
@@ -250,10 +250,10 @@ def redoManifestationsCorpusMeasurements(config, rawDataFilename, measurementFil
     measurements.to_csv(outputFile, index=False)
 
 # -----------------------------------------------------------------------------
-def redoContributorCorpusMeasurements(config, rawDataFilename, measurementFilenameSuffix):
+def redoContributorCorpusMeasurements(config, corpusDirectory, rawDataFilename, measurementFilenameSuffix):
 
   for corpusVersion in config:
-    contributorFile = f'./corpus-versions/{corpusVersion}/csv/{rawDataFilename}'
+    contributorFile = f'{corpusDirectory}/{corpusVersion}/csv/{rawDataFilename}'
     corpusVersionDate = config[corpusVersion][0]
     corpusVersionComment = config[corpusVersion][1]
     outputFile = f'./measurements/{corpusVersion}_{measurementFilenameSuffix}.csv'

@@ -1,4 +1,4 @@
 date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-07-25,2022-07-26 10:55:51.579640,FR-NL,8436,7566,7571,7539,51,2256,4,13,1397,4,7346,149,2590,2256,99,117,Contributors integrated using also ISNI identifiers retrieved from Wikidata via QID
-2022-07-25,2022-07-26 10:55:51.782072,NL-FR,4019,3428,3452,3535,1209,742,210,933,497,247,2938,194,1199,742,171,173,Contributors integrated using also ISNI identifiers retrieved from Wikidata via QID
-2022-07-25,2022-07-26 10:55:51.873388,OTHER,315,234,234,309,77,11,2,71,10,3,273,4,12,11,2,2,Contributors integrated using also ISNI identifiers retrieved from Wikidata via QID
+2022-07-25,2022-07-27 13:46:56.437153,FR-NL,8436,7566,7571,7539,51,2256,4,13,1397,4,7346,149,2590,2256,99,117,Contributors integrated using also ISNI identifiers retrieved from Wikidata via QID
+2022-07-25,2022-07-27 13:46:56.626064,NL-FR,4019,3428,3452,3535,1209,742,210,933,497,247,2938,194,1199,742,171,173,Contributors integrated using also ISNI identifiers retrieved from Wikidata via QID
+2022-07-25,2022-07-27 13:46:56.729544,OTHER,315,234,234,309,77,11,2,71,10,3,273,4,12,11,2,2,Contributors integrated using also ISNI identifiers retrieved from Wikidata via QID
