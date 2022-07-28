@@ -46,7 +46,11 @@ WHERE {
       OPTIONAL { graph <http://beltrans-contributors> { ?author dcterms:identifier ?authorID . } }
       OPTIONAL { graph <http://beltrans-contributors> { ?author schema:familyName ?authorFamilyName . } }
       OPTIONAL { graph <http://beltrans-contributors> { ?author schema:givenName ?authorGivenName . } }
-      OPTIONAL { graph <http://beltrans-contributors> { ?author schema:nationality ?authorNationality . } }
+      OPTIONAL {
+          graph <http://beltrans-contributors> { ?author schema:nationality ?authorNationality . } 
+          graph <http://master-data> { ?authorNationality mads:authoritativeLabel ?authorNationalityLabel . }
+          FILTER(lang(?authorNationalityLabel) = 'en')
+      }
   }
 
   # ILLUSTRATOR
@@ -55,7 +59,11 @@ WHERE {
       OPTIONAL { graph <http://beltrans-contributors> { ?illustrator dcterms:identifier ?illustratorID . } }
       OPTIONAL { graph <http://beltrans-contributors> { ?illustrator schema:familyName ?illustratorFamilyName . } }
       OPTIONAL { graph <http://beltrans-contributors> { ?illustrator schema:givenName ?illustratorGivenName . } }
-      OPTIONAL { graph <http://beltrans-contributors> { ?illustrator schema:nationality ?illustratorNationality . } }
+      OPTIONAL {
+          graph <http://beltrans-contributors> { ?illustrator schema:nationality ?illustratorNationality . } 
+          graph <http://master-data> { ?illustratorNationality mads:authoritativeLabel ?illustratorNationalityLabel . }
+          FILTER(lang(?illustratorNationalityLabel) = 'en')
+      }
   }
 
   # SCENARIST
@@ -64,7 +72,11 @@ WHERE {
       OPTIONAL { graph <http://beltrans-contributors> { ?scenarist dcterms:identifier ?scenaristID . } }
       OPTIONAL { graph <http://beltrans-contributors> { ?scenarist schema:familyName ?scenaristFamilyName . } }
       OPTIONAL { graph <http://beltrans-contributors> { ?scenarist schema:givenName ?scenaristGivenName . } }
-      OPTIONAL { graph <http://beltrans-contributors> { ?scenarist schema:nationality ?scenaristNationality . } }
+      OPTIONAL {
+          graph <http://beltrans-contributors> { ?scenarist schema:nationality ?scenaristNationality . } 
+          graph <http://master-data> { ?scenaristNationality mads:authoritativeLabel ?scenaristNationalityLabel . }
+          FILTER(lang(?scenaristNationalityLabel) = 'en')
+      }
   }
 
   # PUBLISHING DIRECTOR
@@ -73,15 +85,21 @@ WHERE {
       OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector dcterms:identifier ?publishingDirectorID . } }
       OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector schema:familyName ?publishingDirectorFamilyName . } }
       OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector schema:givenName ?publishingDirectorGivenName . } }
-      OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector schema:nationality ?publishingDirectorNationality . } }
+      OPTIONAL {
+          graph <http://beltrans-contributors> { ?publishingDirector schema:nationality ?publishingDirectorNationality . } 
+          graph <http://master-data> { ?publishingDirectorNationality mads:authoritativeLabel ?publishingDirectorNationalityLabel . }
+          FILTER(lang(?publishingDirectorNationalityLabel) = 'en')
+      }
+
   }
 
 
-  BIND( IF(bound(?author) && !bound(?authorNationality), "MISSING", STR(?authorNationality)) AS ?authorNat)
-  BIND( IF(bound(?illustrator) && !bound(?illustratorNationality), "MISSING", STR(?illustratorNationality)) AS ?illustratorNat)
-  BIND( IF(bound(?scenarist) && !bound(?scenaristNationality), "MISSING", STR(?scenaristNationality)) AS ?scenaristNat)
-  BIND( IF(bound(?publishingDirector) && !bound(?publishingDirectorNationality), "MISSING", STR(?publishingDirectorNationality)) AS ?publishingDirectorNat)
+  BIND( IF(bound(?author) && !bound(?authorNationalityLabel), "MISSING", STR(?authorNationalityLabel)) AS ?authorNat)
+  BIND( IF(bound(?illustrator) && !bound(?illustratorNationalityLabel), "MISSING", STR(?illustratorNationalityLabel)) AS ?illustratorNat)
+  BIND( IF(bound(?scenarist) && !bound(?scenaristNationalityLabel), "MISSING", STR(?scenaristNationalityLabel)) AS ?scenaristNat)
+  BIND( IF(bound(?publishingDirector) && !bound(?publishingDirectorNationalityLabel), "MISSING", STR(?publishingDirectorNationalityLabel)) AS ?publishingDirectorNat)
   BIND( CONCAT(?authorNat, ?illustratorNat, ?scenaristNat, ?publishingDirectorNat) AS ?allNat)
 
 }
 GROUP BY ?manifestationID
+HAVING(!CONTAINS(?allNationality, "Belgium") && CONTAINS(?allNationality, "MISSING"))
