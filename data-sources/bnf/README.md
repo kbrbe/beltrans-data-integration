@@ -225,3 +225,58 @@ from an `7.5 GB` n-triples dump
 * took *3.3 hours* on a Blazegraph instance on a server given 2 GB of RAM
 
 
+## Nationality enrichment via ISNI and BnF
+
+**TL;DR: extracting the nationality of 5,034 person authorities from BnF data dumps, based on an initial list of 9,065 ISNI identifiers from which 5,593 were found in the Bnf dumps.**
+
+From our SPARQL endpoint we queried all ISNI identifiers from person authorities with missing nationality information.
+This resulted in 9,065 identifiers which were stored in the file `missing-nationality-isnis.csv`.
+
+By using the following script and the previously generated list of ISNIs, we extracted the matching BnF identifiers from the `external` dump of BnF in 17 seconds.
+This resulted in 5,593 found BnF identifiers.
+
+```
+time python get-subjects.py -i external-isni -o bnf-person-ids-with-isni.csv -f filter-config-persons-with-given-isni.csv
+
+1 XML files with 1626891 records read. 5593 records (5593 unique) matched filter criteria.
+
+real	0m17.474s
+user	0m17.352s
+sys	0m0.120s
+
+```
+
+In order to check which ones have a nationality information, we extracted the properties and values from the found BnF identifiers in 3 minutes.
+
+```
+time python filter-subjects-xml.py -i person-authors/ -o missing-nationality-information.xml -f bnf-person-ids-with-isni.csv
+
+Successfully read 5593 identifiers from 5593 records in given CSV file bnf-person-ids-with-isni.csv
+The intersection between the filters are 5593 unique identifiers
+Opening output file missing-nationality-information.xml
+Start processing 202 files
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 202/202 [02:58<00:00,  1.13it/s]
+202 XML files with 5425148 records read. 11186 records (5593 unique) matched filter criteria.
+
+real	2m58.212s
+user	2m54.728s
+sys	0m2.125s
+
+```
+
+To finally obtain a list of the found nationalities, we performed a SPARQL query which took 18 seconds (including parsing/loading the RDF/XML file generated in the last step).
+This resulted in 5,034 found nationalities (one of them Belgian).
+
+```
+time python queryFiles.py -q ../../data-integration/sparql-queries/get-bnf-nationalities.sparql -o missing-isni-nationalities-from-bnf.csv missing-nationality-information.xml 
+
+trying to parse missing-nationality-information.xml ...
+Parsed input files!
+Execute SPARQL query get-nationalities.sparql ...
+successfully executed SPARQL query!
+
+real	0m18.621s
+user	0m18.489s
+sys	0m0.132s
+
+```

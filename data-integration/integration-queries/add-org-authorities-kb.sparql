@@ -31,21 +31,31 @@ INSERT {
       rdfs:comment "Created from KB data" ;
       bf:identifiedBy ?authorityURIISNI ;
       bf:identifiedBy ?viafEntityURI ;
-      bf:identifiedBy ?wdEntityURI .
+      bf:identifiedBy ?wdEntityURI ;
+      bf:identifiedBy ?ownIDEntityURI .
 
     ?countryEntityURI a schema:PostalAddress ;
+                      rdfs:comment "Created from KB data" ;
                       schema:addressCountry ?country .
 
     ?authorityURIISNI a bf:Isni ;
-      rdf:value ?kbAuthorityISNI .
+                   rdfs:comment "Created from KB data" ;
+                   rdf:value ?kbAuthorityISNI .
 
     ?viafEntityURI a bf:Identifier ;
+                   rdfs:comment "Created from KB data" ;
                    rdfs:label "VIAF" ;
                    rdf:value ?viaf .
 
     ?wdEntityURI a bf:Identifier ;
+                 rdfs:comment "Created from KB data" ;
                  rdfs:label "Wikidata" ;
                  rdf:value ?wd .
+
+    ?ownIDEntityURI a bf:Identifier ;
+                    rdfs:comment "Created from KB data" ;
+                    rdfs:label "NTA" ;
+                    rdf:value ?ownID .
   }
 }
 WHERE {

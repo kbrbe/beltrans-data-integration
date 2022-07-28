@@ -1,0 +1,131 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+
+#
+# Add link to BnF via BnF and also other identifiers as well as nationality information
+#
+INSERT {
+  graph <http://beltrans-contributors> {
+
+    ?authorityURI
+      schema:nationality ?bnfAuthorityNationality ;
+      bf:identifiedBy ?viafEntityURI ;
+      bf:identifiedBy ?isniEntityURI ;
+      bf:identifiedBy ?wdEntityURI ;
+      schema:sameAs ?bnfAuthority .
+
+    ?isniEntityURI a bf:Isni ;
+                   rdfs:comment "Added from BnF via BnF" ;
+                   rdf:value ?isni .
+
+    ?viafEntityURI a bf:Identifier ;
+                   rdfs:comment "Added from BnF via BnF" ;
+                   rdfs:label "VIAF" ;
+                   rdf:value ?viaf .
+
+    ?wdEntityURI a bf:Identifier ;
+                 rdfs:label "Wikidata" ;
+                 rdfs:comment "Added from BnF via BnF" ;
+                 rdf:value ?wd .
+
+  }
+}
+WHERE {
+
+    graph <http://bnf-contributors> { ?bnfAuthority a ?contributorType . }   
+    FILTER( ?contributorType IN (foaf:Person, foaf:Organization) )
+
+    #
+    # Get the identifier we use to link: our own BnF ID
+    #
+    graph <http://bnf-contributors> { ?bnfAuthority dcterms:identifier ?ownID . } 
+
+    #
+    # Get the nationality we want to add to the aggregated URI
+    #
+    OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthority rdagroup2elements:countryAssociatedWithThePerson ?bnfAuthorityNationality . } }
+
+    #
+    # Get optional ISNI
+    #
+    OPTIONAL {
+      graph <http://bnf-contributors> {
+        ?bnfAuthority bf:identifiedBy ?isniEntity .
+
+        ?isniEntity a bf:Isni ;
+                    rdf:value ?isni .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_isni_", ?isni)) as ?isniEntityURI)
+    }
+
+    #
+    # Get optional VIAF
+    #
+    OPTIONAL {
+      graph <http://bnf-contributors> {
+        ?bnfAuthority bf:identifiedBy ?viafEntity .
+
+        ?viafEntity a bf:Identifier ;
+                    rdfs:label "VIAF" ;
+                    rdf:value ?viaf .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_viaf_", ?viaf)) as ?viafEntityURI)
+    }
+
+    #
+    # Get optional WIKIDATA
+    #
+    OPTIONAL {
+      graph <http://bnf-contributors> {
+        ?bnfAuthority bf:identifiedBy ?wdEntity .
+
+        ?wdEntity a bf:Identifier ;
+                  rdfs:label "Wikidata" ;
+                  rdf:value ?wd .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) as ?wdEntityURI)
+    }
+
+
+    OPTIONAL {
+      graph <http://beltrans-contributors> {
+        ?authorityURI bf:identifiedBy ?bnfEntity .
+        ?bnfEntity a bf:Identifier ;
+                    rdfs:label "BnF" ;
+                    rdf:value ?ownID .
+      }
+    }
+
+    #
+    # Find the link to an existing URI with the same BnF ID instead of creating a new URI
+    #
+    FILTER EXISTS{
+      graph <http://beltrans-contributors> {
+        ?authorityURI bf:identifiedBy ?bnfEntity .
+
+        ?bnfEntity a bf:Identifier ;
+                   rdfs:label "BnF" ;
+                   rdf:value ?ownID .
+      }
+    }
+}

@@ -74,7 +74,7 @@ def readSPARQLQuery(filename):
 def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
 
   if not os.path.isfile(queryFilename):
-    print(f'"{filename}" is not a file!')
+    print(f'"{queryFilename}" is not a file!')
     return
   with open(queryFilename, 'rb') as query:
     print(f'\tProcessing query {queryFilename}')
@@ -94,9 +94,10 @@ def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
 
     except requests.HTTPError as he:
       statusCode = he.response.status_code
-      print(f'{statusCode} error while updating {filename} (first 40 characters): ' + he.response.content.decode('utf-8')[0:40])
+      print(f'{statusCode} error while updating {queryFilename} (first 40 characters): ' + he.response.content.decode('utf-8')[0:40])
+      print(he.response.content.decode('utf-8'))
     except Exception as e:
-      print('Error while queryting {url} with {queryFilename} and acceptFormat {acceptFormat}')
+      print(f'Error while querying {url} with {queryFilename} and acceptFormat {acceptFormat}')
       print(e)
 
 
@@ -133,6 +134,7 @@ def sparqlUpdate(url, filename, fileFormat, queryName, auth=None):
     except requests.HTTPError as he:
       statusCode = he.response.status_code
       print(f'{statusCode} error while updating {filename}: ' + he.response.content.decode('utf-8')[0:40])
+      print(he.response.content.decode('utf-8'))
     except Exception as e:
       print('Error while updating {url} with {filename} and type {fileFormat}')
       print(e)

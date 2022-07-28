@@ -12,6 +12,7 @@ import utils
 from predicate_object_filter import PredicateObjectConfigFilter
 from predicate_object_filter import PredicateObjectLookupFilter
 
+
 NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 NS_RDFS = "http://www.w3.org/2000/01/rdf-schema#"
 NS_SCHEMA = "http://schema.org/"
@@ -22,11 +23,12 @@ NS_OWL = "http://www.w3.org/2002/07/owl#"
 NS_XSD = "http://www.w3.org/2001/XMLSchema#"
 NS_FOAF = "http://xmlns.com/foaf/0.1/"
 NS_VOID = "http://rdfs.org/ns/void#"
+NS_SKOS = "http://www.w3.org/2004/02/skos/core#"
 NS_RDAGROUP1 = "http://rdvocab.info/Elements/"
 NS_RDAGROUP2 = "http://rdvocab.info/ElementsGr2/"
 NS_MARCREL = "http://id.loc.gov/vocabulary/relators/"
 
-ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1, 'rdagroup2elements': NS_RDAGROUP2, 'marcrel': NS_MARCREL}
+ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1, 'rdagroup2elements': NS_RDAGROUP2, 'marcrel': NS_MARCREL, 'skos': NS_SKOS}
 
 
 RDF_ABOUT = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about'
@@ -104,20 +106,29 @@ def main():
     outputWriter = csv.writer(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
     #
-    # read ISNI RDF records from input RDF/XML
+    # read RDF records from input RDF/XML
     #
-    inputFiles = os.listdir(options.input_folder)
+    inputFiles = []
+    if os.path.isdir(options.input_folder):
+      inputFiles = os.listdir(options.input_folder)
+    elif os.path.isfile(options.input_folder):
+      inputFiles = [options.input_folder]
+    else:
+      print(f'Error: input has to be an existing folder or file')
 
     numberParsedFiles = 0
     numberXMLFiles = 0
     numberRecords = 0
     filteredRecordIDs = set()
 
+    
     for inputFile in inputFiles:
       numberParsedFiles += 1
       if inputFile.endswith('.xml'):
+        print(f'Processing file "{inputFile}"')
         numberXMLFiles += 1
-        for event, elem in ET.iterparse(os.path.join(options.input_folder, inputFile), events=('start', 'end')):
+        inputFilePath = os.path.join(options.input_folder, inputFile) if os.path.isdir(options.input_folder) else options.input_folder
+        for event, elem in ET.iterparse(inputFilePath, events=('start', 'end')):
 
           #
           # The parser finished reading one subject containing one or more predicates

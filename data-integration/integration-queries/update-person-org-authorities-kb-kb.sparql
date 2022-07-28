@@ -1,0 +1,130 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+
+#
+# Add link to KB via NTA ID and also other identifiers as well as nationality information
+#
+INSERT {
+  graph <http://beltrans-contributors> {
+
+    ?authorityURI
+      schema:nationality ?kbAuthorityNationality ;
+      bf:identifiedBy ?isniEntityURI ;
+      bf:identifiedBy ?viafEntityURI ;
+      bf:identifiedBy ?wdEntityURI ;
+      schema:sameAs ?kbAuthority .
+
+    ?isniEntityURI a bf:Isni ;
+                   rdfs:comment "Added from KB via NTA ID" ;
+                   rdf:value ?isni .
+
+    ?viafEntityURI a bf:Identifier ;
+                   rdfs:comment "Added from KB via NTA ID" ;
+                   rdfs:label "VIAF" ;
+                   rdf:value ?viaf .
+
+    ?wdEntityURI a bf:Identifier ;
+                 rdfs:label "Wikidata" ;
+                 rdfs:comment "Added from KB via NTA ID" ;
+                 rdf:value ?wd .
+
+  }
+}
+WHERE {
+
+    graph <http://kb-linked-authorities> { ?kbAuthority a ?contributorType . }   
+    FILTER( ?contributorType IN (schema:Person, schema:Organization) )
+
+    #
+    # Get the identifier we use to link: our own NTA ID
+    #
+    graph <http://kb-linked-authorities> { ?kbAuthority dcterms:identifier ?ownID . }
+
+    #
+    # Get the nationality we want to add to the aggregated URI
+    #
+    OPTIONAL { graph <http://kb-linked-authorities> { ?kbAuthority schema:nationality ?kbAuthorityNationality . } }
+
+    #
+    # Get optional ISNI
+    #
+    OPTIONAL {
+      graph <http://kb-linked-authorities> {
+        ?kbAuthority bf:identifiedBy ?isniEntity .
+
+        ?isniEntity a bf:Isni ;
+                    rdf:value ?isni .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_isni_", ?isni)) as ?isniEntityURI)
+    }
+
+    #
+    # Get optional VIAF
+    #
+    OPTIONAL {
+      graph <http://kb-linked-authorities> {
+        ?kbAuthority bf:identifiedBy ?viafEntity .
+
+        ?viafEntity a bf:Identifier ;
+                    rdfs:label "VIAF" ;
+                    rdf:value ?viaf .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_viaf_", ?viaf)) as ?viafEntityURI)
+    }
+
+    #
+    # Get optional WIKIDATA
+    #
+    OPTIONAL {
+      graph <http://kb-linked-authorities> {
+        ?kbAuthority bf:identifiedBy ?wdEntity .
+
+        ?wdEntity a bf:Identifier ;
+                  rdfs:label "Wikidata" ;
+                  rdf:value ?wd .
+      }
+      BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) as ?wdEntityURI)
+    }
+
+
+    OPTIONAL {
+      graph <http://beltrans-contributors> {
+        ?authorityURI bf:identifiedBy ?kbEntity .
+        ?kbEntity a bf:Identifier ;
+                  rdfs:label "NTA" ;
+                  rdf:value ?ownID .
+      }
+    }
+
+    #
+    # Find the link to an existing URI with the same VIAF instead of creating a new URI
+    #
+    FILTER EXISTS{
+      graph <http://beltrans-contributors> {
+        ?authorityURI bf:identifiedBy ?kbEntity .
+
+        ?kbEntity a bf:Identifier ;
+                  rdfs:label "NTA" ;
+                  rdf:value ?ownID .
+      }
+    }
+}

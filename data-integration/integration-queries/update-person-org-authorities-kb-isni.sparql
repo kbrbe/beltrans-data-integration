@@ -31,6 +31,7 @@ INSERT {
       schema:nationality ?kbAuthorityNationality ;
       bf:identifiedBy ?viafEntityURI ;
       bf:identifiedBy ?wdEntityURI ;
+      bf:identifiedBy ?ownIDEntityURI ;
       schema:sameAs ?kbAuthority .
 
     ?viafEntityURI a bf:Identifier ;
@@ -42,6 +43,11 @@ INSERT {
                  rdfs:comment "Added from KB via ISNI" ;
                  rdfs:label "Wikidata" ;
                  rdf:value ?wd .
+
+    ?ownIDEntityURI a bf:Identifier ;
+                    rdfs:comment "Added from KB via ISNI" ;
+                    rdfs:label "NTA" ;
+                    rdf:value ?ownID .
   }
 }
 WHERE {
@@ -53,6 +59,14 @@ WHERE {
     # Get the nationality we want to add to the aggregated URI
     #
     OPTIONAL { graph <http://kb-linked-authorities> { ?kbAuthority schema:nationality ?kbAuthorityNationality . } }
+
+    #
+    # Get optional own ID
+    #
+    OPTIONAL {
+      graph <http://kb-linked-authorities> { ?kbAuthority dcterms:identifier ?ownID . } 
+      BIND(iri(concat("http://kbr.be/id/data/identifier_nta_", ?ownID)) as ?ownIDEntityURI)
+    }
 
     #
     # Get optional VIAF

@@ -1,0 +1,4 @@
+date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
+2022-05-23,2022-07-27 16:44:39.290651,FR-NL,6891,6250,6252,6125,58,1817,4,13,1096,4,5970,111,2291,0,80,97,No changes to previous version.
+2022-05-23,2022-07-27 16:44:39.404590,NL-FR,3731,3204,3228,3249,1211,724,208,928,486,247,2687,149,1119,0,133,134,No changes to previous version.
+2022-05-23,2022-07-27 16:44:39.468292,OTHER,236,190,190,230,65,11,2,59,10,3,201,1,9,0,1,1,No changes to previous version.

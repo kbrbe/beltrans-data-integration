@@ -118,6 +118,7 @@ TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
 TRIPLE_STORE_GRAPH_KB_TRL="http://kb-publications"
 TRIPLE_STORE_GRAPH_KB_LA="http://kb-linked-authorities"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
+TRIPLE_STORE_GRAPH_WIKIDATA="http://wikidata"
 
 # if it is a blazegraph triple store
 TRIPLE_STORE_NAMESPACE="integration"
@@ -132,6 +133,8 @@ KB_SPARQL_ENDPOINT="http://data.bibliotheken.nl/sparql"
 GET_BNF_ISBN10_ISBN13_QUERY_FILE="sparql-queries/get-bnf-isbn10-13.sparql"
 GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn10-without-hyphen.sparql"
 GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn13-without-hyphen.sparql"
+
+GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE="sparql-queries/get-missing-nationality-isni.sparql"
 
 DELETE_QUERY_BNF_ISBN="sparql-queries/delete-bnf-isbn.sparql"
 DELETE_QUERY_BNF_ISBN10_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn10-without-hyphen.sparql"
@@ -169,6 +172,7 @@ DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 
 SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-persons-all-info.csv"
 SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE="contributors-persons.csv"
+SUFFIX_DATA_PROFILE_CONT_ALL_PERSONS="all-persons.csv"
 SUFFIX_DATA_PROFILE_CONT_ORGS_FILE="contributors-orgs.csv"
 SUFFIX_DATA_PROFILE_FILE_KBR="integrated-data-kbr-not-filtered.csv"
 SUFFIX_DATA_PROFILE_FILE_BNF="integrated-data-bnf-not-filtered.csv"
@@ -311,7 +315,14 @@ SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
 
 # DATA SOURCE - WIKIDATA
 #
-SUFFIX_WIKIDATA_ENRICHED="wikidata-links.csv"
+SUFFIX_WIKIDATA_ENRICHED="manually-enriched-wikidata.csv"
+
+# DATA SOURCE - BNFISNI enrichment
+#
+SUFFIX_BNFISNI_IDENTIFIERS_ISNI="isni-identifiers-without-nationality.csv"
+SUFFIX_BNFISNI_CONFIG_ISNI_EXTRACTION="config-bnf-isni-extraction.csv"
+SUFFIX_BNFISNI_IDENTIFIERS_BNF="bnf-identifiers.csv"
+SUFFIX_BNFISNI_CONT_LD="bnf-data-of-missing-nationalities.xml"
 
 #
 # LINKED DATA - KBR TRANSLATIONS
@@ -358,6 +369,11 @@ SUFFIX_BNF_CONT_WIKIDATA_LD="bnf-contributor-wikidata.xml"
 #
 SUFFIX_MASTER_LD="master-data.ttl"
 
+#
+# LINKED DATA - WIKIDATA
+#
+SUFFIX_WIKIDATA_LD="from-manually-enriched-wikidata.ttl"
+
 # -----------------------------------------------------------------------------
 function extract {
 
@@ -388,6 +404,9 @@ function extract {
   elif [ "$dataSource" = "wikidata" ];
   then
     extractWikidata $integrationFolderName
+  elif [ "$dataSource" = "bnfisni" ];
+  then
+    extractNationalityFromBnFViaISNI $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
@@ -395,6 +414,7 @@ function extract {
     extractBnF $integrationFolderName
     extractMasterData $integrationFolderName
     extractWikidata $integrationFolderName
+    extractNationalityFromBnFViaISNI $integrationFolderName
   fi
   
 }
@@ -422,6 +442,9 @@ function transform {
   elif [ "$dataSource" = "wikidata" ];
   then
     transformWikidata $integrationFolderName
+  elif [ "$dataSource" = "bnfisni" ];
+  then
+    transformNationalityFromBnFViaISNI $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
@@ -429,6 +452,7 @@ function transform {
     transformBnF $integrationFolderName
     transformMasterData $integrationFolderName
     transformWikidata $integrationFolderName
+    transformNationalityFromBnFViaISNI $integrationFolderName
   fi
   
 }
@@ -453,12 +477,20 @@ function load {
   elif [ "$dataSource" = "kb" ];
   then
     loadKB $integrationFolderName
+  elif [ "$dataSource" = "wikidata" ];
+  then
+    loadWikidata $integrationFolderName
+  elif [ "$dataSource" = "bnfisni" ];
+  then
+    loadNationalityFromBnFViaISNI $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
     loadBnF $integrationFolderName
     loadKBR $integrationFolderName
     loadKB $integrationFolderName
+    loadWikidata $integrationFolderName
+    loadNationalityFromBnFViaISNI $integrationFolderName
   fi
 
 }
@@ -539,6 +571,7 @@ function postprocess {
   unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
   contributorsPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
   contributorsPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE"
+  allPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_PERSONS"
   tmp1="$integrationName/csv/kbr-enriched-not-yet-bnf-and-kb.csv"
   tmp2="$integrationName/csv/kbr-and-bnf-enriched-not-yet-kb.csv"
 
@@ -567,8 +600,11 @@ function postprocess {
   echo "Postprocess contributor data ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllData -m $integratedDataEnriched -o $contributorsPersons
 
+  echo "Postprocess contributor data ..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllData -m $integratedDataEnriched -o $allPersons --keep-non-contributors
+
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -o $excelData
 
 }
 
@@ -761,6 +797,58 @@ function extractBnF {
 }
 
 # -----------------------------------------------------------------------------
+function extractNationalityFromBnFViaISNI {
+
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  source ./py-integration-env/bin/activate
+
+  mkdir -p $integrationName/bnfisni/agents
+  mkdir -p $integrationName/bnfisni/rdf
+
+
+  isniIdentifiers="$integrationName/bnfisni/agents/$SUFFIX_BNFISNI_IDENTIFIERS_ISNI"
+  configISNIExtraction="$integrationName/bnfisni/agents/$SUFFIX_BNFISNI_CONFIG_ISNI_EXTRACTION"
+  bnfIdentifiers="$integrationName/bnfisni/agents/$SUFFIX_BNFISNI_IDENTIFIERS_BNF"
+  bnfContributorData="$integrationName/bnfisni/rdf/$SUFFIX_BNFISNI_CONT_LD"
+
+  bnfContributorIsniData="$integrationName/bnfisni/rdf/$SUFFIX_BNF_CONT_ISNI_LD"
+  bnfContributorVIAFData="$integrationName/bnfisni/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
+  bnfContributorWikidataData="$integrationName/bnfisni/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
+
+  # Query ISNI identifiers with missing nationality information
+  echo "EXTRACTION - Extract ISNI identifier with missing nationality information"
+  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$isniIdentifiers"
+
+  echo "EXTRACTION - Create configuration file for following step"
+  echo "skos:exactMatch,inFile,$isniIdentifiers" > $configISNIExtraction
+
+  # Extract BnF identifier from BnF dump via queried ISNI
+  echo "EXTRACTION - Extract BnF identifier from BnF dump via queried ISNI"
+  getSubjects "$INPUT_BNF_CONT_ISNI" "$configISNIExtraction" "$bnfIdentifiers"
+
+  # Extract BnF contributor data via BnF identifier
+  echo "EXTRACTION - Extract BnF contributor data via BnF identifier"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i "$INPUT_BNF_PERSON_AUTHORS"  -o "$bnfContributorData" -f "$bnfIdentifiers"
+
+  echo "EXTRACTION - Extract links between BnF contributors and ISNI"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfIdentifiers
+
+  echo "EXTRACTION - Extract links between BnF contributors and VIAF"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfIdentifiers
+
+  echo "EXTRACTION - Extract links between BnF contributors and Wikidata"
+  time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfIdentifiers
+
+  # We could query nationality which is used to immediately enrich integrated persons,
+  # but we can also get all data of the newly found contributors to increase the overlap with other sources
+
+}
+
+# -----------------------------------------------------------------------------
 function extractMasterData {
 
   local integrationName=$1
@@ -857,7 +945,6 @@ function transformKB {
 # -----------------------------------------------------------------------------
 function transformBnF {
   local integrationName=$1
-
   echo "TRANSFORMATION - Map BnF translation data to RDF (nothing to do, the extraction step already produced RDF)"
 }
 
@@ -880,17 +967,23 @@ function transformWikidata {
   local integrationName=$1
 
   # create the folder to place the transformed data
-  mkdir -p $integrationName/wikiata/rdf 
+  mkdir -p $integrationName/wikidata/rdf 
 
-  wikidataTurtle="$integrationName/wikidata/rdf/$SUFFIX_MASTER_LD"
+  wikidataTurtle="$integrationName/wikidata/rdf/$SUFFIX_WIKIDATA_LD"
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_WIKIDATA_ENRICHED="$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
+  export RML_SOURCE_WIKIDATA_ENRICHED="$integrationName/wikidata/$SUFFIX_WIKIDATA_ENRICHED"
 
   # 2) execute the mapping
   echo "Map enriched Wikidata dump ..."
   . map.sh ../data-sources/wikidata/authors.yml $wikidataTurtle
  
+}
+
+# -----------------------------------------------------------------------------
+function transformNationalityFromBnFViaISNI {
+  local integrationName=$1
+  echo "TRANSFORMATION - Nothing to do for BnFVIAISNI, the extraction step already produced RDF"
 }
 
 # -----------------------------------------------------------------------------
@@ -1290,6 +1383,7 @@ function mapMasterData {
   
 }
 
+
 # -----------------------------------------------------------------------------
 function loadKBR {
   local integrationName=$1
@@ -1486,6 +1580,24 @@ function loadBnF {
 }
 
 # -----------------------------------------------------------------------------
+function loadWikidata {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # first delete content of the named graph in case it already exists
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_WIKIDATA>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_WIKIDATA"
+
+  local wikidataTurtle="$integrationName/wikidata/rdf/$SUFFIX_WIKIDATA_LD"
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  echo "Load wikidata data"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_WIKIDATA $wikidataTurtle
+}
+
+# -----------------------------------------------------------------------------
 function loadMasterData {
   local integrationName=$1
 
@@ -1506,6 +1618,44 @@ function loadMasterData {
   echo "Load master data (mapped content, countries, languages and gender information)"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_MASTER" \
     "$masterDataTurtle" "$masterDataCountries" "$masterDataLanguages" "$masterDataGender"
+
+}
+
+# -----------------------------------------------------------------------------
+function loadNationalityFromBnFViaISNI {
+  local integrationName=$1
+
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  local bnfContributorData="$integrationName/bnfisni/rdf/$SUFFIX_BNFISNI_CONT_LD"
+  local bnfContributorIsniData="$integrationName/bnfisni/rdf/$SUFFIX_BNF_CONT_ISNI_LD"
+  local bnfContributorVIAFData="$integrationName/bnfisni/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
+  local bnfContributorWikidataData="$integrationName/bnfisni/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
+
+  # we should NOT delete the target graph, because the target graph are the BnF contributors
+  # this step simply adds other data to the BnF contributors
+
+  echo "Load newly identified BnF contributors to provide missing nationalities ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData"
+
+
+  echo "Load external links of newly identified BnF contributors - ISNI ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$bnfContributorIsniData"
+
+  echo "Load external links of newly identified BnF contributors - VIAF ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$bnfContributorVIAFData"
+
+  echo "Load external links of newly identified BnF contributors - WIKIDATA ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$bnfContributorWikidataData"
+
+  echo "Add dcterms:identifier to newly identified BnF contributors and add ISNI/VIAF/Wikidata identifier according to the bibframe vocabulary"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+    "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_ISNI" \
+    "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA"
 
 }
 

@@ -8,84 +8,182 @@ prefix bibo: <http://purl.org/ontology/bibo/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX btm: <http://kbr.be/ns/beltrans/model#>
 PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX btisni: <http://kbr.be/isni/>
 PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 PREFIX up: <http://users.ugent.be/~tdenies/up/>
 
-SELECT DISTINCT
-  ?manifestationID
-  ?kbrAuthorID
-  ?kbrAuthorFamilyName
-  ?kbrAuthorGivenName
-  ?kbrAuthorNationality
-  ?kbrIllustratorID
-  ?kbrIllustratorFamilyName
-  ?kbrIllustratorGivenName
-  ?kbrIllustratorNationality
-  ?kbrScenaristID
-  ?kbrScenaristFamilyName
-  ?kbrScenaristGivenName
-  ?kbrScenaristNationality
+
+SELECT DISTINCT 
+  ?contributor
+  (group_concat(distinct ?contributorLabel;SEPARATOR=';') AS ?label)
+  (group_concat(distinct ?contributorFamilyName;SEPARATOR=';') AS ?familyName)
+  (group_concat(distinct ?contributorGivenName;SEPARATOR=';') AS ?givenName)
+  (group_concat(distinct ?kbr;SEPARATOR=';') AS ?kbrID)
+  (group_concat(distinct ?bnf;SEPARATOR=';') AS ?bnfID)
+  (group_concat(distinct ?nta;SEPARATOR=';') AS ?ntaID)
+  (group_concat(distinct ?isni;SEPARATOR=';') AS ?isniID)
+  (group_concat(distinct ?viaf;SEPARATOR=';') AS ?viafID)
+  (group_concat(distinct ?wikidata;SEPARATOR=';') AS ?wikidataID)
 WHERE {
-  
-  graph <http://kbr-syracuse> {
-    ?manifestation a schema:CreativeWork ;
-                   dcterms:identifier ?manifestationID .
-  }
-  graph <http://kbr-syracuse> { ?manifestation rdfs:comment ?responsibilityStatement . }
-         
-  # AUTHOR
+
+  graph <http://beltrans-manifestations> { ?manifestation dcterms:identifier ?manifestationID . } 
+
   OPTIONAL { 
-      graph <http://kbr-syracuse> {
-         ?activityAssociationAuthor a prov:Association ;
-                              prov:agent ?kbrAuthor ;
-                              prov:hadRole btid:role_aut .
-          ?activityAuthor a prov:Activity ;
-                    prov:qualifiedAssociation ?activityAssociationAuthor ;
-                    prov:generated ?manifestation .      
+      graph <http://beltrans-manifestations> { ?manifestation schema:author|marcrel:ill|marcrel:sce|marcrel:pbd ?contributor . }
+      graph <http://beltrans-contributors> { ?contributor a schema:Person . }
+      OPTIONAL { graph <http://beltrans-contributors> { ?contributor dcterms:identifier ?contributorID . } }
+      OPTIONAL { graph <http://beltrans-contributors> { ?contributor rdfs:label ?contributorLabel . } }
+      OPTIONAL { graph <http://beltrans-contributors> { ?contributor schema:familyName ?contributorFamilyName . } }
+      OPTIONAL { graph <http://beltrans-contributors> { ?contributor schema:givenName ?contributorGivenName . } }
+      OPTIONAL {
+          graph <http://beltrans-contributors> { ?contributor schema:nationality ?contributorNationality . } 
+          graph <http://master-data> { ?contributorNationality mads:contributoritativeLabel ?contributorNationalityLabel . }
+          FILTER(lang(?contributorNationalityLabel) = 'en')
       }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor dcterms:identifier ?kbrAuthorID . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:familyName ?kbrAuthorFamilyName . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:givenName ?kbrAuthorGivenName . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthor schema:nationality ?kbrAuthorNationality . } }
-  }
-
-  # ILLUSTRATOR
-  OPTIONAL { 
-      graph <http://kbr-syracuse> {
-         ?activityAssociationIllustrator a prov:Association ;
-                              prov:agent ?kbrIllustrator ;
-                              prov:hadRole btid:role_ill .
-          ?activityIllustrator a prov:Activity ;
-                    prov:qualifiedAssociation ?activityAssociationIllustrator ;
-                    prov:generated ?manifestation .      
-      }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator dcterms:identifier ?kbrIllustratorID . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:familyName ?kbrIllustratorFamilyName . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:givenName ?kbrIllustratorGivenName . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrIllustrator schema:nationality ?kbrIllustratorNationality . } }
-  }
-
-  # SCENARIST
-  OPTIONAL { 
-      graph <http://kbr-syracuse> {
-         ?activityAssociationScenarist a prov:Association ;
-                              prov:agent ?kbrScenarist ;
-                              prov:hadRole btid:role_sce .
-          ?activityScenarist a prov:Activity ;
-                    prov:qualifiedAssociation ?activityAssociationScenarist ;
-                    prov:generated ?manifestation .      
-      }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist dcterms:identifier ?kbrScenaristID . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:familyName ?kbrScenaristFamilyName . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:givenName ?kbrScenaristGivenName . } }
-      OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrScenarist schema:nationality ?kbrScenaristNationality . } }
   }
 
 
-  FILTER( (bound(?kbrAuthor) && !bound(?kbrAuthorNationality) )
-       || (bound(?kbrIllustrator) && !bound(?kbrIllustratorNationality) )
-       || (bound(?kbrScenarist) && !bound(?kbrScenaristNationality) ) )
+  OPTIONAL { graph <http://beltrans-contributors> {
+                 ?contributor bf:identifiedBy ?isniEntity .
+                 ?isniEntity a bf:Isni ;
+                             rdf:value ?isni .
+             }
+  }
 
+  OPTIONAL { graph <http://beltrans-contributors> {
+                 ?contributor bf:identifiedBy ?viafEntity .
+                 ?viafEntity a bf:Identifier ;
+                             rdfs:label "VIAF" ;
+                             rdf:value ?viaf .
+             }
+  }
+
+  OPTIONAL { graph <http://beltrans-contributors> {
+                 ?contributor bf:identifiedBy ?wikidataEntity .
+                 ?wikidataEntity a bf:Identifier ;
+                                 rdfs:label "Wikidata" ;
+                                 rdf:value ?wikidata .
+             }
+  }
+
+  OPTIONAL { graph <http://beltrans-contributors> {
+                 ?contributor bf:identifiedBy ?kbrEntity .
+                 ?kbrEntity a bf:Identifier ;
+                             rdfs:label "KBR" ;
+                             rdf:value ?kbr .
+             }
+  }
+
+  OPTIONAL { graph <http://beltrans-contributors> {
+                 ?contributor bf:identifiedBy ?bnfEntity .
+                 ?bnfEntity a bf:Identifier ;
+                            rdfs:label "BnF" ;
+                            rdf:value ?bnf .
+             }
+  }
+
+  OPTIONAL { graph <http://beltrans-contributors> {
+                 ?contributor bf:identifiedBy ?ntaEntity .
+                 ?ntaEntity a bf:Identifier ;
+                            rdfs:label "NTA" ;
+                            rdf:value ?nta .
+             }
+  }
+
+
+  FILTER NOT EXISTS {
+      graph <http://beltrans-contributors> { ?contributor schema:nationality ?contributorNationality . }
+  }
+
+  #
+  # sub query which is executed first to get the manifestations
+  # with a missing nationality and no other Belgian contributors
+  # i.e. a possible Belgian which could make the manifestation relevant for the BELTRANS corpus
+  #
+  {
+  SELECT DISTINCT
+    ?manifestationID
+    (group_concat(distinct ?subAuthorID;SEPARATOR=';') AS ?autID)
+    (group_concat(distinct ?allNat;SEPARATOR=';') AS ?allNationality)
+    (group_concat(distinct ?subAuthorNationality;SEPARATOR=';') AS ?autNat)
+    (group_concat(distinct ?subIllustratorID;SEPARATOR=';') AS ?illID)
+    (group_concat(distinct ?subIllustratorNationality;SEPARATOR=';') AS ?illNat)
+    (group_concat(distinct ?subScenaristID;SEPARATOR=';') AS ?sceID)
+    (group_concat(distinct ?subScenaristNationality;SEPARATOR=';') AS ?sceNat)
+    (group_concat(distinct ?subPublishingDirectorID;SEPARATOR=';') AS ?pbdID)
+    (group_concat(distinct ?subPublishingDirectorNationality;SEPARATOR=';') AS ?pbdNat)
+  WHERE {
+    
+    graph <http://beltrans-manifestations> {
+      ?manifestation a schema:CreativeWork ;
+                     dcterms:identifier ?manifestationID .
+    }
+           
+    # AUTHOR
+    OPTIONAL { 
+        graph <http://beltrans-manifestations> { ?manifestation schema:author ?subAuthor . }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subAuthor dcterms:identifier ?subAuthorID . } }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subAuthor schema:familyName ?subAuthorFamilyName . } }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subAuthor schema:givenName ?subAuthorGivenName . } }
+        OPTIONAL {
+            graph <http://beltrans-contributors> { ?subAuthor schema:nationality ?subAuthorNationality . } 
+            graph <http://master-data> { ?subAuthorNationality mads:authoritativeLabel ?subAuthorNationalityLabel . }
+            FILTER(lang(?subAuthorNationalityLabel) = 'en')
+        }
+    }
+
+    # ILLUSTRATOR
+    OPTIONAL { 
+        graph <http://beltrans-manifestations> { ?manifestation marcrel:ill ?subIllustrator . }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subIllustrator dcterms:identifier ?subIllustratorID . } }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subIllustrator schema:familyName ?subIllustratorFamilyName . } }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subIllustrator schema:givenName ?subIllustratorGivenName . } }
+        OPTIONAL {
+            graph <http://beltrans-contributors> { ?subIllustrator schema:nationality ?subIllustratorNationality . } 
+            graph <http://master-data> { ?subIllustratorNationality mads:authoritativeLabel ?subIllustratorNationalityLabel . }
+            FILTER(lang(?subIllustratorNationalityLabel) = 'en')
+        }
+    }
+
+    # SCENARIST
+    OPTIONAL { 
+        graph <http://beltrans-manifestations> { ?manifestation marcrel:sce ?subScenarist . }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subScenarist dcterms:identifier ?subScenaristID . } }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subScenarist schema:familyName ?subScenaristFamilyName . } }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subScenarist schema:givenName ?subScenaristGivenName . } }
+        OPTIONAL {
+            graph <http://beltrans-contributors> { ?subScenarist schema:nationality ?subScenaristNationality . } 
+            graph <http://master-data> { ?subScenaristNationality mads:authoritativeLabel ?subScenaristNationalityLabel . }
+            FILTER(lang(?subScenaristNationalityLabel) = 'en')
+        }
+    }
+
+    # PUBLISHING DIRECTOR
+    OPTIONAL { 
+        graph <http://beltrans-manifestations> { ?manifestation marcrel:sce ?subPublishingDirector . }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subPublishingDirector dcterms:identifier ?subPublishingDirectorID . } }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subPublishingDirector schema:familyName ?subPublishingDirectorFamilyName . } }
+        OPTIONAL { graph <http://beltrans-contributors> { ?subPublishingDirector schema:givenName ?subPublishingDirectorGivenName . } }
+        OPTIONAL {
+            graph <http://beltrans-contributors> { ?subPublishingDirector schema:nationality ?subPublishingDirectorNationality . } 
+            graph <http://master-data> { ?subPublishingDirectorNationality mads:authoritativeLabel ?subPublishingDirectorNationalityLabel . }
+            FILTER(lang(?subPublishingDirectorNationalityLabel) = 'en')
+        }
+
+    }
+
+
+    BIND( IF(bound(?subAuthor) && !bound(?subAuthorNationalityLabel), "MISSING", STR(?subAuthorNationalityLabel)) AS ?subAuthorNat)
+    BIND( IF(bound(?subIllustrator) && !bound(?subIllustratorNationalityLabel), "MISSING", STR(?subIllustratorNationalityLabel)) AS ?subIllustratorNat)
+    BIND( IF(bound(?subScenarist) && !bound(?subScenaristNationalityLabel), "MISSING", STR(?subScenaristNationalityLabel)) AS ?subScenaristNat)
+    BIND( IF(bound(?subPublishingDirector) && !bound(?subPublishingDirectorNationalityLabel), "MISSING", STR(?subPublishingDirectorNationalityLabel)) AS ?subPublishingDirectorNat)
+    BIND( CONCAT(?subAuthorNat, ?subIllustratorNat, ?subScenaristNat, ?subPublishingDirectorNat) AS ?allNat)
+
+  }
+  GROUP BY ?manifestationID
+  HAVING(!CONTAINS(?allNationality, "Belgium") && CONTAINS(?allNationality, "MISSING"))
+  } # end sub select
 }
+GROUP BY ?contributor

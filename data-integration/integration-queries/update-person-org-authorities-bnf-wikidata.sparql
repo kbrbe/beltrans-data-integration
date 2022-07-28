@@ -31,6 +31,7 @@ INSERT {
       schema:nationality ?bnfAuthorityNationality ;
       bf:identifiedBy ?viafEntityURI ;
       bf:identifiedBy ?isniEntityURI ;
+      bf:identifiedBy ?ownIDEntityURI ;
       schema:sameAs ?bnfAuthority .
 
     ?isniEntityURI a bf:Isni ;
@@ -41,6 +42,11 @@ INSERT {
                    rdfs:label "VIAF" ;
                    rdfs:comment "Added from BnF via Wikidata" ;
                    rdf:value ?viaf .
+
+    ?ownIDEntityURI a bf:Identifier ;
+                    rdfs:comment "Added from BnF via Wikidata" ;
+                    rdfs:label "BnF" ;
+                    rdf:value ?ownID .
   }
 }
 WHERE {
@@ -63,6 +69,11 @@ WHERE {
     #
     OPTIONAL { graph <http://bnf-contributors> { ?bnfAuthority rdagroup2elements:countryAssociatedWithThePerson ?bnfAuthorityNationality . } }
 
+    # Get optional own ID
+    OPTIONAL {
+      graph <http://bnf-contributors> { ?bnfAuthority dcterms:identifier ?ownID . } 
+      BIND(iri(concat("http://kbr.be/id/data/identifier_bnf_", ?ownID)) as ?ownIDEntityURI)
+    }
 
     #
     # Get optional ISNI

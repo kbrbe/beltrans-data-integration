@@ -17,6 +17,7 @@ def main():
   parser.add_option('-c', '--input-contributors', action='store', help='The input file containing CSV data with one contributor per line')
   parser.add_option('-m', '--input-manifestations', action='store', help='The input file containing CSV data with one manifestation per line')
   parser.add_option('-o', '--output-file', action='store', help='The file in which content with new headers is stored')
+  parser.add_option('--keep-non-contributors', action='store_true', default=False, help='If this flag is set, contributors with 0 authored,translated etc books are not filtered out')
   (options, args) = parser.parse_args()
 
   #
@@ -98,10 +99,13 @@ def main():
         row['scenaristIn'] = 0
         row['publishingDirectorIn'] = 0
 
-      if row['authorIn'] > 0 or row['translatorIn'] > 0\
-              or row['illustratorIn'] > 0 or row['scenaristIn'] > 0\
-              or row['publishingDirectorIn'] > 0:
+      if options.keep_non_contributors:
         outputWriter.writerow(row)
+      else:
+        if row['authorIn'] > 0 or row['translatorIn'] > 0\
+                or row['illustratorIn'] > 0 or row['scenaristIn'] > 0\
+                or row['publishingDirectorIn'] > 0:
+          outputWriter.writerow(row)
 
   # print statistics
   for dateType in mismatchLog:

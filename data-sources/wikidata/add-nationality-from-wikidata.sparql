@@ -1,0 +1,81 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+
+
+INSERT {
+
+  graph <http://wikidata> {
+    ?wikidataURI a schema:Person ;
+                 dcterms:identifier ?wd ;
+                 schema:nationality ?wikidataNationality ;
+                 bf:identifiedBy ?newWikidataEntity .
+    
+    ?newWikidataEntity a bf:Identifier ;
+                 rdfs:label "Wikidata" ;
+                 rdf:value ?wd .
+
+  }
+}
+WHERE {
+  
+  BIND(iri(concat("http://kbr.be/id/data/identifier_wikidata_", ?wd)) AS ?newWikidataEntity)
+  BIND(iri(concat("http://www.wikidata.org/entity/", ?wd)) AS ?wikidataURI)
+  BIND(iri(concat("http://id.loc.gov/vocabulary/", ?countryCode)) AS ?wikidataNationality)
+  
+  #
+  # Federated query: retrieve missing ISNI from wikidata
+  #
+  SERVICE <https://query.wikidata.org/sparql> {
+    ?wikidataURI wdt:P27/wdt:P4801 ?countryCode .
+  }
+  BIND(REPLACE(?isni, " ", "", "i") AS ?isniFormatted)
+  
+  #
+  # The sub select which is executed first: get all our authorities with Wikidata identifier but without nationality
+  {
+   SELECT ?contributorType ?wd
+   WHERE {
+     
+     graph <http://beltrans-contributors> { 
+        ?contributor a schema:Person ;
+                     bf:identifiedBy ?wdEntity .
+    
+        ?wdEntity a bf:Identifier ;
+                  rdfs:label "Wikidata" ;
+                  rdf:value ?wd .
+     }
+     
+     OPTIONAL { 
+        graph <http://beltrans-contributors> {
+          ?contributor schema:nationality ?nationality .
+        }
+     }
+
+
+     FILTER NOT EXISTS {
+       graph <http://beltrans-contributors> {
+          ?contributor schema:nationality ?nationality .
+       }
+     } 
+    }
+  } # end sub select
+}

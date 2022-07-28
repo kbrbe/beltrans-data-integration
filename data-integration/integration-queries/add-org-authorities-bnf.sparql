@@ -32,21 +32,31 @@ INSERT {
       rdfs:comment "Created from BnF data" ;
       bf:identifiedBy ?authorityURIISNI ;
       bf:identifiedBy ?viafEntityURI ;
-      bf:identifiedBy ?wdEntityURI .
+      bf:identifiedBy ?wdEntityURI ;
+      bf:identifiedBy ?ownIDEntityURI .
 
     ?countryEntityURI a schema:PostalAddress ;
+                      rdfs:comment "Created from BnF data" ;
                       schema:addressCountry ?country .
 
     ?authorityURIISNI a bf:Isni ;
-      rdf:value ?bnfAuthorityISNI .
+                      rdfs:comment "Created from BnF data" ;
+                      rdf:value ?bnfAuthorityISNI .
 
     ?viafEntityURI a bf:Identifier ;
+                   rdfs:comment "Created from BnF data" ;
                    rdfs:label "VIAF" ;
                    rdf:value ?viaf .
 
     ?wdEntityURI a bf:Identifier ;
+                 rdfs:comment "Created from BnF data" ;
                  rdfs:label "Wikidata" ;
                  rdf:value ?wd .
+
+    ?ownIDEntityURI a bf:Identifier ;
+                    rdfs:comment "Created from BnF data" ;
+                    rdfs:label "BnF" ;
+                    rdf:value ?ownID .
 
   }
 }
@@ -61,6 +71,12 @@ WHERE {
 
     BIND( STRUUID() as ?uuid)
     BIND( IRI( CONCAT( "http://kbr.be/id/data/", ?uuid ) ) as ?authorityURI)
+
+    # Get optional own ID
+    OPTIONAL {
+      graph <http://bnf-contributors> { ?bnfAuthority dcterms:identifier ?ownID . } 
+      BIND(iri(concat("http://kbr.be/id/data/identifier_bnf_", ?ownID)) as ?ownIDEntityURI)
+    }
 
     # get optional location
     OPTIONAL {

@@ -16,6 +16,7 @@ yarrrml-parser
 # no corpus versions
 2021-*
 2022-*
+corpus-versions/
 
 # not the geonames dump
 geonames/

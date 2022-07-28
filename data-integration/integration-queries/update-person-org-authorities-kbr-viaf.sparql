@@ -29,8 +29,9 @@ INSERT {
 
     ?authorityURI
       schema:nationality ?kbrAuthorityNationality ;
-      bf:identifiedBy ?viafEntityURI ;
+      bf:identifiedBy ?isniEntityURI ;
       bf:identifiedBy ?wdEntityURI ;
+      bf:identifiedBy ?ownIDEntityURI ;
       schema:sameAs ?kbrAuthority .
 
     ?isniEntityURI a bf:Isni ;
@@ -41,6 +42,11 @@ INSERT {
                  rdfs:label "Wikidata" ;
                  rdfs:comment "Added from KBR via VIAF" ;
                  rdf:value ?wd .
+
+    ?ownIDEntityURI a bf:Identifier ;
+                    rdfs:comment "Created from KBR via VIAF" ;
+                    rdfs:label "KBR" ;
+                    rdf:value ?ownID .
   }
 }
 WHERE {
@@ -63,6 +69,11 @@ WHERE {
     #
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAuthority schema:nationality ?kbrAuthorityNationality . } }
 
+    # Get optional own ID
+    OPTIONAL {
+      graph <http://kbr-linked-authorities> { ?kbrAuthority dcterms:identifier ?ownID . } 
+      BIND(iri(concat("http://kbr.be/id/data/identifier_kbr_", ?ownID)) as ?ownIDEntityURI)
+    }
 
     #
     # Get optional ISNI

@@ -1,4 +1,5 @@
 "Create ISNI SRU authorities - Persons",integration-queries/add-person-authorities-isni-sru.sparql
+"Create Wikidata authorities - Persons",integration-queries/add-person-authorities-wikidata.sparql
 "Create KBR authorities - Persons",integration-queries/add-person-authorities-kbr.sparql
 "Create BnF authorities - Persons",integration-queries/add-person-authorities-bnf.sparql
 "Create KB (NTA) authorities - Persons",integration-queries/add-person-authorities-kb.sparql
