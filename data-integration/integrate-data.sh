@@ -52,6 +52,9 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-06-24_5410records.xml"
 INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-06-24_16318records.xml"
 
+INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
+INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
+
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
 # KBR - linked authorities
@@ -392,6 +395,9 @@ function extract {
   if [ "$dataSource" = "kbr" ];
   then
     extractKBR $integrationFolderName
+  elif [ "$dataSource" = "kbr-originals" ];
+  then
+    extractKBROriginals $integrationFolderName
   elif [ "$dataSource" = "master-data" ];
   then
     extractMasterData $integrationFolderName
@@ -634,6 +640,119 @@ function extractKBR {
 
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
   extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR"
+
+}
+
+# -----------------------------------------------------------------------------
+function extractKBROriginals {
+
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # create the folders to place the extracted translations and agents
+  mkdir -p $integrationName/kbr-originals/translations
+  mkdir -p $integrationName/kbr-originals/agents
+
+  #
+  # Define file names based on current integration directory and file name patterns
+  #
+  kbrDutchTranslationsCleaned="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_CLEANED"
+  kbrFrenchTranslationsCleaned="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_CLEANED"
+
+  kbrDutchTranslationsCSVWorks="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_WORKS"
+  kbrFrenchTranslationsCSVWorks="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+
+  kbrDutchTranslationsCSVCont="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_CONT"
+  kbrDutchTranslationsCSVContReplaced="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_CONT_REPLACE"
+  kbrDutchTranslationsCSVContDedup="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_CONT_DEDUP"
+  kbrFrenchTranslationsCSVCont="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_CONT"
+  kbrFrenchTranslationsCSVContReplaced="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_CONT_REPLACE"
+  kbrFrenchTranslationsCSVContDedup="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_CONT_DEDUP"
+
+  kbrDutchTranslationsIdentifiedAuthorities="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_NEWAUT"
+  kbrFrenchTranslationsIdentifiedAuthorities="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_NEWAUT"
+
+  kbrDutchTranslationsCSVBB="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_BB"
+  kbrFrenchTranslationsCSVBB="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_BB"
+
+  kbrDutchTranslationsPubCountries="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
+  kbrFrenchTranslationsPubCountries="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
+
+  kbrDutchTranslationsPubPlaces="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_PUB_PLACE"
+  kbrFrenchTranslationsPubPlaces="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_PUB_PLACE"
+
+  kbrDutchTranslationsCollectionLinks="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
+  kbrFrenchTranslationsCollectionLinks="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
+
+  kbrDutchTranslationsISBN10="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_ISBN10"
+  kbrDutchTranslationsISBN13="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_ISBN13"
+  kbrFrenchTranslationsISBN10="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_ISBN10"
+  kbrFrenchTranslationsISBN13="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_ISBN13"
+  
+  source ../data-sources/py-etl-env/bin/activate
+
+  echo "Clean Dutch translations ..."
+  cleanTranslations "$INPUT_KBR_TRL_ORIG_NL_FR" "$kbrDutchTranslationsCleaned"
+
+  echo "Clean French translations ..."
+  cleanTranslations "$INPUT_KBR_TRL_ORIG_FR_NL" "$kbrFrenchTranslationsCleaned"
+
+  echo "Extract CSV from Dutch translations XML..."
+  extractCSVFromXMLTranslations "$kbrDutchTranslationsCleaned" "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVCont" "$kbrDutchTranslationsCollectionLinks"
+
+  echo "Extract CSV from French translations XML..."
+  extractCSVFromXMLTranslations "$kbrFrenchTranslationsCleaned" "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsCSVCont" "$kbrFrenchTranslationsCollectionLinks"
+
+  echo "Replace publisher names to support deduplication - NL-FR"
+  python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrDutchTranslationsCSVCont -o $kbrDutchTranslationsCSVContReplaced
+
+  echo "Replace publisher names to support deduplication - FR-NL"
+  python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrFrenchTranslationsCSVCont -o $kbrFrenchTranslationsCSVContReplaced
+
+  echo "Deduplicate newly identified contributors - NL-FR"
+  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrDutchTranslationsCSVContReplaced -o $kbrDutchTranslationsCSVContDedup
+
+  echo "Deduplicate newly identified contributors - FR-NL"
+  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrFrenchTranslationsCSVContReplaced -o $kbrFrenchTranslationsCSVContDedup
+
+  echo "Extract BB assignments for Dutch translations ..."
+  extractBBEntries "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVBB"
+
+  echo "Extract BB assignments for French translations ..."
+  extractBBEntries "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsCSVBB"
+
+  echo "Extract publication countries from Dutch translations ..."
+  extractPubCountries "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsPubCountries"
+
+  echo "Extract publication countries from French translations ..."
+  extractPubCountries "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsPubCountries"
+
+  echo "Extract publication places from Dutch translations ..."
+  extractPubPlaces "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsPubPlaces"
+
+  echo "Extract publication places from French translations ..."
+  extractPubPlaces "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsPubPlaces"
+
+
+  echo "Extract (possibly multiple) ISBN10 identifiers per translation - NL-FR"
+  extractISBN10 "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsISBN10"
+
+  echo "Extract (possibly multiple) ISBN13 identifiers per translation - NL-FR"
+  extractISBN13 "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsISBN13"
+
+  echo "Extract (possibly multiple) ISBN10 identifiers per translation - FR-NL"
+  extractISBN10 "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN10"
+
+  echo "Extract (possibly multiple) ISBN13 identifiers per translation - FR-NL"
+  extractISBN13 "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN13"
+
+
+  echo "Extract newly identified contributors ..."
+  extractIdentifiedAuthorities "$kbrDutchTranslationsCSVContDedup" "$kbrDutchTranslationsIdentifiedAuthorities"
+  extractIdentifiedAuthorities "$kbrFrenchTranslationsCSVContDedup" "$kbrFrenchTranslationsIdentifiedAuthorities"
+
 
 }
 
