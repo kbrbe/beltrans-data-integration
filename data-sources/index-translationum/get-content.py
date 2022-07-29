@@ -32,7 +32,7 @@ class ParseDict(argparse.Action):
 # -----------------------------------------------------------------------------
 def main():
 
-  parser = argparse.ArgumentParser(usage="usage: %prog [options]")
+  parser = argparse.ArgumentParser()
   parser.add_argument('-u', '--url', action='store', help="The URL from which content should be retrieved")
   parser.add_argument('-m', '--number-records', action='store', type=int, help='The number of records which are requested in total')
   parser.add_argument('-r', '--number-results-per-page', action='store', type=int, help='The number of search entries in a page')
@@ -48,9 +48,6 @@ def main():
     parser.print_help()
     exit(1)
 
-  #payload = {'operation': 'searchRetrieve', 'version': '1.1', 'startRecord': 1, 'maximumRecords': numberRecords, 'recordSchema': 'isni-e', 'sortKeys': 'none', 'query': query}
-  #url = f'{baseURL}/username={USERNAME}/password={PASSWORD}/DB=1.3'
-
 
   url = options.url
   urlParameters = options.params
@@ -58,7 +55,6 @@ def main():
   numberResultsPerPage = options.number_results_per_page
   secondsBetweenRequests = options.waiting_time
 
-  # Each result page contain
 
   request = requests.Session()
   records = []
@@ -73,6 +69,7 @@ def main():
       with open(f'no-records-found-{i}.html', 'w', encoding='utf-8') as errFile:
         errFile.write(response.content)
     urlParameters['fr'] = i
+    time.sleep(secondsBetweenRequests)
 
   with open(options.output_file, 'w', encoding='utf-8') as outFile:
     outputWriter = csv.DictWriter(outFile, fieldnames=foundFields)
