@@ -25,8 +25,9 @@ The content was extracted using the script `get-content.py`.
 Following the web interface, there are `3,349` results, we use this information to configure our script
 
 ```
-time python get-content.py -u https://www.unesco.org/xtrans/bsresult.aspx -m 3349 -r 10 -o beltrans-index-translationum.csv -w 0 --params lg=0 sl=nld l=fra from=1970 to=2020
- 82%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋                             | 275/335 [13:21<02:56,  2.94s/it]Invalid ISBN "2-93004-02-11-3" in record 2747/3349
+time python get-content.py -u https://www.unesco.org/xtrans/bsresult.aspx -m 3349 -r 10 -o beltrans_NL-FR_index-translationum_3349.csv -w 0 --params lg=0 sl=nld l=fra from=1970 to=2020
+ 82%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋                             | 275/335 [13:21<02:56,  2.94s/it]
+Invalid ISBN "2-93004-02-11-3" in record 2747/3349
 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 335/335 [16:13<00:00,  2.91s/it]
 
 real	16m13,538s
@@ -55,10 +56,13 @@ We inserted the corrected data manually.
 Following the web interface, there are `11,899` results, we use this information to configure our script
 
 ```
-time python get-content.py -u https://www.unesco.org/xtrans/bsresult.aspx -m 11899 -r 10 -o beltrans_FR-NL_index-translationum.csv -w 0 --params lg=0 sl=fra l=nld from=1970 to=2020
- 65%|█████████████████████████████████████████████████████████████████████████████████████████████████████████▋                                                         | 772/1190 [45:52<24:16,  3.48s/it]Invalid ISBN "PRG" in record 7713/11899
- 72%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                                             | 856/1190 [50:26<19:40,  3.54s/it]Invalid ISBN "GEO GU90-209-2597-0" in record 8552/11899
- 96%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏      | 1139/1190 [1:06:13<03:16,  3.86s/it]Invalid ISBN "PHL" in record 11389/11899
+time python get-content.py -u https://www.unesco.org/xtrans/bsresult.aspx -m 11899 -r 10 -o beltrans_FR-NL_index-translationum_11899.csv -w 0 --params lg=0 sl=fra l=nld from=1970 to=2020
+ 65%|█████████████████████████████████████████████████████████████████████████████████████████████████████████▋                                                         | 772/1190 [45:52<24:16,  3.48s/it]
+Invalid ISBN "PRG" in record 7713/11899
+ 72%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                                             | 856/1190 [50:26<19:40,  3.54s/it]
+Invalid ISBN "GEO GU90-209-2597-0" in record 8552/11899
+ 96%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▏      | 1139/1190 [1:06:13<03:16,  3.86s/it]
+Invalid ISBN "PHL" in record 11389/11899
 Invalid ISBN "REL" in record 11389/11899
 Invalid ISBN "PHL" in record 11389/11899
 Invalid ISBN "REL" in record 11389/11899
