@@ -9,8 +9,7 @@ import itertools
 import xlsxwriter
 
 # -----------------------------------------------------------------------------
-def main():
-  """This script creates an Excel file based on the CSV input. One or more CSV files can be given via arguments, each becomes a new sheet in the output Excel workbook"""
+def checkArguments():
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-o', '--output-file', action='store', help='The Excel file in which content is stored')
@@ -40,9 +39,16 @@ def main():
     parser.print_help()
     exit(1)
 
-  wb = xlsxwriter.Workbook(options.output_file, {'strings_to_formulas': False, 'strings_to_numbers': True})
+  return (options, args)
 
-  for filename in args:
+# -----------------------------------------------------------------------------
+def main(output_file, sheet_names, *csvFiles):
+  """This script creates an Excel file based on the CSV input. One or more CSV files can be given via arguments, each becomes a new sheet in the output Excel workbook"""
+
+
+  wb = xlsxwriter.Workbook(output_file, {'strings_to_formulas': False, 'strings_to_numbers': True})
+
+  for filename in csvFiles:
     with open(filename, 'r', encoding="utf-8") as inFile:
 
       rowCountReader, colCountReader, inputReader = itertools.tee(csv.reader(inFile, delimiter=','), 3)
@@ -54,7 +60,7 @@ def main():
       del colCountReader
       print(f'{filename} has {rowCount} rows and {colCount} cols')
 
-      sheet = wb.add_worksheet(options.sheet_names.pop(0))
+      sheet = wb.add_worksheet(sheet_names.pop(0))
 
       headerDict = [ {'header': e} for e in header]
       table = sheet.add_table(0,0,rowCount,colCount-1, {'style': 'Table Style Light 11', 'header_row': True, 'columns': headerDict})
@@ -66,5 +72,7 @@ def main():
 
   wb.close()
 
+# -----------------------------------------------------------------------------
 if __name__ == '__main__':
-  main()
+  (options, args) = checkArguments()
+  main(options.output_file, options.sheet_names, args)

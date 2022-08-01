@@ -17,7 +17,7 @@ SCRIPT_FIX_ISBN10="../data-sources/bnf/formatISBN10.py"
 SCRIPT_FIX_ISBN13="../data-sources/bnf/formatISBN13.py"
 SCRIPT_CREATE_ISBN10_TRIPLES="../data-sources/bnf/createISBN10Triples.py"
 SCRIPT_CREATE_ISBN13_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
-SCRIPT_CSV_TO_EXCEL="csv-to-excel.py"
+SCRIPT_CSV_TO_EXCEL="csv_to_excel.py"
 SCRIPT_COMPUTE_STATS="create-publication-stats.py"
 SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
 
