@@ -43,6 +43,116 @@ def checkArguments():
     return options
 
 # -----------------------------------------------------------------------------
+def createCandidateString(title, identifiers):
+    return f'{title} ({identifiers})'
+
+# -----------------------------------------------------------------------------
+def handleMultipleCandidates(sourceLookup, target, original_title_normalized, duplicateIDs,
+                             candidateDelimiter, clearMatchesWriter, duplicateIDMatchesWriter, candidateFilter,
+                             matchesCounter, targetYearColumn='yearOfPublication'):
+    """This function determines the candidates and the respective candidateWriter for matches with several IDs.
+     If the candidateFilter is True, an attempt is made to reduce the number of duplicates.
+     If successfully reduced the number of duplicates to 1, the candidateWriter will be the clearMatchesWriter,
+     otherwise the duplicateMatchesWriter.
+    """
+
+    outputRowCandidates = ''
+    outputRowCandidateIDs = ''
+    outputRowWriter = None
+
+    # let's try some automatic filtering to reduce the number of possible candidates
+    if candidateFilter and targetYearColumn in target and target[targetYearColumn] != '':
+        candidateIDs = sourceLookup.filterYearIdentifiers(duplicateIDs,
+                                                          target['yearOfPublication'])
+
+        # the filtering worked! Now there is only a single match we will add to the clear match output
+        if len(candidateIDs) == 1:
+            matchesCounter['singleMatchAfterDuplicateRemoving'] = matchesCounter['singleMatchAfterDuplicateRemoving'] + 1
+            outputRowCandidates = createCandidateString(original_title_normalized, candidateIDs[0])
+            outputRowCandidateIDs = str(candidateIDs[0])
+            outputRowWriter = clearMatchesWriter
+
+        # still more than one match
+        elif len(candidateIDs) > 1:
+            candidateIDsString = candidateDelimiter.join(candidateIDs)
+            idString = ','.join(candidateIDs)
+            outputRowCandidates = createCandidateString(original_title_normalized, idString)
+            outputRowCandidateIDs = candidateIDsString
+            outputRowWriter = duplicateIDMatchesWriter
+
+            if len(candidateIDs) < len(duplicateIDs):
+                matchesCounter['reducedDuplicates'] = matchesCounter['reducedDuplicates'] + 1
+            else:
+                matchesCounter['duplicateMatch'] = matchesCounter['duplicateMatch'] + 1
+
+        # after filtering we are left with no candidates at all
+        else:
+            matchesCounter['noCandidatesLeft'] = matchesCounter['noCandidatesLeft'] + 1
+
+    # we do not want to apply automatic filtering: simply return a list of all candidates
+    else:
+        candidateIDs = sourceLookup.getIdentifier(original_title_normalized)
+        candidateIDsString = candidateDelimiter.join(candidateIDs)
+        idString = ','.join(candidateIDs)
+        outputRowCandidates = original_title_normalized + ' (' + idString + ')'
+        outputRowCandidateIDs = candidateIDsString
+        outputRowWriter = duplicateIDMatchesWriter
+        matchesCounter['duplicateMatch'] = matchesCounter['duplicateMatch'] + 1
+
+    return (outputRowCandidates, outputRowCandidateIDs, outputRowWriter)
+
+# -----------------------------------------------------------------------------
+def performSimilarityMatching(sourceLookup, target, original_title_normalized, candidateDelimiter,
+                              similarityMatchesWriter, similarityDuplicateIDMatchesWriter,
+                              similarityMultipleMatchesWriter, candidateFilter, matchesCounter, similarityThreshold):
+
+    candidates = []
+    candidateKeys = []
+    duplicateIDMatch = False
+    for title, KBRIDs in sourceLookup.getItems():
+        if Indel.normalized_similarity(original_title_normalized, title) > similarityThreshold:
+            idString = ''
+            if sourceLookup.containsSingleIdentifier(title):
+                idString = next(iter(KBRIDs))
+            else:
+                idString = ','.join(sorted(KBRIDs))
+                duplicateIDMatch = True
+            candidate = createCandidateString(title, idString)
+            candidateKeys.append(idString)
+            candidates.append(candidate)
+
+    outputRowCandidates = candidateDelimiter.join(candidates)
+    outputRowCandidateIDs = candidateDelimiter.join(candidateKeys)
+    outputRowWriter = None
+
+    if len(candidates) == 1 and duplicateIDMatch:
+
+        (outputRowCandidates,
+         outputRowCandidateIDs,
+         outputRowWriter) = handleMultipleCandidates(sourceLookup, target, original_title_normalized,
+                                                     candidateKeys[0].split(','), candidateDelimiter,
+                                                     similarityMatchesWriter, similarityDuplicateIDMatchesWriter,
+                                                     candidateFilter, matchesCounter)
+
+
+    elif len(candidates) == 1 and not duplicateIDMatch:
+        matchesCounter['singleMatch'] = matchesCounter['singleMatch'] + 1
+        outputRowCandidates = candidateDelimiter.join(candidates)
+        outputRowCandidateIDs = candidateDelimiter.join(candidateKeys)
+        outputRowWriter = similarityMatchesWriter
+    elif len(candidates) > 1:
+        matchesCounter['multipleMatches'] = matchesCounter['multipleMatches'] + 1
+        listOfList = [id.split(',') for id in candidateKeys]
+        flattenedList = [item for sublist in listOfList for item in sublist]
+        outputRowCandidateIDs = candidateDelimiter.join(flattenedList)
+        outputRowWriter = similarityMultipleMatchesWriter
+    else:
+        # no candidates found, thus no match
+        pass
+
+    return (outputRowCandidates, outputRowCandidateIDs, outputRowWriter)
+
+# -----------------------------------------------------------------------------
 def main(original_works, translations, similarityThreshold, output_file_clear_matches,
          output_file_duplicate_id_matches, output_file_similarity_matches,
          output_file_similarity_duplicate_id_matches, output_file_similarity_multiple_matches,
@@ -84,14 +194,11 @@ def main(original_works, translations, similarityThreshold, output_file_clear_ma
         numberTargetRecords = 0
         numberTargetRecordsWithOriginalTitle = 0
         numberClearMatches = 0
-        numberClearMatchesAfterFiltering = 0
-        numberReducedDuplicateIDMatches = 0
-        numberDuplicateIDMatches = 0
-        numberSimilarityMatches = 0
-        numberSimilarityDuplicateIDMatches = 0
-        numberSimilarityMatchesAfterFiltering = 0
-        numberSimilarityReducedDuplicateIDMatches = 0
-        numberSimilarityMultipleMatches = 0
+
+        titleMatchCounter = {'singleMatch': 0, 'duplicateMatch': 0, 'reducedDuplicates': 0,
+                             'singleMatchAfterDuplicateRemoving': 0, 'noCandidatesLeft': 0}
+        similarityMatchCounter = {'singleMatch': 0, 'duplicateMatch': 0, 'reducedDuplicates': 0,
+                                  'singleMatchAfterDuplicateRemoving': 0, 'multipleMatches': 0, 'noCandidatesLeft': 0}
 
         similarityMatches = {}
 
@@ -100,6 +207,11 @@ def main(original_works, translations, similarityThreshold, output_file_clear_ma
             targetKBRID = target['KBRID']
             targetTitle = target['title']
             targetOriginalTitle = target['originalTitle']
+
+            currentOutputWriter = None
+            outputRowCandidates = ''
+            outputRowCandidateIDs = ''
+
             if target['sourceTitle'] == '' and target['originalTitle'] != '':
                 numberTargetRecordsWithOriginalTitle += 1
                 # we found a matching title
@@ -108,136 +220,53 @@ def main(original_works, translations, similarityThreshold, output_file_clear_ma
                     # we actually found only one matching title (best case)
                     if sourceLookup.containsSingleIdentifier(original_title_normalized):
                         KBRID = next(iter(sourceLookup.getIdentifier(original_title_normalized)))
-                        match = original_title_normalized + ' (' + str(KBRID) + ')'
-                        numberClearMatches += 1
-                        clearMatchesWriter.writerow({'KBRID': targetKBRID, 'title': targetTitle,
-                                                     'originalTitle': targetOriginalTitle,
-                                                     'candidates': match, 'candidatesIDs': str(KBRID)})
+                        outputRowCandidates = createCandidateString(original_title_normalized, str(KBRID))
+                        outputRowCandidateIDs = str(KBRID)
+                        currentOutputWriter = clearMatchesWriter
+                        titleMatchCounter['singleMatch'] = titleMatchCounter['singleMatch'] + 1
 
                     # there are several book identifiers with the given title, further checks needed
                     else:
-                        # let's try some automatic filtering to reduce the number of possible candidates
-                        if candidateFilter and 'yearOfPublication' in target and target['yearOfPublication'] != '':
-                            candidateIDs = sourceLookup.getYearFilteredIdentifiers(original_title_normalized,
-                                                                                   target['yearOfPublication'])
-
-                            # the filtering worked! Now there is only a single match we will add to the clear match output
-                            if len(candidateIDs) == 1:
-                                numberClearMatchesAfterFiltering += 1
-                                match = original_title_normalized + ' (' + candidateIDs[0] + ')'
-                                clearMatchesWriter.writerow({'KBRID': targetKBRID, 'title': targetTitle,
-                                                             'originalTitle': targetOriginalTitle,
-                                                             'candidates': match, 'candidatesIDs': str(candidateIDs[0])})
-
-                            # still more than one match
-                            elif len(candidateIDs) > 1:
-                                candidateIDsString = candidateDelimiter.join(candidateIDs)
-                                idString = ','.join(candidateIDs)
-                                match = original_title_normalized + ' (' + idString + ')'
-
-                                # here needs to be a comparison to check if we really reduced the number
-                                #numberReducedDuplicateIDMatches += 1
-                                duplicateIDMatchesWriter.writerow({'KBRID': targetKBRID, 'title': targetTitle,
-                                                                   'originalTitle': targetOriginalTitle,
-                                                                   'candidates': match,
-                                                                   'candidatesIDs': candidateIDsString})
-
-                        # we do not want to apply automatic filtering: simply return a list of all candidates
-                        else:
-                            candidateIDs = sourceLookup.getIdentifier(original_title_normalized)
-                            candidateIDsString = candidateDelimiter.join(candidateIDs)
-                            idString = ','.join(candidateIDs)
-                            match = original_title_normalized + ' (' + idString + ')'
-                      
-                            numberDuplicateIDMatches += 1
-                            duplicateIDMatchesWriter.writerow({'KBRID': targetKBRID, 'title': targetTitle,
-                                                               'originalTitle': targetOriginalTitle,
-                                                              'candidates': match, 'candidatesIDs': candidateIDsString})
+                        duplicateIDs = sourceLookup.getIdentifier(original_title_normalized)
+                        (outputRowCandidates,
+                         outputRowCandidateIDs,
+                         currentOutputWriter) = handleMultipleCandidates(sourceLookup, target, original_title_normalized,
+                                                                         duplicateIDs, candidateDelimiter, clearMatchesWriter,
+                                                                         duplicateIDMatchesWriter, candidateFilter,
+                                                                         titleMatchCounter)
 
                 # no matching title found, let's try titles with high similarity
                 else:
-                    candidates = []
-                    candidateKeys = []
-                    duplicateIDMatch = False
-                    for title, KBRIDs in sourceLookup.getItems():
-                        if Indel.normalized_similarity(original_title_normalized, title) > similarityThreshold:
-                            idString = ''
-                            if sourceLookup.containsSingleIdentifier(title):
-                                idString = next(iter(KBRIDs))
-                            else:
-                                idString = ','.join(sorted(KBRIDs))
-                                duplicateIDMatch = True
-                            candidate = title + ' (' + idString + ')'
-                            candidateKeys.append(idString)
-                            candidates.append(candidate)
-
-                    match = candidateDelimiter.join(candidates)
-                    matchIDs = candidateDelimiter.join(candidateKeys)
-                    row = {'KBRID': targetKBRID, 'title': targetTitle,
-                           'originalTitle': targetOriginalTitle,
-                           'candidates': match, 'candidatesIDs': matchIDs}
-
-                    if len(candidates) == 1 and duplicateIDMatch:
-
-                        if candidateFilter and 'yearOfPublication' in target and target['yearOfPublication'] != '':
-                            candidateIDs = sourceLookup.filterYearIdentifiers(candidateKeys[0].split(','),
-                                                                              target['yearOfPublication'])
-
-                            # the filtering worked! Now there is only a single match
-                            # we will add to the clear similarity match output
-                            if len(candidateIDs) == 1:
-                                numberSimilarityMatchesAfterFiltering += 1
-                                match = original_title_normalized + ' (' + candidateIDs[0] + ')'
-                                similarityMatchesWriter.writerow({'KBRID': targetKBRID, 'title': targetTitle,
-                                                             'originalTitle': targetOriginalTitle,
-                                                             'candidates': match,
-                                                             'candidatesIDs': str(candidateIDs[0])})
-                            else:
-                                candidateIDsString = candidateDelimiter.join(candidateIDs)
-                                idString = ','.join(candidateIDs)
-                                match = original_title_normalized + ' (' + idString + ')'
-
-                                # here needs to be a comparison to check if we really reduced the number
-                                # numberSimilarityReducedDuplicateIDMatches += 1
-                                numberSimilarityDuplicateIDMatches
-                                similarityDuplicateIDMatchesWriter.writerow({'KBRID': targetKBRID, 'title': targetTitle,
-                                                                   'originalTitle': targetOriginalTitle,
-                                                                   'candidates': match,
-                                                                   'candidatesIDs': candidateIDsString})
-
-                    elif len(candidates) == 1 and not duplicateIDMatch:
-                        numberSimilarityMatches += 1
-                        similarityMatchesWriter.writerow(row)
-                    elif len(candidates) > 1:
-                        numberSimilarityMultipleMatches += 1
-                        similarityMultipleMatchesWriter.writerow(row)
-                    else:
-                        # no candidates found, thus no match
-                        pass
+                    (outputRowCandidates,
+                     outputRowCandidateIDs,
+                     currentOutputWriter) = performSimilarityMatching(sourceLookup, target, original_title_normalized,
+                                                                      candidateDelimiter, similarityMatchesWriter,
+                                                                      similarityDuplicateIDMatchesWriter,
+                                                                      similarityMultipleMatchesWriter, candidateFilter,
+                                                                      similarityMatchCounter, similarityThreshold)
 
 
+            if currentOutputWriter != None:
+                outputRow = {'KBRID': targetKBRID, 'title': targetTitle, 'originalTitle': targetOriginalTitle,
+                             'candidates': outputRowCandidates, 'candidatesIDs': outputRowCandidateIDs}
+                currentOutputWriter.writerow(outputRow)
             numberTargetRecords += 1
-                #new_row = {'KBRID':KBRID_target, 'title':title_target, 'originalTitle':original_title, 'candidates':match}
-                #df = df.append(new_row, ignore_index=True)
 
-    #df.to_csv(output_file, index = False, sep = ',')
 
     print(f'Number of target records: {numberTargetRecords}')
     print(f'Number of target records with original title (and missing identifier): {numberTargetRecordsWithOriginalTitle}')
-    print(f'Number of clear matches: {numberClearMatches}')
-    print(f'Number of clear matches after applying a filter: {numberClearMatchesAfterFiltering}')
-    print(f'Number of duplicate ID matches where we could reduce the number of duplicates: {numberReducedDuplicateIDMatches}')
-    print(f'Number of duplicate ID matches: {numberDuplicateIDMatches}')
-    print(f'Number of similarity matches: {numberSimilarityMatches}')
-    print(f'Number of similarity duplicateID matches: {numberSimilarityDuplicateIDMatches}')
-    print(f'Number of similarity matches after applying a filter: {numberSimilarityMatchesAfterFiltering}')
-    print(f'Number of similarity duplicate ID matches where we could reduce the number of duplicates: {numberSimilarityReducedDuplicateIDMatches}')
-    print(f'Number of similarity multiple matches: {numberSimilarityMultipleMatches}')
+
     print(f'Number of original records: {sourceLookup.getNumberTitles()}')
     print(f'Number of duplicate records: {sourceLookup.getNumberOfDuplicates()}')
     print(f'Max number of duplicates: {sourceLookup.getMaxNumberOfDuplicates()}')
     print(f'Average: {sourceLookup.getAverageNumberOfDuplicates()}')
     print(f'Median: {sourceLookup.getMedianNumberOfDuplicates()}')
+
+    print('Exact title match:')
+    print(titleMatchCounter)
+    print(f'Similarity-based match (threshold {similarityThreshold}):')
+    print(similarityMatchCounter)
+    print(f'Number of clear matches: {numberClearMatches}')
 
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
