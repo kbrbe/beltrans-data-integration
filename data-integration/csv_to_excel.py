@@ -42,7 +42,7 @@ def checkArguments():
   return (options, args)
 
 # -----------------------------------------------------------------------------
-def main(output_file, sheet_names, *csvFiles):
+def main(output_file, sheet_names, csvFiles):
   """This script creates an Excel file based on the CSV input. One or more CSV files can be given via arguments, each becomes a new sheet in the output Excel workbook"""
 
 
