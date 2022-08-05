@@ -71,6 +71,22 @@ def readSPARQLQuery(filename):
 
 
 # -----------------------------------------------------------------------------
+def deleteNamedGraph(url, namedGraph, auth=None):
+
+  try:
+    #namedGraphURL = f'{url}?context-uri=<{}>'
+    r = requests.delete(url, params={'c': f'<{namedGraph}>'}, auth=auth)
+    r.raise_for_status()
+  except requests.HTTPError as he:
+    statusCode = he.response.status_code
+    print(f'{statusCode} error while deleting named graph {namedGraph} (first 100 characters): ' + he.response.content.decode('utf-8')[0:100])
+    #print(he.response.content.decode('utf-8'))
+  except Exception as e:
+    print(f'Error while trying to delete named graph {namedGraph} with url {url}')
+    print(e)
+
+
+# -----------------------------------------------------------------------------
 def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
 
   if not os.path.isfile(queryFilename):
@@ -107,7 +123,7 @@ def sparqlUpdate(url, filename, fileFormat, queryName, auth=None):
     print(f'"{filename}" is not a file!')
     return
   with open(filename, 'rb') as fileIn:
-    print(f'\tProcessing file {filename}')
+    print(f'\tProcessing file {filename} (url: {url})')
     r = None
     try:
       r = requests.post(url, data=fileIn.read(), headers={'Content-Type': fileFormat}, auth=auth)
@@ -136,7 +152,7 @@ def sparqlUpdate(url, filename, fileFormat, queryName, auth=None):
       print(f'{statusCode} error while updating {filename}: ' + he.response.content.decode('utf-8')[0:40])
       print(he.response.content.decode('utf-8'))
     except Exception as e:
-      print('Error while updating {url} with {filename} and type {fileFormat}')
+      print(f'Error while updating {url} with {filename} and type {fileFormat}')
       print(e)
 
 
