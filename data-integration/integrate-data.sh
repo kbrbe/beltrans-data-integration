@@ -11,6 +11,8 @@ SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-author
 SCRIPT_EXTRACT_SEPARATED_COL="../data-sources/kbr/extract-and-normalize-separated-strings.py"
 SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
+SCRIPT_FIND_ORIGINALS="find-originals.py"
+
 SCRIPT_CONVERT_BB="../data-sources/master-data/convert-thesaurus.py"
 
 SCRIPT_ADD_ISBN_10_13="../data-sources/kb/add-formatted-isbn-10-13.py"
@@ -414,6 +416,9 @@ function extract {
   elif [ "$dataSource" = "wikidata" ];
   then
     extractWikidata $integrationFolderName
+  elif [ "$dataSource" = "original-links-kbr" ];
+  then
+    extractOriginalLinksKBR $integrationFolderName
   elif [ "$dataSource" = "bnfisni" ];
   then
     extractNationalityFromBnFViaISNI $integrationFolderName
@@ -886,6 +891,36 @@ function extractNationalityFromBnFViaISNI {
 }
 
 # -----------------------------------------------------------------------------
+function extractOriginalLinksKBR {
+  local integrationName=$1
+
+  mkdir -p $integrationName/original-links-kbr
+
+  $kbrOriginalsNLFR=""
+  $kbrTranslationsNLFR=""
+  $titleMatchesNLFR=""
+  $titleMatchesDuplicatesNLFR=""
+  $similarityMatchesNLFR=""
+  $similarityMatchesDuplicatesNLFR=""
+  $similarityMatchesMultipleNLFR=""
+
+  source ./py-integration-env/bin/activate
+
+  time python $SCRIPT_FIND_ORIGINALS \
+  --original-works $kbrOriginalsNLFR \
+  --translations $kbrTranslationsNLFR \
+  --similarity "0.9" \
+  --apply-candidate-filter \
+  --output-file-clear-matches $titleMatchesNLFR \
+  --output-file-duplicate-id-matches $titleMatchesDuplicatesNLFR \
+  --output-file-similarity-matches $similarityMatchesNLFR \
+  --output-file-similarity-duplicate-id-matches $similarityMatchesDuplicatesNLFR \
+  --output-file-similarity-multiple-matches $similarityMatchesMultipleNLFR
+
+
+}
+
+# -----------------------------------------------------------------------------
 function extractMasterData {
 
   local integrationName=$1
@@ -899,6 +934,8 @@ function extractMasterData {
   local bbEnglish="$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
   local bbDutch="$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
   local bbFrench="$integrationName/master-data/$SUFFIX_MASTER_THES_FR"
+
+  source ./py-integration-env/bin/activate
 
   echo "Convert thesaurus data"
   time python $SCRIPT_CONVERT_BB -i $INPUT_MASTER_THES_EN -o $bbEnglish
