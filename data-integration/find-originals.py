@@ -20,7 +20,7 @@ def checkArguments():
     parser.add_option('-w', '--original-works', action='store', help='CSV containing original works')
     parser.add_option('-t', '--translations', action='store', help='CSV containing translations')
     parser.add_option('-d', '--candidate-delimiter', action='store', default=';', help='The delimiter used to separate multiple candidates, default is a semicolon')
-    parser.add_option('-s', '--similarity', action='store', default=0.9, help='A length-normalized title similarity (used if no direct match can be found)')
+    parser.add_option('-s', '--similarity', action='store', default=0.9, type='float', help='A length-normalized title similarity (used if no direct match can be found)')
     parser.add_option('--apply-candidate-filter', action='store_true', default=False, help='A flag indicating that the number of match candidates (if more than 1) should be tried to reduced automatically, e.g. by checking publication years')
     parser.add_option('--output-file-clear-matches', action='store',
                       help='A CSV file containing matches based on title, match with a single record')

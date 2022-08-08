@@ -259,6 +259,21 @@ SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NAT="fr-translations-linked-authorities-nationalities.csv"
 SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.csv"
 
+# DATA SOURCE - KBR ORIGINALS MATCHING
+#
+
+SUFFIX_KBR_TITLE_MATCHES_NL_FR="title-matches_nl-fr.csv"
+SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR="title-duplicates-matches_nl-fr.csv"
+SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR="similarity-matches_nl-fr.csv"
+SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR="similarity-duplicates-matches_nl-fr.csv"
+SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR="similarity-multiple-matches-nl-fr.csv"
+
+SUFFIX_KBR_TITLE_MATCHES_FR_NL="title-matches_fr-nl.csv"
+SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL="title-duplicates-matches_fr-nl.csv"
+SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL="similarity-matches_fr-nl.csv"
+SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL="similarity-duplicates-matches_fr-nl.csv"
+SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_FR_NL="similarity-multiple-matches_fr-nl.csv"
+
 # DATA SOURCE - KBR BELGIANS
 #
 SUFFIX_KBR_BELGIANS_CLEANED="belgians-cleaned.csv"
@@ -418,7 +433,7 @@ function extract {
     extractWikidata $integrationFolderName
   elif [ "$dataSource" = "original-links-kbr" ];
   then
-    extractOriginalLinksKBR $integrationFolderName
+    extractOriginalLinksKBR $integrationFolderName "original-links-kbr" "kbr" "kbr-originals"
   elif [ "$dataSource" = "bnfisni" ];
   then
     extractNationalityFromBnFViaISNI $integrationFolderName
@@ -893,30 +908,57 @@ function extractNationalityFromBnFViaISNI {
 # -----------------------------------------------------------------------------
 function extractOriginalLinksKBR {
   local integrationName=$1
+  local dataSourceName=$2
+  local translationsSourceName=$3
+  local originalsSourceName=$4
 
-  mkdir -p $integrationName/original-links-kbr
+  mkdir -p $integrationName/$dataSourceName
 
-  $kbrOriginalsNLFR=""
-  $kbrTranslationsNLFR=""
-  $titleMatchesNLFR=""
-  $titleMatchesDuplicatesNLFR=""
-  $similarityMatchesNLFR=""
-  $similarityMatchesDuplicatesNLFR=""
-  $similarityMatchesMultipleNLFR=""
+  local similarityThreshold="0.9"
+
+  local kbrOriginalsNLFR="$integrationName/$originalsSourceName/translations/$SUFFIX_KBR_TRL_NL_WORKS"
+  local kbrTranslationsNLFR="$integrationName/$translationsSourceName/translations/$SUFFIX_KBR_TRL_NL_WORKS"
+  local titleMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
+  local titleDuplicatesMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
+  local similarityMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
+  local similarityDuplicatesMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
+  local similarityMultipleMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR"
+
+  local kbrOriginalsFRNL="$integrationName/$originalsSourceName/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+  local kbrTranslationsFRNL="$integrationName/$translationsSourceName/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+  local titleMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
+  local titleDuplicatesMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
+  local similarityMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
+  local similarityDuplicatesMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
+  local similarityMultipleMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_FR_NL"
 
   source ./py-integration-env/bin/activate
+
+  echo "EXTRACTION - find originals NL-FR"
 
   time python $SCRIPT_FIND_ORIGINALS \
   --original-works $kbrOriginalsNLFR \
   --translations $kbrTranslationsNLFR \
-  --similarity "0.9" \
+  --similarity "$similarityThreshold" \
   --apply-candidate-filter \
   --output-file-clear-matches $titleMatchesNLFR \
-  --output-file-duplicate-id-matches $titleMatchesDuplicatesNLFR \
+  --output-file-duplicate-id-matches $titleDuplicatesMatchesNLFR \
   --output-file-similarity-matches $similarityMatchesNLFR \
-  --output-file-similarity-duplicate-id-matches $similarityMatchesDuplicatesNLFR \
-  --output-file-similarity-multiple-matches $similarityMatchesMultipleNLFR
+  --output-file-similarity-duplicate-id-matches $similarityDuplicatesMatchesNLFR \
+  --output-file-similarity-multiple-matches $similarityMultipleMatchesNLFR
 
+  echo "EXTRACTION - find originals FR-NL"
+
+  time python $SCRIPT_FIND_ORIGINALS \
+  --original-works $kbrOriginalsFRNL \
+  --translations $kbrTranslationsFRNL \
+  --similarity "$similarityThreshold" \
+  --apply-candidate-filter \
+  --output-file-clear-matches $titleMatchesFRNL \
+  --output-file-duplicate-id-matches $titleDuplicatesMatchesFRNL \
+  --output-file-similarity-matches $similarityMatchesFRNL \
+  --output-file-similarity-duplicate-id-matches $similarityDuplicatesMatchesFRNL \
+  --output-file-similarity-multiple-matches $similarityMultipleMatchesFRNL
 
 }
 
