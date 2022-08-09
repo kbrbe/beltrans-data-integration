@@ -1,4 +1,4 @@
 date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-06-23,2022-07-27 16:44:40.700506,FR-NL,7752,7061,7065,7040,52,1983,4,13,1310,4,6881,131,2489,1983,96,114,No ISBN duplicate removal anymore to prevent data loss
-2022-06-23,2022-07-27 16:44:40.907068,NL-FR,3897,3343,3367,3420,1207,728,208,928,491,247,2847,190,1185,728,169,171,No ISBN duplicate removal anymore to prevent data loss
-2022-06-23,2022-07-27 16:44:41.017094,OTHER,284,230,230,278,77,11,2,71,10,3,243,3,11,11,2,2,No ISBN duplicate removal anymore to prevent data loss
+2022-06-23,2022-08-09 14:27:02.767881,FR-NL,7752,7061,7065,7040,52,1983,4,13,1310,4,6881,131,2489,1983,96,114,No ISBN duplicate removal anymore to prevent data loss
+2022-06-23,2022-08-09 14:27:02.956063,NL-FR,3897,3343,3367,3420,1207,728,208,928,491,247,2847,190,1185,728,169,171,No ISBN duplicate removal anymore to prevent data loss
+2022-06-23,2022-08-09 14:27:03.025758,OTHER,284,230,230,278,77,11,2,71,10,3,243,3,11,11,2,2,No ISBN duplicate removal anymore to prevent data loss
