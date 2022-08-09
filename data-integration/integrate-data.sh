@@ -359,6 +359,11 @@ SUFFIX_KBR_TRL_PUB_PLACE_LD="translations-publication-places.ttl"
 SUFFIX_KBR_TRL_ISBN_LD="translations-isbn.ttl"
 
 #
+# LINKED DATA - KBR ORIGINAL LINKS
+#
+SUFFIX_KBR_ORIGINAL_LINKING_LD="translations-original-links.ttl"
+
+#
 # LINKED DATA - KBR LINKED AUTHORITIES
 #
 SUFFIX_KBR_LA_LD="linked-authorities.ttl"
@@ -476,6 +481,9 @@ function transform {
   elif [ "$dataSource" = "wikidata" ];
   then
     transformWikidata $integrationFolderName
+  elif [ "$dataSource" = "original-links-kbr" ];
+  then
+    transformOriginalLinksKBR $integrationFolderName "original-links-kbr"
   elif [ "$dataSource" = "bnfisni" ];
   then
     transformNationalityFromBnFViaISNI $integrationFolderName
@@ -518,6 +526,9 @@ function load {
   elif [ "$dataSource" = "wikidata" ];
   then
     loadWikidata $integrationFolderName
+  elif [ "$dataSource" = "original-links-kbr" ];
+  then
+    loadOriginalLinksKBR $integrationFolderName "original-links-kbr"
   elif [ "$dataSource" = "bnfisni" ];
   then
     loadNationalityFromBnFViaISNI $integrationFolderName
@@ -1043,6 +1054,36 @@ function transformKBROriginals {
 }
 
 # -----------------------------------------------------------------------------
+function transformOriginalLinksKBR {
+  local integrationName=$1
+  local dataSourceName=$2
+
+  # create the folder to place the transformed data
+  mkdir -p $integrationName/$dataSourceName/rdf 
+
+  originalLinksTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
+
+  # map the translations
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_TITLE_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
+  export RML_SOURCE_TITLE_DUPLICATES_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
+  export RML_SOURCE_SIMILARITY_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
+  export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
+
+  export RML_SOURCE_TITLE_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
+  export RML_SOURCE_TITLE_DUPLICATES_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
+  export RML_SOURCE_SIMILARITY_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
+  export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
+
+  # 2) execute the mapping
+  echo "Map KBR original linking ..."
+  . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtle
+
+
+}
+
+# -----------------------------------------------------------------------------
 function transformKB {
 
   local integrationName=$1
@@ -1563,6 +1604,22 @@ function loadKBROriginals {
 }
 
 # -----------------------------------------------------------------------------
+function loadOriginalLinksKBR {
+  local integrationName=$1
+  local dataSourceName=$2
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+  local kbrOriginalLinksTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
+
+  echo "Load KBR links to identified originals ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
+    "$kbrOriginalLinksTurtle"
+}
+
+# -----------------------------------------------------------------------------
 function loadKBRTranslationsAndContributions {
   local integrationName=$1
   local dataSourceName=$2
@@ -1597,7 +1654,7 @@ function loadKBRTranslationsAndContributions {
 function loadKBRLinkedAuthorities {
   local integrationName=$1
   local dataSourceName=$2
-  local linkedAuthoritiesNamedGraph=$4
+  local linkedAuthoritiesNamedGraph=$3
 
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
