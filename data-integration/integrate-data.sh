@@ -725,7 +725,7 @@ function extractKB {
   kbTranslationsWithISBNFRNL="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_FR_NL"
   kbTranslationsWithISBNNLFR="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_NL_FR"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "EXTRACTION - Extract KB translations FR - NL"
   . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_FR_NL_QUERY_FILE" "$kbTranslationsFRNL"
@@ -818,7 +818,7 @@ function extractBnF {
   #
   # we also need related information of the identified publications from other data dumps
   #
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "EXTRACTION - Create list of both NL and FR BnF translation IDs"
   time python $SCRIPT_UNION_IDS $bnfFRNLTranslations $bnfNLFRTranslations -o $bnfTranslationIDs -d ';'
@@ -1179,7 +1179,7 @@ function extractKBRTranslationsAndContributions {
   kbrFrenchTranslationsISBN10="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_ISBN10"
   kbrFrenchTranslationsISBN13="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_ISBN13"
   
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "Clean Dutch translations ..."
   cleanTranslations "$kbrDutchTranslations" "$kbrDutchTranslationsCleaned"
@@ -1272,7 +1272,7 @@ function extractKBRLinkedAuthorities {
   kbrNLPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
   kbrFRPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "Extract authorities NL - Persons ..."
   python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCleaned -n $kbrNLPersonsNationalities
@@ -1308,7 +1308,7 @@ function extractKBRBelgians {
   kbrBelgiansNorm="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NORM"
   kbrBelgiansCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CLEANED"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "Extract Belgians ..."
   # currently this input has already normalized headers
@@ -1326,7 +1326,7 @@ function extractBnFBelgianContributors {
   # document which input was used
   printf "\nUsed input (BnF Belgian contributors)\n* $bnfPersonAuthors" >> "$integrationName/bnf/README.md"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   getSubjects "$bnfPersonAuthors" "$BNF_FILTER_CONFIG_CONTRIBUTORS" "$bnfBelgianContributorIDs"
 }
@@ -1341,7 +1341,7 @@ function extractBnFBelgianPublications {
   # document which input was used
   printf "\nUsed input (BnF editions used to filter publication IDs from Belgian contributors)\n* $bnfEditionContributions\n* $bnfBelgians\n" >> "$integrationName/bnf/README.md"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
   time python $SCRIPT_GET_RDF_XML_SUBJECTS -i $bnfEditionContributions -o $bnfBelgianPublicationIDs -p "marcrel:aut" -p "marcrel:ill" -p "marcrel:sce" -l $bnfBelgians
 }
 
@@ -1354,7 +1354,7 @@ function extractBnFTranslations {
   # document which input was used
   printf "\nUsed input (BnF translations used to extract relevant publication IDs)\n* $bnfTranslations\n" >> "$integrationName/bnf/README.md"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
   time python $SCRIPT_EXTRACT_COLUMN -i $bnfTranslations -o $bnfTranslationIDs -d ';' -c 0
 }  
 
@@ -1369,7 +1369,7 @@ function extractBnFRelevantPublicationData {
   # document which input was used
   printf "\nUsed input (BnF editions used to extract relevant publication data)\n* $bnfEditions" >> "$integrationName/bnf/README.md"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
   time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $bnfEditions  -o $bnfRelevantData -f $bnfTranslationIDs -f $bnfBelgianPubs
 }
 
