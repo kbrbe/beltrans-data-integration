@@ -97,7 +97,7 @@ mappings:
     po:
       - [a, prov:Activity]
       - [prov:generated, btid:manifestation_$(KBRID)~iri]
-      - [prov:used, btid:manifestation_source_$(candidatesIDs)~iri]
+      - [prov:used, btid:manifestation_$(candidatesIDs)~iri]
       - [rdfs:comment, "The original was detected using a title lookup where an exact match was found"]
       - [up:assertionConfidence, 1.0]
 
