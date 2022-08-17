@@ -32,6 +32,8 @@ variables:
   sourceCONTOrgsNLFR: &sourceCONTOrgsNLFR ${RML_SOURCE_KB_CONT_ORGS_NL_FR}
   sourceAUTOrgsFRNL: &sourceAUTOrgsFRNL ${RML_SOURCE_KB_AUT_ORGS_FR_NL}
   sourceAUTOrgsNLFR: &sourceAUTOrgsNLFR ${RML_SOURCE_KB_AUT_ORGS_NL_FR}
+  sourceTRLKBCODEFRNL: &sourceTRLKBCODEFRNL ${RML_SOURCE_KB_TRL_KBCODE_FR_NL}
+  sourceTRLKBCODENLFR: &sourceTRLKBCODENLFR ${RML_SOURCE_KB_TRL_KBCODE_NL_FR}
 
 mappings:
 
@@ -216,4 +218,19 @@ mappings:
       - [schema:name, $(sourceTitle)]
       - [schema:inLanguage, lang:fre~iri]
 
-
+  # ---------------------------------------------------------------------------
+  #
+  kbcodeAssignments:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates relationships between translations and their kbcode classification."
+    sources:
+      - access: *sourceTRLKBCODEFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceTRLKBCODENLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: $(manifestation)
+    po:
+      - [schema:about, $(kbcode)~iri]
+   

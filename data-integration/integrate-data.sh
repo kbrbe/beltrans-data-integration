@@ -1125,6 +1125,9 @@ function transformKB {
   export RML_SOURCE_KB_AUT_ORGS_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_FR_NL"
   export RML_SOURCE_KB_AUT_ORGS_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_NL_FR"
 
+  export RML_SOURCE_KB_TRL_KBCODE_FR_NL="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_FR_NL"
+  export RML_SOURCE_KB_TRL_KBCODE_NL_FR="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_NL_FR"
+
   # 2) execute the mapping
   echo "TRANSFORMATION - Map KB translations FR-NL ..."
   . map.sh ../data-sources/kb/kb-translations.yml $kbTranslationsTurtle
