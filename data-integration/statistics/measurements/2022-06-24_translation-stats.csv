@@ -1,4 +1,4 @@
 date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-06-24,2022-07-27 16:44:41.178255,FR-NL,8149,7316,7321,7439,51,1990,4,13,1318,4,7250,137,2504,1990,99,117,"New KBR dump with old Dutch, old French and middle French as well as new data in general"
-2022-06-24,2022-07-27 16:44:41.402038,NL-FR,3997,3412,3436,3525,1209,727,210,933,494,247,2929,192,1194,727,170,172,"New KBR dump with old Dutch, old French and middle French as well as new data in general"
-2022-06-24,2022-07-27 16:44:41.481866,OTHER,315,234,234,309,77,11,2,71,10,3,273,4,12,11,2,2,"New KBR dump with old Dutch, old French and middle French as well as new data in general"
+2022-06-24,2022-08-11 15:03:25.230989,FR-NL,8149,7316,7321,7439,51,1990,4,13,1318,4,7250,137,2504,1990,99,117,"New KBR dump with old Dutch, old French and middle French as well as new data in general"
+2022-06-24,2022-08-11 15:03:25.745785,NL-FR,3997,3412,3436,3525,1209,727,210,933,494,247,2929,192,1194,727,170,172,"New KBR dump with old Dutch, old French and middle French as well as new data in general"
+2022-06-24,2022-08-11 15:03:26.123857,OTHER,315,234,234,309,77,11,2,71,10,3,273,4,12,11,2,2,"New KBR dump with old Dutch, old French and middle French as well as new data in general"

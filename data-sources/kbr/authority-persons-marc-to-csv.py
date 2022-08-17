@@ -101,11 +101,20 @@ def main():
     nationalityWriter = csv.DictWriter(natFile, fieldnames=['authorityID', 'nationality'], delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     nationalityWriter.writeheader()
 
-    for event, elem in ET.iterparse(options.input_file, events=('start', 'end')):
+    # if the XML file is huge, memory becomes an issue even while streaming because a reference to the parent is kept
+    # therefore we first get the root element
+    # https://stackoverflow.com/questions/12160418/why-is-lxml-etree-iterparse-eating-up-all-my-memory
+    context = ET.iterparse(options.input_file, events=('start', 'end'))
+    context = iter(context)
+    event, root = next(context)
+
+    # now we iterate over the children of the root and always clear the root information
+    for event, elem in context:
 
       # The parser finished reading one authority record, get information and then discard the record
       if  event == 'end' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
-
         addAuthorityFieldsToCSV(elem, outputWriter, nationalityWriter, stats)
+        root.clear()
+    elem.clear()
 
 main()

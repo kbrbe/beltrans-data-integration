@@ -11,13 +11,17 @@ SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-author
 SCRIPT_EXTRACT_SEPARATED_COL="../data-sources/kbr/extract-and-normalize-separated-strings.py"
 SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
+SCRIPT_FIND_ORIGINALS="find-originals.py"
+
+SCRIPT_CONVERT_BB="../data-sources/master-data/convert-thesaurus.py"
+
 SCRIPT_ADD_ISBN_10_13="../data-sources/kb/add-formatted-isbn-10-13.py"
 SCRIPT_BNF_ADD_ISBN_10_13="../data-sources/bnf/add-formatted-isbn-10-13.py"
 SCRIPT_FIX_ISBN10="../data-sources/bnf/formatISBN10.py"
 SCRIPT_FIX_ISBN13="../data-sources/bnf/formatISBN13.py"
 SCRIPT_CREATE_ISBN10_TRIPLES="../data-sources/bnf/createISBN10Triples.py"
 SCRIPT_CREATE_ISBN13_TRIPLES="../data-sources/bnf/createISBN13Triples.py"
-SCRIPT_CSV_TO_EXCEL="csv-to-excel.py"
+SCRIPT_CSV_TO_EXCEL="csv_to_excel.py"
 SCRIPT_COMPUTE_STATS="create-publication-stats.py"
 SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
 
@@ -49,8 +53,8 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 # KBR - translations
 #INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-17_4745records.xml"
 #INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-17_13126records.xml"
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-06-24_5410records.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-06-24_16318records.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-08-11_5419records.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-08-11_16356records.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -58,10 +62,10 @@ INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-06-24_NL-FR_APEP_4524.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-06-24_NL-FR_AORG_846.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-06-24_FR-NL_APEP_10539.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-06-24_FR-NL_AORG_971.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-08-11_NL-FR_APEP_4523.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-08-11_NL-FR_AORG_850.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-08-11_FR-NL_APEP_10548.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-08-11_FR-NL_AORG_973.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
@@ -90,9 +94,9 @@ INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
 INPUT_MASTER_COUNTRIES="../data-sources/master-data/countries.nt"
 INPUT_MASTER_LANGUAGES="../data-sources/master-data/languages.nt"
 INPUT_MASTER_GENDER="../data-sources/master-data/gender.ttl"
-INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography-en-hierarchy.csv"
-INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl-hierarchy.csv"
-INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography-fr-hierarchy.csv"
+INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography-en.csv"
+INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl.csv"
+INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography-fr.csv"
 
 # WIKIDATA
 INPUT_WIKIDATA_ENRICHED="../data-sources/wikidata/2022-04-14-beltrans-wikidata-manually-enriched.csv"
@@ -108,6 +112,7 @@ INPUT_WIKIDATA_ENRICHED="../data-sources/wikidata/2022-04-14-beltrans-wikidata-m
 TRIPLE_STORE_GRAPH_INT_TRL="http://beltrans-manifestations"
 TRIPLE_STORE_GRAPH_INT_CONT="http://beltrans-contributors"
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
+TRIPLE_STORE_GRAPH_KBR_ORIG_TRL="http://kbr-originals"
 TRIPLE_STORE_GRAPH_BNF_TRL="http://bnf-publications"
 TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL="http://bnf-fr-nl"
 TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR="http://bnf-nl-fr"
@@ -117,6 +122,7 @@ TRIPLE_STORE_GRAPH_BNF_CONT_ISNI="http://bnf-contributors-isni"
 TRIPLE_STORE_GRAPH_BNF_CONT_VIAF="http://bnf-contributors-viaf"
 TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA="http://bnf-contributors-wikidata"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
+TRIPLE_STORE_GRAPH_KBR_ORIG_LA="http://kbr-originals-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
 TRIPLE_STORE_GRAPH_KB_TRL="http://kb-publications"
 TRIPLE_STORE_GRAPH_KB_LA="http://kb-linked-authorities"
@@ -253,6 +259,21 @@ SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NAT="fr-translations-linked-authorities-nationalities.csv"
 SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.csv"
 
+# DATA SOURCE - KBR ORIGINALS MATCHING
+#
+
+SUFFIX_KBR_TITLE_MATCHES_NL_FR="title-matches_nl-fr.csv"
+SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR="title-duplicates-matches_nl-fr.csv"
+SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR="similarity-matches_nl-fr.csv"
+SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR="similarity-duplicates-matches_nl-fr.csv"
+SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR="similarity-multiple-matches-nl-fr.csv"
+
+SUFFIX_KBR_TITLE_MATCHES_FR_NL="title-matches_fr-nl.csv"
+SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL="title-duplicates-matches_fr-nl.csv"
+SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL="similarity-matches_fr-nl.csv"
+SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL="similarity-duplicates-matches_fr-nl.csv"
+SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_FR_NL="similarity-multiple-matches_fr-nl.csv"
+
 # DATA SOURCE - KBR BELGIANS
 #
 SUFFIX_KBR_BELGIANS_CLEANED="belgians-cleaned.csv"
@@ -338,6 +359,11 @@ SUFFIX_KBR_TRL_PUB_PLACE_LD="translations-publication-places.ttl"
 SUFFIX_KBR_TRL_ISBN_LD="translations-isbn.ttl"
 
 #
+# LINKED DATA - KBR ORIGINAL LINKS
+#
+SUFFIX_KBR_ORIGINAL_LINKING_LD="translations-original-links.ttl"
+
+#
 # LINKED DATA - KBR LINKED AUTHORITIES
 #
 SUFFIX_KBR_LA_LD="linked-authorities.ttl"
@@ -410,12 +436,16 @@ function extract {
   elif [ "$dataSource" = "wikidata" ];
   then
     extractWikidata $integrationFolderName
+  elif [ "$dataSource" = "original-links-kbr" ];
+  then
+    extractOriginalLinksKBR $integrationFolderName "original-links-kbr" "kbr" "kbr-originals"
   elif [ "$dataSource" = "bnfisni" ];
   then
     extractNationalityFromBnFViaISNI $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
+    extractKBROriginals $integrationFolderName
     extractKB $integrationFolderName
     extractBnF $integrationFolderName
     extractMasterData $integrationFolderName
@@ -436,6 +466,9 @@ function transform {
   if [ "$dataSource" = "kbr" ];
   then
     transformKBR $integrationFolderName
+  elif [ "$dataSource" = "kbr-originals" ];
+  then
+    transformKBROriginals $integrationFolderName
   elif [ "$dataSource" = "master-data" ];
   then
     transformMasterData $integrationFolderName
@@ -448,12 +481,16 @@ function transform {
   elif [ "$dataSource" = "wikidata" ];
   then
     transformWikidata $integrationFolderName
+  elif [ "$dataSource" = "original-links-kbr" ];
+  then
+    transformOriginalLinksKBR $integrationFolderName "original-links-kbr"
   elif [ "$dataSource" = "bnfisni" ];
   then
     transformNationalityFromBnFViaISNI $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
+    transformKBROriginals $integrationFolderName
     transformKB $integrationFolderName
     transformBnF $integrationFolderName
     transformMasterData $integrationFolderName
@@ -474,6 +511,9 @@ function load {
   if [ "$dataSource" = "kbr" ];
   then
     loadKBR $integrationFolderName
+  elif [ "$dataSource" = "kbr-originals" ];
+  then
+    loadKBROriginals $integrationFolderName
   elif [ "$dataSource" = "master-data" ];
   then
     loadMasterData $integrationFolderName
@@ -486,6 +526,9 @@ function load {
   elif [ "$dataSource" = "wikidata" ];
   then
     loadWikidata $integrationFolderName
+  elif [ "$dataSource" = "original-links-kbr" ];
+  then
+    loadOriginalLinksKBR $integrationFolderName "original-links-kbr"
   elif [ "$dataSource" = "bnfisni" ];
   then
     loadNationalityFromBnFViaISNI $integrationFolderName
@@ -636,7 +679,7 @@ function extractKBR {
   mkdir -p $integrationName/kbr/agents
 
   echo "EXTRACTION - Extract and clean KBR translations data"
-  extractKBRTranslationsAndContributions "$integrationName" "$INPUT_KBR_TRL_NL" "$INPUT_KBR_TRL_FR"
+  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "$INPUT_KBR_TRL_FR"
 
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
   extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR"
@@ -650,110 +693,16 @@ function extractKBROriginals {
 
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
+  local dataSourceName="kbr-originals"
 
   # create the folders to place the extracted translations and agents
-  mkdir -p $integrationName/kbr-originals/translations
-  mkdir -p $integrationName/kbr-originals/agents
+  mkdir -p $integrationName/$dataSourceName/translations
+  mkdir -p $integrationName/$dataSourceName/agents
 
-  #
-  # Define file names based on current integration directory and file name patterns
-  #
-  kbrDutchTranslationsCleaned="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_CLEANED"
-  kbrFrenchTranslationsCleaned="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_CLEANED"
+  echo "EXTRACTION - Extract and clean KBR originals translations data"
+  extractKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$INPUT_KBR_TRL_ORIG_NL_FR" "$INPUT_KBR_TRL_ORIG_FR_NL"
 
-  kbrDutchTranslationsCSVWorks="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_WORKS"
-  kbrFrenchTranslationsCSVWorks="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_WORKS"
-
-  kbrDutchTranslationsCSVCont="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_CONT"
-  kbrDutchTranslationsCSVContReplaced="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_CONT_REPLACE"
-  kbrDutchTranslationsCSVContDedup="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_CONT_DEDUP"
-  kbrFrenchTranslationsCSVCont="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_CONT"
-  kbrFrenchTranslationsCSVContReplaced="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_CONT_REPLACE"
-  kbrFrenchTranslationsCSVContDedup="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_CONT_DEDUP"
-
-  kbrDutchTranslationsIdentifiedAuthorities="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_NEWAUT"
-  kbrFrenchTranslationsIdentifiedAuthorities="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_NEWAUT"
-
-  kbrDutchTranslationsCSVBB="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_BB"
-  kbrFrenchTranslationsCSVBB="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_BB"
-
-  kbrDutchTranslationsPubCountries="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
-  kbrFrenchTranslationsPubCountries="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
-
-  kbrDutchTranslationsPubPlaces="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_PUB_PLACE"
-  kbrFrenchTranslationsPubPlaces="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_PUB_PLACE"
-
-  kbrDutchTranslationsCollectionLinks="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
-  kbrFrenchTranslationsCollectionLinks="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
-
-  kbrDutchTranslationsISBN10="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_ISBN10"
-  kbrDutchTranslationsISBN13="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_NL_ISBN13"
-  kbrFrenchTranslationsISBN10="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_ISBN10"
-  kbrFrenchTranslationsISBN13="$integrationName/kbr-originals/translations/$SUFFIX_KBR_TRL_FR_ISBN13"
-  
-  source ../data-sources/py-etl-env/bin/activate
-
-  echo "Clean Dutch translations ..."
-  cleanTranslations "$INPUT_KBR_TRL_ORIG_NL_FR" "$kbrDutchTranslationsCleaned"
-
-  echo "Clean French translations ..."
-  cleanTranslations "$INPUT_KBR_TRL_ORIG_FR_NL" "$kbrFrenchTranslationsCleaned"
-
-  echo "Extract CSV from Dutch translations XML..."
-  extractCSVFromXMLTranslations "$kbrDutchTranslationsCleaned" "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVCont" "$kbrDutchTranslationsCollectionLinks"
-
-  echo "Extract CSV from French translations XML..."
-  extractCSVFromXMLTranslations "$kbrFrenchTranslationsCleaned" "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsCSVCont" "$kbrFrenchTranslationsCollectionLinks"
-
-  echo "Replace publisher names to support deduplication - NL-FR"
-  python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrDutchTranslationsCSVCont -o $kbrDutchTranslationsCSVContReplaced
-
-  echo "Replace publisher names to support deduplication - FR-NL"
-  python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrFrenchTranslationsCSVCont -o $kbrFrenchTranslationsCSVContReplaced
-
-  echo "Deduplicate newly identified contributors - NL-FR"
-  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrDutchTranslationsCSVContReplaced -o $kbrDutchTranslationsCSVContDedup
-
-  echo "Deduplicate newly identified contributors - FR-NL"
-  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrFrenchTranslationsCSVContReplaced -o $kbrFrenchTranslationsCSVContDedup
-
-  echo "Extract BB assignments for Dutch translations ..."
-  extractBBEntries "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVBB"
-
-  echo "Extract BB assignments for French translations ..."
-  extractBBEntries "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsCSVBB"
-
-  echo "Extract publication countries from Dutch translations ..."
-  extractPubCountries "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsPubCountries"
-
-  echo "Extract publication countries from French translations ..."
-  extractPubCountries "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsPubCountries"
-
-  echo "Extract publication places from Dutch translations ..."
-  extractPubPlaces "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsPubPlaces"
-
-  echo "Extract publication places from French translations ..."
-  extractPubPlaces "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsPubPlaces"
-
-
-  echo "Extract (possibly multiple) ISBN10 identifiers per translation - NL-FR"
-  extractISBN10 "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsISBN10"
-
-  echo "Extract (possibly multiple) ISBN13 identifiers per translation - NL-FR"
-  extractISBN13 "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsISBN13"
-
-  echo "Extract (possibly multiple) ISBN10 identifiers per translation - FR-NL"
-  extractISBN10 "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN10"
-
-  echo "Extract (possibly multiple) ISBN13 identifiers per translation - FR-NL"
-  extractISBN13 "$kbrFrenchTranslationsCSVWorks" "$kbrFrenchTranslationsISBN13"
-
-
-  echo "Extract newly identified contributors ..."
-  extractIdentifiedAuthorities "$kbrDutchTranslationsCSVContDedup" "$kbrDutchTranslationsIdentifiedAuthorities"
-  extractIdentifiedAuthorities "$kbrFrenchTranslationsCSVContDedup" "$kbrFrenchTranslationsIdentifiedAuthorities"
-
-
+  # there is no linked authorities export
 }
 
 # -----------------------------------------------------------------------------
@@ -787,7 +736,7 @@ function extractKB {
   kbTranslationsWithISBNFRNL="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_FR_NL"
   kbTranslationsWithISBNNLFR="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_NL_FR"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "EXTRACTION - Extract KB translations FR - NL"
   . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_FR_NL_QUERY_FILE" "$kbTranslationsFRNL"
@@ -880,7 +829,7 @@ function extractBnF {
   #
   # we also need related information of the identified publications from other data dumps
   #
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "EXTRACTION - Create list of both NL and FR BnF translation IDs"
   time python $SCRIPT_UNION_IDS $bnfFRNLTranslations $bnfNLFRTranslations -o $bnfTranslationIDs -d ';'
@@ -968,6 +917,63 @@ function extractNationalityFromBnFViaISNI {
 }
 
 # -----------------------------------------------------------------------------
+function extractOriginalLinksKBR {
+  local integrationName=$1
+  local dataSourceName=$2
+  local translationsSourceName=$3
+  local originalsSourceName=$4
+
+  mkdir -p $integrationName/$dataSourceName
+
+  local similarityThreshold="0.9"
+
+  local kbrOriginalsNLFR="$integrationName/$originalsSourceName/translations/$SUFFIX_KBR_TRL_NL_WORKS"
+  local kbrTranslationsNLFR="$integrationName/$translationsSourceName/translations/$SUFFIX_KBR_TRL_NL_WORKS"
+  local titleMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
+  local titleDuplicatesMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
+  local similarityMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
+  local similarityDuplicatesMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
+  local similarityMultipleMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR"
+
+  local kbrOriginalsFRNL="$integrationName/$originalsSourceName/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+  local kbrTranslationsFRNL="$integrationName/$translationsSourceName/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+  local titleMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
+  local titleDuplicatesMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
+  local similarityMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
+  local similarityDuplicatesMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
+  local similarityMultipleMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_FR_NL"
+
+  source ./py-integration-env/bin/activate
+
+  echo "EXTRACTION - find originals NL-FR"
+
+  time python $SCRIPT_FIND_ORIGINALS \
+  --original-works $kbrOriginalsNLFR \
+  --translations $kbrTranslationsNLFR \
+  --similarity "$similarityThreshold" \
+  --apply-candidate-filter \
+  --output-file-clear-matches $titleMatchesNLFR \
+  --output-file-duplicate-id-matches $titleDuplicatesMatchesNLFR \
+  --output-file-similarity-matches $similarityMatchesNLFR \
+  --output-file-similarity-duplicate-id-matches $similarityDuplicatesMatchesNLFR \
+  --output-file-similarity-multiple-matches $similarityMultipleMatchesNLFR
+
+  echo "EXTRACTION - find originals FR-NL"
+
+  time python $SCRIPT_FIND_ORIGINALS \
+  --original-works $kbrOriginalsFRNL \
+  --translations $kbrTranslationsFRNL \
+  --similarity "$similarityThreshold" \
+  --apply-candidate-filter \
+  --output-file-clear-matches $titleMatchesFRNL \
+  --output-file-duplicate-id-matches $titleDuplicatesMatchesFRNL \
+  --output-file-similarity-matches $similarityMatchesFRNL \
+  --output-file-similarity-duplicate-id-matches $similarityDuplicatesMatchesFRNL \
+  --output-file-similarity-multiple-matches $similarityMultipleMatchesFRNL
+
+}
+
+# -----------------------------------------------------------------------------
 function extractMasterData {
 
   local integrationName=$1
@@ -978,15 +984,23 @@ function extractMasterData {
   # create the folders to place the extracted translations and agents
   mkdir -p $integrationName/master-data
 
+  local bbEnglish="$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
+  local bbDutch="$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
+  local bbFrench="$integrationName/master-data/$SUFFIX_MASTER_THES_FR"
+
+  source ./py-integration-env/bin/activate
+
+  echo "Convert thesaurus data"
+  time python $SCRIPT_CONVERT_BB -i $INPUT_MASTER_THES_EN -o $bbEnglish
+  time python $SCRIPT_CONVERT_BB -i $INPUT_MASTER_THES_NL -o $bbDutch
+  time python $SCRIPT_CONVERT_BB -i $INPUT_MASTER_THES_FR -o $bbFrench
+
   echo "EXTRACTION - Nothing to extract from master data, copying files"
   cp "$INPUT_MASTER_MARC_ROLES" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
   cp "$INPUT_MASTER_MARC_BINDING_TYPES" "$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
   cp "$INPUT_MASTER_COUNTRIES" "$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
   cp "$INPUT_MASTER_LANGUAGES" "$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   cp "$INPUT_MASTER_GENDER" "$integrationName/master-data/$SUFFIX_MASTER_GENDER"
-  cp "$INPUT_MASTER_THES_EN" "$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
-  cp "$INPUT_MASTER_THES_NL" "$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
-  cp "$INPUT_MASTER_THES_FR" "$integrationName/master-data/$SUFFIX_MASTER_THES_FR"
 
 }
 
@@ -1015,13 +1029,58 @@ function transformKBR {
   mkdir -p $integrationName/kbr/rdf 
 
   echo "TRANSFORMATION - Map KBR translation data to RDF"
-  mapKBRTranslationsAndContributions $integrationName
+  mapKBRTranslationsAndContributions $integrationName "kbr"
 
   echo "TRANSFORMATION - Map KBR linked authorities data to RDF"
   mapKBRLinkedAuthorities $integrationName
 
   #echo "TRANSFORMATION - Map KBR Belgians data to RDF"
   #mapKBRBelgians $integrationName
+}
+
+# -----------------------------------------------------------------------------
+function transformKBROriginals {
+
+  local integrationName=$1
+
+  local dataSourceName="kbr-originals"
+
+  # create the folder to place the transformed data
+  mkdir -p $integrationName/$dataSourceName/rdf 
+
+  echo "TRANSFORMATION - Map KBR translation data to RDF"
+  mapKBRTranslationsAndContributions $integrationName "$dataSourceName"
+
+}
+
+# -----------------------------------------------------------------------------
+function transformOriginalLinksKBR {
+  local integrationName=$1
+  local dataSourceName=$2
+
+  # create the folder to place the transformed data
+  mkdir -p $integrationName/$dataSourceName/rdf 
+
+  originalLinksTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
+
+  # map the translations
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_TITLE_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
+  export RML_SOURCE_TITLE_DUPLICATES_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
+  export RML_SOURCE_SIMILARITY_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
+  export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
+
+  export RML_SOURCE_TITLE_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
+  export RML_SOURCE_TITLE_DUPLICATES_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
+  export RML_SOURCE_SIMILARITY_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
+  export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
+
+  # 2) execute the mapping
+  echo "Map KBR original linking ..."
+  . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtle
+
+
 }
 
 # -----------------------------------------------------------------------------
@@ -1115,52 +1174,53 @@ function extractKBRTranslationsAndContributions {
   # named graph: <http://kbr-syracuse>
   #
   local integrationName=$1
-  local kbrDutchTranslations=$2
-  local kbrFrenchTranslations=$3
+  local dataSourceName=$2
+  local kbrDutchTranslations=$3
+  local kbrFrenchTranslations=$4
 
   # DutchTranslations = NL-FR
   # FrenchTranslations = FR-NL
 
   # document which input was used
-  printf "\nUsed input (KBR translations and contributors)\n* $kbrDutchTranslations\n* $kbrFrenchTranslations" >> "$integrationName/kbr/README.md"
+  printf "\nUsed input (KBR translations and contributors)\n* $kbrDutchTranslations\n* $kbrFrenchTranslations" >> "$integrationName/$dataSourceName/README.md"
 
   #
   # Define file names based on current integration directory and file name patterns
   #
-  kbrDutchTranslationsCleaned="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CLEANED"
-  kbrFrenchTranslationsCleaned="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CLEANED"
+  kbrDutchTranslationsCleaned="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_CLEANED"
+  kbrFrenchTranslationsCleaned="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_CLEANED"
 
-  kbrDutchTranslationsCSVWorks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_WORKS"
-  kbrFrenchTranslationsCSVWorks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+  kbrDutchTranslationsCSVWorks="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_WORKS"
+  kbrFrenchTranslationsCSVWorks="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_WORKS"
 
-  kbrDutchTranslationsCSVCont="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT"
-  kbrDutchTranslationsCSVContReplaced="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT_REPLACE"
-  kbrDutchTranslationsCSVContDedup="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT_DEDUP"
-  kbrFrenchTranslationsCSVCont="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT"
-  kbrFrenchTranslationsCSVContReplaced="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT_REPLACE"
-  kbrFrenchTranslationsCSVContDedup="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT_DEDUP"
+  kbrDutchTranslationsCSVCont="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_CONT"
+  kbrDutchTranslationsCSVContReplaced="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_CONT_REPLACE"
+  kbrDutchTranslationsCSVContDedup="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_CONT_DEDUP"
+  kbrFrenchTranslationsCSVCont="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_CONT"
+  kbrFrenchTranslationsCSVContReplaced="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_CONT_REPLACE"
+  kbrFrenchTranslationsCSVContDedup="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_CONT_DEDUP"
 
-  kbrDutchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_NEWAUT"
-  kbrFrenchTranslationsIdentifiedAuthorities="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_NEWAUT"
+  kbrDutchTranslationsIdentifiedAuthorities="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_NEWAUT"
+  kbrFrenchTranslationsIdentifiedAuthorities="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_NEWAUT"
 
-  kbrDutchTranslationsCSVBB="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_BB"
-  kbrFrenchTranslationsCSVBB="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_BB"
+  kbrDutchTranslationsCSVBB="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_BB"
+  kbrFrenchTranslationsCSVBB="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_BB"
 
-  kbrDutchTranslationsPubCountries="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
-  kbrFrenchTranslationsPubCountries="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
+  kbrDutchTranslationsPubCountries="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
+  kbrFrenchTranslationsPubCountries="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
 
-  kbrDutchTranslationsPubPlaces="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_PLACE"
-  kbrFrenchTranslationsPubPlaces="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_PLACE"
+  kbrDutchTranslationsPubPlaces="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_PUB_PLACE"
+  kbrFrenchTranslationsPubPlaces="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_PUB_PLACE"
 
-  kbrDutchTranslationsCollectionLinks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
-  kbrFrenchTranslationsCollectionLinks="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
+  kbrDutchTranslationsCollectionLinks="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
+  kbrFrenchTranslationsCollectionLinks="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
 
-  kbrDutchTranslationsISBN10="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_ISBN10"
-  kbrDutchTranslationsISBN13="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_ISBN13"
-  kbrFrenchTranslationsISBN10="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_ISBN10"
-  kbrFrenchTranslationsISBN13="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_ISBN13"
+  kbrDutchTranslationsISBN10="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_ISBN10"
+  kbrDutchTranslationsISBN13="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_ISBN13"
+  kbrFrenchTranslationsISBN10="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_ISBN10"
+  kbrFrenchTranslationsISBN13="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_ISBN13"
   
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "Clean Dutch translations ..."
   cleanTranslations "$kbrDutchTranslations" "$kbrDutchTranslationsCleaned"
@@ -1253,7 +1313,7 @@ function extractKBRLinkedAuthorities {
   kbrNLPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
   kbrFRPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "Extract authorities NL - Persons ..."
   python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCleaned -n $kbrNLPersonsNationalities
@@ -1289,7 +1349,7 @@ function extractKBRBelgians {
   kbrBelgiansNorm="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NORM"
   kbrBelgiansCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CLEANED"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   echo "Extract Belgians ..."
   # currently this input has already normalized headers
@@ -1307,7 +1367,7 @@ function extractBnFBelgianContributors {
   # document which input was used
   printf "\nUsed input (BnF Belgian contributors)\n* $bnfPersonAuthors" >> "$integrationName/bnf/README.md"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
 
   getSubjects "$bnfPersonAuthors" "$BNF_FILTER_CONFIG_CONTRIBUTORS" "$bnfBelgianContributorIDs"
 }
@@ -1322,7 +1382,7 @@ function extractBnFBelgianPublications {
   # document which input was used
   printf "\nUsed input (BnF editions used to filter publication IDs from Belgian contributors)\n* $bnfEditionContributions\n* $bnfBelgians\n" >> "$integrationName/bnf/README.md"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
   time python $SCRIPT_GET_RDF_XML_SUBJECTS -i $bnfEditionContributions -o $bnfBelgianPublicationIDs -p "marcrel:aut" -p "marcrel:ill" -p "marcrel:sce" -l $bnfBelgians
 }
 
@@ -1335,7 +1395,7 @@ function extractBnFTranslations {
   # document which input was used
   printf "\nUsed input (BnF translations used to extract relevant publication IDs)\n* $bnfTranslations\n" >> "$integrationName/bnf/README.md"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
   time python $SCRIPT_EXTRACT_COLUMN -i $bnfTranslations -o $bnfTranslationIDs -d ';' -c 0
 }  
 
@@ -1350,7 +1410,7 @@ function extractBnFRelevantPublicationData {
   # document which input was used
   printf "\nUsed input (BnF editions used to extract relevant publication data)\n* $bnfEditions" >> "$integrationName/bnf/README.md"
 
-  source ../data-sources/py-etl-env/bin/activate
+  source py-integration-env/bin/activate
   time python $SCRIPT_FILTER_RDF_XML_SUBJECTS -i $bnfEditions  -o $bnfRelevantData -f $bnfTranslationIDs -f $bnfBelgianPubs
 }
 
@@ -1358,23 +1418,24 @@ function extractBnFRelevantPublicationData {
 function mapKBRTranslationsAndContributions {
 
   local integrationName=$1
+  local dataSourceName=$2
 
-  kbrTranslationsTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_LD"
-  kbrTranslationsIdentifiedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_NEWAUT_LD"
-  kbrTranslationsBBTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_BB_LD"
-  kbrTranslationsPubCountriesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
-  kbrTranslationsPubPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_PLACE_LD"
-  kbrTranslationsISBNTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_ISBN_LD"
+  kbrTranslationsTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_LD"
+  kbrTranslationsIdentifiedAuthorities="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_NEWAUT_LD"
+  kbrTranslationsBBTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_BB_LD"
+  kbrTranslationsPubCountriesTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
+  kbrTranslationsPubPlacesTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_PUB_PLACE_LD"
+  kbrTranslationsISBNTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_ISBN_LD"
 
   # map the translations
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_WORKS_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_WORKS"
-  export RML_SOURCE_WORKS_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_WORKS"
-  export RML_SOURCE_CONT_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_CONT_DEDUP"
-  export RML_SOURCE_CONT_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_CONT_DEDUP"
-  export RML_SOURCE_COLLECTION_LINKS_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
-  export RML_SOURCE_COLLECTION_LINKS_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
+  export RML_SOURCE_WORKS_FR="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+  export RML_SOURCE_WORKS_NL="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_WORKS"
+  export RML_SOURCE_CONT_FR="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_CONT_DEDUP"
+  export RML_SOURCE_CONT_NL="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_CONT_DEDUP"
+  export RML_SOURCE_COLLECTION_LINKS_FR="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_COL_LINKS"
+  export RML_SOURCE_COLLECTION_LINKS_NL="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_COL_LINKS"
 
   # 2) execute the mapping
   echo "Map KBR translations and contributions ..."
@@ -1384,8 +1445,8 @@ function mapKBRTranslationsAndContributions {
   # map newly identified publishers
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_CONT_NL_IDENTIFIED="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_NEWAUT"
-  export RML_SOURCE_KBR_CONT_FR_IDENTIFIED="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_NEWAUT"
+  export RML_SOURCE_KBR_CONT_NL_IDENTIFIED="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_NEWAUT"
+  export RML_SOURCE_KBR_CONT_FR_IDENTIFIED="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_NEWAUT"
 
   # 2) execute the mapping
   echo "Map KBR newly identified contributors ..."
@@ -1394,8 +1455,8 @@ function mapKBRTranslationsAndContributions {
   # map belgian bibliography assignments
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_BB_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_BB"
-  export RML_SOURCE_KBR_BB_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_BB"
+  export RML_SOURCE_KBR_BB_NL="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_BB"
+  export RML_SOURCE_KBR_BB_FR="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_BB"
   
   # 2) execute the mapping
   echo "Map KBR BB assignments ..."
@@ -1404,8 +1465,8 @@ function mapKBRTranslationsAndContributions {
   # map publication countries
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_PUB_COUNTRIES_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
-  export RML_SOURCE_KBR_PUB_COUNTRIES_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
+  export RML_SOURCE_KBR_PUB_COUNTRIES_NL="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_PUB_COUNTRY"
+  export RML_SOURCE_KBR_PUB_COUNTRIES_FR="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_PUB_COUNTRY"
 
   # 2) execute the mapping
   echo "Map KBR publication countries relationships ..."
@@ -1414,8 +1475,8 @@ function mapKBRTranslationsAndContributions {
   # map publication places
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_PUB_PLACES_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_PUB_PLACE"
-  export RML_SOURCE_KBR_PUB_PLACES_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_PUB_PLACE"
+  export RML_SOURCE_KBR_PUB_PLACES_NL="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_PUB_PLACE"
+  export RML_SOURCE_KBR_PUB_PLACES_FR="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_PUB_PLACE"
 
   # 2) execute the mapping
   echo "Map KBR publication places relationships ..."
@@ -1425,10 +1486,10 @@ function mapKBRTranslationsAndContributions {
   # map ISBN10/ISBN13
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_ISBN10_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_ISBN10"
-  export RML_SOURCE_KBR_ISBN10_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_ISBN10"
-  export RML_SOURCE_KBR_ISBN13_NL="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_NL_ISBN13"
-  export RML_SOURCE_KBR_ISBN13_FR="$integrationName/kbr/translations/$SUFFIX_KBR_TRL_FR_ISBN13"
+  export RML_SOURCE_KBR_ISBN10_NL="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_ISBN10"
+  export RML_SOURCE_KBR_ISBN10_FR="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_ISBN10"
+  export RML_SOURCE_KBR_ISBN13_NL="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_ISBN13"
+  export RML_SOURCE_KBR_ISBN13_FR="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_ISBN13"
 
   # 2) execute the mapping
   echo "Map KBR ISBN10/ISBN13 relationships ..."
@@ -1507,38 +1568,108 @@ function mapMasterData {
 function loadKBR {
   local integrationName=$1
 
+  local dataSourceName="kbr"
+
+  local translationsNamedGraph="$TRIPLE_STORE_GRAPH_KBR_TRL"
+  local linkedAuthoritiesNamedGraph="$TRIPLE_STORE_GRAPH_KBR_LA"
+
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  local kbrTranslationsAndContributions="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_LD"
-  local kbrIdentifiedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_NEWAUT_LD"
-  local kbrLinkedAuthorities="$integrationName/kbr/rdf/$SUFFIX_KBR_LA_LD"
-  local kbrTranslationsBB="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_BB_LD"
-  local kbrTranslationsPubCountries="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
-  local kbrTranslationsPubPlaces="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_PUB_PLACE_LD"
-  local kbrBelgians="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
-  local kbrTranslationsISBNTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_TRL_ISBN_LD"
+  # first delete content of the named graph in case it already exists
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
+
+  loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedAuthorities "$integrationName" "$dataSourceName" "$linkedAuthoritiesNamedGraph"
+}
+
+# -----------------------------------------------------------------------------
+function loadKBROriginals {
+  local integrationName=$1
+
+  local dataSourceName="kbr-originals"
+
+  local translationsNamedGraph="$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL"
+  local linkedAuthoritiesNamedGraph="$TRIPLE_STORE_GRAPH_KBR_ORIG_LA"
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  # first delete content of the named graph in case it already exists
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
+
+  loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph"
+}
+
+# -----------------------------------------------------------------------------
+function loadOriginalLinksKBR {
+  local integrationName=$1
+  local dataSourceName=$2
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+  local kbrOriginalLinksTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
+
+  echo "Load KBR links to identified originals ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
+    "$kbrOriginalLinksTurtle"
+}
+
+# -----------------------------------------------------------------------------
+function loadKBRTranslationsAndContributions {
+  local integrationName=$1
+  local dataSourceName=$2
+  local translationsNamedGraph=$3
+  local linkedAuthoritiesNamedGraph=$4
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local kbrTranslationsAndContributions="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_LD"
+  local kbrIdentifiedAuthorities="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_NEWAUT_LD"
+  local kbrTranslationsBB="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_BB_LD"
+  local kbrTranslationsPubCountries="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_PUB_COUNTRY_LD"
+  local kbrTranslationsPubPlaces="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_PUB_PLACE_LD"
+  local kbrTranslationsISBNTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_ISBN_LD"
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
-  # first delete content of the named graph in case it already exists
-  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_TRL>"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_TRL"
 
   echo "Load KBR translations and contributions, BB assignments, countries, places, ISBN10/ISBN13 ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
     "$kbrTranslationsAndContributions" "$kbrTranslationsBB" "$kbrTranslationsPubCountries" "$kbrTranslationsPubPlaces" "$kbrTranslationsISBNTurtle"
 
-
-  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KBR_LA>"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KBR_LA"
-  
-  # upload both linked authorities and newly identified authorities to the linked authorities named graph
-  echo "Load KBR linked authorities (extracted and newly created ones) ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_LA" \
-    "$kbrLinkedAuthorities" "$kbrIdentifiedAuthorities"
+  # upload newly identified authorities to the linked authorities named graph
+  echo "Load newly identified KBR linked authorities ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+    "$kbrIdentifiedAuthorities"
 
 }
+
+# -----------------------------------------------------------------------------
+function loadKBRLinkedAuthorities {
+  local integrationName=$1
+  local dataSourceName=$2
+  local linkedAuthoritiesNamedGraph=$3
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local kbrLinkedAuthorities="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_LA_LD"
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  # upload newly identified authorities to the linked authorities named graph
+  echo "Load newly identified KBR linked authorities ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+    "$kbrLinkedAuthorities"
+
+}
+
+
 
 # -----------------------------------------------------------------------------
 function loadKB {
@@ -1921,7 +2052,13 @@ function deleteNamedGraph {
   local endpoint=$2
   local namedGraph=$3
 
-  . $SCRIPT_DELETE_NAMED_GRAPH "$namespace" "$endpoint" "$namedGraph"
+  local url="$endpoint/namespace/$namespace/sparql"
+  echo "Delete existing content in namespace <$namedGraph> (url $url)"
+
+  source ./py-integration-env/bin/activate
+  python delete_named_graph.py -u "$url" --named-graph "$namedGraph"
+
+  #. $SCRIPT_DELETE_NAMED_GRAPH "$namespace" "$endpoint" "$namedGraph"
 }
 
 # -----------------------------------------------------------------------------

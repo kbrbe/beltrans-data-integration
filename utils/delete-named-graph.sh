@@ -10,7 +10,7 @@ fi;
 export $(cat .env | sed 's/#.*//g' | xargs)
 
 
-curl -D- -X DELETE \
+curl -L -D- -X DELETE \
   --user $ENV_SPARQL_ENDPOINT_USER:$ENV_SPARQL_ENDPOINT_PASSWORD \
 "$2/namespace/$1/sparql?c=<$3>"
 

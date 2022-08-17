@@ -297,6 +297,29 @@ def selectDate(row, dateType, sources, rowIDCol, mismatchLog, mismatchLogKey):
                 row.pop(colName)
 
 # -----------------------------------------------------------------------------
+def yearSmallerOrEqual(year1, year2):
+    """Returns True if year1 is smaller/equal than year2, false otherwise or in case of invalid values.
+
+    >>> yearSmallerOrEqual(1970, 2000)
+    True
+    >>> yearSmallerOrEqual(2020, 1970)
+    False
+    >>> yearSmallerOrEqual(1970, 1970)
+    True
+    >>> yearSmallerOrEqual('ca. 1970', 1970)
+    False
+    >>> yearSmallerOrEqual(1970, '1971?')
+    False
+    """
+    try:
+        if int(year1) <= int(year2):
+            return True
+        else:
+            return False
+    except:
+        return False
+
+# -----------------------------------------------------------------------------
 if __name__ == "__main__":
   import doctest
   doctest.testmod()

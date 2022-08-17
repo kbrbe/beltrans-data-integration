@@ -1,0 +1,124 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  bibo: "http://purl.org/ontology/bibo/"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  lang: "http://id.loc.gov/vocabulary/languages/"
+  schema: "http://schema.org/"
+  up: "http://users.ugent.be/~tdenies/up/"
+  marcrel: "http://id.loc.gov/vocabulary/relators/"
+
+variables:
+  titleMatchesNLFR: &titleMatchesNLFR ${RML_SOURCE_TITLE_MATCHES_NL_FR}
+  titleDuplicatesMatchesNLFR: &titlesDuplicatesMatchesNLFR ${RML_SOURCE_TITLE_DUPLICATES_MATCHES_NL_FR}
+  similarityMatchesNLFR: &similarityMatchesNLFR ${RML_SOURCE_SIMILARITY_MATCHES_NL_FR}
+  similarityDuplicatesMatchesNLFR: &similarityDuplicatesMatchesNLFR ${RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_NL_FR}
+
+  titleMatchesFRNL: &titleMatchesFRNL ${RML_SOURCE_TITLE_MATCHES_FR_NL}
+  titleDuplicatesMatchesFRNL: &titlesDuplicatesMatchesFRNL ${RML_SOURCE_TITLE_DUPLICATES_MATCHES_FR_NL}
+  similarityMatchesFRNL: &similarityMatchesFRNL ${RML_SOURCE_SIMILARITY_MATCHES_FR_NL}
+  similarityDuplicatesMatchesFRNL: &similarityDuplicatesMatchesFRNL ${RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_FR_NL}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  translationLinks:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates direct schema:translationOfWork links from the translation to the original."
+    sources:
+      - access: *titleMatchesNLFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *titleMatchesFRNL
+        referenceFormulation: csv
+        delimiter: ',' 
+      - access: *similarityMatchesNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+      - access: *similarityMatchesFRNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(KBRID)
+    po:
+      - [schema:translationOfWork, btid:manifestation_$(candidatesIDs)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  originalLinks:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates direct schema:workTranslation links from the original to the translation."
+    sources:
+      - access: *titleMatchesNLFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *titleMatchesFRNL
+        referenceFormulation: csv
+        delimiter: ',' 
+      - access: *similarityMatchesNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+      - access: *similarityMatchesFRNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(candidatesIDs)
+    po:
+      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  translationActivityExactMatch:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping adds certainty provenance to a W3C PROV activity related to a single translation, indicating provenance about the similarity score used to detect the original. Only if the original was found based on similarity."
+    sources:
+      - access: *titleMatchesNLFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *titleMatchesFRNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    po:
+      - [a, prov:Activity]
+      - [prov:generated, btid:manifestation_$(KBRID)~iri]
+      - [prov:used, btid:manifestation_$(candidatesIDs)~iri]
+      - [rdfs:comment, "The original was detected using a title lookup where an exact match was found"]
+      - [up:assertionConfidence, 1.0]
+
+  # ---------------------------------------------------------------------------
+  #
+  translationActivitySimilarityMatch:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping adds certainty provenance to a W3C PROV activity related to a single translation, indicating provenance about the similarity score used to detect the original. Only if the original was found based on similarity."
+    sources:
+      - access: *similarityMatchesNLFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *similarityMatchesFRNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    po:
+      - [a, prov:Activity]
+      - [prov:generated, btid:manifestation_$(KBRID)~iri]
+      - [prov:used, btid:manifestation_$(candidatesIDs)~iri]
+      - [rdfs:comment, "The original was detected using a length-normalized Levenshtein distance and a similarity threshold of 0.9"]
+      - [up:assertionConfidence, 0.9]
+
+
