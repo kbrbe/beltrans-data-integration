@@ -1,6 +1,6 @@
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 
-SELECT DISTINCT ?concept ?name ?notation ?qualifiedName ?parent
+SELECT DISTINCT ?notation ?qualifiedName ?name
 WHERE {
 
   graph <http://kbcode> {
@@ -12,5 +12,5 @@ WHERE {
 
   OPTIONAL { graph <http://kbcode> { ?concept skos:broader ?parent . } }
 }
-ORDER BY ASC(?notation)
+ORDER BY ASC(?notation) ASC(?qualifiedName)
 

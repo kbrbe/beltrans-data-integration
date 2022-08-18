@@ -144,6 +144,8 @@ GET_BNF_ISBN10_ISBN13_QUERY_FILE="sparql-queries/get-bnf-isbn10-13.sparql"
 GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn10-without-hyphen.sparql"
 GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn13-without-hyphen.sparql"
 
+GET_KBCODE_HIERARCHY_INFO_QUERY_FILE="sparql-queries/get-kbcode-hierarchy.sparql"
+
 GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE="sparql-queries/get-missing-nationality-isni.sparql"
 
 DELETE_QUERY_BNF_ISBN="sparql-queries/delete-bnf-isbn.sparql"
@@ -205,6 +207,7 @@ SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.cs
 SUFFIX_DATA_PROFILE_SOURCE_STATS="source-translation-stats.csv"
 SUFFIX_DATA_PROFILE_EXCEL_DATA="corpus-data.xlsx"
 SUFFIX_DATA_PROFILE_EXCEL_STATS="corpus-stats.xlsx"
+SUFFIX_DATA_PROFILE_KBCODE="kbcode-hierarchy"
 
 SUFFIX_PLACE_OF_PUBLICATION_GEONAMES="place-of-publications-geonames.csv"
 SUFFIX_UNKNOWN_GEONAMES_MAPPING="missing-geonames-mapping.csv"
@@ -603,12 +606,15 @@ function query {
   queryFileAgg="$DATA_PROFILE_QUERY_FILE_AGG"
   queryFileContPersons="$DATA_PROFILE_QUERY_FILE_CONT_PERSONS"
   queryFileContOrgs="$DATA_PROFILE_QUERY_FILE_CONT_ORGS"
+  queryFileKBCode="$GET_KBCODE_HIERARCHY_INFO_QUERY_FILE"
 
   outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
 
   # persons will be "all data" as it contains several birth and death dates, it will be filtered in the postprocessing
   outputFileContPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
   outputFileContOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
+
+  outputFileKBCode="$integrationName/csv/$SUFFIX_DATA_PROFILE_KBCODE"
 
   echo "Creating the dataprofile CSV file ..."
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
@@ -618,6 +624,8 @@ function query {
 
   echo "Creating the contributor orgs CSV file ..."
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileContOrgs" "$ENV_SPARQL_ENDPOINT" "$outputFileContOrgs"
+
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileKBCode" "$ENV_SPARQL_ENDPOINT" "$outputFileKBCode"
 
 }
 
@@ -637,6 +645,8 @@ function postprocess {
   tmp2="$integrationName/csv/kbr-and-bnf-enriched-not-yet-kb.csv"
 
   contributorsOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
+
+  kbCodeHierarchy="$integrationName/csv/$SUFFIX_DATA_PROFILE_KBCODE"
 
   excelData="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_DATA"
 
@@ -665,7 +675,7 @@ function postprocess {
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllData -m $integratedDataEnriched -o $allPersons --keep-non-contributors
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "KBCode" -o $excelData
 
 }
 
