@@ -611,13 +611,13 @@ function query {
   outputFileContOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
 
   echo "Creating the dataprofile CSV file ..."
-  queryDataBlazegraph"$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
 
   echo "Creating the contributor persons CSV file ..."
-  queryDataBlazegraph"$TRIPLE_STORE_NAMESPACE" "$queryFileContPersons" "$ENV_SPARQL_ENDPOINT" "$outputFileContPersonsAllData"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileContPersons" "$ENV_SPARQL_ENDPOINT" "$outputFileContPersonsAllData"
 
   echo "Creating the contributor orgs CSV file ..."
-  queryDataBlazegraph"$TRIPLE_STORE_NAMESPACE" "$queryFileContOrgs" "$ENV_SPARQL_ENDPOINT" "$outputFileContOrgs"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileContOrgs" "$ENV_SPARQL_ENDPOINT" "$outputFileContOrgs"
 
 }
 
@@ -922,7 +922,7 @@ function extractNationalityFromBnFViaISNI {
 
   # Query ISNI identifiers with missing nationality information
   echo "EXTRACTION - Extract ISNI identifier with missing nationality information"
-  queryDataBlazegraph"$TRIPLE_STORE_NAMESPACE" "$GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$isniIdentifiers"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$isniIdentifiers"
 
   echo "EXTRACTION - Create configuration file for following step"
   echo "skos:exactMatch,inFile,$isniIdentifiers" > $configISNIExtraction
@@ -1820,7 +1820,7 @@ function loadBnF {
   source ./py-integration-env/bin/activate
 
   echo "Get BnF ISBN10 and ISBN13 identifiers ..."
-  queryDataBlazegraph"$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_ISBN13_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10ISBN13"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_ISBN13_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10ISBN13"
 
   echo "Compute BnF ISBN10 and ISBN13 identifiers ..."
   time python $SCRIPT_BNF_ADD_ISBN_10_13 -i $bnfISBN10ISBN13 -o $bnfISBN10ISBN13Enriched
@@ -1832,7 +1832,7 @@ function loadBnF {
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_NT" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" "$bnfISBN10ISBN13Enriched"
 
   #echo "Fix BnF ISBN13 identifiers without hyphen - get malformed ISBN identifiers"
-  #queryDataBlazegraph"$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN13MissingHyphen"
+  #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN13MissingHyphen"
 
   #echo "Fix BnF ISBN13 identifiers without hyphen - normalize ISBN identifiers"
   #time python $SCRIPT_FIX_ISBN13 -i $bnfISBN13MissingHyphen -o $bnfCleanedISBN13
@@ -1845,7 +1845,7 @@ function loadBnF {
   #uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_BNF_ISBN13_WITHOUT_HYPHEN" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
   #echo "Fix BnF ISBN10 identifiers without hyphen - get malformed ISBN identifiers" 
-  #queryDataBlazegraph"$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10MissingHyphen"
+  #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10MissingHyphen"
 
   #echo "Fix BnF ISBN10 identifiers without hyphen - normalize ISBN identifiers"
   #time python $SCRIPT_FIX_ISBN10 -i $bnfISBN10MissingHyphen -o $bnfCleanedISBN10

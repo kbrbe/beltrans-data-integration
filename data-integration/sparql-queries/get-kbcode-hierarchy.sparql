@@ -1,0 +1,16 @@
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?concept ?name ?notation ?qualifiedName ?parent
+WHERE {
+
+  graph <http://kbcode> {
+    ?concept a skos:Concept ;
+             skos:prefLabel ?name ;
+             rdfs:label ?qualifiedName ;
+             skos:notation ?notation .
+  }
+
+  OPTIONAL { graph <http://kbcode> { ?concept skos:broader ?parent . } }
+}
+ORDER BY ASC(?notation)
+

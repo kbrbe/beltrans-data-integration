@@ -29,6 +29,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetKBTitle)
 
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
+    (group_concat(distinct ?kbTargetManifestationKBCodeLabel;SEPARATOR=';') AS ?targetThesaurusKBCode)
     (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetCollectionIdentifier)
     #(group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
 
@@ -251,6 +252,11 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:locationCreated ?kbLocationCreated . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdfs:comment ?kbResponsibilityStatement . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:publisher ?kbPublisherName . }}
+
+      OPTIONAL {
+        graph <http://kb-publications> { ?kbManifestation schema:about ?genre . }
+        graph <http://kbcode> { ?genre rdfs:label ?kbTargetManifestationKBCodeLabel. }
+      }
 
       #
       # SOURCE INFORMATION
