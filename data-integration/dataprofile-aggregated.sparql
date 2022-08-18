@@ -183,17 +183,17 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         graph <http://kbr-syracuse> { ?kbrManifestation schema:translationOfWork ?kbrManifestationSource . }
 
         # there might be a title (from a 246 text field or linked 765 work)
-        OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestationSource schema:name ?kbrSourceManifestationTitle . } }
+        OPTIONAL { graph <http://kbr-originals> { ?kbrManifestationSource schema:name ?kbrSourceManifestationTitle . } }
 
         #
         # In case it is not a dummy source entry just with the language, there is an identifier
         #
         OPTIONAL {
-          graph <http://kbr-syracuse> { ?kbrManifestationSource dcterms:identifier ?kbrSourceManifestationID . }
+          graph <http://kbr-originals> { ?kbrManifestationSource dcterms:identifier ?kbrSourceManifestationID . }
 
           # Optionally there is also an ISBN for the source
-          OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestationSource bibo:isbn10 ?kbrSourceManifestationISBN10 . } }
-          OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestationSource bibo:isbn13 ?kbrSourceManifestationISBN13 . } }
+          OPTIONAL { graph <http://kbr-originals> { ?kbrManifestationSource bibo:isbn10 ?kbrSourceManifestationISBN10 . } }
+          OPTIONAL { graph <http://kbr-originals> { ?kbrManifestationSource bibo:isbn13 ?kbrSourceManifestationISBN13 . } }
         }
       }
 

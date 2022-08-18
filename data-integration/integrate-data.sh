@@ -365,6 +365,7 @@ SUFFIX_BNFISNI_CONT_LD="bnf-data-of-missing-nationalities.xml"
 # LINKED DATA - KBR TRANSLATIONS
 #
 SUFFIX_KBR_TRL_LD="translations-and-contributions.ttl"
+SUFFIX_KBR_TRL_LIMITED_ORIG_LD="limited-info-originals.ttl"
 SUFFIX_KBR_NEWAUT_LD="translations-identified-authorities.ttl"
 SUFFIX_KBR_TRL_BB_LD="translations-bb.ttl"
 SUFFIX_KBR_TRL_PUB_COUNTRY_LD="translations-publication-countries.ttl"
@@ -1076,6 +1077,9 @@ function transformKBR {
   echo "TRANSFORMATION - Map KBR translation data to RDF"
   mapKBRTranslationsAndContributions $integrationName "kbr"
 
+  echo "TRANSFORMATION - Map KBR (limited) original information to RDF"
+  mapKBRTranslationLimitedOriginals $integrationName "kbr"
+
   echo "TRANSFORMATION - Map KBR linked authorities data to RDF"
   mapKBRLinkedAuthorities $integrationName
 
@@ -1222,7 +1226,7 @@ function extractKBRTranslationsAndContributions {
   # KBR TRANSLATIONS
   # XML -> XML clean -> CSV -> TURTLE (kbr-translations.ttl)
   # mapping: kbr-translations.yml
-  # named graph: <http://kbr-syracuse>
+  # named graphs: <http://kbr-syracuse> and <http://kbr-originals>
   #
   local integrationName=$1
   local dataSourceName=$2
@@ -1550,6 +1554,26 @@ function mapKBRTranslationsAndContributions {
 }
 
 # -----------------------------------------------------------------------------
+function mapKBRTranslationLimitedOriginals {
+  local integrationName=$1
+  local dataSourceName=$2
+
+  kbrLimitedOriginalsTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_LIMITED_ORIG_LD"
+
+  # map the translations
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_WORKS_FR="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+  export RML_SOURCE_WORKS_NL="$integrationName/$dataSourceName/translations/$SUFFIX_KBR_TRL_NL_WORKS"
+
+  # 2) execute the mapping
+  echo "Map KBR limited information about originals ..."
+  . map.sh ../data-sources/kbr/kbr-translations-limited-originals.yml $kbrLimitedOriginalsTurtle
+
+
+}
+
+# -----------------------------------------------------------------------------
 function mapKBRLinkedAuthorities {
 
   local integrationName=$1
@@ -1632,6 +1656,7 @@ function loadKBR {
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
 
   loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph"
+  loadKBRLimitedOriginalInfo "$integrationName" "$dataSourceName" "$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL"
   loadKBRLinkedAuthorities "$integrationName" "$dataSourceName" "$linkedAuthoritiesNamedGraph"
 }
 
@@ -1699,6 +1724,23 @@ function loadKBRTranslationsAndContributions {
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
     "$kbrIdentifiedAuthorities"
 
+}
+
+# -----------------------------------------------------------------------------
+function loadKBRLimitedOriginalInfo {
+  local integrationName=$1
+  local dataSourceName=$2
+  local originalsNamedGraph=$3
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local kbrLimitedOriginalsTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_LIMITED_ORIG_LD"
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  echo "Load KBR (limited) original information ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$originalsNamedGraph" \
+    "$kbrLimitedOriginalsTurtle"
 }
 
 # -----------------------------------------------------------------------------
