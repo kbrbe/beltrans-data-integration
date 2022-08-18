@@ -1,0 +1,20 @@
+PREFIX kb: <http://data.bibliotheken.nl/def#>
+SELECT ?manifestation ?kbcode
+WHERE {
+
+  ?manifestation a schema:Book ;
+                 schema:inLanguage "fr" ;
+                 schema:translationOfWork/schema:inLanguage "nl" ;
+                 schema:about ?kbcode .
+
+  ?kbcode skos:inScheme <http://data.bibliotheken.nl/id/scheme/kbcode> .
+
+
+  OPTIONAL {
+    ?manifestation schema:publication ?publication .
+
+    OPTIONAL { ?publication schema:startDate ?publicationYear . }
+  }
+ 
+  FILTER( xsd:integer(str(?publicationYear)) > 1969 && xsd:integer(str(?publicationYear)) < 2021)
+}

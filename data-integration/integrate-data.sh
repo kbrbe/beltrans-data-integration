@@ -128,6 +128,7 @@ TRIPLE_STORE_GRAPH_KB_TRL="http://kb-publications"
 TRIPLE_STORE_GRAPH_KB_LA="http://kb-linked-authorities"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
 TRIPLE_STORE_GRAPH_WIKIDATA="http://wikidata"
+TRIPLE_STORE_GRAPH_KBCODE="http://kbcode"
 
 # if it is a blazegraph triple store
 TRIPLE_STORE_NAMESPACE="integration"
@@ -142,6 +143,8 @@ KB_SPARQL_ENDPOINT="http://data.bibliotheken.nl/sparql"
 GET_BNF_ISBN10_ISBN13_QUERY_FILE="sparql-queries/get-bnf-isbn10-13.sparql"
 GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn10-without-hyphen.sparql"
 GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn13-without-hyphen.sparql"
+
+GET_KBCODE_HIERARCHY_INFO_QUERY_FILE="sparql-queries/get-kbcode-hierarchy.sparql"
 
 GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE="sparql-queries/get-missing-nationality-isni.sparql"
 
@@ -204,6 +207,7 @@ SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.cs
 SUFFIX_DATA_PROFILE_SOURCE_STATS="source-translation-stats.csv"
 SUFFIX_DATA_PROFILE_EXCEL_DATA="corpus-data.xlsx"
 SUFFIX_DATA_PROFILE_EXCEL_STATS="corpus-stats.xlsx"
+SUFFIX_DATA_PROFILE_KBCODE="kbcode-hierarchy"
 
 SUFFIX_PLACE_OF_PUBLICATION_GEONAMES="place-of-publications-geonames.csv"
 SUFFIX_UNKNOWN_GEONAMES_MAPPING="missing-geonames-mapping.csv"
@@ -292,11 +296,17 @@ SUFFIX_KB_AUT_PERSONS_NL_FR="kb-authors-persons-nl-fr.csv"
 SUFFIX_KB_AUT_ORGS_FR_NL="kb-authors-orgs-fr-nl.csv"
 SUFFIX_KB_AUT_ORGS_NL_FR="kb-authors-orgs-nl-fr.csv"
 
+
 SUFFIX_KB_TRL_ISBN_NL_FR="kb-translations-with-formatted-isbn-nl-fr.csv"
 SUFFIX_KB_TRL_ISBN_FR_NL="kb-translations-with-formatted-isbn-fr-nl.csv"
 
+SUFFIX_KB_KBCODE_FR_NL="kbcode-assignments-fr-nl.csv"
+SUFFIX_KB_KBCODE_NL_FR="kbcode-assignments-nl-fr.csv"
+
 GET_KB_TRL_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-manifestations-fr-nl.sparql"
 GET_KB_TRL_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-manifestations-nl-fr.sparql"
+GET_KB_KBCODE_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-kbcode-fr-nl.sparql"
+GET_KB_KBCODE_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-kbcode-nl-fr.sparql"
 GET_KB_CONT_PERSONS_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-contributors-persons-fr-nl.sparql"
 GET_KB_CONT_PERSONS_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-contributors-persons-nl-fr.sparql"
 GET_KB_CONT_ORGS_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-contributors-orgs-fr-nl.sparql"
@@ -305,6 +315,8 @@ GET_KB_AUT_PERSONS_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-authors-perso
 GET_KB_AUT_PERSONS_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-authors-persons-nl-fr.sparql"
 GET_KB_AUT_ORGS_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-authors-orgs-fr-nl.sparql"
 GET_KB_AUT_ORGS_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-authors-orgs-nl-fr.sparql"
+
+INSERT_KBCODE_QUERY_FILE="../data-sources/kb/insert-kbcode-hierarchy.sparql"
 
 # DATA SOURCE - BNF
 #
@@ -433,6 +445,9 @@ function extract {
   elif [ "$dataSource" = "kb" ];
   then
     extractKB $integrationFolderName
+  elif [ "$dataSource" = "kbcode" ];
+  then
+    extractKBCode $integrationFolderName
   elif [ "$dataSource" = "wikidata" ];
   then
     extractWikidata $integrationFolderName
@@ -591,6 +606,7 @@ function query {
   queryFileAgg="$DATA_PROFILE_QUERY_FILE_AGG"
   queryFileContPersons="$DATA_PROFILE_QUERY_FILE_CONT_PERSONS"
   queryFileContOrgs="$DATA_PROFILE_QUERY_FILE_CONT_ORGS"
+  queryFileKBCode="$GET_KBCODE_HIERARCHY_INFO_QUERY_FILE"
 
   outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
 
@@ -598,14 +614,18 @@ function query {
   outputFileContPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
   outputFileContOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
 
+  outputFileKBCode="$integrationName/csv/$SUFFIX_DATA_PROFILE_KBCODE"
+
   echo "Creating the dataprofile CSV file ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
 
   echo "Creating the contributor persons CSV file ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContPersons" "$ENV_SPARQL_ENDPOINT" "$outputFileContPersonsAllData"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileContPersons" "$ENV_SPARQL_ENDPOINT" "$outputFileContPersonsAllData"
 
   echo "Creating the contributor orgs CSV file ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$queryFileContOrgs" "$ENV_SPARQL_ENDPOINT" "$outputFileContOrgs"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileContOrgs" "$ENV_SPARQL_ENDPOINT" "$outputFileContOrgs"
+
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileKBCode" "$ENV_SPARQL_ENDPOINT" "$outputFileKBCode"
 
 }
 
@@ -625,6 +645,8 @@ function postprocess {
   tmp2="$integrationName/csv/kbr-and-bnf-enriched-not-yet-kb.csv"
 
   contributorsOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
+
+  kbCodeHierarchy="$integrationName/csv/$SUFFIX_DATA_PROFILE_KBCODE"
 
   excelData="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_DATA"
 
@@ -653,7 +675,7 @@ function postprocess {
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllData -m $integratedDataEnriched -o $allPersons --keep-non-contributors
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "KBCode" -o $excelData
 
 }
 
@@ -733,16 +755,19 @@ function extractKB {
   kbAuthorsOrgsFRNL="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_FR_NL"
   kbAuthorsOrgsNLFR="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_NL_FR"
 
+  kbCodeAssignmentsFRNL="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_FR_NL"
+  kbCodeAssignmentsNLFR="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_NL_FR"
+
   kbTranslationsWithISBNFRNL="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_FR_NL"
   kbTranslationsWithISBNNLFR="$integrationName/kb/translations/$SUFFIX_KB_TRL_ISBN_NL_FR"
 
   source py-integration-env/bin/activate
 
   echo "EXTRACTION - Extract KB translations FR - NL"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_FR_NL_QUERY_FILE" "$kbTranslationsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_FR_NL_QUERY_FILE" "$kbTranslationsFRNL"
 
   echo "EXTRACTION - Extract KB translations NL - FR"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_NL_FR_QUERY_FILE" "$kbTranslationsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_NL_FR_QUERY_FILE" "$kbTranslationsNLFR"
 
   echo "EXTRACTION - Compute formatted ISBN10 and ISBN13 identifiers FR - NL"
   time python $SCRIPT_ADD_ISBN_10_13 -i $kbTranslationsFRNL -o $kbTranslationsWithISBNFRNL
@@ -751,31 +776,49 @@ function extractKB {
   time python $SCRIPT_ADD_ISBN_10_13 -i $kbTranslationsNLFR -o $kbTranslationsWithISBNNLFR
 
   echo "EXTRACTION - Extract KB translation contributors persons FR - NL"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_FR_NL_QUERY_FILE" "$kbContributorsPersonsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_FR_NL_QUERY_FILE" "$kbContributorsPersonsFRNL"
 
   echo "EXTRACTION - Extract KB translation contributors persons NL - FR"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_NL_FR_QUERY_FILE" "$kbContributorsPersonsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_NL_FR_QUERY_FILE" "$kbContributorsPersonsNLFR"
 
   echo "EXTRACTION - Extract KB translation authors persons FR - NL"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_FR_NL_QUERY_FILE" "$kbAuthorsPersonsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_FR_NL_QUERY_FILE" "$kbAuthorsPersonsFRNL"
 
   echo "EXTRACTION - Extract KB translation authors persons NL - FR"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_NL_FR_QUERY_FILE" "$kbAuthorsPersonsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_NL_FR_QUERY_FILE" "$kbAuthorsPersonsNLFR"
 
 
   echo "EXTRACTION - Extract KB translation contributors orgs FR - NL"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_FR_NL_QUERY_FILE" "$kbContributorsOrgsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_FR_NL_QUERY_FILE" "$kbContributorsOrgsFRNL"
 
   echo "EXTRACTION - Extract KB translation contributors orgs NL - FR"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_NL_FR_QUERY_FILE" "$kbContributorsOrgsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_NL_FR_QUERY_FILE" "$kbContributorsOrgsNLFR"
 
   echo "EXTRACTION - Extract KB translation authors orgs FR - NL"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_FR_NL_QUERY_FILE" "$kbAuthorsOrgsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_FR_NL_QUERY_FILE" "$kbAuthorsOrgsFRNL"
 
   echo "EXTRACTION - Extract KB translation authors orgs NL - FR"
-  . $SCRIPT_QUERY_DATA "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_NL_FR_QUERY_FILE" "$kbAuthorsOrgsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_NL_FR_QUERY_FILE" "$kbAuthorsOrgsNLFR"
+
+  echo "EXTRACTION - Extract KBCode classifications FR-NL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_KBCODE_FR_NL_QUERY_FILE" "$kbCodeAssignmentsFRNL"
+
+  echo "EXTRACTION - Extract KBCode classifications NL-FR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_KBCODE_NL_FR_QUERY_FILE" "$kbCodeAssignmentsNLFR"
 }
 
+# -----------------------------------------------------------------------------
+function extractKBCode {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  echo "EXTRACT, TRANSFORM and LOAD the KBCode hierarchy with a federated SPARQL UPDATE query"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$INSERT_KBCODE_QUERY_FILE"
+  
+}
 
 # -----------------------------------------------------------------------------
 function extractBnF {
@@ -889,7 +932,7 @@ function extractNationalityFromBnFViaISNI {
 
   # Query ISNI identifiers with missing nationality information
   echo "EXTRACTION - Extract ISNI identifier with missing nationality information"
-  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$isniIdentifiers"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$isniIdentifiers"
 
   echo "EXTRACTION - Create configuration file for following step"
   echo "skos:exactMatch,inFile,$isniIdentifiers" > $configISNIExtraction
@@ -1109,6 +1152,9 @@ function transformKB {
   export RML_SOURCE_KB_CONT_ORGS_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_CONT_ORGS_NL_FR"
   export RML_SOURCE_KB_AUT_ORGS_FR_NL="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_FR_NL"
   export RML_SOURCE_KB_AUT_ORGS_NL_FR="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_NL_FR"
+
+  export RML_SOURCE_KB_TRL_KBCODE_FR_NL="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_FR_NL"
+  export RML_SOURCE_KB_TRL_KBCODE_NL_FR="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_NL_FR"
 
   # 2) execute the mapping
   echo "TRANSFORMATION - Map KB translations FR-NL ..."
@@ -1784,7 +1830,7 @@ function loadBnF {
   source ./py-integration-env/bin/activate
 
   echo "Get BnF ISBN10 and ISBN13 identifiers ..."
-  queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_ISBN13_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10ISBN13"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_ISBN13_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10ISBN13"
 
   echo "Compute BnF ISBN10 and ISBN13 identifiers ..."
   time python $SCRIPT_BNF_ADD_ISBN_10_13 -i $bnfISBN10ISBN13 -o $bnfISBN10ISBN13Enriched
@@ -1796,7 +1842,7 @@ function loadBnF {
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_NT" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" "$bnfISBN10ISBN13Enriched"
 
   #echo "Fix BnF ISBN13 identifiers without hyphen - get malformed ISBN identifiers"
-  #queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN13MissingHyphen"
+  #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN13MissingHyphen"
 
   #echo "Fix BnF ISBN13 identifiers without hyphen - normalize ISBN identifiers"
   #time python $SCRIPT_FIX_ISBN13 -i $bnfISBN13MissingHyphen -o $bnfCleanedISBN13
@@ -1809,7 +1855,7 @@ function loadBnF {
   #uploadData "$TRIPLE_STORE_NAMESPACE" "$DELETE_QUERY_BNF_ISBN13_WITHOUT_HYPHEN" "$FORMAT_SPARQL_UPDATE" "$ENV_SPARQL_ENDPOINT"
 
   #echo "Fix BnF ISBN10 identifiers without hyphen - get malformed ISBN identifiers" 
-  #queryData "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10MissingHyphen"
+  #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN10_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN10MissingHyphen"
 
   #echo "Fix BnF ISBN10 identifiers without hyphen - normalize ISBN identifiers"
   #time python $SCRIPT_FIX_ISBN10 -i $bnfISBN10MissingHyphen -o $bnfCleanedISBN10
@@ -2062,7 +2108,7 @@ function deleteNamedGraph {
 }
 
 # -----------------------------------------------------------------------------
-function queryData {
+function queryDataBlazegraph {
   local namespace=$1
   local queryFile=$2
   local endpoint=$3
@@ -2075,6 +2121,16 @@ function queryData {
 #  . $SCRIPT_QUERY_DATA "$endpoint/namespace/$namespace/sparql" "$queryFile" "$outputFile"
   python query_data.py -u "$queryURL" -q "$queryFile" -o "$outputFile"
 
+}
+
+# -----------------------------------------------------------------------------
+function queryData {
+  local url=$1
+  local queryFile=$2
+  local outputFile=$3
+
+  source ./py-integration-env/bin/activate
+  python query_data.py -u "$url" -q "$queryFile" -o "$outputFile"
 }
 
 # -----------------------------------------------------------------------------

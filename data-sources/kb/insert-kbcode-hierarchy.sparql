@@ -1,0 +1,30 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX kb: <http://data.bibliotheken.nl/def#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+INSERT {
+
+  graph <http://kbcode> {
+    ?kbcode a skos:Concept ;
+            skos:prefLabel ?prefLabel ;
+            rdfs:label ?qualifiedName ;
+            skos:notation ?notation ;
+            skos:broader ?parent ;
+            skos:narrower ?child .
+  }
+
+}
+WHERE {
+
+  SERVICE <http://data.bibliotheken.nl/sparql> {
+
+    ?kbcode skos:inScheme <http://data.bibliotheken.nl/id/scheme/kbcode> .
+
+    OPTIONAL { ?kbcode skos:broader ?parent . }
+    OPTIONAL { ?kbcode skos:notation ?notation .}
+    OPTIONAL { ?kbcode rdfs:label ?qualifiedName . }
+    OPTIONAL { ?kbcode skos:narrower ?child . }
+    OPTIONAL { ?kbcode skos:prefLabel ?prefLabel . }
+
+  }
+}
