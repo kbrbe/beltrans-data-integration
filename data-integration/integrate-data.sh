@@ -128,6 +128,7 @@ TRIPLE_STORE_GRAPH_KB_TRL="http://kb-publications"
 TRIPLE_STORE_GRAPH_KB_LA="http://kb-linked-authorities"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
 TRIPLE_STORE_GRAPH_WIKIDATA="http://wikidata"
+TRIPLE_STORE_GRAPH_KBCODE="http://kbcode"
 
 # if it is a blazegraph triple store
 TRIPLE_STORE_NAMESPACE="integration"
@@ -312,6 +313,8 @@ GET_KB_AUT_PERSONS_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-authors-perso
 GET_KB_AUT_ORGS_FR_NL_QUERY_FILE="../data-sources/kb/extract-kb-authors-orgs-fr-nl.sparql"
 GET_KB_AUT_ORGS_NL_FR_QUERY_FILE="../data-sources/kb/extract-kb-authors-orgs-nl-fr.sparql"
 
+INSERT_KBCODE_QUERY_FILE="../data-sources/kb/insert-kbcode-hierarchy.sparql"
+
 # DATA SOURCE - BNF
 #
 SUFFIX_BNF_BELGIANS_IDS="bnf-belgian-contributor-ids.csv"
@@ -439,6 +442,9 @@ function extract {
   elif [ "$dataSource" = "kb" ];
   then
     extractKB $integrationFolderName
+  elif [ "$dataSource" = "kbcode" ];
+  then
+    extractKBCode $integrationFolderName
   elif [ "$dataSource" = "wikidata" ];
   then
     extractWikidata $integrationFolderName
@@ -791,6 +797,18 @@ function extractKB {
   queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_KBCODE_NL_FR_QUERY_FILE" "$kbCodeAssignmentsNLFR"
 }
 
+# -----------------------------------------------------------------------------
+function extractKBCode {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  echo "EXTRACT, TRANSFORM and LOAD the KBCode hierarchy with a federated SPARQL UPDATE query"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$INSERT_KBCODE_QUERY_FILE"
+  
+}
 
 # -----------------------------------------------------------------------------
 function extractBnF {
