@@ -125,6 +125,7 @@ TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_ORIG_LA="http://kbr-originals-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
 TRIPLE_STORE_GRAPH_KB_TRL="http://kb-publications"
+TRIPLE_STORE_GRAPH_KB_TRL_ORIG="http://kb-originals"
 TRIPLE_STORE_GRAPH_KB_LA="http://kb-linked-authorities"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
 TRIPLE_STORE_GRAPH_WIKIDATA="http://wikidata"
@@ -385,6 +386,7 @@ SUFFIX_KBR_LA_LD="linked-authorities.ttl"
 #
 SUFFIX_KB_TRL_LD="kb-translations.ttl"
 SUFFIX_KB_LA_LD="kb-linked-authorities.ttl"
+SUFFIX_KB_TRL_ORIG_LD="kb-limited-originals.ttl"
 
 #
 # LINKED DATA - KBR BELGIANS
@@ -1136,6 +1138,7 @@ function transformKB {
 
   kbTranslationsTurtle="$integrationName/kb/rdf/$SUFFIX_KB_TRL_LD"
   kbLinkedAuthoritiesTurtle="$integrationName/kb/rdf/$SUFFIX_KB_LA_LD" 
+  kbOriginalsTurtle="$integrationName/kb/rdf/$SUFFIX_KB_TRL_ORIG_LD"
 
   # map the translations
 
@@ -1157,11 +1160,13 @@ function transformKB {
   export RML_SOURCE_KB_TRL_KBCODE_NL_FR="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_NL_FR"
 
   # 2) execute the mapping
-  echo "TRANSFORMATION - Map KB translations FR-NL ..."
+  echo "TRANSFORMATION - Map KB translations ..."
   . map.sh ../data-sources/kb/kb-translations.yml $kbTranslationsTurtle
 
+  echo "TRANSFORMATION - Map KB (limited) original information"
+  . map.sh ../data-sources/kb/kb-translations-limited-originals.yml $kbOriginalsTurtle
 
-  echo "TRANSFORMATION - Map KB linked authorities FR-NL ..."
+  echo "TRANSFORMATION - Map KB linked authorities ..."
   . map.sh ../data-sources/kb/kb-linked-authorities.yml $kbLinkedAuthoritiesTurtle
 
 }
@@ -1727,20 +1732,26 @@ function loadKB {
 
   local kbTranslationsAndContributions="$integrationName/kb/rdf/$SUFFIX_KB_TRL_LD"
   local kbLinkedAuthorities="$integrationName/kb/rdf/$SUFFIX_KB_LA_LD"
+  local kbOriginalsTurtle="$integrationName/kb/rdf/$SUFFIX_KB_TRL_ORIG_LD"
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   # first delete content of the named graph in case it already exists
-  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KB_TRL>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_TRL"
 
-  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_KB_LA>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_LA"
+
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG"
+
 
   echo "Load KB translations and contributions ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL" "$kbTranslationsAndContributions"
 
+  echo "Load KB (limited) original information ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG" "$kbOriginalsTurtle"
+
   echo "Load KB linked authorities ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_LA" "$kbLinkedAuthorities"
+
 
 }
 

@@ -261,7 +261,10 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       #
       # SOURCE INFORMATION
       #
-      OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:translationOfWork/schema:name ?kbSourceManifestationTitle . } }
+      OPTIONAL { 
+        graph <http://kb-publications> { ?kbManifestation schema:translationOfWork ?kbOriginal . }
+        graph <http://kb-originals> { ?kbOriginal schema:name ?kbSourceManifestationTitle . } 
+      }
 
     } # end optional KB
         
