@@ -181,45 +181,6 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  manifestationsSourcesNLFR:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping adds the language to the Dutch source of a creative work, currently on the LRM level of manifestations."
-    sources:
-      - access: *sourceTRLNLFR
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_source_$(manifestationID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(sourceTitle)]
-        - [grel:valueParameter2, ""] 
-    po:
-      - [schema:name, $(sourceTitle)]
-      - [schema:inLanguage, lang:dut~iri]
-
-
-  # ---------------------------------------------------------------------------
-  #
-  manifestationsSourcesFRNL:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping adds the language to the French source of a creative work, currently on the LRM level of manifestations."
-    sources:
-      - access: *sourceTRLFRNL
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_source_$(manifestationID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(sourceTitle)]
-        - [grel:valueParameter2, ""] 
-    po:
-      - [schema:name, $(sourceTitle)]
-      - [schema:inLanguage, lang:fre~iri]
-
-  # ---------------------------------------------------------------------------
-  #
   kbcodeAssignments:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates relationships between translations and their kbcode classification."

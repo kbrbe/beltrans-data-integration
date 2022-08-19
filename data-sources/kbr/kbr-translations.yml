@@ -249,9 +249,9 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  creationActivity:
+  creationActivityWithSource:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity."
+    description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity. The mapping is only executed if there is a source identifier, thus it will link to a (minimal) record of the actual source."
     sources:
       - access: *sourceWorksFR
         referenceFormulation: csv
@@ -260,6 +260,37 @@ mappings:
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:translationActivity_$(KBRID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(sourceKBRID)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [rdfs:label, "Translation context of $(KBRID)", en~lang]
+      - [a, prov:Activity]
+      - [prov:generated, btid:manifestation_$(KBRID)~iri]
+      - [prov:used, btid:manifestation_$(sourceKBRID)~iri]
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  creationActivity:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity. The mapping is only executed if there is no source identifier, thus it will link to a created dummy of the source with prefix _source_."
+    sources:
+      - access: *sourceWorksFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceWorksNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, $(sourceKBRID)]
+        - [grel:valueParameter2, ""] 
     po:
       - [rdfs:label, "Translation context of $(KBRID)", en~lang]
       - [a, prov:Activity]
@@ -391,148 +422,6 @@ mappings:
       - [prov:qualifiedAssociation, btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)~iri]
 
 
-  # ---------------------------------------------------------------------------
-  #
-  manifestationsSourcesWithoutSource:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates creative works representing the source text of a translation when no source ID exists, currently on the LRM level of manifestations."
-    sources:
-      - access: *sourceWorksFR
-        referenceFormulation: csv
-        delimiter: ','
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:manifestation_source_$(KBRID)
-    condition:
-      function: idlab-fn:equal
-      parameters:
-        - [grel:valueParameter, $(sourceKBRID)]
-        - [grel:valueParameter2, ""] 
-    po:
-      - [a, schema:CreativeWork]
-      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
-      - p: schema:name
-        o: $(originalTitle)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(originalTitle)]
-            - [grel:valueParameter2, ""] 
-
-
-  # ---------------------------------------------------------------------------
-  #
-  manifestationsSourcesWithoutSourceFR:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates creative works representing the French source text of a translation, currently on the LRM level of manifestations."
-    sources:
-      - access: *sourceWorksFR
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:manifestation_source_$(KBRID)
-    condition:
-      function: idlab-fn:equal
-      parameters:
-        - [grel:valueParameter, $(sourceKBRID)]
-        - [grel:valueParameter2, ""] 
-    po:
-      - [schema:inLanguage, lang:fre~iri]
-
-  # ---------------------------------------------------------------------------
-  #
-  manifestationsSourcesWithoutSourceNL:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates creative works representing the Dutch source text of a translation, currently on the LRM level of manifestations."
-    sources:
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_source_$(KBRID)
-    condition:
-      function: idlab-fn:equal
-      parameters:
-        - [grel:valueParameter, $(sourceKBRID)]
-        - [grel:valueParameter2, ""] 
-    po:
-      - [schema:inLanguage, lang:dut~iri]
-
-
-  # ---------------------------------------------------------------------------
-  #
-  manifestationsSourcesNL:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping adds the language to source of a creative work, currently on the LRM level of manifestations."
-    sources:
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:manifestation_$(sourceKBRID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(sourceKBRID)]
-        - [grel:valueParameter2, ""] 
-    po:
-      - [schema:inLanguage, lang:dut~iri]
-
-  # ---------------------------------------------------------------------------
-  #
-  manifestationsSourcesFR:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping adds the language to source of a creative work, currently on the LRM level of manifestations."
-    sources:
-      - access: *sourceWorksFR
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:manifestation_$(sourceKBRID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(sourceKBRID)]
-        - [grel:valueParameter2, ""] 
-    po:
-      - [schema:inLanguage, lang:fre~iri]
-
-
-  # ---------------------------------------------------------------------------
-  #
-  manifestationsSources:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates creative works for publications where we have a KBR source link, currently on the LRM level of manifestations."
-    sources:
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ',' 
-      - access: *sourceWorksFR
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:manifestation_$(sourceKBRID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(sourceKBRID)]
-        - [grel:valueParameter2, ""] 
-    po:
-      - [a, schema:CreativeWork]
-      - [dcterms:identifier, $(sourceKBRID)]
-      - [schema:name, $(sourceTitle)]
-      - p: bibo:isbn10
-        o: $(sourceISBN10)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(sourceISBN10)]
-            - [grel:valueParameter2, ""] 
-      - p: bibo:isbn13
-        o: $(sourceISBN13)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(sourceISBN13)]
-            - [grel:valueParameter2, ""] 
-      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
-
 
   # ---------------------------------------------------------------------------
   #
@@ -590,5 +479,4 @@ mappings:
       - [a, schema:CreativeWorkSeries]
       - [dcterms:identifier, $(collectionID)]
       - [schema:name, $(collection-name)]
-
 
