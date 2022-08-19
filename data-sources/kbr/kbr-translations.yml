@@ -251,7 +251,7 @@ mappings:
   #
   creationActivityWithSource:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity. The mapping is only executed if there is a source identifier, thus it will link to a (minimal) record of the actual source."
+    description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity."
     sources:
       - access: *sourceWorksFR
         referenceFormulation: csv
@@ -277,6 +277,29 @@ mappings:
   #
   creationActivity:
     creator: <https://sven-lieber.org/profile#me>
+    sources:
+      - access: *sourceWorksFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceWorksNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:translationActivity_$(KBRID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(sourceKBRID)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [rdfs:label, "Translation context of $(KBRID)", en~lang]
+      - [a, prov:Activity]
+      - [prov:generated, btid:manifestation_$(KBRID)~iri]
+      - [prov:used, btid:manifestation_$(sourceKBRID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  creationActivityWithoutSource:
+    creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity. The mapping is only executed if there is no source identifier, thus it will link to a created dummy of the source with prefix _source_."
     sources:
       - access: *sourceWorksFR
@@ -296,6 +319,7 @@ mappings:
       - [a, prov:Activity]
       - [prov:generated, btid:manifestation_$(KBRID)~iri]
       - [prov:used, btid:manifestation_source_$(KBRID)~iri]
+
 
 
   # ---------------------------------------------------------------------------
