@@ -43,7 +43,10 @@ WHERE {
     # Get the source and target language we want to add to the aggregated URI
     #
     OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:inLanguage ?targetLang . } }
-    OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:translationOfWork/schema:inLanguage ?sourceLang . } }
+    OPTIONAL { 
+      graph <http://kb-publications> { ?kbManifestation schema:translationOfWork ?kbOriginal . }
+      graph <http://kb-originals> { ?kbOriginal schema:inLanguage ?sourceLang . } 
+    }
 
     #
     # Get optional ISBN10
