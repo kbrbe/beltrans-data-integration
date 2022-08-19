@@ -43,7 +43,10 @@ WHERE {
     }
 
     OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:inLanguage ?targetLang . } }
-    OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:translationOfWork/schema:inLanguage ?sourceLang . } }
+    OPTIONAL { 
+      graph <http://kb-publications> { ?kbManifestation schema:translationOfWork ?kbOriginal . }
+      graph <http://kb-originals> { ?kbOriginal schema:inLanguage ?sourceLang . } 
+    }
 
     BIND( STRUUID() as ?uuid)
     BIND( IRI( CONCAT( "http://kbr.be/id/data/", ?uuid ) ) as ?manifestationURI)
