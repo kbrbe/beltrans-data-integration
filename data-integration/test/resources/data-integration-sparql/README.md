@@ -4,30 +4,20 @@ This test data reflects the following cases.
 
 ## Bibliographic data matching based on ISBN10
 
-* A manifestation from KBR, which should have matches via ISBN10 with a record from KBR, BnF and KB
-* A manifestation from KBR, which should have matches via ISBN10 with a record from KBR and BnF
-* A manifestation from KBR, which should have matches via ISBN10 with a record from KBR and KB
-* A manifestation from BnF, which should have matches via ISBN10 with a record from KBR, BnF and KB
-* A manifestation from BnF, which should have matches via ISBN10 with a record from KBR and BnF
-* A manifestation from BnF, which should have matches via ISBN10 with a record from BnF and KB
-* A manifestation from KB, which should have matches via ISBN10 with a record from KBR, BnF and KB
-* A manifestation from KB, which should have matches via ISBN10 with a record from KBR and KB
-* A manifestation from KB, which should have matches via ISBN10 with a record from BnF and KB
+* A manifestation, which should have matches via ISBN10 with a record from KBR, BnF and KB (`KBR-BnF-KB`)
+* A manifestation, which should have matches via ISBN10 with a record from KBR and BnF (`KBR-BnF-000`)
+* A manifestation, which should have matches via ISBN10 with a record from KBR and KB ('KBR-000-KB`)
+* A manifestation, which should have matches via ISBN10 with a record from BnF and KB (`000-BnF-KB`)
 * A manifestation with ISBN10 only found at KBR
 * A manifestation with ISBN10 only found at BnF
 * A manifestation with ISBN10 only found at KB
 
 ## Bibliographic data matching based on ISBN13
 
-* A manifestation from KBR, which should have matches via ISBN13 with a record from KBR, BnF and KB
-* A manifestation from KBR, which should have matches via ISBN13 with a record from KBR and BnF
-* A manifestation from KBR, which should have matches via ISBN13 with a record from KBR and KB
-* A manifestation from BnF, which should have matches via ISBN13 with a record from KBR, BnF and KB
-* A manifestation from BnF, which should have matches via ISBN13 with a record from KBR and BnF
-* A manifestation from BnF, which should have matches via ISBN13 with a record from BnF and KB
-* A manifestation from KB, which should have matches via ISBN13 with a record from KBR, BnF and KB
-* A manifestation from KB, which should have matches via ISBN13 with a record from KBR and KB
-* A manifestation from KB, which should have matches via ISBN13 with a record from BnF and KB
+* A manifestation, which should have matches via ISBN13 with a record from KBR, BnF and KB (`KBR-BnF-KB`)
+* A manifestation, which should have matches via ISBN13 with a record from KBR and BnF (`KBR-BnF-00`)
+* A manifestation, which should have matches via ISBN13 with a record from KBR and KB (`KBR-000-KB`)
+* A manifestation, which should have matches via ISBN13 with a record from BnF and KB (`000-BnF-KB`)
 * A manifestation with ISBN13 only found at KBR
 * A manifestation with ISBN13 only found at BnF
 * A manifestation with ISBN13 only found at KB
