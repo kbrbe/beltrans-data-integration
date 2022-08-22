@@ -1,4 +1,4 @@
-"uri","name","ISBN10","ISBN13","authorURI","comment"
+"id","title","ISBN10","ISBN13","author","comment"
 "kbrBook1","KBR book 1","KBR-BnF-KB","","kbrAuthorBE1",""
 "kbrBook2","KBR book 2","KBR-BnF-00","","kbrAuthorBE2",""
 "kbrBook3","KBR book 3","KBR-000-KB","","kbrAuthorBE3",""
