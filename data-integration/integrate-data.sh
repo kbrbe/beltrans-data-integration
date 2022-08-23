@@ -25,7 +25,7 @@ SCRIPT_CSV_TO_EXCEL="csv_to_excel.py"
 SCRIPT_COMPUTE_STATS="create-publication-stats.py"
 SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
 
-SCRIPT_INTERLINK_DATA="interlink-named-graph-data.py"
+SCRIPT_INTERLINK_DATA="interlink_named_graph_data.py"
 
 SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"

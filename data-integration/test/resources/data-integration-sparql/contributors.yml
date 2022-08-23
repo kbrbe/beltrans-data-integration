@@ -34,6 +34,7 @@ mappings:
     s: btid:$(id)
     po:
       - [a, schema:Person]
+      - [a, foaf:Person]
       - p: dcterms:identifier
         o: $(id)
         condition:
@@ -56,7 +57,7 @@ mappings:
             - [grel:valueParameter, $(nationality)]
             - [grel:valueParameter2, ""] 
       - p: bf:identifiedBy
-        o: btid:isni_(ISNI)~iri
+        o: btid:isni_$(ISNI)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
@@ -70,7 +71,7 @@ mappings:
             - [grel:valueParameter, $(VIAF)]
             - [grel:valueParameter2, ""]
       - p: bf:identifiedBy
-        o: btid:wikidata_(Wikidata)~iri
+        o: btid:wikidata_$(Wikidata)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:

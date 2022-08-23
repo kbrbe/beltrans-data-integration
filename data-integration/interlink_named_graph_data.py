@@ -11,8 +11,7 @@ from optparse import OptionParser
 from dotenv import load_dotenv
 
 # -----------------------------------------------------------------------------
-def main():
-  """This script uses SPARQL INSERT/UPDATE queries to create a single named graph of data. For all creation queries all updates are executed several times."""
+def checkArguments():
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-u', '--url', action='store', help='The URL of the SPARQL endpoint which is queried')
@@ -28,6 +27,13 @@ def main():
     parser.print_help()
     exit(1)
 
+  return (options, args)
+
+# -----------------------------------------------------------------------------
+def main(url, numberUpdates, createQueries, updateQueries):
+  """This script uses SPARQL INSERT/UPDATE queries to create a single named graph of data. For all creation queries all updates are executed several times."""
+
+
   load_dotenv()
   userEnvVar="ENV_SPARQL_ENDPOINT_USER"
   passwordEnvVar="ENV_SPARQL_ENDPOINT_PASSWORD"
@@ -41,8 +47,8 @@ def main():
   else:
     auth=(user,password)
     
-  with open(options.update_queries, 'r', encoding='utf-8') as updateQueriesFile, \
-       open(options.create_queries, 'r', encoding='utf-8') as createQueriesFile:
+  with open(updateQueries, 'r', encoding='utf-8') as updateQueriesFile, \
+       open(createQueries, 'r', encoding='utf-8') as createQueriesFile:
 
     updateQueries = list(csv.reader(updateQueriesFile, delimiter=','))
     createQueries = list(csv.reader(createQueriesFile, delimiter=',')) 
@@ -51,13 +57,14 @@ def main():
     for c in createQueries:
       # create data
       print(f'CREATE data from {c[0]}')
-      utils_sparql.sparqlUpdate(options.url, c[1], 'application/sparql-update', c[0], auth=auth)
+      utils_sparql.sparqlUpdate(url, c[1], 'application/sparql-update', c[0], auth=auth)
 
       # perform update query per source to link found data to created URIs via sameAs
-      for i in range(options.number_updates):
-        print(f'Update cycle {i}/{options.number_updates}')
+      for i in range(numberUpdates):
+        print(f'Update cycle {i}/{numberUpdates}')
         for u in updateQueries:
-          utils_sparql.sparqlUpdate(options.url, u[1], 'application/sparql-update', u[0], auth=auth)
+          utils_sparql.sparqlUpdate(url, u[1], 'application/sparql-update', u[0], auth=auth)
 
 if __name__ == '__main__':
-  main()
+  (options, args) = checkArguments()
+  main(options.url, options.number_updates, options.create_queries, options.update_queries)
