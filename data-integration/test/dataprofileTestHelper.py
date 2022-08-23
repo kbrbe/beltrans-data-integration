@@ -105,6 +105,10 @@ class DataprofileTestHelper:
   # ---------------------------------------------------------------------------
   def identifiersOnSameRow(self, identifierTuple, otherIdentifierTuples):
     """Returns True if a contributor record (one row) contains all the given identifiers.
+    The given tuples represent column name and column value, e.g. ('kbrID', '1') the column kbrID and identifier 1.
+    The identifierTuple is the starting point and then the function recursively checks that the row found
+    via the identifierTuple contains also the data specified by the otherIdentifierTuples.
+
     >>> data = DataprofileTestHelper([{'kbrIDs': 'kbr1', 'bnfIDs': 'bnf1', 'ntaIDs': 'nta1'},{'kbrIDs': '2'},{'bnfIDs': '3'}])
     >>> data.identifiersOnSameRow(('kbrIDs','kbr1'), [('bnfIDs','bnf1'), ('ntaIDs','nta1')])
     True
@@ -125,26 +129,16 @@ class DataprofileTestHelper:
       colName2, identifier2 = otherIdentifierTuples.pop(0)
       colName2Value = utils.getDfCellValue(self.df, colName, identifier, colName2)
       if colName2Value == identifier2:
-        # There was a match between given value and found value, if there is more to check to a recursive call
+        # There was a match between given value and found value, if there is more to check do a recursive call
         # otherwise we are happy because we found a match and return True
         if len(otherIdentifierTuples) > 0:
           return self.identifiersOnSameRow((colName2, identifier2), otherIdentifierTuples)
         else:
           return True     
       else:
+        # if at some point in the recursive calls one identifier is not as expected we return False
         return False
     
-      
-
-#    value = utils.getDfCellValue(self.df, 'kbrIDs', kbrIdentifier, 'bnfIDs')
-#    if value == bnfIdentifier:
-#      value2 = utils.getDfCellValue(self.df, 'bnfIDs', value, 'ntaIDs')
-#      if value2 == kbIdentifier:
-#        return True
-#      else:
-#        return False
-#    else:
-#      return False
 
   # ---------------------------------------------------------------------------
   def kbrAndBnFIdentifierOnSameRow(self, kbrIdentifier, bnfIdentifier):

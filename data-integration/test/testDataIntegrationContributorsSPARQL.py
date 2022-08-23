@@ -14,7 +14,7 @@ from BlazegraphIntegrationTestContainer import BlazegraphIntegrationTestContaine
 __unittest = True
 
 # -----------------------------------------------------------------------------
-class TestDataIntegrationSPARQL(unittest.TestCase):
+class TestDataIntegrationContributorsSPARQL(unittest.TestCase):
 
   # ---------------------------------------------------------------------------
   @classmethod
@@ -28,11 +28,8 @@ class TestDataIntegrationSPARQL(unittest.TestCase):
       time.sleep(10)      
 
       loadConfig = {
-        'http://kbr-syracuse': ['./test/resources/data-integration-sparql/kbr-manifestations.ttl'],
         'http://kbr-linked-authorities': ['./test/resources/data-integration-sparql/kbr-contributors.ttl'],
-        'http://bnf-publications': ['./test/resources/data-integration-sparql/bnf-manifestations.ttl'],
         'http://bnf-contributors': ['./test/resources/data-integration-sparql/bnf-contributors.ttl'],
-        'http://kb-publications': ['./test/resources/data-integration-sparql/kb-manifestations.ttl'],
         'http://kb-linked-authorities': ['./test/resources/data-integration-sparql/kb-contributors.ttl'],
         'http://master-data': ['./test/resources/data-integration-sparql/master-data.ttl'],
       }
@@ -56,8 +53,6 @@ class TestDataIntegrationSPARQL(unittest.TestCase):
       with open(cls.tempAgg, 'r') as allIn:
         csvReader = csv.DictReader(allIn, delimiter=',')
         csvData = [dict(d) for d in csvReader]
-        print("CSV")
-        print(csvData)
         cls.data = DataprofileTestHelper(csvData)
         print(cls.data.df[['contributorID', 'kbrIDs', 'bnfIDs', 'ntaIDs', 'isniIDs', 'viafIDs', 'wikidataIDs']])
     
@@ -70,7 +65,7 @@ class TestDataIntegrationSPARQL(unittest.TestCase):
   # ---------------------------------------------------------------------------
   def testCorpusSize(self):
     """This function tests if the number of corpus rows is correct, thus that contributors from KBR, BnF and KB with a common identifier are listed in the same row."""
-    self.assertEqual(TestDataIntegrationSPARQL.data.numberRows(), 21, msg="Corpus too big or too small")
+    self.assertEqual(TestDataIntegrationContributorsSPARQL.data.numberRows(), 21, msg="Corpus too big or too small")
 
 
   # ---------------------------------------------------------------------------
@@ -80,7 +75,7 @@ class TestDataIntegrationSPARQL(unittest.TestCase):
     results = {}
     for i in contributorIDs:
       try:
-        results[i] = TestDataIntegrationSPARQL.data.identifiersOnSameRow(('kbrIDs', f'kbrAuthorBE{i}'), [('bnfIDs', f'bnfAuthorBE{i}'),('ntaIDs', f'kbAuthorBE{i}')])
+        results[i] = TestDataIntegrationContributorsSPARQL.data.identifiersOnSameRow(('kbrIDs', f'kbrAuthorBE{i}'), [('bnfIDs', f'bnfAuthorBE{i}'),('ntaIDs', f'kbAuthorBE{i}')])
       except:
         results[i] = 'Not in result'
     
@@ -95,7 +90,7 @@ class TestDataIntegrationSPARQL(unittest.TestCase):
     results = {}
     for i in contributorIDs:
       try:
-        results[i] = TestDataIntegrationSPARQL.data.identifiersOnSameRow(('kbrIDs', f'kbrAuthorBE{i}'), [('bnfIDs', f'bnfAuthorBE{i}')])
+        results[i] = TestDataIntegrationContributorsSPARQL.data.identifiersOnSameRow(('kbrIDs', f'kbrAuthorBE{i}'), [('bnfIDs', f'bnfAuthorBE{i}')])
       except:
         results[i] = 'Not in result'
     
@@ -110,7 +105,7 @@ class TestDataIntegrationSPARQL(unittest.TestCase):
     results = {}
     for kbrID, kbID in contributorIDs:
       try:
-        results[f'{kbrID},{kbID}'] = TestDataIntegrationSPARQL.data.identifiersOnSameRow(('kbrIDs', f'kbrAuthorBE{kbrID}'), [('ntaIDs', f'kbAuthorBE{kbID}')])
+        results[f'{kbrID},{kbID}'] = TestDataIntegrationContributorsSPARQL.data.identifiersOnSameRow(('kbrIDs', f'kbrAuthorBE{kbrID}'), [('ntaIDs', f'kbAuthorBE{kbID}')])
       except:
         results[f'{kbrID},{kbID}'] = 'Not in result'
     
@@ -125,7 +120,7 @@ class TestDataIntegrationSPARQL(unittest.TestCase):
     results = {}
     for i in contributorIDs:
       try:
-        results[i] = TestDataIntegrationSPARQL.data.identifiersOnSameRow(('bnfIDs', f'bnfAuthorBE{i}'), [('ntaIDs', f'kbAuthorBE{i}')])
+        results[i] = TestDataIntegrationContributorsSPARQL.data.identifiersOnSameRow(('bnfIDs', f'bnfAuthorBE{i}'), [('ntaIDs', f'kbAuthorBE{i}')])
       except:
         results[i] = 'Not in result'
     
