@@ -27,6 +27,11 @@ def checkArguments():
     parser.print_help()
     exit(1)
 
+  for configFile in [options.create_queries, options.update_queries]:
+    if not os.path.isfile(configFile):
+      print(f'The given config "{configFile} is not a file"')
+      exit(1)
+
   return (options, args)
 
 # -----------------------------------------------------------------------------
@@ -57,13 +62,13 @@ def main(url, numberUpdates, createQueries, updateQueries):
     for c in createQueries:
       # create data
       print(f'CREATE data from {c[0]}')
-      utils_sparql.sparqlUpdate(url, c[1], 'application/sparql-update', c[0], auth=auth)
+      utils_sparql.sparqlUpdateFile(url, c[1], 'application/sparql-update', c[0], auth=auth)
 
       # perform update query per source to link found data to created URIs via sameAs
       for i in range(numberUpdates):
-        print(f'Update cycle {i}/{numberUpdates}')
+        print(f'Update cycle {i+1}/{numberUpdates}')
         for u in updateQueries:
-          utils_sparql.sparqlUpdate(url, u[1], 'application/sparql-update', u[0], auth=auth)
+          utils_sparql.sparqlUpdateFile(url, u[1], 'application/sparql-update', u[0], auth=auth)
 
 if __name__ == '__main__':
   (options, args) = checkArguments()

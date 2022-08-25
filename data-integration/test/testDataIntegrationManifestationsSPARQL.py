@@ -6,7 +6,7 @@ import utils
 import csv
 import os
 import integration
-from interlink_named_graph_data import main as integrateData
+from interlink_named_graph_data_files import main as integrateDataSPARQLFiles
 from dataprofileTestHelper import DataprofileTestHelper
 from BlazegraphIntegrationTestContainer import BlazegraphIntegrationTestContainer
 
@@ -39,7 +39,7 @@ class TestDataIntegrationManifestationsSPARQL(unittest.TestCase):
 
       # integrate the data (this integration we actually want to test)
       numberUpdates = 3
-      integrateData(uploadURL, numberUpdates, 'manifestations-create-queries.csv', 'manifestations-update-queries.csv')
+      integrateDataSPARQLFiles(uploadURL, numberUpdates, 'manifestations-create-queries.csv', 'manifestations-update-queries.csv')
 
       # query data from our test fixture
       with open(cls.tempAgg, 'wb') as resultFileAgg:

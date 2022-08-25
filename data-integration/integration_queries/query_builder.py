@@ -2,9 +2,49 @@ from string import Template
 
 # -----------------------------------------------------------------------------
 class ContributorUpdateQuery():
+  """With this query builder class, one can generate a SPARQL UPDATE query to update a person or organization
+  of a target graph with certain properties from a source graph and a schema:sameAs link back to the person/organization
+  of the source graph.
+
+  The properties added to the target graph are identifiers described using the BIBFRAME ontology,
+  i.e. instances of bf:Identifier or bf:Isni to which is linked via bf:identifiedBy.
+  The update will always add the nationality from the source graph as well as add a schema:sameAs link from target to source.
+  On the one hand it can be configured which identifier is used to identify a match between source and target graph
+  and on the other hand, it can be configured which other identifiers from the source will be added to the target.
+
+  For example, the following call will generate a SPARQL UPDATE query which tries to make a link between
+  source and target graph using the ISNI identifier and will add VIAF and Wikidata identifiers to the target.
+
+  qb = ContributorUpdateQuery("KBR", "http://kbr-data", "http://integrated-data", "ISNI", ["VIAF", "Wikidata"])
+  """
 
   # ---------------------------------------------------------------------------
-  def __init__(self, source, sourceGraph, targetGraph, identifierName, identifiersToAdd, nationalityProperty='schema:nationality', personClass='schema:Person', organizationClass='schema:Organization'):
+  def __init__(self, source, sourceGraph: str, targetGraph: str, identifierName: str, identifiersToAdd: list,
+               nationalityProperty='schema:nationality', personClass='schema:Person',
+               organizationClass='schema:Organization'):
+    """
+
+    Parameters
+    ----------
+    source :str
+        The name of the data source which will be used for comments, for example "KBR"
+    sourceGraph : str
+        The name of the source graph without brackets, e.g. http://kbr-linked-authorities
+    targetGraph : str
+        The name of the target graph without brackets, e.g. http://beltrans-contributors
+    identifierName : str
+        The name of the identifier used to link a source to a target record, e.g. ISNI or VIAF
+    identifiersToAdd : list
+        The names of other identifiers which will be added from source to target if a match was found.
+        On the one hand, this name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+        and on the other hand to build variable names in the SPARQL query.
+    nationalityProperty : str
+        The RDF property used to fetch nationality information from the source graph, the default is schema:nationality
+    personClass : str
+        The RDF class used to identify a person record in the source graph, the default is schema:Person
+    organizationClass : str
+        The RDF class used to identify an organization record in the source graph, the default is schema:Organization
+    """
     self.source = source
     self.sourceGraph = sourceGraph
     self.targetGraph = targetGraph
@@ -14,7 +54,7 @@ class ContributorUpdateQuery():
     self.personClass = personClass
     self.organizationClass = organizationClass
 
-    self.baseURL="http://kbr.be/id/data/"
+    self.baseURL = "http://kbr.be/id/data/"
 
   # ---------------------------------------------------------------------------
   def _buildQuery(self):
@@ -39,10 +79,10 @@ class ContributorUpdateQuery():
     for identifier in self.identifiersToAdd:
       query += self._getINSERTTriplePattern(identifier, self.source, self.identifierName)
 
-    query += "} " # end of graph block
-    query += "} " # end of INSERT block
+    query += "} "  # end of graph block
+    query += "} "  # end of INSERT block
 
-    query += "WHERE {"
+    query += "WHERE { "
 
     query += self._getFilterSourceQuadPattern(self.sourceGraph, self.personClass, self.organizationClass)
     query += self._getSourceNationalityQuadPattern(self.sourceGraph, self.nationalityProperty)
