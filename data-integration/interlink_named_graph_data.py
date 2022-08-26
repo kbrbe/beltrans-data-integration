@@ -7,7 +7,7 @@ import os
 import re
 import requests
 import utils_sparql
-from integration_queries.query_builder import ContributorUpdateQuery
+from integration_queries.query_builder import ContributorUpdateQuery, ContributorCreateQuery
 from optparse import OptionParser
 from dotenv import load_dotenv
 
@@ -47,6 +47,34 @@ def checkArguments():
       exit(1)
 
   return (options, args)
+
+# -----------------------------------------------------------------------------
+def generateCreateQueryPersons(sourceName, sourceGraph, targetGraph, identifiersToAdd):
+  """This function uses the imported query generation module to generate a SPARQL INSERT."""
+
+  if sourceName == 'BnF' or sourceName == 'bnf':
+    nationalityProperty = 'rdagroup2elements:countryAssociatedWithThePerson'
+    entitySourceClass = 'foaf:Person'
+    entityTargetClass = 'schema:Person'
+    labelProperty = 'foaf:name'
+    familyNameProperty = 'foaf:familyName'
+    givenNameProperty = 'foaf:givenName'
+  else:
+    nationalityProperty = 'schema:nationality'
+    entitySourceClass = 'schema:Person'
+    entityTargetClass = 'schema:Person'
+    labelProperty = 'rdfs:label'
+    familyNameProperty = 'schema:familyName'
+    givenNameProperty = 'schema:givenName'
+
+  qb = ContributorCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
+                              identifiersToAdd=identifiersToAdd, entitySourceClass=entitySourceClass,
+                              entityTargetClass=entityTargetClass, nationalityProperty=nationalityProperty,
+                              labelProperty=labelProperty, familyNameProperty=familyNameProperty,
+                              givenNameProperty=givenNameProperty)
+  return qb.getQueryString()
+
+
 
 # -----------------------------------------------------------------------------
 def generateUpdateQuery(sourceName, sourceGraph, targetGraph, linkIdentifierName, identifiersToAdd):
@@ -96,10 +124,20 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
     for createConfigEntry in createQueries:
       creationSourceName = createConfigEntry['sourceName']
       creationSourceType = createConfigEntry['sourceType']
+      createIdentifiersToAdd = createConfigEntry['identifiersToAdd'].split(',')
+      creationQueryName = f'Create {creationSourceName}'
       # create data
       print(f'CREATE {creationSourceType} data from {creationSourceName}')
 
-      # todo generate and execute CREATE query
+      if creationSourceType == 'persons':
+        creationQueryString = generateCreateQueryPersons(creationSourceName, createConfigEntry['sourceGraph'],
+                                                         targetGraph, createIdentifiersToAdd)
+      else:
+        # todo implement organization creation
+        continue
+
+      #print(creationQueryString)
+      utils_sparql.sparqlUpdate(url, creationQueryString, 'application/sparql-update', creationQueryName, auth=auth)
       #utils_sparql.sparqlUpdateFile(url, c[1], 'application/sparql-update', c[0], auth=auth)
 
       # perform update query per source to link found data to created URIs via sameAs
@@ -108,15 +146,15 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
         for updateConfigEntry in updateQueries:
           updateSourceName = updateConfigEntry['sourceName']
           linkIdentifier = updateConfigEntry['linkIdentifier']
-          identifiersToAdd = updateConfigEntry['identifiersToAdd'].split(',')
-          queryName = f'Update {updateSourceName} via {linkIdentifier}'
+          updateIdentifiersToAdd = updateConfigEntry['identifiersToAdd'].split(',')
+          updateQueryName = f'Update {updateSourceName} via {linkIdentifier}'
 
-          print("###########################################\n\n")
+          #print("###########################################\n\n")
           # Generate a SPARQL UPDATE query on the fly given the configuration entry updateConfigEntry and execute it
           updateQueryString = generateUpdateQuery(updateSourceName, updateConfigEntry['sourceGraph'], targetGraph,
-                                                  linkIdentifier, identifiersToAdd)
-          print(updateQueryString)
-          #utils_sparql.sparqlUpdate(url, updateQueryString, 'application/sparql-update', queryName, auth=auth)
+                                                  linkIdentifier, updateIdentifiersToAdd)
+          #print(updateQueryString)
+          utils_sparql.sparqlUpdate(url, updateQueryString, 'application/sparql-update', updateQueryName, auth=auth)
 
 if __name__ == '__main__':
   (options, args) = checkArguments()
