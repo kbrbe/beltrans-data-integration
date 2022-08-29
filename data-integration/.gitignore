@@ -30,4 +30,4 @@ geonames/
 !contributors-update-queries.csv
 !missing-geonames-mapping.csv
 !*stats.csv
-
+!config-integration*

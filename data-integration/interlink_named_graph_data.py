@@ -10,6 +10,7 @@ import utils_sparql
 from integration_queries.query_builder import ContributorUpdateQuery, ContributorCreateQuery
 from optparse import OptionParser
 from dotenv import load_dotenv
+import time
 
 # -----------------------------------------------------------------------------
 def checkArguments():
@@ -136,9 +137,7 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
         # todo implement organization creation
         continue
 
-      #print(creationQueryString)
       utils_sparql.sparqlUpdate(url, creationQueryString, 'application/sparql-update', creationQueryName, auth=auth)
-      #utils_sparql.sparqlUpdateFile(url, c[1], 'application/sparql-update', c[0], auth=auth)
 
       # perform update query per source to link found data to created URIs via sameAs
       for i in range(numberUpdates):
@@ -149,11 +148,10 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
           updateIdentifiersToAdd = updateConfigEntry['identifiersToAdd'].split(',')
           updateQueryName = f'Update {updateSourceName} via {linkIdentifier}'
 
-          #print("###########################################\n\n")
           # Generate a SPARQL UPDATE query on the fly given the configuration entry updateConfigEntry and execute it
           updateQueryString = generateUpdateQuery(updateSourceName, updateConfigEntry['sourceGraph'], targetGraph,
                                                   linkIdentifier, updateIdentifiersToAdd)
-          #print(updateQueryString)
+
           utils_sparql.sparqlUpdate(url, updateQueryString, 'application/sparql-update', updateQueryName, auth=auth)
 
 if __name__ == '__main__':

@@ -113,8 +113,8 @@ class ContributorQuery():
         pattern = Template("""
     ?${identifier}EntityURI """ + identifierType +
                            """
-                               rdfs:comment "Created from $source $additionalCommentText" ;
-                               rdfs:value ?${identifier} .
+                               rdfs:comment "$additionalCommentText" ;
+                               rdf:value ?${identifier} .
                        
                            """
                            )
@@ -292,7 +292,7 @@ class ContributorCreateQuery(ContributorQuery):
 
         # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
         for identifier in self.identifiersToAdd:
-            query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source, f'data')
+            query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source, f'Created from $source data')
 
         query += "} "  # end of graph block
         query += "} "  # end of INSERT block
@@ -429,7 +429,7 @@ class ContributorUpdateQuery(ContributorQuery):
         # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
         for identifier in self.identifiersToAdd:
             query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source,
-                                                                       f'via {self.identifierName}')
+                                                                       f'Added from $source via {self.identifierName}')
 
         query += "} "  # end of graph block
         query += "} "  # end of INSERT block
@@ -475,8 +475,8 @@ class ContributorUpdateQuery(ContributorQuery):
                        
                            OPTIONAL {
                              graph <$targetGraph> {
-                               ?contributorURI bf:identifiedBy ?${identifier}Entity .
-                               ?${identifier}Entity """ + identifierType +
+                               ?contributorURI bf:identifiedBy ?${identifier}TargetEntity .
+                               ?${identifier}TargetEntity """ + identifierType +
                            """
                                                     rdf:value ?${identifier}Local .
                              }
@@ -484,8 +484,8 @@ class ContributorUpdateQuery(ContributorQuery):
                        
                            FILTER EXISTS {
                              graph <$targetGraph> {
-                               ?contributorURI bf:identifiedBy ?${identifier}Entity .
-                               ?${identifier}Entity """ + identifierType +
+                               ?contributorURI bf:identifiedBy ?${identifier}TargetEntity .
+                               ?${identifier}TargetEntity """ + identifierType +
                            """
                                                     rdf:value ?${identifier}Local .
                              }
