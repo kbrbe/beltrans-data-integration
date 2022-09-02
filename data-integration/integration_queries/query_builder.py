@@ -1,37 +1,28 @@
 from string import Template
 from abc import ABC
 
+class Query(ABC):
 
-class ContributorQuery(ABC):
-    VAR_CONTRIBUTOR_URI = "?contributorURI"
-    VAR_CONTRIBUTOR_NATIONALITY = "?contributorNationality"
-    VAR_CONTRIBUTOR_LOCAL_URI = "?localContributorURI"
-    VAR_CONTRIBUTOR_FAMILY_NAME = "?familyName"
-    VAR_CONTRIBUTOR_GIVEN_NAME = "?givenName"
-    VAR_CONTRIBUTOR_LABEL = "?contributorLabel"
-    VAR_CONTRIBUTOR_UUID = "?uuid"
-    VAR_COUNTRY_ENTITY = "?countryEntityURI"
-    VAR_COUNTRY = "?country"
-
+    BASE_URL = 'http://kbr.be/id/data/'
     # ---------------------------------------------------------------------------
     @classmethod
     def _getSimpleTriplePattern(cls, subject, predicate, object, graph=None, optional=False, newline=False):
         """This function builds a triple pattern.
 
         It can be a simple subject predicate object triple
-        >>> ContributorQuery._getSimpleTriplePattern('?person', 'a', 'schema:Person')
+        >>> Query._getSimpleTriplePattern('?person', 'a', 'schema:Person')
         '?person a schema:Person .\\n        '
 
         It can be an optional subject predicate object triple
-        >>> ContributorQuery._getSimpleTriplePattern('?person', 'a', 'schema:Person', optional=True)
+        >>> Query._getSimpleTriplePattern('?person', 'a', 'schema:Person', optional=True)
         'OPTIONAL { ?person a schema:Person .\\n         }'
 
         It can be a quad
-        >>> ContributorQuery._getSimpleTriplePattern('?person', 'a', 'schema:Person', graph='http://my-graph')
+        >>> Query._getSimpleTriplePattern('?person', 'a', 'schema:Person', graph='http://my-graph')
         'graph <http://my-graph> { ?person a schema:Person .\\n         }'
 
         And it can be an optional quad
-        >>> ContributorQuery._getSimpleTriplePattern('?person', 'a', 'schema:Person', graph='http://my-graph', optional=True)
+        >>> Query._getSimpleTriplePattern('?person', 'a', 'schema:Person', graph='http://my-graph', optional=True)
         'OPTIONAL { graph <http://my-graph> { ?person a schema:Person .\\n         } }'
         """
         pattern = Template(""" ${subject} ${predicate} ${object} . """)
@@ -49,16 +40,58 @@ class ContributorQuery(ABC):
         else:
             return queryPart
 
+    @classmethod
+    def _getPrefixList(cls):
+        return """prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+"""
+
+    # ---------------------------------------------------------------------------
+    def getQueryString(self):
+        return Query._getPrefixList() + "\n\n" + self._buildQuery()
+
+class ContributorQuery(Query, ABC):
+    VAR_CONTRIBUTOR_URI = "?contributorURI"
+    VAR_CONTRIBUTOR_NATIONALITY = "?contributorNationality"
+    VAR_CONTRIBUTOR_LOCAL_URI = "?localContributorURI"
+    VAR_CONTRIBUTOR_FAMILY_NAME = "?familyName"
+    VAR_CONTRIBUTOR_GIVEN_NAME = "?givenName"
+    VAR_CONTRIBUTOR_LABEL = "?contributorLabel"
+    VAR_CONTRIBUTOR_UUID = "?uuid"
+    VAR_COUNTRY_ENTITY = "?countryEntityURI"
+    VAR_COUNTRY = "?country"
+
+
+
     # ---------------------------------------------------------------------------
     def _getINSERTIdentifiedByTriplePattern(self, identifier):
-        return ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'bf:identifiedBy',
                                                         f'?{identifier}EntityURI',
                                                         newline=True)
 
     # ---------------------------------------------------------------------------
     def _getINSERTNationalityTriplePattern(self):
-        return ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'schema:nationality',
                                                         ContributorQuery.VAR_CONTRIBUTOR_NATIONALITY,
                                                         newline=True)
@@ -74,7 +107,7 @@ class ContributorQuery(ABC):
         declarationPattern = pattern.substitute(countryEntityVar=ContributorQuery.VAR_COUNTRY_ENTITY, source=self.source,
                            countryVar=ContributorQuery.VAR_COUNTRY)
 
-        linkPattern = ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        linkPattern = Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'schema:location',
                                                         ContributorQuery.VAR_COUNTRY_ENTITY,
                                                         newline=True)
@@ -84,42 +117,42 @@ class ContributorQuery(ABC):
 
     # ---------------------------------------------------------------------------
     def _getINSERTSameAsTriplePattern(self):
-        return ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'schema:sameAs',
                                                         ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
                                                         newline=True)
 
     # ---------------------------------------------------------------------------
     def _getINSERTIdentifierTriplePattern(self):
-        return ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'dcterms:identifier',
                                                         ContributorQuery.VAR_CONTRIBUTOR_UUID,
                                                         newline=True)
 
     # ---------------------------------------------------------------------------
     def _getINSERTFamilyNameTriplePattern(self):
-        return ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'schema:familyName',
                                                         ContributorQuery.VAR_CONTRIBUTOR_FAMILY_NAME,
                                                         newline=True)
 
     # ---------------------------------------------------------------------------
     def _getINSERTGivenNameTriplePattern(self):
-        return ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'schema:givenName',
                                                         ContributorQuery.VAR_CONTRIBUTOR_GIVEN_NAME,
                                                         newline=True)
 
     # ---------------------------------------------------------------------------
     def _getINSERTContributorLabelTriplePattern(self):
-        return ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'rdfs:label',
                                                         ContributorQuery.VAR_CONTRIBUTOR_LABEL,
                                                         newline=True)
 
     # ---------------------------------------------------------------------------
     def _getINSERTContributorCommentTriplePattern(self, comment):
-        return ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'rdfs:comment',
                                                         f'"{comment}"',
                                                         newline=True)
@@ -214,34 +247,131 @@ class ContributorQuery(ABC):
         else:
             return queryPart
 
-    @classmethod
-    def _getPrefixList(cls):
-        return """prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix prov: <http://www.w3.org/ns/prov#>
-prefix dc: <http://purl.org/dc/elements/1.1/>
-prefix dcterms: <http://purl.org/dc/terms/>
-prefix schema: <http://schema.org/>
-prefix lang: <http://id.loc.gov/vocabulary/languages/>
-prefix bibo: <http://purl.org/ontology/bibo/>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX btm: <http://kbr.be/ns/beltrans/model#>
-PREFIX btid: <http://kbr.be/id/data/> 
-PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
-PREFIX btisni: <http://kbr.be/isni/>
-PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
-PREFIX up: <http://users.ugent.be/~tdenies/up/>
-PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
-PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
-PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
-PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
-PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
-PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
-"""
+
+
+class ManifestationQuery(Query, ABC):
+    VAR_MANIFESTATION_URI = '?manifestationURI'
+    VAR_MANIFESTATION_UUID = '?uuid'
+    VAR_MANIFESTATION_LABEL = '?manifestationLabel'
+    VAR_MANIFESTATION_TITLE = '?manifestationTitle'
+    VAR_MANIFESTATION_TARGET_LANG = '?targetLang'
+    VAR_MANIFESTATION_SOURCE_LANG = '?sourceLang'
+    VAR_MANIFESTATION_LOCAL_URI = '?localManifestationURI'
+    VAR_MANIFESTATION_ISBN10 = '?isbn10'
+    VAR_MANIFESTATION_ISBN13 = '?isbn13'
 
     # ---------------------------------------------------------------------------
-    def getQueryString(self):
-        return ContributorQuery._getPrefixList() + "\n\n" + self._buildQuery()
+    @classmethod
+    def _getUUIDAndLabelCreationAndBind(cls):
+        pattern = Template("""
+
+        BIND( STRUUID() as $uuidVariable)
+        BIND( IRI( CONCAT( "$baseURL", $uuidVariable ) ) as $URIVariable)
+        BIND( CONCAT( "BELTRANS manifestation ", $uuidVariable ) as $labelVariable)
+        """)
+        return pattern.substitute(baseURL=Query.BASE_URL, uuidVariable=ManifestationQuery.VAR_MANIFESTATION_UUID,
+                                  URIVariable=ManifestationQuery.VAR_MANIFESTATION_URI,
+                                  labelVariable=ManifestationQuery.VAR_MANIFESTATION_LABEL)
+
+class ManifestationCreateQuery(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, source, sourceGraph: str, targetGraph: str, originalsGraph: str,
+                 entitySourceClass, entityTargetClass,
+                 titleProperty='schema:name'):
+        """
+
+        Parameters
+        ----------
+        source : str
+            The name of the data source. It will be used for comments.
+        sourceGraph : str
+            The name of the source graph without brackets, e.g. http://kb-manifestations
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        originalsGraph : str
+            The name of the graph with information about the translation's original, e.g. http://kb-originals
+        entitySourceClass : str
+            The RDF class used to identify a  record in the source graph,
+            e.g. schema:CreativeWork or schema:Book
+        entityTargetClass : str
+            The RDF class used to specify the type of a newly created entity in the target graph
+        titleProperty : str
+            The RDF property used to fetch a name label in the source graph, the default is rdfs:label
+        """
+        self.source = source
+        self.sourceGraph = sourceGraph
+        self.targetGraph = targetGraph
+        self.originalsGraph = originalsGraph
+        self.entitySourceClass = entitySourceClass
+        self.entityTargetClass = entityTargetClass
+        self.titleProperty = titleProperty
+
+    # ---------------------------------------------------------------------------
+    def _getFilterSourceQuadPattern(self):
+        pattern = Template("""
+
+       FILTER NOT EXISTS {
+         graph <$targetGraph> {
+           ?entity a $entityType ;
+                   schema:sameAs $localContributorURI .
+         }
+       }
+       """)
+        return pattern.substitute(targetGraph=self.targetGraph, entityType=self.entityTargetClass,
+                                  localContributorURI=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI)
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        query = "INSERT { "
+        for property, object in [('a', self.entityTargetClass),
+                                 ('dcterms:identifier', ManifestationQuery.VAR_MANIFESTATION_UUID),
+                                 ('rdfs:label', ManifestationQuery.VAR_MANIFESTATION_LABEL),
+                                 ('schema:name', ManifestationQuery.VAR_MANIFESTATION_TITLE),
+                                 ('schema:inLanguage', ManifestationQuery.VAR_MANIFESTATION_TARGET_LANG),
+                                 ('btm:sourceLanguage', ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG),
+                                 ('schema:sameAs', ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI),
+                                 ('bibo:isbn10', ManifestationQuery.VAR_MANIFESTATION_ISBN10),
+                                 ('bibo:isbn13', ManifestationQuery.VAR_MANIFESTATION_ISBN13),
+                                 ('rdfs:comment', f'"Created from {self.source} data"')]:
+            query += Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
+                                                  property,
+                                                  object,
+                                                  graph=self.targetGraph,
+                                                  optional=False,
+                                                  newline=True)
+
+        query += "} \n"  # end of INSERT block
+
+        query += "WHERE { "
+
+
+        for property, object, optional in [('a', self.entitySourceClass, False),
+                                           (self.titleProperty, ManifestationQuery.VAR_MANIFESTATION_TITLE, False),
+                                           ('bibo:isbn10', ManifestationQuery.VAR_MANIFESTATION_ISBN10, True),
+                                           ('bibo:isbn13', ManifestationQuery.VAR_MANIFESTATION_ISBN13, True)]:
+            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                                  property,
+                                                  object,
+                                                  graph=self.sourceGraph,
+                                                  optional=optional,
+                                                  newline=True)
+
+        pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar schema:translationOfWork ?originalURI . }
+                                        graph <$originalsGraph> { ?originalURI schema:inLanguage $sourceLangVar . } }
+                          """)
+
+        query += pattern.substitute(sourceGraph=self.sourceGraph, localURIVar=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                    originalsGraph=self.originalsGraph, sourceLangVar=ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG)
+
+        query += ManifestationQuery._getUUIDAndLabelCreationAndBind()
+
+
+        query += self._getFilterSourceQuadPattern()
+
+        query += ' }'
+        return query
 
 
 # -----------------------------------------------------------------------------
@@ -339,7 +469,7 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
         query = "INSERT { "
 
         query += insertBeginPattern.substitute(targetGraph=self.targetGraph)
-        query += ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        query += Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                           'a',
                                                           self.entityTargetClass,
                                                           newline=True)
@@ -365,7 +495,7 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
 
         query += "WHERE { "
 
-        query += ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
+        query += Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
                                                           'a',
                                                           self.entitySourceClass,
                                                           graph=self.sourceGraph)
@@ -373,7 +503,7 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
                                  (self.familyNameProperty, ContributorQuery.VAR_CONTRIBUTOR_FAMILY_NAME),
                                  (self.givenNameProperty, ContributorQuery.VAR_CONTRIBUTOR_GIVEN_NAME),
                                  (self.nationalityProperty, ContributorQuery.VAR_CONTRIBUTOR_NATIONALITY)]:
-            query += self._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
+            query += Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
                                                   property,
                                                   object,
                                                   graph=self.sourceGraph,
@@ -450,7 +580,7 @@ class OrganizationContributorCreateQuery(ContributorCreateQuery):
         query = "INSERT { "
 
         query += insertBeginPattern.substitute(targetGraph=self.targetGraph)
-        query += ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+        query += Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                           'a',
                                                           self.entityTargetClass,
                                                           newline=True)
@@ -475,12 +605,12 @@ class OrganizationContributorCreateQuery(ContributorCreateQuery):
 
         query += "WHERE { "
 
-        query += ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
+        query += Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
                                                           'a',
                                                           self.entitySourceClass,
                                                           graph=self.sourceGraph)
         for property, object in [(self.labelProperty, ContributorQuery.VAR_CONTRIBUTOR_LABEL)]:
-            query += self._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
+            query += Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
                                                   property,
                                                   object,
                                                   graph=self.sourceGraph,
