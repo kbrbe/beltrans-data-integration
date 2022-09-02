@@ -7,7 +7,7 @@ import os
 import re
 import requests
 import utils_sparql
-from integration_queries.query_builder import ContributorUpdateQuery, ContributorCreateQuery
+from integration_queries.query_builder import ContributorUpdateQuery, OrganizationContributorCreateQuery, PersonContributorCreateQuery
 from optparse import OptionParser
 from dotenv import load_dotenv
 import time
@@ -51,7 +51,7 @@ def checkArguments():
 
 # -----------------------------------------------------------------------------
 def generateCreateQueryPersons(sourceName, sourceGraph, targetGraph, identifiersToAdd):
-  """This function uses the imported query generation module to generate a SPARQL INSERT."""
+  """This function uses the imported query generation module to generate a SPARQL INSERT query for Persons."""
 
   if sourceName == 'BnF' or sourceName == 'bnf':
     nationalityProperty = 'rdagroup2elements:countryAssociatedWithThePerson'
@@ -61,18 +61,39 @@ def generateCreateQueryPersons(sourceName, sourceGraph, targetGraph, identifiers
     familyNameProperty = 'foaf:familyName'
     givenNameProperty = 'foaf:givenName'
   else:
-    nationalityProperty = 'schema:nationality'
+    nationalityProperty = 'schema:location/schema:addressCountry'
     entitySourceClass = 'schema:Person'
     entityTargetClass = 'schema:Person'
-    labelProperty = 'rdfs:label'
+    labelProperty = 'skos:prefLabel'
     familyNameProperty = 'schema:familyName'
     givenNameProperty = 'schema:givenName'
 
-  qb = ContributorCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
+  qb = PersonContributorCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
                               identifiersToAdd=identifiersToAdd, entitySourceClass=entitySourceClass,
                               entityTargetClass=entityTargetClass, nationalityProperty=nationalityProperty,
                               labelProperty=labelProperty, familyNameProperty=familyNameProperty,
                               givenNameProperty=givenNameProperty)
+  return qb.getQueryString()
+
+# -----------------------------------------------------------------------------
+def generateCreateQueryOrganizations(sourceName, sourceGraph, targetGraph, identifiersToAdd):
+  """This function uses the imported query generation module to generate a SPARQL INSERT query for Organizations."""
+
+  if sourceName == 'BnF' or sourceName == 'bnf':
+    countryProperty = 'rdagroup2elements:placeAssociatedWithTheCorporateBody'
+    entitySourceClass = 'foaf:Organization'
+    entityTargetClass = 'schema:Organization'
+    labelProperty = 'foaf:name'
+  else:
+    countryProperty = 'schema:location/schema:country'
+    entitySourceClass = 'schema:Organization'
+    entityTargetClass = 'schema:Organization'
+    labelProperty = 'rdfs:label'
+
+  qb = OrganizationContributorCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
+                              identifiersToAdd=identifiersToAdd, entitySourceClass=entitySourceClass,
+                              entityTargetClass=entityTargetClass, countryProperty=countryProperty,
+                              labelProperty=labelProperty)
   return qb.getQueryString()
 
 
@@ -134,8 +155,8 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
         creationQueryString = generateCreateQueryPersons(creationSourceName, createConfigEntry['sourceGraph'],
                                                          targetGraph, createIdentifiersToAdd)
       else:
-        # todo implement organization creation
-        continue
+        creationQueryString = generateCreateQueryOrganizations(creationSourceName, createConfigEntry['sourceGraph'],
+                                                         targetGraph, createIdentifiersToAdd)
 
       utils_sparql.sparqlUpdate(url, creationQueryString, 'application/sparql-update', creationQueryName, auth=auth)
 

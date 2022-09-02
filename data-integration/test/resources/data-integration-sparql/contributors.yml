@@ -33,8 +33,6 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po:
-      - [a, schema:Person]
-      - [a, foaf:Person]
       - p: dcterms:identifier
         o: $(id)
         condition:
@@ -42,19 +40,12 @@ mappings:
           parameters:
             - [grel:valueParameter, $(id)]
             - [grel:valueParameter2, ""] 
-      - p: rdfs:label
+      - p: skos:prefLabel
         o: $(name)
         condition:
           function: idlab-fn:notEqual
           parameters:
             - [grel:valueParameter, $(name)]
-            - [grel:valueParameter2, ""] 
-      - p: schema:nationality
-        o: countries:$(nationality)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(nationality)]
             - [grel:valueParameter2, ""] 
       - p: bf:identifiedBy
         o: btid:isni_$(ISNI)~iri
@@ -77,6 +68,79 @@ mappings:
           parameters:
             - [grel:valueParameter, $(Wikidata)]
             - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  contributorsPersons:
+    sources:
+      - access: ${RML_TEST_SOURCE_CONTRIBUTORS}
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, $(type)]
+        - [grel:valueParameter2, "Person"] 
+    po:
+      - [a, schema:Person]
+      - p: schema:nationality
+        o: countries:$(nationality)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(nationality)]
+            - [grel:valueParameter2, ""] 
+
+  # ---------------------------------------------------------------------------
+  #
+  contributorsOrgs:
+    sources:
+      - access: ${RML_TEST_SOURCE_CONTRIBUTORS}
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, $(type)]
+        - [grel:valueParameter2, "Organization"] 
+    po:
+      - [a, schema:Organization]
+      - p: schema:addressCountry
+        o: btid:address_$(id)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(nationality)]
+            - [grel:valueParameter2, ""] 
+
+  # ---------------------------------------------------------------------------
+  #
+  contributorsAddress:
+    sources:
+      - access: ${RML_TEST_SOURCE_CONTRIBUTORS}
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:address_$(id)
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, $(type)]
+        - [grel:valueParameter2, "Organization"] 
+    po:
+      - [a, schema:PostalAddress]
+      - p: schema:country
+        o: countries:$(nationality)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(nationality)]
+            - [grel:valueParameter2, ""] 
+
+
+
+
 
   # ---------------------------------------------------------------------------
   #

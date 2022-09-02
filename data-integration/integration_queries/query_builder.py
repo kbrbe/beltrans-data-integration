@@ -1,9 +1,8 @@
 from string import Template
+from abc import ABC
 
-from jinja2.nodes import Concat
 
-
-class ContributorQuery():
+class ContributorQuery(ABC):
     VAR_CONTRIBUTOR_URI = "?contributorURI"
     VAR_CONTRIBUTOR_NATIONALITY = "?contributorNationality"
     VAR_CONTRIBUTOR_LOCAL_URI = "?localContributorURI"
@@ -11,6 +10,8 @@ class ContributorQuery():
     VAR_CONTRIBUTOR_GIVEN_NAME = "?givenName"
     VAR_CONTRIBUTOR_LABEL = "?contributorLabel"
     VAR_CONTRIBUTOR_UUID = "?uuid"
+    VAR_COUNTRY_ENTITY = "?countryEntityURI"
+    VAR_COUNTRY = "?country"
 
     # ---------------------------------------------------------------------------
     @classmethod
@@ -61,6 +62,25 @@ class ContributorQuery():
                                                         'schema:nationality',
                                                         ContributorQuery.VAR_CONTRIBUTOR_NATIONALITY,
                                                         newline=True)
+
+    # ---------------------------------------------------------------------------
+    def _getINSERTCountryTriplePattern(self):
+
+        pattern = Template("""
+        $countryEntityVar a schema:PostalAddress ;
+                  rdfs:comment "Created from $source data" ;
+                  schema:addressCountry $countryVar .
+        """)
+        declarationPattern = pattern.substitute(countryEntityVar=ContributorQuery.VAR_COUNTRY_ENTITY, source=self.source,
+                           countryVar=ContributorQuery.VAR_COUNTRY)
+
+        linkPattern = ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+                                                        'schema:location',
+                                                        ContributorQuery.VAR_COUNTRY_ENTITY,
+                                                        newline=True)
+
+        return linkPattern + declarationPattern
+
 
     # ---------------------------------------------------------------------------
     def _getINSERTSameAsTriplePattern(self):
@@ -123,7 +143,7 @@ class ContributorQuery():
     # ---------------------------------------------------------------------------
     def _getSourceNationalityQuadPattern(self, sourceGraph, nationalityProperty, optional=False):
         pattern = Template("""
-    OPTIONAL { graph <$sourceGraph> { ?localContributorURI $nationalityProperty ?contributorNationality . } }
+    graph <$sourceGraph> { ?localContributorURI $nationalityProperty ?contributorNationality . }
 
     """)
         queryPart = pattern.substitute(sourceGraph=sourceGraph, nationalityProperty=nationalityProperty)
@@ -132,6 +152,21 @@ class ContributorQuery():
             return 'OPTIONAL { ' + queryPart + ' } '
         else:
             return queryPart
+
+    # ---------------------------------------------------------------------------
+    def _getSourceCountryQuadPattern(self, sourceGraph, optional=False):
+        pattern = Template("""
+    graph <$sourceGraph> { ?localContributorURI $countryProperty $countryVar . }
+
+    """)
+        queryPart = pattern.substitute(sourceGraph=sourceGraph, countryProperty=self.countryProperty,
+                                       countryVar=ContributorQuery.VAR_COUNTRY)
+
+        bindPart = f'BIND(iri(concat("{self.baseURL}", {ContributorQuery.VAR_CONTRIBUTOR_UUID})) as {ContributorQuery.VAR_COUNTRY_ENTITY})'
+        if optional:
+            return 'OPTIONAL { ' + queryPart + ' } ' + bindPart + ' '
+        else:
+            return queryPart + bindPart + ' '
 
     # ---------------------------------------------------------------------------
     @classmethod
@@ -155,7 +190,7 @@ class ContributorQuery():
     @classmethod
     def _getIdentifierStringPatternDCTERMS(cls):
         pattern = """
-        graph <$graph> { $localContributorURIVariable dcterms:identifier ?${identifier}Entity . }
+        graph <$graph> { $localContributorURIVariable dcterms:identifier ?${identifier} . }
         BIND(iri(concat("${baseURL}identifier_${identifier}_", ?${identifier})) as ?${identifier}EntityURI)
         """
         return pattern
@@ -210,12 +245,43 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
 # -----------------------------------------------------------------------------
-class ContributorCreateQuery(ContributorQuery):
+class ContributorCreateQuery(ContributorQuery, ABC):
     """
     With this query builder class, one can generate a SPARQL UPDATE query to add a person or organization
     from a local data source graph to a target graph in case there is not yet an existing target graph record
     pointing to the local person or organization via a schema:sameAs link.
     """
+
+    # ---------------------------------------------------------------------------
+    def _getFilterSourceQuadPattern(self):
+        pattern = Template("""
+    
+    FILTER NOT EXISTS {
+      graph <$targetGraph> {
+        ?entity a $entityType ;
+                schema:sameAs $localContributorURI .
+      }
+    }
+    """)
+        return pattern.substitute(targetGraph=self.targetGraph, entityType=self.entityTargetClass,
+                                  localContributorURI=ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI)
+
+    # ---------------------------------------------------------------------------
+    def _getUUIDCreationAndBind(self):
+        pattern = Template("""
+      
+    BIND( STRUUID() as $uuidVariable)
+    BIND( IRI( CONCAT( "$baseURL", $uuidVariable ) ) as $contributorURIVariable)
+    """)
+        return pattern.substitute(baseURL=self.baseURL, uuidVariable=ContributorQuery.VAR_CONTRIBUTOR_UUID,
+                                  contributorURIVariable=ContributorQuery.VAR_CONTRIBUTOR_URI)
+
+class PersonContributorCreateQuery(ContributorCreateQuery):
+    """
+     With this query builder class, one can generate a SPARQL UPDATE query to add a person
+     from a local data source graph to a target graph in case there is not yet an existing target graph record
+     pointing to the local person or organization via a schema:sameAs link.
+     """
 
     # -----------------------------------------------------------------------------
     def __init__(self, source, sourceGraph: str, targetGraph: str, identifiersToAdd: list,
@@ -292,7 +358,7 @@ class ContributorCreateQuery(ContributorQuery):
 
         # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
         for identifier in self.identifiersToAdd:
-            query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source, f'Created from $source data')
+            query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source, f'Created from {self.source} data')
 
         query += "} "  # end of graph block
         query += "} "  # end of INSERT block
@@ -327,30 +393,112 @@ class ContributorCreateQuery(ContributorQuery):
         query += ' }'
         return query
 
-    # ---------------------------------------------------------------------------
-    def _getFilterSourceQuadPattern(self):
-        pattern = Template("""
-    
-    FILTER NOT EXISTS {
-      graph <$targetGraph> {
-        ?entity a $entityType ;
-                schema:sameAs $localContributorURI .
-      }
-    }
-    """)
-        return pattern.substitute(targetGraph=self.targetGraph, entityType=self.entityTargetClass,
-                                  localContributorURI=ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI)
+class OrganizationContributorCreateQuery(ContributorCreateQuery):
+    """
+         With this query builder class, one can generate a SPARQL UPDATE query to add an organization
+         from a local data source graph to a target graph in case there is not yet an existing target graph record
+         pointing to the local person or organization via a schema:sameAs link.
+         """
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, source, sourceGraph: str, targetGraph: str, identifiersToAdd: list,
+                 entitySourceClass, entityTargetClass,
+                 countryProperty='schema:address/schema:addressCountry', labelProperty='skos:prefLabel'):
+        """
+
+        Parameters
+        ----------
+        source : str
+            The name of the data source. It will be used for comments.
+        sourceGraph : str
+            The name of the source graph without brackets, e.g. http://kbr-linked-authorities
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-contributors
+        identifiersToAdd : list
+            The names of other identifiers which will be added from source to target if a match was found.
+            On the one hand, this name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+            and on the other hand to build variable names in the SPARQL query.
+        countryProperty : str
+            The RDF property used to fetch the country information from the source graph, the default is the property path schema:address/schema:addressCountry
+        entitySourceClass : str
+            The RDF class used to identify a  record in the source graph,
+            e.g. schema:Person, foaf:Person, schema:Organization or foaf:Organization
+        entityTargetClass : str
+            The RDF class used to specify the type of a newly created entity in the target graph
+        labelProperty : str
+            The RDF property used to fetch a name label in the source graph, the default is skos:prefLabel
+        """
+        self.source = source
+        self.sourceGraph = sourceGraph
+        self.targetGraph = targetGraph
+        self.identifiersToAdd = identifiersToAdd
+        self.countryProperty = countryProperty
+        self.entitySourceClass = entitySourceClass
+        self.entityTargetClass = entityTargetClass
+        self.labelProperty = labelProperty
+
+        self.baseURL = "http://kbr.be/id/data/"
+
 
     # ---------------------------------------------------------------------------
-    def _getUUIDCreationAndBind(self):
-        pattern = Template("""
-      
-    BIND( STRUUID() as $uuidVariable)
-    BIND( IRI( CONCAT( "$baseURL", $uuidVariable ) ) as $contributorURIVariable)
-    """)
-        return pattern.substitute(baseURL=self.baseURL, uuidVariable=ContributorQuery.VAR_CONTRIBUTOR_UUID,
-                                  contributorURIVariable=ContributorQuery.VAR_CONTRIBUTOR_URI)
+    def _buildQuery(self):
 
+        insertBeginPattern = Template("""
+    graph <$targetGraph> {
+    """)
+
+        query = "INSERT { "
+
+        query += insertBeginPattern.substitute(targetGraph=self.targetGraph)
+        query += ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+                                                          'a',
+                                                          self.entityTargetClass,
+                                                          newline=True)
+
+        query += self._getINSERTIdentifierTriplePattern()
+        query += self._getINSERTSameAsTriplePattern()
+        query += self._getINSERTContributorLabelTriplePattern()
+        query += self._getINSERTContributorCommentTriplePattern(comment=f'Created from {self.source} data')
+        query += self._getINSERTCountryTriplePattern()
+
+        # bf:identifiedBy links, e.g. bf:identifiedBy ?viafEntityURI
+        for identifier in self.identifiersToAdd:
+            if identifier != '':
+                query += self._getINSERTIdentifiedByTriplePattern(identifier)
+
+        # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
+        for identifier in self.identifiersToAdd:
+            query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source, f'Created from {self.source} data')
+
+        query += "} "  # end of graph block
+        query += "} "  # end of INSERT block
+
+        query += "WHERE { "
+
+        query += ContributorQuery._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
+                                                          'a',
+                                                          self.entitySourceClass,
+                                                          graph=self.sourceGraph)
+        for property, object in [(self.labelProperty, ContributorQuery.VAR_CONTRIBUTOR_LABEL)]:
+            query += self._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
+                                                  property,
+                                                  object,
+                                                  graph=self.sourceGraph,
+                                                  optional=True)
+
+        query += self._getUUIDCreationAndBind()
+        query += self._getSourceCountryQuadPattern(self.sourceGraph, optional=True)
+        # query += self._getFilterExistsQuadPattern(self.sourceGraph, self.targetGraph, self.identifierName)
+
+
+        for identifier in self.identifiersToAdd:
+            if identifier != '':
+                query += self._getIdentifierQuadPattern(identifier, self.sourceGraph, optional=True)
+
+        query += self._getFilterSourceQuadPattern()
+
+        query += ' }'
+        return query
 
 # -----------------------------------------------------------------------------
 class ContributorUpdateQuery(ContributorQuery):
@@ -437,7 +585,7 @@ class ContributorUpdateQuery(ContributorQuery):
         query += "WHERE { "
 
         query += self._getFilterSourceQuadPattern(self.sourceGraph, self.personClass, self.organizationClass)
-        query += self._getSourceNationalityQuadPattern(self.sourceGraph, self.nationalityProperty)
+        query += self._getSourceNationalityQuadPattern(self.sourceGraph, self.nationalityProperty, optional=True)
         query += self._getFilterExistsQuadPattern(self.sourceGraph, self.targetGraph, self.identifierName)
 
         for identifier in self.identifiersToAdd:

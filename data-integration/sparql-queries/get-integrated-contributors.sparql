@@ -37,16 +37,17 @@ WHERE {
 
 
   graph <http://beltrans-contributors> {
-    ?contributorURI a schema:Person ;
+    ?contributorURI a ?contributorType ;
                     dcterms:identifier ?contributorID .
   }
+  FILTER ( ?contributorType IN (schema:Person, schema:Organization) )
 
   OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabel . } }
 
   # NATIONALITY
   #
   OPTIONAL {
-    graph <http://beltrans-contributors> { ?contributorURI schema:nationality ?nationality . } 
+    graph <http://beltrans-contributors> { ?contributorURI schema:nationality|schema:location/schema:addressCountry ?nationality . } 
     graph <http://master-data> { ?nationality mads:authoritativeLabel ?nationalityLabel . }
     FILTER (lang(?nationalityLabel) = 'en')
   }
@@ -93,10 +94,7 @@ WHERE {
   #
   OPTIONAL {
     graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?kbrURI . } 
-    graph <http://kbr-linked-authorities> {
-      ?kbrURI a schema:Person ;
-              dcterms:identifier ?kbrID .
-    }
+    graph <http://kbr-linked-authorities> { ?kbrURI dcterms:identifier ?kbrID . }
 
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrURI schema:birthDate ?kbrBirthDate . } }
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrURI schema:deathDate ?kbrDeathDate . } }
@@ -106,10 +104,7 @@ WHERE {
   #
   OPTIONAL {
     graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?bnfURI . } 
-    graph <http://bnf-contributors> {
-      ?bnfURI a foaf:Person ;
-              dcterms:identifier ?bnfID .
-    }
+    graph <http://bnf-contributors> { ?bnfURI dcterms:identifier ?bnfID . }
 
     OPTIONAL { graph <http://bnf-contributors> { ?bnfURI bio:birth ?bnfBirthDate . } }
     OPTIONAL { graph <http://bnf-contributors> { ?bnfURI bio:death ?bnfDeathDate . } }
@@ -119,10 +114,7 @@ WHERE {
   #
   OPTIONAL {
     graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?ntaURI . } 
-    graph <http://kb-linked-authorities> {
-      ?ntaURI a schema:Person ;
-              dcterms:identifier ?ntaID .
-    }
+    graph <http://kb-linked-authorities> { ?ntaURI dcterms:identifier ?ntaID . }
 
     OPTIONAL { graph <http://kbr-linked-authorities> { ?ntaURI schema:birthDate ?ntaBirthDate . } }
     OPTIONAL { graph <http://kbr-linked-authorities> { ?ntaURI schema:deathDate ?ntaDeathDate . } }
