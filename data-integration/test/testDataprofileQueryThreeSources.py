@@ -13,58 +13,12 @@ from BlazegraphIntegrationTestContainer import BlazegraphIntegrationTestContaine
 __unittest = True
 
 # -----------------------------------------------------------------------------
-class TestDataprofileQueryThreeSources(unittest.TestCase):
-
-  # ---------------------------------------------------------------------------
-  @classmethod
-  def setUpClass(cls):
-    # use temporary files which will be deleted in the tearDownClass function
-    cls.tempAgg = os.path.join(tempfile.gettempdir(), 'aggregated-data.csv')
-
-    # start a local Blazegraph and insert our test data
-    internalBlazegraphHostname='blz'
-    with BlazegraphIntegrationTestContainer(imageName="data-integration_blazegraph-test", hostName=internalBlazegraphHostname) as blazegraph:
-      time.sleep(10)      
-
-      loadConfig = {
-        'http://beltrans-manifestations': ['./test/resources/beltrans-graph-data-three-sources/integrated-data.ttl'],
-        'http://beltrans-contributors': ['./test/resources/beltrans-graph-data-three-sources/integrated-contributors.ttl'],
-        'http://kbr-syracuse': ['./test/resources/beltrans-graph-data-three-sources/kbr-data.ttl'],
-        'http://kbr-linked-authorities': ['./test/resources/beltrans-graph-data-three-sources/kbr-contributors.ttl'],
-        'http://bnf-publications': ['./test/resources/beltrans-graph-data-three-sources/bnf-data.ttl'],
-        'http://bnf-contributors': ['./test/resources/beltrans-graph-data-three-sources/bnf-contributors.ttl'],
-        'http://kb-publications': ['./test/resources/beltrans-graph-data-three-sources/kb-data.ttl'],
-        'http://kb-contributors': ['./test/resources/beltrans-graph-data-three-sources/kb-contributors.ttl'],
-        'http://master-data': ['./test/resources/beltrans-graph-data-three-sources/master-data.ttl'],
-      }
-      #uploadURL = 'http://' + internalBlazegraphHostname + '/namespace/kb'
-      uploadURL = 'http://localhost:8080/bigdata/namespace/kb/sparql'
-      utils.addTestData(uploadURL, loadConfig)
-
-      # query data from our test fixture
-      with open(cls.tempAgg, 'wb') as resultFileAgg:
-
-        queryAgg = utils.readSPARQLQuery('./dataprofile-aggregated.sparql')
-        #queryAgg = utils.readSPARQLQuery('sparql-queries/get-all.sparql')
-        utils.query(uploadURL, queryAgg, resultFileAgg)
-
-      # read and store the queried/integrated data such that we can easily use it in the test functions
-      with open(cls.tempAgg, 'r') as allIn:
-        csvReader = csv.DictReader(allIn, delimiter=',')
-        csvData = [dict(d) for d in csvReader]
-        cls.data = DataprofileTestHelper(csvData)
-        print(cls.data.df[['targetIdentifier', 'targetKBRIdentifier', 'targetBnFIdentifier', 'targetKBIdentifier', 'authorIdentifiers']])
-    
-  # ---------------------------------------------------------------------------
-  @classmethod
-  def tearDownClass(cls):
-    if os.path.isfile(cls.tempAgg):
-      os.remove(cls.tempAgg)
+class TestDataprofileQueryThreeSources():
 
   # ---------------------------------------------------------------------------
   def testCorpusSize(self):
     """This function tests if the number of corpus rows is correct, thus that a book from KBR and BnF is matched in the same row if ISBN10 or ISBN13 match."""
-    self.assertEqual(TestDataprofileQueryThreeSources.data.numberRows(), 6, msg="Corpus too big or too small")
+    self.assertEqual(self.getData().numberRows(), 6, msg="Corpus too big or too small")
 
   # ---------------------------------------------------------------------------
   def testIfAllBooksFound(self):
@@ -72,7 +26,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     bookIDs = [1,2,3,4,7,8]
     results = {}
     for i in bookIDs:
-      results[i] = TestDataprofileQueryThreeSources.data.targetIdentifierExists(f'Book {i}')
+      results[i] = self.getData().targetIdentifierExists(f'Book {i}')
 
     errors = {key: value for key, value in results.items() if value is not True} 
     self.assertEqual(len(errors), 0, msg=f'books which are missing: {errors}')
@@ -84,7 +38,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     bookIDs = [1,3,7,8]
     results = {}
     for i in bookIDs:
-      results[i] = TestDataprofileQueryThreeSources.data.kbrTargetIdentifierExists(f'KBR book {i}')
+      results[i] = self.getData().kbrTargetIdentifierExists(f'KBR book {i}')
 
     errors = {key: value for key, value in results.items() if value is not True} 
     self.assertEqual(len(errors), 0, msg=f'KBR books which are missing: {errors}')
@@ -95,7 +49,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     bookIDs = [2,7]
     results = {}
     for i in bookIDs:
-      results[i] = TestDataprofileQueryThreeSources.data.bnfTargetIdentifierExists(f'BnF book {i}')
+      results[i] = self.getData().bnfTargetIdentifierExists(f'BnF book {i}')
 
     errors = {key: value for key, value in results.items() if value is not True} 
     self.assertEqual(len(errors), 0, msg=f'BnF books which are missing: {errors}')
@@ -106,7 +60,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     bookIDs = [2,4,8]
     results = {}
     for i in bookIDs:
-      results[i] = TestDataprofileQueryThreeSources.data.kbTargetIdentifierExists(f'KB book {i}')
+      results[i] = self.getData().kbTargetIdentifierExists(f'KB book {i}')
 
     errors = {key: value for key, value in results.items() if value is not True} 
     self.assertEqual(len(errors), 0, msg=f'KB books which are missing: {errors}')
@@ -117,7 +71,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     bookIDs = [5,6]
     results = {}
     for i in bookIDs:
-      results[i] = TestDataprofileQueryThreeSources.data.targetIdentifierExists(f'Book {i}')
+      results[i] = self.getData().targetIdentifierExists(f'Book {i}')
 
     errors = {key: value for key, value in results.items() if value is not False} 
     self.assertEqual(len(errors), 0, msg=f'Books which should have been filtered out: {errors}')
@@ -129,7 +83,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     bookIDs = []
     results = {}
     for i in bookIDs:
-      results[i] = TestDataprofileQueryThreeSources.data.kbrTargetIdentifierExists(f'KBR book {i}')
+      results[i] = self.getData().kbrTargetIdentifierExists(f'KBR book {i}')
 
     errors = {key: value for key, value in results.items() if value is not False} 
     self.assertEqual(len(errors), 0, msg=f'KBR books which should have been filtered out: {errors}')
@@ -141,7 +95,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     bookIDs = [5,6]
     results = {}
     for i in bookIDs:
-      results[i] = TestDataprofileQueryThreeSources.data.bnfTargetIdentifierExists(f'BnF book {i}')
+      results[i] = self.getData().bnfTargetIdentifierExists(f'BnF book {i}')
 
     errors = {key: value for key, value in results.items() if value is not False} 
     self.assertEqual(len(errors), 0, msg=f'BnF books which should have been filtered out: {errors}')
@@ -152,7 +106,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     bookIDs = []
     results = {}
     for i in bookIDs:
-      results[i] = TestDataprofileQueryThreeSources.data.kbTargetIdentifierExists(f'KB book {i}')
+      results[i] = self.getData().kbTargetIdentifierExists(f'KB book {i}')
 
     errors = {key: value for key, value in results.items() if value is not False} 
     self.assertEqual(len(errors), 0, msg=f'KB books which should have been filtered out: {errors}')
@@ -166,7 +120,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     results = {}
     for i in bookIDs:
       try:
-        results[i] = TestDataprofileQueryThreeSources.data.kbrAndBnFIdentifierOnSameRow(f'KBR book {i}', f'BnF book {i}')
+        results[i] = self.getData().kbrAndBnFIdentifierOnSameRow(f'KBR book {i}', f'BnF book {i}')
       except:
         results[i] = 'Not in result'
     
@@ -180,7 +134,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     results = {}
     for i in bookIDs:
       try:
-        results[i] = TestDataprofileQueryThreeSources.data.kbrAndKBIdentifierOnSameRow(f'KBR book {i}', f'KB book {i}')
+        results[i] = self.getData().kbrAndKBIdentifierOnSameRow(f'KBR book {i}', f'KB book {i}')
       except:
         results[i] = 'Not in result'
     
@@ -194,7 +148,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     results = {}
     for i in bookIDs:
       try:
-        results[i] = TestDataprofileQueryThreeSources.data.kbAndBnFIdentifierOnSameRow(f'KB book {i}', f'BnF book {i}')
+        results[i] = self.getData().kbAndBnFIdentifierOnSameRow(f'KB book {i}', f'BnF book {i}')
       except:
         results[i] = 'Not in result'
     
@@ -205,24 +159,24 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
   # ---------------------------------------------------------------------------
   def testAuthorIdentifiersBook1(self):
     """This function tests if all author identifiers are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsAuthorString('Book 1', '1BE'), msg=f'Book 1 misses contributor "1BE" as author')
+    self.assertTrue(self.getData().targetIdentifierContainsAuthorString('Book 1', '1BE'), msg=f'Book 1 misses contributor "1BE" as author')
 
   # ---------------------------------------------------------------------------
   def testAuthorNameBook1(self):
     """This function tests if all author names are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsAuthorString('Book 1', 'John Van 1BE'), msg=f'Book 1 misses the name "John Van 1BE"')
+    self.assertTrue(self.getData().targetIdentifierContainsAuthorString('Book 1', 'John Van 1BE'), msg=f'Book 1 misses the name "John Van 1BE"')
 
 
 
   # ---------------------------------------------------------------------------
   def testAuthorIdentifiersBook8(self):
     """This function tests if all author identifiers are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsAuthorString('Book 8', '11BE'), msg=f'Book 8 misses contributor "11BE" as author')
+    self.assertTrue(self.getData().targetIdentifierContainsAuthorString('Book 8', '11BE'), msg=f'Book 8 misses contributor "11BE" as author')
 
   # ---------------------------------------------------------------------------
   def testAuthorNameBook8(self):
     """This function tests if all author names are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsAuthorString('Book 8', 'Sophie Van 11BE'), msg=f'Book 8 misses the author name "Sophie Van 11BE"')
+    self.assertTrue(self.getData().targetIdentifierContainsAuthorString('Book 8', 'Sophie Van 11BE'), msg=f'Book 8 misses the author name "Sophie Van 11BE"')
 
 
 
@@ -233,7 +187,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     results = {}
     for aID in authorIDs:
       try:
-        results[aID] = TestDataprofileQueryThreeSources.data.targetIdentifierContainsAuthorString('Book 2', aID)
+        results[aID] = self.getData().targetIdentifierContainsAuthorString('Book 2', aID)
       except:
         results[aID] = 'Not in result'
     
@@ -247,7 +201,7 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
     results = {}
     for aID in authorIDs:
       try:
-        results[aID] = TestDataprofileQueryThreeSources.data.targetIdentifierContainsAuthorString('Book 2', aID)
+        results[aID] = self.getData().targetIdentifierContainsAuthorString('Book 2', aID)
       except:
         results[aID] = 'Not in result'
     
@@ -260,36 +214,36 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
   # ---------------------------------------------------------------------------
   def testIllustratorIdentifiersBook3(self):
     """This function tests if all illustrator identifiers are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsIllustratorString('Book 3', '4BE'), msg=f'Book 3 misses contributor "4BE" as illustrator')
+    self.assertTrue(self.getData().targetIdentifierContainsIllustratorString('Book 3', '4BE'), msg=f'Book 3 misses contributor "4BE" as illustrator')
 
   # ---------------------------------------------------------------------------
   def testIllustratorNameBook3(self):
     """This function tests if all illustrator names are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsIllustratorString('Book 3', 'Joseph Van 4BE'), msg=f'Book 3 misses the illustrator name "Joseph Van 4BE"')
+    self.assertTrue(self.getData().targetIdentifierContainsIllustratorString('Book 3', 'Joseph Van 4BE'), msg=f'Book 3 misses the illustrator name "Joseph Van 4BE"')
 
 
 
   # ---------------------------------------------------------------------------
   def testIllustratorIdentifiersBook7(self):
     """This function tests if all illustrator identifiers are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsIllustratorString('Book 7', '9BE'), msg=f'Book 7 misses "contributor 9 BE" as illustrator')
+    self.assertTrue(self.getData().targetIdentifierContainsIllustratorString('Book 7', '9BE'), msg=f'Book 7 misses "contributor 9 BE" as illustrator')
 
   # ---------------------------------------------------------------------------
   def testIllustratorNameBook7(self):
     """This function tests if all illustrator names are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsIllustratorString('Book 7', 'missing name'), msg=f'Book 7 misses illustrator name "missing name"')
+    self.assertTrue(self.getData().targetIdentifierContainsIllustratorString('Book 7', 'missing name'), msg=f'Book 7 misses illustrator name "missing name"')
 
 
 
   # ---------------------------------------------------------------------------
   def testIllustratorIdentifiersBook8(self):
     """This function tests if all illustrator identifiers are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsIllustratorString('Book 8', '11BE'), msg=f'Book 8 misses contributor "11BE" as illustrator')
+    self.assertTrue(self.getData().targetIdentifierContainsIllustratorString('Book 8', '11BE'), msg=f'Book 8 misses contributor "11BE" as illustrator')
 
   # ---------------------------------------------------------------------------
   def testIllustratorNameBook8(self):
     """This function tests if all illustrator names are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsIllustratorString('Book 8', 'Sophie Van 11BE'), msg=f'Book 8 misses illustrator "Sophie Van 11BE"')
+    self.assertTrue(self.getData().targetIdentifierContainsIllustratorString('Book 8', 'Sophie Van 11BE'), msg=f'Book 8 misses illustrator "Sophie Van 11BE"')
 
 
 
@@ -297,27 +251,79 @@ class TestDataprofileQueryThreeSources(unittest.TestCase):
   # ---------------------------------------------------------------------------
   def testScenaristIdentifiersBook4(self):
     """This function tests if all scenarist identifiers are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsScenaristString('Book 4', '5BE'), msg=f'Book 4 misses contributor "5BE" as scenarist')
+    self.assertTrue(self.getData().targetIdentifierContainsScenaristString('Book 4', '5BE'), msg=f'Book 4 misses contributor "5BE" as scenarist')
 
   # ---------------------------------------------------------------------------
   def testScenaristNameBook4(self):
     """This function tests if all scenarist names are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsScenaristString('Book 4', 'Alice Van 5BE'), msg=f'Book 4 misses scenarist "5BE"')
+    self.assertTrue(self.getData().targetIdentifierContainsScenaristString('Book 4', 'Alice Van 5BE'), msg=f'Book 4 misses scenarist "5BE"')
 
 
 
   # ---------------------------------------------------------------------------
   def testScenaristIdentifiersBook7(self):
     """This function tests if all scenarist identifiers are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsScenaristString('Book 7', '10FR'), msg=f'Book 7 misses contributor "10FR" as scenarist')
+    self.assertTrue(self.getData().targetIdentifierContainsScenaristString('Book 7', '10FR'), msg=f'Book 7 misses contributor "10FR" as scenarist')
 
   # ---------------------------------------------------------------------------
   def testScenaristNameBook7(self):
     """This function tests if all scenarist names are queried."""
-    self.assertTrue(TestDataprofileQueryThreeSources.data.targetIdentifierContainsScenaristString('Book 7', 'Eduard Van 10FR'), msg=f'Book 7 misses scenarist "Eduard Van 10FR"')
+    self.assertTrue(self.getData().targetIdentifierContainsScenaristString('Book 7', 'Eduard Van 10FR'), msg=f'Book 7 misses scenarist "Eduard Van 10FR"')
 
 
+class TestDataprofileQueryThreeSourcesAlreadyIntegrated(TestDataprofileQueryThreeSources, unittest.TestCase):
 
+  # ---------------------------------------------------------------------------
+  def getData(self):
+    return TestDataprofileQueryThreeSourcesAlreadyIntegrated.data
+
+  # ---------------------------------------------------------------------------
+  @classmethod
+  def setUpClass(cls):
+    # use temporary files which will be deleted in the tearDownClass function
+    cls.tempAgg = os.path.join(tempfile.gettempdir(), 'aggregated-data.csv')
+
+    # start a local Blazegraph and insert our test data
+    internalBlazegraphHostname = 'blz'
+    with BlazegraphIntegrationTestContainer(imageName="data-integration_blazegraph-test",
+                                            hostName=internalBlazegraphHostname) as blazegraph:
+      time.sleep(10)
+
+      loadConfig = {
+        'http://beltrans-manifestations': ['./test/resources/beltrans-graph-data-three-sources/integrated-data.ttl'],
+        'http://beltrans-contributors': [
+          './test/resources/beltrans-graph-data-three-sources/integrated-contributors.ttl'],
+        'http://kbr-syracuse': ['./test/resources/beltrans-graph-data-three-sources/kbr-data.ttl'],
+        'http://kbr-linked-authorities': ['./test/resources/beltrans-graph-data-three-sources/kbr-contributors.ttl'],
+        'http://bnf-publications': ['./test/resources/beltrans-graph-data-three-sources/bnf-data.ttl'],
+        'http://bnf-contributors': ['./test/resources/beltrans-graph-data-three-sources/bnf-contributors.ttl'],
+        'http://kb-publications': ['./test/resources/beltrans-graph-data-three-sources/kb-data.ttl'],
+        'http://kb-contributors': ['./test/resources/beltrans-graph-data-three-sources/kb-contributors.ttl'],
+        'http://master-data': ['./test/resources/beltrans-graph-data-three-sources/master-data.ttl'],
+      }
+      # uploadURL = 'http://' + internalBlazegraphHostname + '/namespace/kb'
+      uploadURL = 'http://localhost:8080/bigdata/namespace/kb/sparql'
+      utils.addTestData(uploadURL, loadConfig)
+
+      # query data from our test fixture
+      with open(cls.tempAgg, 'wb') as resultFileAgg:
+        queryAgg = utils.readSPARQLQuery('./dataprofile-aggregated.sparql')
+        # queryAgg = utils.readSPARQLQuery('sparql-queries/get-all.sparql')
+        utils.query(uploadURL, queryAgg, resultFileAgg)
+
+      # read and store the queried/integrated data such that we can easily use it in the test functions
+      with open(cls.tempAgg, 'r') as allIn:
+        csvReader = csv.DictReader(allIn, delimiter=',')
+        csvData = [dict(d) for d in csvReader]
+        cls.data = DataprofileTestHelper(csvData)
+        print(cls.data.df[['targetIdentifier', 'targetKBRIdentifier', 'targetBnFIdentifier', 'targetKBIdentifier',
+                           'authorIdentifiers']])
+
+  # ---------------------------------------------------------------------------
+  @classmethod
+  def tearDownClass(cls):
+    if os.path.isfile(cls.tempAgg):
+      os.remove(cls.tempAgg)
 
 if __name__ == '__main__':
   unittest.main()
