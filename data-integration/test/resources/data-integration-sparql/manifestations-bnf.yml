@@ -76,8 +76,8 @@ mappings:
           parameters:
             - [grel:valueParameter, $(author)]
             - [grel:valueParameter2, ""] 
-      - p: schema:translationOfWork
-        o: btid:source_$(id)~iri
+      - p: btm:sourceLanguage
+        o: lang:$(sourceLanguage)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:

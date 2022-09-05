@@ -1,6 +1,8 @@
 
 SOURCE_FOLDER="data-integration-sparql"
 MAPPING_MANIFESTATIONS="manifestations.yml"
+MAPPING_MANIFESTATIONS_BNF="manifestations-bnf.yml"
+MAPPING_ORIGINALS="originals.yml"
 MAPPING_CONTRIBUTORS="contributors.yml"
 MAPPING_CONTRIBUTORS_BNF="contributors-bnf.yml"
 MAPPING_SAMEAS="sameas.yml"
@@ -8,14 +10,16 @@ MAPPING_SAMEAS="sameas.yml"
 # build KBR data
 export RML_TEST_SOURCE_PUBLICATIONS=$SOURCE_FOLDER"/kbr-manifestations.csv"
 . map.sh $SOURCE_FOLDER"/"$MAPPING_MANIFESTATIONS $SOURCE_FOLDER"/kbr-manifestations.ttl"
+. map.sh $SOURCE_FOLDER"/"$MAPPING_ORIGINALS $SOURCE_FOLDER"/kbr-originals.ttl"
 
 # build BnF data
 export RML_TEST_SOURCE_PUBLICATIONS=$SOURCE_FOLDER"/bnf-manifestations.csv"
-. map.sh $SOURCE_FOLDER"/"$MAPPING_MANIFESTATIONS $SOURCE_FOLDER"/bnf-manifestations.ttl"
+. map.sh $SOURCE_FOLDER"/"$MAPPING_MANIFESTATIONS_BNF $SOURCE_FOLDER"/bnf-manifestations.ttl"
 
 # build KB data
 export RML_TEST_SOURCE_PUBLICATIONS=$SOURCE_FOLDER"/kb-manifestations.csv"
 . map.sh $SOURCE_FOLDER"/"$MAPPING_MANIFESTATIONS $SOURCE_FOLDER"/kb-manifestations.ttl"
+. map.sh $SOURCE_FOLDER"/"$MAPPING_ORIGINALS $SOURCE_FOLDER"/kb-originals.ttl"
 
 
 # build KBR contributor data

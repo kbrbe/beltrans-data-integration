@@ -26,68 +26,26 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  publications:
+  originals:
     sources:
       - access: ${RML_TEST_SOURCE_PUBLICATIONS}
         referenceFormulation: csv
         delimiter: ','
-    s: btid:$(id)
+    s: btid:source_$(id)
     po:
       - [a, schema:CreativeWork]
-      - p: dcterms:identifier
-        o: $(id)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(id)]
-            - [grel:valueParameter2, ""] 
-      - p: schema:name
-        o: $(title)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(title)]
-            - [grel:valueParameter2, ""] 
-      - p: rdfs:comment
-        o: $(comment)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(comment)]
-            - [grel:valueParameter2, ""] 
-      - p: bibo:isbn10
-        o: $(isbn10)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(isbn10)]
-            - [grel:valueParameter2, ""] 
-      - p: bibo:isbn13
-        o: $(isbn13)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(isbn13)]
-            - [grel:valueParameter2, ""] 
-      - p: schema:author
-        o: btid:$(author)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(author)]
-            - [grel:valueParameter2, ""] 
-      - p: schema:translationOfWork
-        o: btid:source_$(id)~iri
+      - p: schema:workTranslation
+        o: btid:$(id)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
             - [grel:valueParameter, $(sourceLanguage)]
             - [grel:valueParameter2, ""] 
       - p: schema:inLanguage
-        o: lang:$(targetLanguage)~iri
+        o: lang:$(sourceLanguage)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(targetLanguage)]
+            - [grel:valueParameter, $(sourceLanguage)]
             - [grel:valueParameter2, ""] 
 
