@@ -48,7 +48,7 @@ def main(url, contentType, namedGraph, files):
       queryName = f'SPARQL-UPDATE (named graph "{namedGraph}")' if namedGraph else 'SPARQL-UPDATE'
     else:
       queryName = f'file uploaded (named graph "{namedGraph}")' if namedGraph else 'file uploaded'
-    utils_sparql.sparqlUpdate(url, inputFile, contentType, queryName, auth=auth)
+    utils_sparql.sparqlUpdateFile(url, inputFile, contentType, queryName, auth=auth)
 
 if __name__ == '__main__':
   (options, args) = parseArguments()
