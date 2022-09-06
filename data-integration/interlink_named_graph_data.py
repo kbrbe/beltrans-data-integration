@@ -71,17 +71,29 @@ def generateCreateQueryPersons(sourceName, sourceGraph, targetGraph, identifiers
   if sourceName == 'BnF' or sourceName == 'bnf':
     nationalityProperty = 'rdagroup2elements:countryAssociatedWithThePerson'
     entitySourceClass = 'foaf:Person'
-    entityTargetClass = 'schema:Person'
     labelProperty = 'foaf:name'
     familyNameProperty = 'foaf:familyName'
     givenNameProperty = 'foaf:givenName'
-  else:
-    nationalityProperty = 'schema:location/schema:addressCountry'
+  elif sourceName == 'KBR' or sourceName == 'kbr':
+    nationalityProperty = 'schema:nationality'
     entitySourceClass = 'schema:Person'
-    entityTargetClass = 'schema:Person'
-    labelProperty = 'skos:prefLabel'
+    labelProperty = 'rdfs:label'
     familyNameProperty = 'schema:familyName'
     givenNameProperty = 'schema:givenName'
+  elif sourceName == 'NTA' or sourceName == 'nta':
+    nationalityProperty = 'schema:nationality'
+    entitySourceClass = 'schema:Person'
+    labelProperty = 'schema:name'
+    familyNameProperty = 'schema:familyName'
+    givenNameProperty = 'schema:givenName'
+  else:
+    nationalityProperty = 'schema:nationality'
+    entitySourceClass = 'schema:Person'
+    labelProperty = 'rdfs:label'
+    familyNameProperty = 'schema:familyName'
+    givenNameProperty = 'schema:givenName'
+
+  entityTargetClass = 'schema:Person'
 
   qb = PersonContributorCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
                               identifiersToAdd=identifiersToAdd, entitySourceClass=entitySourceClass,
@@ -97,14 +109,21 @@ def generateCreateQueryOrganizations(sourceName, sourceGraph, targetGraph, ident
   if sourceName == 'BnF' or sourceName == 'bnf':
     countryProperty = 'rdagroup2elements:placeAssociatedWithTheCorporateBody'
     entitySourceClass = 'foaf:Organization'
-    entityTargetClass = 'schema:Organization'
     labelProperty = 'foaf:name'
-  else:
-    countryProperty = 'schema:location/schema:country'
+  elif sourceName == 'KBR' or sourceName == 'kbr':
+    countryProperty = 'schema:address/schema:addressCountry'
     entitySourceClass = 'schema:Organization'
-    entityTargetClass = 'schema:Organization'
+    labelProperty = 'skos:prefLabel'
+  elif sourceName == 'NTA' or sourceName == 'nta':
+    countryProperty = 'schema:location/schema:addressCountry'
+    entitySourceClass = 'schema:Organization'
+    labelProperty = 'schema:name'
+  else:
+    countryProperty = 'schema:location/schema:addressCountry'
+    entitySourceClass = 'schema:Organization'
     labelProperty = 'rdfs:label'
 
+  entityTargetClass = 'schema:Organization'
   qb = OrganizationContributorCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
                               identifiersToAdd=identifiersToAdd, entitySourceClass=entitySourceClass,
                               entityTargetClass=entityTargetClass, countryProperty=countryProperty,

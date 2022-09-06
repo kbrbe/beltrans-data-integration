@@ -570,10 +570,10 @@ function integrate {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  createManifestationsQueries="manifestations-create-queries.csv"
-  createContributorsQueries="contributors-create-queries.csv"
-  updateManifestationsQueries="manifestations-update-queries.csv"
-  updateContributorsQueries="contributors-update-queries.csv"
+  createManifestationsQueries="config-integration-manifestations-create.csv"
+  createContributorsQueries="config-integration-contributors-create.csv"
+  updateManifestationsQueries="config-integration-manifestations-update.csv"
+  updateContributorsQueries="config-integration-contributors-update.csv"
 
   integrationNamespace="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
@@ -586,10 +586,12 @@ function integrate {
 
   source ./py-integration-env/bin/activate
   echo "Integrate manifestations ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2
+  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+    --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2
 
   echo "Integrate contributors ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3
+  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3
 
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists and publishing directors) ..."
 

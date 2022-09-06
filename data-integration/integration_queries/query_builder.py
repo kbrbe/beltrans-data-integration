@@ -358,9 +358,19 @@ class ManifestationCreateQuery(ManifestationQuery):
                                                   optional=optional,
                                                   newline=True)
 
-        pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar schema:translationOfWork ?originalURI . }
+
+        if self.source == 'BnF' or self.source == 'bnf':
+            pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar btm:sourceLanguage $sourceLangVar . } }
+            """)
+            query += pattern.substitute(sourceGraph=self.sourceGraph, localURIVar=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                        sourceLangVar=ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG)
+        else:
+            pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar schema:translationOfWork ?originalURI . }
                                         graph <$originalsGraph> { ?originalURI schema:inLanguage $sourceLangVar . } }
                           """)
+
+            query += pattern.substitute(sourceGraph=self.sourceGraph, localURIVar=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                    originalsGraph=self.originalsGraph, sourceLangVar=ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG)
 
         query += pattern.substitute(sourceGraph=self.sourceGraph, localURIVar=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
                                     originalsGraph=self.originalsGraph, sourceLangVar=ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG)
@@ -840,7 +850,7 @@ class ContributorUpdateQuery(ContributorQuery):
         # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
         for identifier in self.identifiersToAdd:
             query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source,
-                                                                       f'Added from $source via {self.identifierName}')
+                                                                       f'Added from {self.source} via {self.identifierName}')
 
         query += "} "  # end of graph block
         query += "} "  # end of INSERT block
