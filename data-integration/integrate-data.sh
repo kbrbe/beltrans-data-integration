@@ -25,7 +25,7 @@ SCRIPT_CSV_TO_EXCEL="csv_to_excel.py"
 SCRIPT_COMPUTE_STATS="create-publication-stats.py"
 SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
 
-SCRIPT_INTERLINK_DATA="interlink-named-graph-data.py"
+SCRIPT_INTERLINK_DATA="interlink_named_graph_data.py"
 
 SCRIPT_GET_RDF_XML_SUBJECTS="../data-sources/bnf/get-subjects.py"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
@@ -162,11 +162,11 @@ CREATE_QUERY_BNF_ISNI="sparql-queries/create-bnf-isni.sparql"
 CREATE_QUERY_BNF_VIAF="sparql-queries/create-bnf-viaf.sparql"
 CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 
-LINK_QUERY_CONT_AUTHORS="integration-queries/link-beltrans-manifestations-authors.sparql"
-LINK_QUERY_CONT_TRANSLATORS="integration-queries/link-beltrans-manifestations-translators.sparql"
-LINK_QUERY_CONT_ILLUSTRATORS="integration-queries/link-beltrans-manifestations-illustrators.sparql"
-LINK_QUERY_CONT_SCENARISTS="integration-queries/link-beltrans-manifestations-scenarists.sparql"
-LINK_QUERY_CONT_PUBLISHING_DIRECTORS="integration-queries/link-beltrans-manifestations-publishing-directors.sparql"
+LINK_QUERY_CONT_AUTHORS="integration_queries/link-beltrans-manifestations-authors.sparql"
+LINK_QUERY_CONT_TRANSLATORS="integration_queries/link-beltrans-manifestations-translators.sparql"
+LINK_QUERY_CONT_ILLUSTRATORS="integration_queries/link-beltrans-manifestations-illustrators.sparql"
+LINK_QUERY_CONT_SCENARISTS="integration_queries/link-beltrans-manifestations-scenarists.sparql"
+LINK_QUERY_CONT_PUBLISHING_DIRECTORS="integration_queries/link-beltrans-manifestations-publishing-directors.sparql"
 
 DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
 DATA_PROFILE_QUERY_FILE_CONT_PERSONS="dataprofile-contributors-persons.sparql"
@@ -570,10 +570,10 @@ function integrate {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  createManifestationsQueries="manifestations-create-queries.csv"
-  createContributorsQueries="contributors-create-queries.csv"
-  updateManifestationsQueries="manifestations-update-queries.csv"
-  updateContributorsQueries="contributors-update-queries.csv"
+  createManifestationsQueries="config-integration-manifestations-create.csv"
+  createContributorsQueries="config-integration-contributors-create.csv"
+  updateManifestationsQueries="config-integration-manifestations-update.csv"
+  updateContributorsQueries="config-integration-contributors-update.csv"
 
   integrationNamespace="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
@@ -586,10 +586,12 @@ function integrate {
 
   source ./py-integration-env/bin/activate
   echo "Integrate manifestations ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2
+  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+    --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2
 
   echo "Integrate contributors ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3
+  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3
 
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists and publishing directors) ..."
 

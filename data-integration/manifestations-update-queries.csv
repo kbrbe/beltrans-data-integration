@@ -1,4 +1,4 @@
-"Update data from BnF via ISBN10",integration-queries/update-manifestations-bnf-isbn10.sparql
-"Update data from BnF via ISBN13",integration-queries/update-manifestations-bnf-isbn13.sparql
-"Update data from KB via ISBN10",integration-queries/update-manifestations-kb-isbn10.sparql
-"Update data from KB via ISBN13",integration-queries/update-manifestations-kb-isbn13.sparql
+"Update data from BnF via ISBN10",integration_queries/update-manifestations-bnf-isbn10.sparql
+"Update data from BnF via ISBN13",integration_queries/update-manifestations-bnf-isbn13.sparql
+"Update data from KB via ISBN10",integration_queries/update-manifestations-kb-isbn10.sparql
+"Update data from KB via ISBN13",integration_queries/update-manifestations-kb-isbn13.sparql

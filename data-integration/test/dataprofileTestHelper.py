@@ -102,6 +102,43 @@ class DataprofileTestHelper:
       return False
 
 
+  # ---------------------------------------------------------------------------
+  def identifiersOnSameRow(self, identifierTuple, otherIdentifierTuples):
+    """Returns True if a contributor record (one row) contains all the given identifiers.
+    The given tuples represent column name and column value, e.g. ('kbrID', '1') the column kbrID and identifier 1.
+    The identifierTuple is the starting point and then the function recursively checks that the row found
+    via the identifierTuple contains also the data specified by the otherIdentifierTuples.
+
+    >>> data = DataprofileTestHelper([{'kbrIDs': 'kbr1', 'bnfIDs': 'bnf1', 'ntaIDs': 'nta1'},{'kbrIDs': '2'},{'bnfIDs': '3'}])
+    >>> data.identifiersOnSameRow(('kbrIDs','kbr1'), [('bnfIDs','bnf1'), ('ntaIDs','nta1')])
+    True
+
+    >>> data.identifiersOnSameRow(('kbrIDs','kbr2'), [('bnfIDs','bnf1'), ('ntaIDs','nta1')])
+    Traceback (most recent call last):
+     ...
+    ValueError: No row with ID "kbr2" in column "kbrIDs" found!
+
+    >>> data2 = DataprofileTestHelper([{'kbrIDs': 'kbr1', 'bnfIDs': 'bnf1'},{'kbrIDs': 'kbr1', 'bnfIDs': 'bnf2'}])
+    >>> data2.identifiersOnSameRow(('kbrIDs','kbr1'), [('bnfIDs','bnf1')])
+    Traceback (most recent call last):
+     ...
+    ValueError: More than one row with ID "kbr1" in column "kbrIDs" found!
+    """
+    colName, identifier = identifierTuple
+    if len(otherIdentifierTuples) > 0:
+      colName2, identifier2 = otherIdentifierTuples.pop(0)
+      colName2Value = utils.getDfCellValue(self.df, colName, identifier, colName2)
+      if colName2Value == identifier2:
+        # There was a match between given value and found value, if there is more to check do a recursive call
+        # otherwise we are happy because we found a match and return True
+        if len(otherIdentifierTuples) > 0:
+          return self.identifiersOnSameRow((colName2, identifier2), otherIdentifierTuples)
+        else:
+          return True     
+      else:
+        # if at some point in the recursive calls one identifier is not as expected we return False
+        return False
+    
 
   # ---------------------------------------------------------------------------
   def kbrAndBnFIdentifierOnSameRow(self, kbrIdentifier, bnfIdentifier):

@@ -118,42 +118,48 @@ def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
 
 
 # -----------------------------------------------------------------------------
-def sparqlUpdate(url, filename, fileFormat, queryName, auth=None):
+def sparqlUpdateFile(url, filename, fileFormat, queryName, auth=None):
+
   if not os.path.isfile(filename):
     print(f'"{filename}" is not a file!')
     return
   with open(filename, 'rb') as fileIn:
     print(f'\tProcessing file {filename} (url: {url})')
-    r = None
+    sparqlUpdate(url, fileIn.read(), fileFormat, queryName, auth)
+
+# -----------------------------------------------------------------------------
+def sparqlUpdate(url, queryString, fileFormat, queryName, auth=None):
+
+  r = None
+  try:
+    r = requests.post(url, data=queryString, headers={'Content-Type': fileFormat}, auth=auth)
+    r.raise_for_status()
+
+    response = r.content.decode('utf-8')
     try:
-      r = requests.post(url, data=fileIn.read(), headers={'Content-Type': fileFormat}, auth=auth)
-      r.raise_for_status()
-
-      response = r.content.decode('utf-8')
-      try:
-        m = re.search(r".*totalElapsed=(\d+)ms.*mutationCount=(\d+).*", response)
-        timeElapsed = m.group(1)
-        mutations = m.group(2)
-        print(f'\t{queryName}: {mutations} changes in {timeElapsed}ms')
-      except Exception as e:
-        # if the content was a file and no query the answer might be XML
-        try:
-          responseXML = ET.fromstring(response)
-          modified = responseXML.get('modified')
-          timeElapsed = responseXML.get('milliseconds')
-          print(f'\t{queryName}: {modified} changes in {timeElapsed}ms')
-        except Exception as e:
-          print(f'Unexpected answer, first 200 characters of answer:' + response[0:200])
-          print(e)
-          print(response)
-
-    except requests.HTTPError as he:
-      statusCode = he.response.status_code
-      print(f'{statusCode} error while updating {filename}: ' + he.response.content.decode('utf-8')[0:40])
-      print(he.response.content.decode('utf-8'))
+      m = re.search(r".*totalElapsed=(\d+)ms.*mutationCount=(\d+).*", response)
+      timeElapsed = m.group(1)
+      mutations = m.group(2)
+      print(f'\t{queryName}: {mutations} changes in {timeElapsed}ms')
     except Exception as e:
-      print(f'Error while updating {url} with {filename} and type {fileFormat}')
-      print(e)
+      # if the content was a file and no query the answer might be XML
+      try:
+        responseXML = ET.fromstring(response)
+        modified = responseXML.get('modified')
+        timeElapsed = responseXML.get('milliseconds')
+        print(f'\t{queryName}: {modified} changes in {timeElapsed}ms')
+      except Exception as e:
+        print(f'Unexpected answer, first 200 characters of answer:' + response[0:200])
+        print(e)
+        print(response)
+
+  except requests.HTTPError as he:
+    statusCode = he.response.status_code
+    print(f'{statusCode} error while updating {queryName}: ' + he.response.content.decode('utf-8')[0:40])
+    print(he.response.content.decode('utf-8'))
+  except Exception as e:
+    print(f'Error while updating {url} with query {queryName} and type {fileFormat}')
+    print(e)
 
 
 # -----------------------------------------------------------------------------
