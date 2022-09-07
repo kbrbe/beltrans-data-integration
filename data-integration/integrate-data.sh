@@ -392,6 +392,11 @@ SUFFIX_KBR_ORGS_FR_NL_LD="fr-nl_organizations.ttl"
 SUFFIX_KBR_ORGS_NL_FR_LD="nl-fr_organizations.ttl"
 SUFFIX_KBR_PLACES_LD="places.ttl"
 SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
+SUFFIX_KBR_PERSONS_IDENTIFIERS_FR_NL_LD="fr-nl_persons-identifiers.ttl"
+SUFFIX_KBR_PERSONS_IDENTIFIERS_NL_FR_LD="nl-fr_persons-identifiers.ttl"
+SUFFIX_KBR_ORGS_IDENTIFIERS_FR_NL_LD="fr-nl_orgs-identifiers.ttl"
+SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD="nl-fr_orgs-identifiers.ttl"
+SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD="belgians-identifiers.ttl"
 
 #
 # LINKED DATA - KB
@@ -1633,18 +1638,31 @@ function mapKBRLinkedAuthorities {
   kbrOrgsTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_NL_FR_LD"
   kbrBelgiansTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
   kbrPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
+  kbrPersonsIdentifiersTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_IDENTIFIERS_FR_NL_LD"
+  kbrPersonsIdentifiersTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_IDENTIFIERS_NL_FR_LD"
+  kbrOrgsIdentifiersTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_FR_NL_LD"
+  kbrOrgsIdentifiersTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD"
+  kbrBelgiansIdentifiersTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD"
 
 
 
   # 2) execute the mapping
   mapKBRPersons "$kbrPersonsFRNL" "$kbrPersonsNatFRNL" "$kbrPersonsTurtleFRNL"
   mapKBRPersons "$kbrPersonsNLFR" "$kbrPersonsNatNLFR" "$kbrPersonsTurtleNLFR"
-  mapKBRPersons "$kbrBelgians" "$kbrBelgiansNat" "$kbrBelgiansTurtle"
+  #mapKBRPersons "$kbrBelgians" "$kbrBelgiansNat" "$kbrBelgiansTurtle"
 
   mapKBROrgs "$kbrOrgsFRNL" "$kbrOrgsTurtleFRNL"
   mapKBROrgs "$kbrOrgsNLFR" "$kbrOrgsTurtleNLFR"
 
   mapKBRPlaces "$integrationName" "$kbrPlacesTurtle"
+
+  mapKBRLinkedIdentifiers "$kbrPersonsFRNL" "$kbrPersonsIdentifiersTurtleFRNL"
+  mapKBRLinkedIdentifiers "$kbrPersonsNLFR" "$kbrPersonsIdentifiersTurtleNLFR"
+
+  mapKBRLinkedIdentifiers "$kbrOrgsFRNL" "$kbrOrgsIdentifiersTurtleFRNL"
+  mapKBRLinkedIdentifiers "$kbrOrgsNLFR" "$kbrOrgsIdentifiersTurtleNLFR"
+
+  #mapKBRLinkedIdentifiers "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
 
 }
 
@@ -1861,12 +1879,20 @@ function loadKBRLinkedAuthorities {
   local kbrPlaces="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PLACES_LD"
   local kbrBelgians="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_BELGIANS_LD"
 
+  local kbrPersonsIdentifiersTurtleFRNL="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PERSONS_IDENTIFIERS_FR_NL_LD"
+  local kbrPersonsIdentifiersTurtleNLFR="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PERSONS_IDENTIFIERS_NL_FR_LD"
+  local kbrOrgsIdentifiersTurtleFRNL="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_FR_NL_LD"
+  local kbrOrgsIdentifiersTurtleNLFR="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD"
+  local kbrBelgiansIdentifiersTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD"
+
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   # upload newly identified authorities to the linked authorities named graph
   echo "Load newly identified KBR linked authorities ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
-    "$kbrPersonsFRNL" "$kbrPersonsNLFR" "$kbrOrgsFRNL" "$kbrOrgsNLFR" "$kbrPlaces" "$kbrBelgians"
+    "$kbrPersonsFRNL" "$kbrPersonsNLFR" "$kbrOrgsFRNL" "$kbrOrgsNLFR" "$kbrPlaces" \
+    "$kbrPersonsIdentifiersTurtleFRNL" "$kbrPersonsIdentifiersTurtleNLFR" "$kbrOrgsIdentifiersTurtleFRNL" \
+    "$kbrOrgsIdentifiersTurtleNLFR"
 
 }
 
