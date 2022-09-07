@@ -1,4 +1,4 @@
 date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-08-18,2022-08-19 13:49:45.797244,FR-NL,8501,7600,7605,7593,51,2281,4,13,1411,4,7385,151,2604,2281,101,119,Strictly split translations and originals into different named graphs
-2022-08-18,2022-08-19 13:49:45.979034,NL-FR,4030,3434,3458,3546,1209,742,210,933,497,247,2946,193,1198,742,171,173,Strictly split translations and originals into different named graphs
-2022-08-18,2022-08-19 13:49:46.059581,OTHER,317,235,235,311,77,11,2,71,10,3,275,6,14,11,3,3,Strictly split translations and originals into different named graphs
+2022-08-18,2022-09-06 22:03:09.617835,FR-NL,8501,7600,7605,7593,51,2281,4,13,1411,4,7385,151,2604,2281,101,119,Strictly split translations and originals into different named graphs
+2022-08-18,2022-09-06 22:03:09.758588,NL-FR,4030,3434,3458,3546,1209,742,210,933,497,247,2946,193,1198,742,171,173,Strictly split translations and originals into different named graphs
+2022-08-18,2022-09-06 22:03:09.839849,OTHER,317,235,235,311,77,11,2,71,10,3,275,6,14,11,3,3,Strictly split translations and originals into different named graphs

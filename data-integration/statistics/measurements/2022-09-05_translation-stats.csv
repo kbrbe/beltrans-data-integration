@@ -1,0 +1,4 @@
+date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
+2022-09-05,2022-09-06 22:03:10.001819,FR-NL,8501,7600,7605,7593,51,2281,4,13,1411,4,7385,151,2604,2281,101,119,Integration changes: dynamic SPARQL instead of files
+2022-09-05,2022-09-06 22:03:10.222682,NL-FR,4030,3434,3458,3546,1209,742,210,933,497,247,2946,193,1198,742,171,173,Integration changes: dynamic SPARQL instead of files
+2022-09-05,2022-09-06 22:03:10.317310,OTHER,317,235,235,311,77,11,2,71,10,3,275,6,14,11,3,3,Integration changes: dynamic SPARQL instead of files
