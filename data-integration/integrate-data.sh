@@ -1854,13 +1854,19 @@ function loadKBRLinkedAuthorities {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  local kbrLinkedAuthorities="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_LA_LD"
+  local kbrPersonsFRNL="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PERSONS_FR_NL_LD"
+  local kbrPersonsNLFR="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PERSONS_NL_FR_LD"
+  local kbrOrgsFRNL="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_FR_NL_LD"
+  local kbrOrgsNLFR="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_NL_FR_LD"
+  local kbrPlaces="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PLACES_LD"
+  local kbrBelgians="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_BELGIANS_LD"
+
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   # upload newly identified authorities to the linked authorities named graph
   echo "Load newly identified KBR linked authorities ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
-    "$kbrLinkedAuthorities"
+    "$kbrPersonsFRNL" "$kbrPersonsNLFR" "$kbrOrgsFRNL" "$kbrOrgsNLFR" "$kbrPlaces" "$kbrBelgians"
 
 }
 
