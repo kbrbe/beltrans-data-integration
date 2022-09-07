@@ -74,7 +74,7 @@ INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-belg_2022-02-05.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-belg_2022-09-05_28772records.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -263,6 +263,9 @@ SUFFIX_KBR_LA_PERSONS_FR_NORM="fr-translations-linked-authorities-persons-norm.c
 SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NAT="fr-translations-linked-authorities-nationalities.csv"
 SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.csv"
+
+SUFFIX_KBR_BELGIANS_CSV="kbr-belgians.csv"
+SUFFIX_KBR_BELGIANS_NATIONALITIES="kbr-belgians-nationalities.csv"
 
 # DATA SOURCE - KBR ORIGINALS MATCHING
 #
@@ -710,7 +713,7 @@ function extractKBR {
   extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "$INPUT_KBR_TRL_FR"
 
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR"
+  extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR" "$INPUT_KBR_BELGIANS"
 
 }
 
@@ -1354,6 +1357,7 @@ function extractKBRLinkedAuthorities {
   local kbrNLOrgs=$3
   local kbrFRPersons=$4
   local kbrFROrgs=$5
+  local kbrBelgianPersons=$6
 
   # document which input was used
   printf "\nUsed input (KBR linked authorities) \n* $kbrNLPersons\n* $kbrNLOrgs\n* $kbrFRPersons\n* $kbrFROrgs" >> "$integrationName/kbr/README.md"
@@ -1361,32 +1365,35 @@ function extractKBRLinkedAuthorities {
   #
   # Define file names based on current integration directory and file name patterns
   #
-  kbrNLPersonsNorm="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NORM"
-  kbrNLOrgsNorm="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_NORM"
-  kbrFRPersonsNorm="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NORM"
-  kbrFROrgsNorm="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_NORM"
+  kbrNLPersonsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_CLEANED"
+  kbrNLOrgsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
+  kbrFRPersonsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_CLEANED"
+  kbrFROrgsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
 
-  kbrNLPersonsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_CLEANED"
-  kbrNLOrgsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
-  kbrFRPersonsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_CLEANED"
-  kbrFROrgsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
+  kbrBelgianPersonsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CSV"
 
   kbrNLPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
   kbrFRPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
 
+  kbrBelgianPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
+
   source py-integration-env/bin/activate
 
-  echo "Extract authorities NL - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCleaned -n $kbrNLPersonsNationalities
+  echo "Extract authorities NL-FR - Persons ..."
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCSV -n $kbrNLPersonsNationalities
 
-  echo "Extract authorities NL - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrNLOrgs -o $kbrNLOrgsCleaned
+  echo "Extract authorities NL-FR - Organizations ..."
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrNLOrgs -o $kbrNLOrgsCSV
 
-  echo "Extract authorities FR - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrFRPersons -o $kbrFRPersonsCleaned -n $kbrFRPersonsNationalities
+  echo "Extract authorities FR-NL - Persons ..."
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrFRPersons -o $kbrFRPersonsCSV -n $kbrFRPersonsNationalities
 
-  echo "Extract authorities FR - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrFROrgs -o $kbrFROrgsCleaned
+  echo "Extract authorities FR-NL - Organizations ..."
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrFROrgs -o $kbrFROrgsCSV
+
+  echo "Extract authorities KBR-Belgians - Persons ..."
+  # these Belgians might have multiple nationalities, thus it is still important to get the nationality information
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrBelgianPersons -o $kbrBelgianPersonsCSV -n $kbrBelgianPersonsNationalities
 
   echo "Copy publisher location information ..."
   cp "$INPUT_KBR_LA_PLACES_VLG" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
