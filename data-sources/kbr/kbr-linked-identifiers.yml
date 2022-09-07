@@ -1,0 +1,68 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  skos: "http://www.w3.org/2004/02/skos/core#"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+
+variables:
+  sourceKBRLinkedAuthorities: &sourceKBRLinkedAuthorities ${RML_SOURCE_KBR_LINKED_AUTHORITIES}
+
+mappings:
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsISNI:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
+    sources:
+      - access: *sourceKBRLinkedAuthorities
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:identifier_isni_$(authorityID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(isni_id)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Isni]
+      - [rdf:value, $(isni_id)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsVIAF:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
+    sources:
+      - access: *sourceKBRLinkedAuthorities
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:identifier_viaf_$(authorityID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(viaf_id)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "VIAF"]
+      - [rdf:value, $(viaf_id)]
+
+

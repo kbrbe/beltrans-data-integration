@@ -1,0 +1,56 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  skos: "http://www.w3.org/2004/02/skos/core#"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+
+variables:
+  sourceKBRPublisherPlacesFlanders: &sourceKBRPublisherPlacesFlanders ${RML_SOURCE_KBR_PUBLISHER_PLACES_FLANDERS}
+  sourceKBRPublisherPlacesWallonia: &sourceKBRPublisherPlacesWallonia ${RML_SOURCE_KBR_PUBLISHER_PLACES_WALLONIA}
+  sourceKBRPublisherPlacesBrussels: &sourceKBRPublisherPlacesBrussels ${RML_SOURCE_KBR_PUBLISHER_PLACES_BRUSSELS}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  regionOrgs:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates an address resource for an organizational authority such that the country can be stored according to schema.org"
+    sources:
+      - access: *sourceKBRPublisherPlacesFlanders
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRPublisherPlacesWallonia
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceKBRPublisherPlacesBrussels
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:address_$(IDN)
+    po:
+      - [a, schema:PostalAddress]
+      - [rdfs:label, "Address of authority $(IDN)"]
+      - [schema:addressRegion, $(REGION)]
+      - [schema:addressLocality, $(place)]
+      - p: schema:addressCountry
+        o: countries:be~iri
+        condition:
+          function: grel:string_startsWith
+          parameters:
+            - [grel:valueParameter, $(REGION)]
+            - [grel:string_sub, "BE"]

@@ -241,6 +241,7 @@ SUFFIX_KBR_TRL_FR_PUB_COUNTRY="fr-translations-pub-country.csv"
 SUFFIX_KBR_TRL_FR_PUB_PLACE="fr-translations-pub-place.csv"
 SUFFIX_KBR_TRL_FR_COL_LINKS="fr-collection-links.csv"
 
+
 SUFFIX_KBR_TRL_NL_ISBN10="nl-fr-isbn10.csv"
 SUFFIX_KBR_TRL_NL_ISBN13="nl-fr-isbn13.csv"
 SUFFIX_KBR_TRL_FR_ISBN10="fr-nl-isbn10.csv"
@@ -266,6 +267,7 @@ SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.c
 
 SUFFIX_KBR_BELGIANS_CSV="kbr-belgians.csv"
 SUFFIX_KBR_BELGIANS_NATIONALITIES="kbr-belgians-nationalities.csv"
+
 
 # DATA SOURCE - KBR ORIGINALS MATCHING
 #
@@ -384,7 +386,12 @@ SUFFIX_KBR_ORIGINAL_LINKING_LD="translations-original-links.ttl"
 #
 # LINKED DATA - KBR LINKED AUTHORITIES
 #
-SUFFIX_KBR_LA_LD="linked-authorities.ttl"
+SUFFIX_KBR_PERSONS_FR_NL_LD="fr-nl_persons.ttl"
+SUFFIX_KBR_PERSONS_NL_FR_LD="nl-fr_persons.ttl"
+SUFFIX_KBR_ORGS_FR_NL_LD="fr-nl_organizations.ttl"
+SUFFIX_KBR_ORGS_NL_FR_LD="nl-fr_organizations.ttl"
+SUFFIX_KBR_PLACES_LD="places.ttl"
+SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
 
 #
 # LINKED DATA - KB
@@ -1092,8 +1099,6 @@ function transformKBR {
   echo "TRANSFORMATION - Map KBR linked authorities data to RDF"
   mapKBRLinkedAuthorities $integrationName
 
-  #echo "TRANSFORMATION - Map KBR Belgians data to RDF"
-  #mapKBRBelgians $integrationName
 }
 
 # -----------------------------------------------------------------------------
@@ -1609,46 +1614,89 @@ function mapKBRTranslationLimitedOriginals {
 function mapKBRLinkedAuthorities {
 
   local integrationName=$1
+  # input
+  kbrPersonsFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_CLEANED"
+  kbrPersonsNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_CLEANED"
+  kbrPersonsNatFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
+  kbrPersonsNatNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
 
-  kbrLinkedAuthoritiesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_LA_LD"
+  kbrOrgsFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
+  kbrOrgsNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
 
-  # map the linked authorities
+  kbrBelgians="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CSV"
+  kbrBelgiansNat="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
 
-  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_NL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_CLEANED"
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_FR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_CLEANED"
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_NL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_FR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
+  # output
+  kbrPersonsTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_FR_NL_LD"
+  kbrPersonsTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NL_FR_LD"
+  kbrOrgsTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_FR_NL_LD"
+  kbrOrgsTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_NL_FR_LD"
+  kbrBelgiansTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
+  kbrPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
 
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_NL_NAT="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_FR_NAT="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
+
+
+  # 2) execute the mapping
+  mapKBRPersons "$kbrPersonsFRNL" "$kbrPersonsNatFRNL" "$kbrPersonsTurtleFRNL"
+  mapKBRPersons "$kbrPersonsNLFR" "$kbrPersonsNatNLFR" "$kbrPersonsTurtleNLFR"
+  mapKBRPersons "$kbrBelgians" "$kbrBelgiansNat" "$kbrBelgiansTurtle"
+
+  mapKBROrgs "$kbrOrgsFRNL" "$kbrOrgsTurtleFRNL"
+  mapKBROrgs "$kbrOrgsNLFR" "$kbrOrgsTurtleNLFR"
+
+  mapKBRPlaces "$integrationName" "$kbrPlacesTurtle"
+
+}
+
+# -----------------------------------------------------------------------------
+function mapKBRPersons {
+  local sourceFile=$1
+  local sourceFileNat=$2
+  local outputTurtle=$3
+
+  export RML_SOURCE_KBR_PERSONS="$sourceFile"
+  export RML_SOURCE_KBR_PERSONS_NAT="$sourceFileNat"
+
+  echo "Map KBR Persons - $sourceFile"
+  . map.sh ../data-sources/kbr/kbr-persons.yml $outputTurtle
+}
+
+# -----------------------------------------------------------------------------
+function mapKBROrgs {
+  local sourceFile=$1
+  local outputTurtle=$2
+
+  export RML_SOURCE_KBR_ORGS="$sourceFile"
+
+  echo "Map KBR Orgs - $sourceFile"
+  . map.sh ../data-sources/kbr/kbr-orgs.yml $outputTurtle
+}
+
+# -----------------------------------------------------------------------------
+function mapKBRLinkedIdentifiers {
+  local sourceFile=$1
+  local outputTurtle=$2
+
+  export RML_SOURCE_KBR_LINKED_AUTHORITIES="$sourceFile"
+
+  echo "Map KBR Orgs - $sourceFile"
+  . map.sh ../data-sources/kbr/kbr-linked-identifiers.yml $outputTurtle
+}
+
+# -----------------------------------------------------------------------------
+function mapKBRPlaces {
+  local integrationName=$1
+
+  local kbrPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
 
   export RML_SOURCE_KBR_PUBLISHER_PLACES_FLANDERS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
   export RML_SOURCE_KBR_PUBLISHER_PLACES_WALLONIA="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_WAL"
   export RML_SOURCE_KBR_PUBLISHER_PLACES_BRUSSELS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_BRU"
 
-  # 2) execute the mapping
-  echo "Map KBR linked authorities ..."
-  . map.sh ../data-sources/kbr/kbr-linked-authorities.yml $kbrLinkedAuthoritiesTurtle
-
+  echo "Map KBR Places"
+  . map.sh ../data-sources/kbr/kbr-places.yml $kbrPlacesTurtle
 }
 
-# -----------------------------------------------------------------------------
-function mapKBRBelgians {
-
-  local integrationName=$1
-
-  kbrBelgiansTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
-
-  # map the authorities
-
-  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_BELGIANS="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CLEANED"
-
-  # 2) execute the mapping
-  echo "Map KBR Belgians ..."
-  . map.sh ../data-sources/kbr/kbr-belgians.yml $kbrBelgiansTurtle
-}
 
 # -----------------------------------------------------------------------------
 function mapMasterData {
