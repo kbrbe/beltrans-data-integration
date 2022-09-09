@@ -6,7 +6,7 @@
 "BnF","ISNI","BnF,ISNI,VIAF,Wikidata","http://bnf-contributors"
 "KBR","ISNI","KBR,ISNI,VIAF,Wikidata","http://kbr-linked-authorities"
 "NTA","ISNI","NTA,ISNI,VIAF,Wikidata","http://kb-linked-authorities"
-"Wikidata","Wikidata","Wikidata,ISNI,VIAF,KBR,BnF,NTA","http://wikidata"
+"Wikidata","ISNI","Wikidata,ISNI,VIAF,KBR,BnF,NTA","http://wikidata"
 "BnF","VIAF","BnF,ISNI,VIAF,Wikidata","http://bnf-contributors"
 "KBR","VIAF","KBR,ISNI,VIAF,Wikidata","http://kbr-linked-authorities"
 "NTA","VIAF","NTA,ISNI,VIAF,Wikidata","http://kb-linked-authorities"
