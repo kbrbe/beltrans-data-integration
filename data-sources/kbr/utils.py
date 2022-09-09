@@ -242,12 +242,15 @@ def extractIdentifier(rowID, value, pattern):
   ''
   >>> extractIdentifier('1', 1234, 'ISNI')
   ''
+  >>> extractIdentifier('1', "ISNI 0000 0001 2138 0055\\n", 'ISNI')
+  '0000000121380055'
   """
 
   identifier = ''
 
   if( isinstance(value, str) ):
 
+    value = value.strip()
     if(str.startswith(value, pattern) and not str.endswith(value, '-') and not '?' in value):
       # remove the prefix (e.g. VIAF or ISNI) and replace spaces (e.g. '0000 0000 1234')
       tmp = value.replace(pattern, '')

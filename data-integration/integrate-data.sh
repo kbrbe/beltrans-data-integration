@@ -74,7 +74,7 @@ INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-belg_2022-02-05.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-belg_2022-09-05_28772records.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -241,6 +241,7 @@ SUFFIX_KBR_TRL_FR_PUB_COUNTRY="fr-translations-pub-country.csv"
 SUFFIX_KBR_TRL_FR_PUB_PLACE="fr-translations-pub-place.csv"
 SUFFIX_KBR_TRL_FR_COL_LINKS="fr-collection-links.csv"
 
+
 SUFFIX_KBR_TRL_NL_ISBN10="nl-fr-isbn10.csv"
 SUFFIX_KBR_TRL_NL_ISBN13="nl-fr-isbn13.csv"
 SUFFIX_KBR_TRL_FR_ISBN10="fr-nl-isbn10.csv"
@@ -263,6 +264,10 @@ SUFFIX_KBR_LA_PERSONS_FR_NORM="fr-translations-linked-authorities-persons-norm.c
 SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NAT="fr-translations-linked-authorities-nationalities.csv"
 SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.csv"
+
+SUFFIX_KBR_BELGIANS_CSV="kbr-belgians.csv"
+SUFFIX_KBR_BELGIANS_NATIONALITIES="kbr-belgians-nationalities.csv"
+
 
 # DATA SOURCE - KBR ORIGINALS MATCHING
 #
@@ -381,7 +386,17 @@ SUFFIX_KBR_ORIGINAL_LINKING_LD="translations-original-links.ttl"
 #
 # LINKED DATA - KBR LINKED AUTHORITIES
 #
-SUFFIX_KBR_LA_LD="linked-authorities.ttl"
+SUFFIX_KBR_PERSONS_FR_NL_LD="fr-nl_persons.ttl"
+SUFFIX_KBR_PERSONS_NL_FR_LD="nl-fr_persons.ttl"
+SUFFIX_KBR_ORGS_FR_NL_LD="fr-nl_organizations.ttl"
+SUFFIX_KBR_ORGS_NL_FR_LD="nl-fr_organizations.ttl"
+SUFFIX_KBR_PLACES_LD="places.ttl"
+SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
+SUFFIX_KBR_PERSONS_IDENTIFIERS_FR_NL_LD="fr-nl_persons-identifiers.ttl"
+SUFFIX_KBR_PERSONS_IDENTIFIERS_NL_FR_LD="nl-fr_persons-identifiers.ttl"
+SUFFIX_KBR_ORGS_IDENTIFIERS_FR_NL_LD="fr-nl_orgs-identifiers.ttl"
+SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD="nl-fr_orgs-identifiers.ttl"
+SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD="belgians-identifiers.ttl"
 
 #
 # LINKED DATA - KB
@@ -710,7 +725,7 @@ function extractKBR {
   extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "$INPUT_KBR_TRL_FR"
 
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR"
+  extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR" "$INPUT_KBR_BELGIANS"
 
 }
 
@@ -1089,8 +1104,6 @@ function transformKBR {
   echo "TRANSFORMATION - Map KBR linked authorities data to RDF"
   mapKBRLinkedAuthorities $integrationName
 
-  #echo "TRANSFORMATION - Map KBR Belgians data to RDF"
-  #mapKBRBelgians $integrationName
 }
 
 # -----------------------------------------------------------------------------
@@ -1354,6 +1367,7 @@ function extractKBRLinkedAuthorities {
   local kbrNLOrgs=$3
   local kbrFRPersons=$4
   local kbrFROrgs=$5
+  local kbrBelgianPersons=$6
 
   # document which input was used
   printf "\nUsed input (KBR linked authorities) \n* $kbrNLPersons\n* $kbrNLOrgs\n* $kbrFRPersons\n* $kbrFROrgs" >> "$integrationName/kbr/README.md"
@@ -1361,32 +1375,35 @@ function extractKBRLinkedAuthorities {
   #
   # Define file names based on current integration directory and file name patterns
   #
-  kbrNLPersonsNorm="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NORM"
-  kbrNLOrgsNorm="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_NORM"
-  kbrFRPersonsNorm="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NORM"
-  kbrFROrgsNorm="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_NORM"
+  kbrNLPersonsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_CLEANED"
+  kbrNLOrgsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
+  kbrFRPersonsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_CLEANED"
+  kbrFROrgsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
 
-  kbrNLPersonsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_CLEANED"
-  kbrNLOrgsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
-  kbrFRPersonsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_CLEANED"
-  kbrFROrgsCleaned="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
+  kbrBelgianPersonsCSV="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CSV"
 
   kbrNLPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
   kbrFRPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
 
+  kbrBelgianPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
+
   source py-integration-env/bin/activate
 
-  echo "Extract authorities NL - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCleaned -n $kbrNLPersonsNationalities
+  echo "Extract authorities NL-FR - Persons ..."
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCSV -n $kbrNLPersonsNationalities
 
-  echo "Extract authorities NL - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrNLOrgs -o $kbrNLOrgsCleaned
+  echo "Extract authorities NL-FR - Organizations ..."
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrNLOrgs -o $kbrNLOrgsCSV
 
-  echo "Extract authorities FR - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrFRPersons -o $kbrFRPersonsCleaned -n $kbrFRPersonsNationalities
+  echo "Extract authorities FR-NL - Persons ..."
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrFRPersons -o $kbrFRPersonsCSV -n $kbrFRPersonsNationalities
 
-  echo "Extract authorities FR - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrFROrgs -o $kbrFROrgsCleaned
+  echo "Extract authorities FR-NL - Organizations ..."
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrFROrgs -o $kbrFROrgsCSV
+
+  echo "Extract authorities KBR-Belgians - Persons ..."
+  # these Belgians might have multiple nationalities, thus it is still important to get the nationality information
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrBelgianPersons -o $kbrBelgianPersonsCSV -n $kbrBelgianPersonsNationalities
 
   echo "Copy publisher location information ..."
   cp "$INPUT_KBR_LA_PLACES_VLG" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
@@ -1602,46 +1619,102 @@ function mapKBRTranslationLimitedOriginals {
 function mapKBRLinkedAuthorities {
 
   local integrationName=$1
+  # input
+  kbrPersonsFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_CLEANED"
+  kbrPersonsNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_CLEANED"
+  kbrPersonsNatFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
+  kbrPersonsNatNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
 
-  kbrLinkedAuthoritiesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_LA_LD"
+  kbrOrgsFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
+  kbrOrgsNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
 
-  # map the linked authorities
+  kbrBelgians="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CSV"
+  kbrBelgiansNat="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
 
-  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_NL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_CLEANED"
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_FR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_CLEANED"
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_NL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS_FR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
+  # output
+  kbrPersonsTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_FR_NL_LD"
+  kbrPersonsTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NL_FR_LD"
+  kbrOrgsTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_FR_NL_LD"
+  kbrOrgsTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_NL_FR_LD"
+  kbrBelgiansTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
+  kbrPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
+  kbrPersonsIdentifiersTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_IDENTIFIERS_FR_NL_LD"
+  kbrPersonsIdentifiersTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_IDENTIFIERS_NL_FR_LD"
+  kbrOrgsIdentifiersTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_FR_NL_LD"
+  kbrOrgsIdentifiersTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD"
+  kbrBelgiansIdentifiersTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD"
 
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_NL_NAT="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
-  export RML_SOURCE_KBR_LINKED_AUTHORITIES_PERSONS_FR_NAT="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
+
+
+  # 2) execute the mapping
+  mapKBRPersons "$kbrPersonsFRNL" "$kbrPersonsNatFRNL" "$kbrPersonsTurtleFRNL"
+  mapKBRPersons "$kbrPersonsNLFR" "$kbrPersonsNatNLFR" "$kbrPersonsTurtleNLFR"
+  mapKBRPersons "$kbrBelgians" "$kbrBelgiansNat" "$kbrBelgiansTurtle"
+
+  mapKBROrgs "$kbrOrgsFRNL" "$kbrOrgsTurtleFRNL"
+  mapKBROrgs "$kbrOrgsNLFR" "$kbrOrgsTurtleNLFR"
+
+  mapKBRPlaces "$integrationName" "$kbrPlacesTurtle"
+
+  mapKBRLinkedIdentifiers "$kbrPersonsFRNL" "$kbrPersonsIdentifiersTurtleFRNL"
+  mapKBRLinkedIdentifiers "$kbrPersonsNLFR" "$kbrPersonsIdentifiersTurtleNLFR"
+
+  mapKBRLinkedIdentifiers "$kbrOrgsFRNL" "$kbrOrgsIdentifiersTurtleFRNL"
+  mapKBRLinkedIdentifiers "$kbrOrgsNLFR" "$kbrOrgsIdentifiersTurtleNLFR"
+
+  mapKBRLinkedIdentifiers "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
+
+}
+
+# -----------------------------------------------------------------------------
+function mapKBRPersons {
+  local sourceFile=$1
+  local sourceFileNat=$2
+  local outputTurtle=$3
+
+  export RML_SOURCE_KBR_PERSONS="$sourceFile"
+  export RML_SOURCE_KBR_PERSONS_NAT="$sourceFileNat"
+
+  echo "Map KBR Persons - $sourceFile"
+  . map.sh ../data-sources/kbr/kbr-persons.yml $outputTurtle
+}
+
+# -----------------------------------------------------------------------------
+function mapKBROrgs {
+  local sourceFile=$1
+  local outputTurtle=$2
+
+  export RML_SOURCE_KBR_ORGS="$sourceFile"
+
+  echo "Map KBR Orgs - $sourceFile"
+  . map.sh ../data-sources/kbr/kbr-orgs.yml $outputTurtle
+}
+
+# -----------------------------------------------------------------------------
+function mapKBRLinkedIdentifiers {
+  local sourceFile=$1
+  local outputTurtle=$2
+
+  export RML_SOURCE_KBR_LINKED_AUTHORITIES="$sourceFile"
+
+  echo "Map KBR Orgs - $sourceFile"
+  . map.sh ../data-sources/kbr/kbr-linked-identifiers.yml $outputTurtle
+}
+
+# -----------------------------------------------------------------------------
+function mapKBRPlaces {
+  local integrationName=$1
+
+  local kbrPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
 
   export RML_SOURCE_KBR_PUBLISHER_PLACES_FLANDERS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
   export RML_SOURCE_KBR_PUBLISHER_PLACES_WALLONIA="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_WAL"
   export RML_SOURCE_KBR_PUBLISHER_PLACES_BRUSSELS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_BRU"
 
-  # 2) execute the mapping
-  echo "Map KBR linked authorities ..."
-  . map.sh ../data-sources/kbr/kbr-linked-authorities.yml $kbrLinkedAuthoritiesTurtle
-
+  echo "Map KBR Places"
+  . map.sh ../data-sources/kbr/kbr-places.yml $kbrPlacesTurtle
 }
 
-# -----------------------------------------------------------------------------
-function mapKBRBelgians {
-
-  local integrationName=$1
-
-  kbrBelgiansTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_LD"
-
-  # map the authorities
-
-  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_BELGIANS="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CLEANED"
-
-  # 2) execute the mapping
-  echo "Map KBR Belgians ..."
-  . map.sh ../data-sources/kbr/kbr-belgians.yml $kbrBelgiansTurtle
-}
 
 # -----------------------------------------------------------------------------
 function mapMasterData {
@@ -1799,13 +1872,27 @@ function loadKBRLinkedAuthorities {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  local kbrLinkedAuthorities="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_LA_LD"
+  local kbrPersonsFRNL="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PERSONS_FR_NL_LD"
+  local kbrPersonsNLFR="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PERSONS_NL_FR_LD"
+  local kbrOrgsFRNL="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_FR_NL_LD"
+  local kbrOrgsNLFR="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_NL_FR_LD"
+  local kbrPlaces="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PLACES_LD"
+  local kbrBelgians="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_BELGIANS_LD"
+
+  local kbrPersonsIdentifiersTurtleFRNL="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PERSONS_IDENTIFIERS_FR_NL_LD"
+  local kbrPersonsIdentifiersTurtleNLFR="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_PERSONS_IDENTIFIERS_NL_FR_LD"
+  local kbrOrgsIdentifiersTurtleFRNL="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_FR_NL_LD"
+  local kbrOrgsIdentifiersTurtleNLFR="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD"
+  local kbrBelgiansIdentifiersTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD"
+
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   # upload newly identified authorities to the linked authorities named graph
   echo "Load newly identified KBR linked authorities ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
-    "$kbrLinkedAuthorities"
+    "$kbrPersonsFRNL" "$kbrPersonsNLFR" "$kbrOrgsFRNL" "$kbrOrgsNLFR" "$kbrPlaces" \
+    "$kbrPersonsIdentifiersTurtleFRNL" "$kbrPersonsIdentifiersTurtleNLFR" "$kbrOrgsIdentifiersTurtleFRNL" \
+    "$kbrOrgsIdentifiersTurtleNLFR" "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
 
 }
 
