@@ -1649,7 +1649,7 @@ function mapKBRLinkedAuthorities {
   # 2) execute the mapping
   mapKBRPersons "$kbrPersonsFRNL" "$kbrPersonsNatFRNL" "$kbrPersonsTurtleFRNL"
   mapKBRPersons "$kbrPersonsNLFR" "$kbrPersonsNatNLFR" "$kbrPersonsTurtleNLFR"
-  #mapKBRPersons "$kbrBelgians" "$kbrBelgiansNat" "$kbrBelgiansTurtle"
+  mapKBRPersons "$kbrBelgians" "$kbrBelgiansNat" "$kbrBelgiansTurtle"
 
   mapKBROrgs "$kbrOrgsFRNL" "$kbrOrgsTurtleFRNL"
   mapKBROrgs "$kbrOrgsNLFR" "$kbrOrgsTurtleNLFR"
@@ -1662,7 +1662,7 @@ function mapKBRLinkedAuthorities {
   mapKBRLinkedIdentifiers "$kbrOrgsFRNL" "$kbrOrgsIdentifiersTurtleFRNL"
   mapKBRLinkedIdentifiers "$kbrOrgsNLFR" "$kbrOrgsIdentifiersTurtleNLFR"
 
-  #mapKBRLinkedIdentifiers "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
+  mapKBRLinkedIdentifiers "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
 
 }
 
@@ -1892,7 +1892,7 @@ function loadKBRLinkedAuthorities {
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
     "$kbrPersonsFRNL" "$kbrPersonsNLFR" "$kbrOrgsFRNL" "$kbrOrgsNLFR" "$kbrPlaces" \
     "$kbrPersonsIdentifiersTurtleFRNL" "$kbrPersonsIdentifiersTurtleNLFR" "$kbrOrgsIdentifiersTurtleFRNL" \
-    "$kbrOrgsIdentifiersTurtleNLFR"
+    "$kbrOrgsIdentifiersTurtleNLFR" "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
 
 }
 
