@@ -53,8 +53,8 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 # KBR - translations
 #INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-17_4745records.xml"
 #INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-17_13126records.xml"
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-08-11_5419records.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-08-11_16356records.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-09-11_5507records.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-09-11_16459records.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -62,10 +62,10 @@ INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-08-11_NL-FR_APEP_4523.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-08-11_NL-FR_AORG_850.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-08-11_FR-NL_APEP_10548.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-08-11_FR-NL_AORG_973.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-09-11_NL-FR_APEP_4591.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-09-11_NL-FR_AORG_860.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-09-11_FR-NL_APEP_10656.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2022-09-11_FR-NL_AORG_984.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
@@ -991,16 +991,16 @@ function extractOriginalLinksKBR {
 
   local similarityThreshold="0.9"
 
-  local kbrOriginalsNLFR="$integrationName/$originalsSourceName/translations/$SUFFIX_KBR_TRL_NL_WORKS"
-  local kbrTranslationsNLFR="$integrationName/$translationsSourceName/translations/$SUFFIX_KBR_TRL_NL_WORKS"
+  local kbrOriginalsNLFR="$integrationName/$originalsSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_NL_WORKS"
+  local kbrTranslationsNLFR="$integrationName/$translationsSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_NL_WORKS"
   local titleMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
   local titleDuplicatesMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
   local similarityMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
   local similarityDuplicatesMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
   local similarityMultipleMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR"
 
-  local kbrOriginalsFRNL="$integrationName/$originalsSourceName/translations/$SUFFIX_KBR_TRL_FR_WORKS"
-  local kbrTranslationsFRNL="$integrationName/$translationsSourceName/translations/$SUFFIX_KBR_TRL_FR_WORKS"
+  local kbrOriginalsFRNL="$integrationName/$originalsSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_FR_WORKS"
+  local kbrTranslationsFRNL="$integrationName/$translationsSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_FR_WORKS"
   local titleMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
   local titleDuplicatesMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
   local similarityMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
