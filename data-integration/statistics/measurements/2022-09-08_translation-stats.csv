@@ -1,4 +1,4 @@
 date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-09-08,2022-09-09 15:29:32.559607,FR-NL,8565,7653,7658,7600,51,2339,4,13,1412,4,7389,151,2605,2339,101,119,fetched more KBR ISNIs because of fixed parsing and fixed Wikidata contributor update via ISNI
-2022-09-08,2022-09-09 15:29:32.763953,NL-FR,4067,3465,3489,3556,1209,777,210,933,505,247,2955,193,1200,777,171,173,fetched more KBR ISNIs because of fixed parsing and fixed Wikidata contributor update via ISNI
-2022-09-08,2022-09-09 15:29:32.853321,OTHER,318,236,236,312,77,11,2,71,10,3,276,6,14,11,3,3,fetched more KBR ISNIs because of fixed parsing and fixed Wikidata contributor update via ISNI
+2022-09-08,2022-09-12 11:34:55.004515,FR-NL,8565,7653,7658,7600,51,2339,4,13,1412,4,7389,151,2605,2339,101,119,fetched more KBR ISNIs because of fixed parsing and fixed Wikidata contributor update via ISNI
+2022-09-08,2022-09-12 11:34:55.136103,NL-FR,4067,3465,3489,3556,1209,777,210,933,505,247,2955,193,1200,777,171,173,fetched more KBR ISNIs because of fixed parsing and fixed Wikidata contributor update via ISNI
+2022-09-08,2022-09-12 11:34:55.212466,OTHER,318,236,236,312,77,11,2,71,10,3,276,6,14,11,3,3,fetched more KBR ISNIs because of fixed parsing and fixed Wikidata contributor update via ISNI

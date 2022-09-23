@@ -6,17 +6,79 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
-## [20220624] - 2022-06-24
 
-Todo: finish listing all changes based on commit log and issues
+## [20220912] - 2022-09-12
+
+In this version we mainly fixed some bugs and filled some gaps in the data.
 
 ### Added
 
+* We started to integrate genre classifications from KB ([106](https://github.com/kbrbe/beltrans-data-integration/issues/106))
+* We started to use an Export of Belgians from the KBR catalogue to fill missing KBR identifier gaps in the contributor list of the corpus Excel file
+
 ### Changed
+
+* All information about originals is now stored in dedicated named graphs (even if it is minimal information extracted from the translation records) (this prevents incorrect data due to inconsistently updated data and required that we restructure RML mapping rules [134](https://github.com/kbrbe/beltrans-data-integration/issues/134)) 
+* Our data integration relies on several SPARQL queries per data source, instead of having hard-coded queries we generate the queries now based on a configuration file ([130](https://github.com/kbrbe/beltrans-data-integration/issues/130))
 
 ### Fixed
 
-- For BnF and KB no publisher name information existed because of a mistake in a SPARQL query (BnF) and a missing RML mapping for KB. This was fixed with the commits https://github.com/kbrbe/beltrans-data-integration/commit/603d51786c897e9d01355267014c15a652510815 https://github.com/kbrbe/beltrans-data-integration/commit/cd0c6e61f72aa95b809a7d7e02d6436f284e75ad and was added to the dataprofile query 
+* Retrieving more ISNI identifiers from KBR exports because we properly handle newline characters ([46730da](https://github.com/kbrbe/beltrans-data-integration/commit/46730dacf0ba66e5d1ae1d060e742c8d41724dc6))
+* Fixed integration from Wikidata list based on ISNI: due to wrong configuration ISNI was not taken into account ([d987018](https://github.com/kbrbe/beltrans-data-integration/commit/d98701848869da94fcc7b028e442ac8dabdced23))
+
+## [20220811] - 2022-08-11
+
+Besides our main data sources, we also started to use correlation lists of contributor identifiers as data source and started to visualize contributor statistics across corpus versions.
+We started to systematically identify the KBR identifier of originals.
+Furthermore, we used federated Wikidata queries and more extraction from BnF dumps to fill gaps related to ISNI identifiers and nationality information.
+
+### Added
+
+* We also visualize corpus statistics with respect to contributors ([126](https://github.com/kbrbe/beltrans-data-integration/issues/126))
+* We added a list of contributors with identifiers from Wikidata as a new data source, it also contains manually curated links to KBR contributors. Thus we also had to adapt the RDF generation and integration SPARQL queries to represent library identifiers using the Bibframe ontology, like we already did for ISNI/VIAF/Wikidata identifiers ([805dfd](https://github.com/kbrbe/beltrans-data-integration/commit/805dfd10d85a09568b51f9caf5132bc429aac21b))
+* We added federated Wikidata queries to fill ISNI and nationality gaps as well as a subsequent script to lookup missing (authority) data in BnF dumps ([83](https://github.com/kbrbe/beltrans-data-integration/issues/83))
+* Based on a different KBR export and source title information in translations, we started to systematically identify KBR identifiers of originals ([129](https://github.com/kbrbe/beltrans-data-integration/issues/129))
+
+### Changed
+
+* So far only translations from authors with Belgian nationality were considered for the corpus, now we also consider translations from organizational authors with associated country Belgium ([127](https://github.com/kbrbe/beltrans-data-integration/issues/127))
+* With some changes in our infrastructure we also started to use Python script to send SPARQL queries instead of using bash scripts and curl
+* We refactored the large integration `utils.py` file into several more thematic utils files ([117](https://github.com/kbrbe/beltrans-data-integration/issues/117#issuecomment-1185624839))
+
+
+## [20220624] - 2022-06-24
+
+Starting from this version we have a processing step to add geoname identifiers, we provide more source titles, provide translation-related statistics in the contributor list and in general provide statistics to visualize changes in the corpus.
+Furthermore we simplified the corpus Excel sheet by merging several columns from different data sources and provide several bug fixes.
+
+We tried clustering based on manifestation editions: reprints have different local identifiers ([119](https://github.com/kbrbe/beltrans-data-integration/issues/119)), but this lead to unwanted side-effects resulting in data loss which why we do not perform this clustering anymore ([b9f8821](https://github.com/kbrbe/beltrans-data-integration/commit/b9f8821518e1b307406315dca993d07350fbcc88))
+
+### Added
+
+- We started to visualize the statistics representing the changes in the corpus between versions ([120](https://github.com/kbrbe/beltrans-data-integration/issues/120))
+- We started to collect statistics about the overlap between different combinations of KBR, BnF and KB identifiers ([125](https://github.com/kbrbe/beltrans-data-integration/issues/125))
+- Besides the enrichment of country names (see fixed) we also provide an enrichment with geonames identifier ([112](https://github.com/kbrbe/beltrans-data-integration/issues/112), [104](https://github.com/kbrbe/beltrans-data-integration/issues/105))
+- We identified more original titles: for KBR we also check the value of the MARC field `246$a` to extract the original title of a translation ([111](https://github.com/kbrbe/beltrans-data-integration/issues/111))
+- Source titles from KB data are now also available in the corpus ([118](https://github.com/kbrbe/beltrans-data-integration/issues/118))
+- The contributor list in the corpus Excel sheet now shows some basic statistics about how many works someone authored, illustrated, ... ([115](https://github.com/kbrbe/beltrans-data-integration/issues/115))
+
+
+### Changed
+
+- Instead of having a single *year of publication* and *placeOfPublication* column for each source, we perform a postprocessing to merge the columns of the respective sources (and indicate inconsistencies) ([107](https://github.com/kbrbe/beltrans-data-integration/issues/105), [110](https://github.com/kbrbe/beltrans-data-integration/issues/109))
+- The corpus Excel file contains now "tables" instead of only showing CSV, which already includes the possibility to filter ([113](https://github.com/kbrbe/beltrans-data-integration/issues/113))
+- The corpus Excel file contains now seperate sheets for person and organization contributors ([109](https://github.com/kbrbe/beltrans-data-integration/issues/109))
+
+### Fixed
+
+- For BnF and KB no publisher name information existed because of a mistake in a SPARQL query (BnF) and a missing RML mapping for KB. This was fixed with the commits [603d517](https://github.com/kbrbe/beltrans-data-integration/commit/603d51786c897e9d01355267014c15a652510815), [cd0c6e6](https://github.com/kbrbe/beltrans-data-integration/commit/cd0c6e61f72aa95b809a7d7e02d6436f284e75ad) and was added to the dataprofile query 
+- Information about publishing directors are now not only extracted but also used (see [this](https://github.com/kbrbe/beltrans-data-integration/commit/3cf508454209dd68ebc915bbec95c4a3c7970612) commit)
+- The enrichment of country names based on locations was improved, unit tests were added ([104](https://github.com/kbrbe/beltrans-data-integration/issues/104))
+- KBR identifiers are treated as string identifiers instead of float numbers ([108](https://github.com/kbrbe/beltrans-data-integration/issues/108))
+- Column values starting with `=` are no longer interpreted as formula in the corpus Excel sheet ([113](https://github.com/kbrbe/beltrans-data-integration/issues/113))
+- Uncleaned ISBN10 and ISBN13 from KBR were mapped, but this was fixed ([121](https://github.com/kbrbe/beltrans-data-integration/issues/121), [123](https://github.com/kbrbe/beltrans-data-integration/issues/123))
+- We improved the contributors postprocessing runtime from several minutes to less than a second ([122](https://github.com/kbrbe/beltrans-data-integration/issues/122))
+- Fetching more KBR ISNI identifiers by looking also for `ISNI` instead of only `isni` (see [this](https://github.com/kbrbe/beltrans-data-integration/commit/fdac9d52b885a5f74a8a1ebd648f2496a6169330) commit)
 
 ## [20220425] - 2022-04-25
 
@@ -129,8 +191,10 @@ This version corresponds to the milestone https://github.com/SvenLieber/beltrans
   - Make data queryable via SPARQL endpoint ([#23](https://github.com/SvenLieber/beltrans-data/issues/23))
   - A SPARQL query to obtain the data ([#22](https://github.com/SvenLieber/beltrans-data/issues/22))
 
-[20211129]: https://github.com/SvenLieber/beltrans-data/releases/tag/2021-11-29
-[20211223]: https://github.com/SvenLieber/beltrans-data/compare/2021-11-29...2021-12-23
-[20220217]: https://github.com/SvenLieber/beltrans-data/compare/2021-12-23...2022-02-17
-[20220425]: https://github.com/SvenLieber/beltrans-data/compare/2022-02-17...2022-04-25
-[20220624]: https://github.com/SvenLieber/beltrans-data/compare/2022-04-25...2022-06-24
+[20211129]: https://github.com/kbrbe/beltrans-data-integration/releases/tag/2021-11-29
+[20211223]: https://github.com/kbrbe/beltrans-data-integration/compare/2021-11-29...2021-12-23
+[20220217]: https://github.com/kbrbe/beltrans-data-integration/compare/2021-12-23...2022-02-17
+[20220425]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-02-17...2022-04-25
+[20220624]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-04-25...2022-06-24
+[20220811]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-06-24...2022-08-11
+[20220912]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-08-11...2022-09-12
