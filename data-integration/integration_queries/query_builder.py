@@ -884,34 +884,39 @@ class ContributorUpdateQuery(ContributorQuery):
         """
 
         identifierType = ' a bf:Isni ; ' if identifier == 'ISNI' or identifier == 'isni' else ' a bf:Identifier ; rdfs:label "$identifier" ; '
+        if identifier == self.source:
+            queryPart = """
+                graph <$sourceGraph> { ?localContributorURI dcterms:identifier ?${identifier}Local . }
+                """
+        else:
 
-        pattern = Template("""
-    graph <$sourceGraph> {
-      ?localContributorURI bf:identifiedBy ?${identifier}Entity .
+            queryPart = """
+        graph <$sourceGraph> {
+          ?localContributorURI bf:identifiedBy ?${identifier}Entity .
+    
+          ?${identifier}Entity """ + identifierType + """
+                                  rdf:value ?${identifier}Local .
+        }
+        """
 
-      ?${identifier}Entity """ + identifierType +
-                           """
-                                                   rdf:value ?${identifier}Local .
-                           }
-                       
-                           OPTIONAL {
-                             graph <$targetGraph> {
-                               ?contributorURI bf:identifiedBy ?${identifier}TargetEntity .
-                               ?${identifier}TargetEntity """ + identifierType +
-                           """
-                                                    rdf:value ?${identifier}Local .
-                             }
-                           }
-                       
-                           FILTER EXISTS {
-                             graph <$targetGraph> {
-                               ?contributorURI bf:identifiedBy ?${identifier}TargetEntity .
-                               ?${identifier}TargetEntity """ + identifierType +
-                           """
-                                                    rdf:value ?${identifier}Local .
-                             }
-                           }
-                           """)
+        pattern = Template(queryPart + """
+    OPTIONAL {
+      graph <$targetGraph> {
+        ?contributorURI bf:identifiedBy ?${identifier}TargetEntity .
+        ?${identifier}TargetEntity """ + identifierType + """
+                             rdf:value ?${identifier}Local .
+      }
+    }
+ 
+    FILTER EXISTS {
+      graph <$targetGraph> {
+        ?contributorURI bf:identifiedBy ?${identifier}TargetEntity .
+        ?${identifier}TargetEntity """ + identifierType +
+    """
+                             rdf:value ?${identifier}Local .
+      }
+    }
+   """)
         return pattern.substitute(sourceGraph=sourceGraph, targetGraph=targetGraph, identifier=identifier)
 
 
