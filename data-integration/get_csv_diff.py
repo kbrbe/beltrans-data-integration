@@ -16,7 +16,7 @@ def main():
   parser.add_option('--second-csv', action='store', help='Second CSV file')
   parser.add_option('--first-column', action='store', help='column name of the first CSV which is taken for comparison')
   parser.add_option('--second-column', action='store', help='column name of the second CSV which is taken for comparison')
-  parser.add_option('-d', '--delimiter', action='store', default=',', help='The name of the file in which the found union IDs should be stored')
+  parser.add_option('-d', '--delimiter', action='store', default=',', help='CSV delimiter, default is a comma')
   
   (options, args) = parser.parse_args()
 
