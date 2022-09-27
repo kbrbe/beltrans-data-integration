@@ -1,7 +1,7 @@
 "sourceName","linkIdentifier","identifiersToAdd","sourceGraph"
 "BnF","BnF","BnF,ISNI,VIAF,Wikidata","http://bnf-contributors"
 "KBR","KBR","KBR,ISNI,VIAF,Wikidata","http://kbr-linked-authorities"
-"NTA","KBR","NTA,ISNI,VIAF,Wikidata","http://kb-linked-authorities"
+"NTA","NTA","NTA,ISNI,VIAF,Wikidata","http://kb-linked-authorities"
 "Wikidata","Wikidata","Wikidata,ISNI,VIAF,KBR,BnF,KB","http://wikidata"
 "BnF","ISNI","BnF,ISNI,VIAF,Wikidata","http://bnf-contributors"
 "KBR","ISNI","KBR,ISNI,VIAF,Wikidata","http://kbr-linked-authorities"
