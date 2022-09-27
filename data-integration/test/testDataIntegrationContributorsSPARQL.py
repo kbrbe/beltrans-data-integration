@@ -24,7 +24,7 @@ class TestDataIntegrationContributorsSPARQL():
  # ---------------------------------------------------------------------------
   def testCorpusSize(self):
     """This function tests if the number of corpus rows is correct, thus that contributors from KBR, BnF and KB with a common identifier are listed in the same row."""
-    self.assertEqual(self.getData().numberRows(), 21, msg="Corpus too big or too small")
+    self.assertEqual(self.getData().numberRows(), 22, msg="Corpus too big or too small")
 
 
   # ---------------------------------------------------------------------------
@@ -74,8 +74,8 @@ class TestDataIntegrationContributorsSPARQL():
 
    # ---------------------------------------------------------------------------
   def testMatchingBnFAndKB(self):
-    """This function tests if there is a match across BnF and KB based on ISNI, VIAF and Wikidata."""
-    contributorIDs = [3,11,7]
+    """This function tests if there is a match across BnF and KB based on ISNI, VIAF and Wikidata (or BnF and KB correlation list)."""
+    contributorIDs = [3,11,7,13]
     results = {}
     for i in contributorIDs:
       try:
@@ -89,57 +89,57 @@ class TestDataIntegrationContributorsSPARQL():
 
 
 # -----------------------------------------------------------------------------
-class TestDataIntegrationContributorsSPARQLHardCoded(TestDataIntegrationContributorsSPARQL, unittest.TestCase):
-
-  def getData(self):
-    return TestDataIntegrationContributorsSPARQLHardCoded.data
-
-  # ---------------------------------------------------------------------------
-  @classmethod
-  def setUpClass(cls):
-
-    # use temporary files which will be deleted in the tearDownClass function
-    cls.tempAgg = os.path.join(tempfile.gettempdir(), 'aggregated-data.csv')
-
-    # start a local Blazegraph and insert our test data
-    internalBlazegraphHostname='blz'
-    with BlazegraphIntegrationTestContainer(imageName="data-integration_blazegraph-test", hostName=internalBlazegraphHostname) as blazegraph:
-      time.sleep(10)
-
-      loadConfig = {
-        'http://kbr-linked-authorities': ['./test/resources/data-integration-sparql/kbr-contributors.ttl'],
-        'http://bnf-contributors': ['./test/resources/data-integration-sparql/bnf-contributors.ttl'],
-        'http://kb-linked-authorities': ['./test/resources/data-integration-sparql/kb-contributors.ttl'],
-        'http://master-data': ['./test/resources/data-integration-sparql/master-data.ttl'],
-      }
-      #uploadURL = 'http://' + internalBlazegraphHostname + '/namespace/kb'
-      uploadURL = 'http://localhost:8080/bigdata/namespace/kb/sparql'
-      utils.addTestData(uploadURL, loadConfig)
-
-      # integrate the data (this integration we actually want to test)
-      numberUpdates = 3
-      integrateDataSPARQLFiles(uploadURL, numberUpdates, 'contributors-create-queries.csv', 'contributors-update-queries.csv')
-
-      # query data from our test fixture
-      with open(cls.tempAgg, 'wb') as resultFileAgg:
-
-        queryAgg = utils.readSPARQLQuery('./sparql-queries/get-integrated-contributors.sparql')
-        #queryAgg = utils.readSPARQLQuery('sparql-queries/get-all.sparql')
-        utils.query(uploadURL, queryAgg, resultFileAgg)
-
-
-      # read and store the queried/integrated data such that we can easily use it in the test functions
-      with open(cls.tempAgg, 'r') as allIn:
-        csvReader = csv.DictReader(allIn, delimiter=',')
-        csvData = [dict(d) for d in csvReader]
-        cls.data = DataprofileTestHelper(csvData)
-        print(cls.data.df[['contributorID', 'kbrIDs', 'bnfIDs', 'ntaIDs', 'isniIDs', 'viafIDs', 'wikidataIDs']])
-
-  # ---------------------------------------------------------------------------
-  @classmethod
-  def tearDownClass(cls):
-    if os.path.isfile(cls.tempAgg):
-      os.remove(cls.tempAgg)
+# class TestDataIntegrationContributorsSPARQLHardCoded(TestDataIntegrationContributorsSPARQL, unittest.TestCase):
+#
+#   def getData(self):
+#     return TestDataIntegrationContributorsSPARQLHardCoded.data
+#
+#   # ---------------------------------------------------------------------------
+#   @classmethod
+#   def setUpClass(cls):
+#
+#     # use temporary files which will be deleted in the tearDownClass function
+#     cls.tempAgg = os.path.join(tempfile.gettempdir(), 'aggregated-data.csv')
+#
+#     # start a local Blazegraph and insert our test data
+#     internalBlazegraphHostname='blz'
+#     with BlazegraphIntegrationTestContainer(imageName="data-integration_blazegraph-test", hostName=internalBlazegraphHostname) as blazegraph:
+#       time.sleep(10)
+#
+#       loadConfig = {
+#         'http://kbr-linked-authorities': ['./test/resources/data-integration-sparql/kbr-contributors.ttl'],
+#         'http://bnf-contributors': ['./test/resources/data-integration-sparql/bnf-contributors.ttl'],
+#         'http://kb-linked-authorities': ['./test/resources/data-integration-sparql/kb-contributors.ttl'],
+#         'http://master-data': ['./test/resources/data-integration-sparql/master-data.ttl'],
+#       }
+#       #uploadURL = 'http://' + internalBlazegraphHostname + '/namespace/kb'
+#       uploadURL = 'http://localhost:8080/bigdata/namespace/kb/sparql'
+#       utils.addTestData(uploadURL, loadConfig)
+#
+#       # integrate the data (this integration we actually want to test)
+#       numberUpdates = 3
+#       integrateDataSPARQLFiles(uploadURL, numberUpdates, 'contributors-create-queries.csv', 'contributors-update-queries.csv')
+#
+#       # query data from our test fixture
+#       with open(cls.tempAgg, 'wb') as resultFileAgg:
+#
+#         queryAgg = utils.readSPARQLQuery('./sparql-queries/get-integrated-contributors.sparql')
+#         #queryAgg = utils.readSPARQLQuery('sparql-queries/get-all.sparql')
+#         utils.query(uploadURL, queryAgg, resultFileAgg)
+#
+#
+#       # read and store the queried/integrated data such that we can easily use it in the test functions
+#       with open(cls.tempAgg, 'r') as allIn:
+#         csvReader = csv.DictReader(allIn, delimiter=',')
+#         csvData = [dict(d) for d in csvReader]
+#         cls.data = DataprofileTestHelper(csvData)
+#         print(cls.data.df[['contributorID', 'kbrIDs', 'bnfIDs', 'ntaIDs', 'isniIDs', 'viafIDs', 'wikidataIDs']])
+#
+#   # ---------------------------------------------------------------------------
+#   @classmethod
+#   def tearDownClass(cls):
+#     if os.path.isfile(cls.tempAgg):
+#       os.remove(cls.tempAgg)
 
 
 # -----------------------------------------------------------------------------
@@ -164,7 +164,8 @@ class TestDataIntegrationContributorsSPARQLConfig(TestDataIntegrationContributor
         'http://kbr-linked-authorities': ['./test/resources/data-integration-sparql/kbr-contributors.ttl'],
         'http://bnf-contributors': ['./test/resources/data-integration-sparql/bnf-contributors.ttl'],
         'http://kb-linked-authorities': ['./test/resources/data-integration-sparql/kb-contributors.ttl'],
-        'http://master-data': ['./test/resources/data-integration-sparql/master-data.ttl'],
+        'http://wikidata': ['./test/resources/data-integration-sparql/correlation-list-contributors.ttl'],
+        'http://master-data': ['./test/resources/data-integration-sparql/master-data.ttl']
       }
       # uploadURL = 'http://' + internalBlazegraphHostname + '/namespace/kb'
       uploadURL = 'http://localhost:8080/bigdata/namespace/kb/sparql'
