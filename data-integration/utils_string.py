@@ -76,6 +76,36 @@ def extractStringFromBrackets(value):
     return ''
 
 # -----------------------------------------------------------------------------
+def overlappingValues(values):
+  """This function returns true if a value of one array element is also part of another array element.
+  >>> data = ['Jan Janssen', 'Janssen, Jan', 'John Doe']
+  >>> overlappingValues(data)
+  True
+  >>> data1 = ['John Doe', 'Alice', 'Bob', 'Pascal Renard, ']
+  >>> overlappingValues(data1)
+  False
+
+  The function returns False if an empty array is given
+  >>> overlappingValues([])
+  False
+  """
+  lookup = {}
+  for value in values:
+    parts = value.replace(',', ' ').split(' ')
+    for p in parts:
+      namePart = getNormalizedString(p).strip()
+      if namePart != '':
+        if namePart in lookup:
+          lookup[namePart] = True
+        else:
+          lookup[namePart] = False
+
+  if True in lookup.values():
+    return True
+  else:
+    return False
+
+# -----------------------------------------------------------------------------
 if __name__ == "__main__":
   import doctest
   doctest.testmod()
