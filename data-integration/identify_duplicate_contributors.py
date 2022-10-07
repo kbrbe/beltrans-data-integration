@@ -5,6 +5,7 @@
 import csv
 from optparse import OptionParser
 import utils_string
+import utils
 
 
 # -----------------------------------------------------------------------------
@@ -37,13 +38,7 @@ def main(inputFile, outputFile, outputColumns, columnName, csvDelimiter, columnV
 
     inputReader = csv.DictReader(inFile, delimiter=csvDelimiter)
 
-    inputColumns = set(inputReader.fieldnames)
-    wantedColumns = set(outputColumns + [columnName])
-    nonExistentColumns = wantedColumns.difference(inputColumns)
-    if len(nonExistentColumns) > 0:
-      text = 'columns are' if len(nonExistentColumns) > 1 else 'column is'
-      print(f'The following requested {text} not in the input: {nonExistentColumns}')
-      exit(1)
+    utils.checkIfColumnsExist(inputReader.fieldnames, outputColumns + [columnName])
 
     # not using list(wantedColumns) as fieldnames because we want to determine the order
     outputWriter = csv.DictWriter(outFile, fieldnames=outputColumns + [columnName], delimiter=csvDelimiter)
