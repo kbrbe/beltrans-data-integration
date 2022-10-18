@@ -26,13 +26,13 @@ Because the quality dimensions and possible root causes are described in CSV fil
 ```mermaid
 flowchart LR
     KBR["KBR-translations.xml"]:::doc --> MARC[marc-to-csv.py]
-    MARC --> PUB:::doc["publications.csv"]
-    MARC --> CONT:::doc["contributions.csv"]
+    MARC --> PUB["publications.csv"]:::doc
+    MARC --> CONT["contributions.csv"]:::doc
     CONT --> DEDUP["deduplicate-publishers.py"]
-    ORGS:::doc["KBR-organisations.csv"] --> DEDUP
-    DEDUP --> MATCH:::doc["matches.csv"]
-    DEDUP --> MULTIMATCH:::doc["multiple-matches.csv"]
-    DEDUP --> NOMATCH:::doc["no-matches.csv"]
+    ORGS["KBR-organisations.csv"]:::doc --> DEDUP
+    DEDUP --> MATCH["matches.csv"]:::doc
+    DEDUP --> MULTIMATCH["multiple-matches.csv"]:::doc
+    DEDUP --> NOMATCH["no-matches.csv"]:::doc
     classDef doc fill:#D3D;
     click MARC "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/marc-to-csv.py"
     click DEDUP "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/deduplicate-publishers.py"
