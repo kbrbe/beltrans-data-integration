@@ -13,7 +13,7 @@
 "rootCause12","int5","A data source provides a wrong VIAF identifier"
 "rootCause13","int6","A data source provides a wrong Wikidata identifier"
 "rootCause14","int6","Wikidata quality issue: one authority with two Wikidata identifiers"
-"rootCause15","kbr1","The unknown authority name of MARC field 264 exists as MARC field 710 but in a different spelling"
+"rootCause15","kbr1","The unknown authority name of MARC field 264 exists as MARC field 710 in the same record but in a different spelling"
 "rootCause16","kbr1","The unknown authority name of MARC field 264 does not exist in KBRs catalogue"
 "rootCause17","kbr2","The authority name of MARC field 264 has a single match with one of the candidate authority records from KBR"
 "rootCause18","kbr2","The authority name of MARC field 264 has no match with any of the KBR candidate authority records"
