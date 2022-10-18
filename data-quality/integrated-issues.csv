@@ -1,0 +1,7 @@
+"ID","issue type","name","description"
+"int1","","conflicting birth date","Different local records of an integrated authority record have conflicting birth dates"
+"int2","","conflicting death date","Different local records of an integrated authority record have conflicting death dates"
+"int3","","conflicting publication years","Different local records of an integrated bibliographic record have conflicting publication years"
+"int4","","duplicate ISNI identifier","One integrated authority record refers to more than one ISNI identifier"
+"int5","","duplicate VIAF identifier","One integrated authority record refers to more than one VIAF identifier"
+"int6","","duplicate Wikidata identifier","One integrated authority record refers to more than one Wikidata identifier"

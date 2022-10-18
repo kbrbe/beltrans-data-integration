@@ -1,0 +1,3 @@
+"ID","Name","Description","Where can the issue be detected?"
+"1","No link from an authority name to an authority record","A data source only provides the name of an authority.","data source pre-processing"
+"2","Several links from an authority name to an authority record","A data source only provides the name of an authority, automatic linking identified several candidate records.","data source pre-processing"
