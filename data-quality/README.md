@@ -25,7 +25,7 @@ Because the quality dimensions and possible root causes are described in CSV fil
 
 ```mermaid
 flowchart LR
-    KBR:::doc["KBR-translations.xml"] --> MARC[marc-to-csv.py]
+    KBR["KBR-translations.xml"]:::doc --> MARC[marc-to-csv.py]
     MARC --> PUB:::doc["publications.csv"]
     MARC --> CONT:::doc["contributions.csv"]
     CONT --> DEDUP["deduplicate-publishers.py"]
