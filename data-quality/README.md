@@ -19,8 +19,10 @@ To support this, for each root cause a (slightly different) CSV might be provide
 
 Because the quality dimensions and possible root causes are described in CSV files with identifiers, we can map those also to RDF by using vocabularies such as the [W3C Data Quality Vocabulary](https://w3.org/TR/vocab-dqv/).
 
-## KBR
+## KBR publisher identification
 
+We identified the issues `kbr1` and `kbr2`. As seen in the following graph, we create several CSV files when trying to identify publishers.
+All of them need to be checked, but more information besides the CSV content is needed to determine the precise issue and root-cause.
 
 ```mermaid
 flowchart LR
@@ -36,3 +38,15 @@ flowchart LR
     click MARC "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/marc-to-csv.py"
     click DEDUP "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/deduplicate-publishers.py"
 ```
+
+## KBR invalid ISBN
+
+Todo
+
+## Conflicting dates
+
+Todo
+
+## Duplicate identifier
+
+Todo
