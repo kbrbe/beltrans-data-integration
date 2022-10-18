@@ -21,7 +21,6 @@ Because the quality dimensions and possible root causes are described in CSV fil
 
 ## KBR
 
-![KBR unknown authorities](../img/KBR-unknown-authority-names.png)
 
 ```mermaid
 flowchart LR
@@ -33,7 +32,7 @@ flowchart LR
     DEDUP --> MATCH["matches.csv"]:::doc
     DEDUP --> MULTIMATCH["multiple-matches.csv"]:::doc
     DEDUP --> NOMATCH["no-matches.csv"]:::doc
-    classDef doc fill:#D3D;
+    classDef doc fill:#bcbcbc;
     click MARC "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/marc-to-csv.py"
     click DEDUP "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/deduplicate-publishers.py"
 ```
