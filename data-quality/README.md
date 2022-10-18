@@ -25,12 +25,15 @@ Because the quality dimensions and possible root causes are described in CSV fil
 
 ```mermaid
 flowchart LR
-    KBR[KBR] --> MARC[marc-to-csv.py]
-    MARC --> PUB[publications.csv]
-    MARC --> CONT[contributions.csv]
+    KBR:::doc[KBR-translations.xml] --> MARC[marc-to-csv.py]
+    MARC --> PUB:::doc[publications.csv]
+    MARC --> CONT:::doc[contributions.csv]
     CONT --> DEDUP[deduplicate-publishers.py]
-    ORGS[KBR organisations] --> DEDUP
-    DEDUP --> MATCH[matches.csv]
-    DEDUP --> MULTIMATCH[multiple-matches.csv]
-    DEDUP --> NOMATCH[no-matches.csv]
+    ORGS:::doc[KBR-organisations.csv] --> DEDUP
+    DEDUP --> MATCH:::doc[matches.csv]
+    DEDUP --> MULTIMATCH:::doc[multiple-matches.csv]
+    DEDUP --> NOMATCH:::doc[no-matches.csv]
+    classDef doc fill:#D3D
+    click MARC "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/marc-to-csv.py"
+    click DEDUP "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/deduplicate-publishers.py"
 ```
