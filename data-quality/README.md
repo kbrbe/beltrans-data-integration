@@ -33,7 +33,7 @@ flowchart LR
     DEDUP --> MATCH:::doc[matches.csv]
     DEDUP --> MULTIMATCH:::doc[multiple-matches.csv]
     DEDUP --> NOMATCH:::doc[no-matches.csv]
-    classDef doc fill:#D3D
+    classDef doc fill:#D3D;
     click MARC "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/marc-to-csv.py"
     click DEDUP "https://github.com/kbrbe/beltrans-data-integration/data-sources/kbr/deduplicate-publishers.py"
 ```
