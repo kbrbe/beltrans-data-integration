@@ -22,3 +22,15 @@ Because the quality dimensions and possible root causes are described in CSV fil
 ## KBR
 
 ![KBR unknown authorities](../img/KBR-unknown-authority-names.png)
+
+```mermaid
+flowchart LR
+    KBR[KBR] --> MARC[marc-to-csv.py]
+    MARC --> PUB[publications.csv]
+    MARC --> CONT[contributions.csv]
+    CONT --> DEDUP[deduplicate-publishers.py]
+    ORGS[KBR organisations] --> DEDUP
+    DEDUP --> MATCH[matches.csv]
+    DEDUP --> MULTIMATCH[multiple-matches.csv]
+    DEDUP --> NOMATCH[no-matches.csv]
+```
