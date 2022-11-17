@@ -20,6 +20,7 @@ prefixes:
   lang: "http://id.loc.gov/vocabulary/languages/"
   schema: "http://schema.org/"
   up: "http://users.ugent.be/~tdenies/up/"
+  rdagroup1elements: "http://rdvocab.info/elements/"
 
 variables:
   sourceTRLFRNL: &sourceTRLFRNL ${RML_SOURCE_KB_TRL_FR_NL}
@@ -111,7 +112,7 @@ mappings:
           parameters:
             - [grel:valueParameter, $(isbn13)]
             - [grel:valueParameter2, ""] 
-      - p: schema:publisher
+      - p: rdagroup1elements:publishersName
         o: $(publisherName)
         condition:
           function: idlab-fn:notEqual
