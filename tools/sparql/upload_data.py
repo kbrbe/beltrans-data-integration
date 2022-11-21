@@ -14,13 +14,11 @@ def parseArguments():
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-u', '--url', action='store', help='The URL of the SPARQL endpoint which is queried')
-  parser.add_option('-q', '--query-file', action='store', help='The SPARQL query which will be sent using Content-type application/sparql-query')
-  parser.add_option('-o', '--output-file', action='store', help='The file in which the requested data will be stored')
-  parser.add_option('--accept-format', action='store', default='text/csv', help='The desired output format, e.g. text/csv or application/json, default is text/csv')
+  parser.add_option('--content-type', action='store', help='The content type, for example application/sparql-update or text/turtle')
   parser.add_option('--named-graph', action='store', help='The name of an optional named graph')
   (options, args) = parser.parse_args()
 
-  if( (not options.url) or (not options.query_file) or (not options.output_file) ):
+  if( (not options.url) or (not options.content_type) ):
     parser.print_help()
     exit(1)
 
@@ -29,15 +27,13 @@ def parseArguments():
 
   return (options, args)
 
-# -----------------------------------------------------------------------------
-def main(url, queryFilename, outputFilename, acceptFormat, namedGraph):
+def main(url, contentType, namedGraph, files):
 
   load_dotenv('.env')
   userEnvVar="ENV_SPARQL_ENDPOINT_USER"
   passwordEnvVar="ENV_SPARQL_ENDPOINT_PASSWORD"
   user = os.getenv(userEnvVar)
   password = os.getenv(passwordEnvVar)
-
 
   auth=None
   if(user == None or password == None):
@@ -46,9 +42,15 @@ def main(url, queryFilename, outputFilename, acceptFormat, namedGraph):
   else:
     auth=(user,password)
  
-  utils_sparql.sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=auth)
+  for inputFile in files:
+    queryName = ''
+    if contentType == 'application/sparql-update':
+      queryName = f'SPARQL-UPDATE (named graph "{namedGraph}")' if namedGraph else 'SPARQL-UPDATE'
+    else:
+      queryName = f'file uploaded (named graph "{namedGraph}")' if namedGraph else 'file uploaded'
+    utils_sparql.sparqlUpdateFile(url, inputFile, contentType, queryName, auth=auth)
 
 if __name__ == '__main__':
   (options, args) = parseArguments()
-  main(options.url, options.query_file, options.output_file, options.accept_format, options.named_graph)
+  main(options.url, options.content_type, options.named_graph, args)
  

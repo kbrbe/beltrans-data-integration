@@ -177,6 +177,8 @@ CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 
 CREATE_QUERY_KB_TRL_PBL="sparql-queries/link-kb-translations-to-publishers.sparql"
 
+ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
+
 LINK_QUERY_CONT_AUTHORS="integration_queries/link-beltrans-manifestations-authors.sparql"
 LINK_QUERY_CONT_TRANSLATORS="integration_queries/link-beltrans-manifestations-translators.sparql"
 LINK_QUERY_CONT_ILLUSTRATORS="integration_queries/link-beltrans-manifestations-illustrators.sparql"
@@ -635,6 +637,9 @@ function integrate {
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" \
     "$LINK_QUERY_CONT_AUTHORS" "$LINK_QUERY_CONT_TRANSLATORS" "$LINK_QUERY_CONT_ILLUSTRATORS" \
     "$LINK_QUERY_CONT_SCENARISTS" "$LINK_QUERY_CONT_PUBLISHING_DIRECTORS"
+
+  echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
 
 }
 
