@@ -815,49 +815,49 @@ function extractKB {
   source py-integration-env/bin/activate
 
   echo "EXTRACTION - Extract KB translations FR - NL"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_FR_NL_QUERY_FILE" "$kbTranslationsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_FR_NL_QUERY_FILE" "$kbTranslationsFRNL"
 
   echo "EXTRACTION - Extract KB translations NL - FR"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_NL_FR_QUERY_FILE" "$kbTranslationsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_TRL_NL_FR_QUERY_FILE" "$kbTranslationsNLFR"
 
   echo "EXTRACTION - Compute formatted ISBN10 and ISBN13 identifiers FR - NL"
-  #time python $SCRIPT_ADD_ISBN_10_13 -i $kbTranslationsFRNL -o $kbTranslationsWithISBNFRNL
+  time python $SCRIPT_ADD_ISBN_10_13 -i $kbTranslationsFRNL -o $kbTranslationsWithISBNFRNL
 
   echo "EXTRACTION - Compute formatted ISBN10 and ISBN13 identifiers NL - FR"
-  #time python $SCRIPT_ADD_ISBN_10_13 -i $kbTranslationsNLFR -o $kbTranslationsWithISBNNLFR
+  time python $SCRIPT_ADD_ISBN_10_13 -i $kbTranslationsNLFR -o $kbTranslationsWithISBNNLFR
 
 
   echo "EXTRACTION - Extract KB translation contributors persons FR - NL"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_FR_NL_QUERY_FILE" "$kbContributorsPersonsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_FR_NL_QUERY_FILE" "$kbContributorsPersonsFRNL"
 
   echo "EXTRACTION - Extract KB translation contributors persons NL - FR"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_NL_FR_QUERY_FILE" "$kbContributorsPersonsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_PERSONS_NL_FR_QUERY_FILE" "$kbContributorsPersonsNLFR"
 
   echo "EXTRACTION - Extract KB translation authors persons FR - NL"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_FR_NL_QUERY_FILE" "$kbAuthorsPersonsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_FR_NL_QUERY_FILE" "$kbAuthorsPersonsFRNL"
 
   echo "EXTRACTION - Extract KB translation authors persons NL - FR"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_NL_FR_QUERY_FILE" "$kbAuthorsPersonsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_PERSONS_NL_FR_QUERY_FILE" "$kbAuthorsPersonsNLFR"
 
 
   echo "EXTRACTION - Extract KB translation contributors orgs FR - NL"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_FR_NL_QUERY_FILE" "$kbContributorsOrgsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_FR_NL_QUERY_FILE" "$kbContributorsOrgsFRNL"
 
   echo "EXTRACTION - Extract KB translation contributors orgs NL - FR"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_NL_FR_QUERY_FILE" "$kbContributorsOrgsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_CONT_ORGS_NL_FR_QUERY_FILE" "$kbContributorsOrgsNLFR"
 
   echo "EXTRACTION - Extract KB translation authors orgs FR - NL"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_FR_NL_QUERY_FILE" "$kbAuthorsOrgsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_FR_NL_QUERY_FILE" "$kbAuthorsOrgsFRNL"
 
   echo "EXTRACTION - Extract KB translation authors orgs NL - FR"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_NL_FR_QUERY_FILE" "$kbAuthorsOrgsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_AUT_ORGS_NL_FR_QUERY_FILE" "$kbAuthorsOrgsNLFR"
 
 
   echo "EXTRACTION - Extract KBCode classifications FR-NL"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_KBCODE_FR_NL_QUERY_FILE" "$kbCodeAssignmentsFRNL"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_KBCODE_FR_NL_QUERY_FILE" "$kbCodeAssignmentsFRNL"
 
   echo "EXTRACTION - Extract KBCode classifications NL-FR"
-  #queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_KBCODE_NL_FR_QUERY_FILE" "$kbCodeAssignmentsNLFR"
+  queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_KBCODE_NL_FR_QUERY_FILE" "$kbCodeAssignmentsNLFR"
 
   echo "EXTRACTION - Extract publisher names from publications NL-FR"
   python -m $MODULE_EXTRACT_COLUMNS -i "$kbTranslationsNLFR" -o "$kbTranslationsPublishersNLFR" -c "publisherName"
@@ -1967,27 +1967,27 @@ function loadKB {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   # first delete content of the named graph in case it already exists
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_TRL"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_TRL"
 
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_LA"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_LA"
 
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG"
 
 
   echo "Load KB translations and contributions ..."
-  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL" "$kbTranslationsAndContributions"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL" "$kbTranslationsAndContributions"
 
   echo "Load KB (limited) original information ..."
-  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG" "$kbOriginalsTurtle"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG" "$kbOriginalsTurtle"
 
   echo "Load KB linked authorities ..."
-  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_LA" "$kbLinkedAuthorities"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_LA" "$kbLinkedAuthorities"
 
   echo "Load KB publisher data FR-NL ..."
-  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL "$kbPublishersFRNL"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL "$kbPublishersFRNL"
 
   echo "Load KB publisher data NL-FR ..."
-  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL "$kbPublishersNLFR"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL "$kbPublishersNLFR"
 
   echo "Link KB translations to publisher authority records ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KB_TRL_PBL"
