@@ -1,0 +1,48 @@
+PREFIX kb: <http://data.bibliotheken.nl/def#>
+
+SELECT DISTINCT ?publisher ?publisherID ?publisherName ?publisherAddressCountry ?publisherAddressLocality ?publisherAddressPostalCode ?publisherAddressStreetAddress
+WHERE {
+
+  #
+  # Get the translations according to our BELTRANS criteria
+  #
+  ?manifestation a schema:Book ;
+                 schema:inLanguage "nl" ;
+                 schema:translationOfWork/schema:inLanguage "fr" ;
+                 schema:publication ?publication .
+
+  OPTIONAL { ?publication schema:startDate ?publicationYear . }
+  OPTIONAL { ?publication schema:location/schema:name ?placeOfPublication . }
+
+  FILTER( xsd:integer(str(?publicationYear)) > 1969 && xsd:integer(str(?publicationYear)) < 2021)
+
+  #
+  # We are only interested in the publishers of a translation and optionally its attributes
+  #
+  ?publication schema:organizer/schema:name ?publisherName .
+
+  #
+  # look for publisher records with the same name as mentioned in the publisher blank node
+  #
+  ?publisher a schema:Organization ;
+             schema:name ?publisherName .
+  FILTER(!isBlank(?publisher))
+
+  OPTIONAL { ?publisher schema:mainEntityOfPage/kb:ppn ?publisherID . }
+
+  OPTIONAL { ?publisher schema:name ?publisherName . }
+
+  #
+  # It's either a location linking to the postal address ...
+  #
+  OPTIONAL {
+    ?publisher schema:location|schema:location/schema:address ?publisherLocation . 
+    ?publisherLocation a schema:PostalAddress .
+
+    OPTIONAL { ?publisherLocation schema:addressCountry ?publisherAddressCountry . }
+    OPTIONAL { ?publisherLocation schema:addressLocality ?publisherAddressLocality . }
+    OPTIONAL { ?publisherLocation schema:postalCode  ?publisherAddressPostalCode . }
+    OPTIONAL { ?publisherLocation schema:streetAddress  ?publisherAddressStreetAddress . }
+  }
+
+}

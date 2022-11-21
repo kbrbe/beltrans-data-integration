@@ -251,7 +251,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:bookEdition ?kbTargetManifestationEdition . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:locationCreated ?kbLocationCreated . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdfs:comment ?kbResponsibilityStatement . }}
-      OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:publisher ?kbPublisherName . }}
+      OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdagroup1elements:publishersName ?kbPublisherName . }}
 
       OPTIONAL {
         graph <http://kb-publications> { ?kbManifestation schema:about ?genre . }
