@@ -1,0 +1,10 @@
+prefix schema: <http://schema.org/>
+prefix rdagroup1elements: <http://rdvocab.info/elements/>
+
+INSERT {
+  graph <http://kb-publications> { ?publication schema:publisher ?publisher . }
+}
+WHERE {
+  graph <http://kb-publications> { ?publication rdagroup1elements:publishersName ?publisherName . }
+  graph <http://kb-publishers> { ?publisher schema:name ?publisherName . }
+}
