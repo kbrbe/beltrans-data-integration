@@ -77,8 +77,9 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 class DuplicateIdentifierQuery(Query):
 
     # ---------------------------------------------------------------------------
-    def __init__(self, namedGraph, entityType, identifierName):
-        self.namedGraph = namedGraph
+    def __init__(self, contributorNamedGraph, manifestationNamedGraph, entityType, identifierName):
+        self.contributorNamedGraph = contributorNamedGraph
+        self.manifestationNamedGraph = manifestationNamedGraph
         self.identifierName = identifierName
         self.entityType = entityType
 
@@ -96,20 +97,34 @@ class DuplicateIdentifierQuery(Query):
   SELECT DISTINCT ?person
   WHERE {
 
-  graph <$namedGraph> {
-    ?person a $entityType ;
-            bf:identifiedBy ?identifierEntity .
+    graph <$contributorNamedGraph> {
+      ?person a $entityType ;
+              bf:identifiedBy ?identifierEntity .
 
-    ?identifierEntity a $identifierClass ;
-                      $identifierLabelTriple
-                      rdf:value ?identifier .
-  }
+      ?identifierEntity a $identifierClass ;
+                        $identifierLabelTriple
+                        rdf:value ?identifier .
+    }
+
+    #
+    # the person needs to be linked to a translation of the BELTRANS corpus
+    #
+    {
+      SELECT DISTINCT ?person
+      WHERE {
+        graph <$manifestationNamedGraph> {
+          ?manifestation schema:isPartOf btid:beltransCorpus ;
+                         schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?person .
+        }
+      }
+    }
   }
   GROUP BY ?person
   HAVING (COUNT(?identifier) > 1)
        """)
-        return pattern.substitute(namedGraph=self.namedGraph, entityType=self.entityType,
-                                  identifierClass=identifierClass, identifierLabelTriple=identifierLabelTriple)
+        return pattern.substitute(contributorNamedGraph=self.contributorNamedGraph, entityType=self.entityType,
+                                  identifierClass=identifierClass, identifierLabelTriple=identifierLabelTriple,
+                                  manifestationNamedGraph=self.manifestationNamedGraph)
 
 
 

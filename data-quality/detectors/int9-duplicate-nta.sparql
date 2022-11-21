@@ -1,4 +1,4 @@
-# generated at 2022-11-21, 15:43:05 by class <class 'tools.sparql.query_builder.DuplicateIdentifierQuery'>
+# generated at 2022-11-21, 17:28:44 by class <class 'tools.sparql.query_builder.DuplicateIdentifierQuery'>
 
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -27,14 +27,27 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
   SELECT DISTINCT ?person
   WHERE {
 
-  graph <http://beltrans-contributors> {
-    ?person a schema:Person ;
-            bf:identifiedBy ?identifierEntity .
+    graph <http://beltrans-contributors> {
+      ?person a schema:Person ;
+              bf:identifiedBy ?identifierEntity .
 
-    ?identifierEntity a bf:Identifier ;
-                      rdfs:label "NTA" ;
-                      rdf:value ?identifier .
-  }
+      ?identifierEntity a bf:Identifier ;
+                        rdfs:label "NTA" ;
+                        rdf:value ?identifier .
+    }
+
+    #
+    # the person needs to be linked to a translation of the BELTRANS corpus
+    #
+    {
+      SELECT DISTINCT ?person
+      WHERE {
+        graph <http://beltrans-manifestations> {
+          ?manifestation schema:isPartOf btid:beltransCorpus ;
+                         schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?person .
+        }
+      }
+    }
   }
   GROUP BY ?person
   HAVING (COUNT(?identifier) > 1)
