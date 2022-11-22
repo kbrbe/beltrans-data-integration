@@ -20,7 +20,7 @@ prefixes:
   schema: "http://schema.org/"
 
 variables:
-  sourceKBROrgs: &sourceKBROrgs ${RML_SOURCE_KBR_ORGS}
+  sourceKBROrgs: &sourceKBROrgs ${RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS}
 
 mappings:
 

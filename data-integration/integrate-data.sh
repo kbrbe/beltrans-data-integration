@@ -1740,10 +1740,10 @@ function mapKBROrgs {
   local sourceFile=$1
   local outputTurtle=$2
 
-  export RML_SOURCE_KBR_ORGS="$sourceFile"
+  export RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS="$sourceFile"
 
   echo "Map KBR Orgs - $sourceFile"
-  . map.sh ../data-sources/kbr/kbr-orgs.yml $outputTurtle
+  . map.sh ../data-sources/kbr/kbr-linked-authorities-orgs.yml $outputTurtle
 }
 
 # -----------------------------------------------------------------------------
