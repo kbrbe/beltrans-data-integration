@@ -1,0 +1,286 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+SELECT DISTINCT
+ ?person
+ (group_concat(distinct ?name;SEPARATOR=';') AS ?name)
+ (group_concat(distinct ?isniInfo;SEPARATOR='\n') AS ?isniInfo)
+ (group_concat(distinct ?wdInfo;SEPARATOR='\n') AS ?wdInfo)
+ (group_concat(distinct ?kbrInfo;SEPARATOR='\n') AS ?kbrInfo)
+ (group_concat(distinct ?bnfInfo;SEPARATOR='\n') AS ?bnfInfo)
+ (group_concat(distinct ?ntaInfo;SEPARATOR='\n') AS ?ntaInfo)
+
+WHERE {
+  
+  	  graph <http://beltrans-contributors> { ?person rdfs:label ?name . }
+      #OPTIONAL { graph <http://beltrans-contributors> { ?person rdfs:label ?name . } }
+
+      #
+      # ISNI
+      #
+      OPTIONAL {
+         graph <http://beltrans-contributors> { ?person schema:sameAs ?isniURI . }
+         graph <http://isni-sru> { ?isniURI a schema:Person . }
+         OPTIONAL { graph <http://isni-sru> { ?isniURI rdfs:label ?isniLabel . } }
+         OPTIONAL {
+           graph <http://isni-sru> {
+             ?isniURI bf:identifiedBy ?isniISNIEntity .
+             ?isniISNIEntity a bf:Isni ;
+                            rdf:value ?isniISNI .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://isni-sru> {
+             ?isniURI bf:identifiedBy ?isniVIAFEntity .
+             ?isniVIAFEntity a bf:Identifier ;
+                            rdfs:label "VIAF" ;
+                            rdf:value ?isniVIAF .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://isni-sru> {
+             ?isniURI bf:identifiedBy ?isniWDEntity .
+             ?isniWDEntity a bf:Identifier ;
+                          rdfs:label "Wikidata" ;
+                          rdf:value ?isniWD .
+           }
+         }
+            
+         OPTIONAL {
+           graph <http://isni-sru> {
+             ?isniURI bf:identifiedBy ?isniBnFEntity .
+             ?isniBnFEntity a bf:Identifier ;
+                          rdfs:label "BNF" ;
+                          rdf:value ?isniBnF .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://isni-sru> {
+             ?isniURI bf:identifiedBy ?isniNTAEntity .
+             ?isniNTAEntity a bf:Identifier ;
+                          rdfs:label "NTA" ;
+                          rdf:value ?isniNTA .
+           }
+         }
+
+         BIND(CONCAT(?isniLabel, ", ISNI ", COALESCE(?isniISNI, ""), ", VIAF ", COALESCE(?isniVIAF, ""), " WD ", COALESCE(?isniWD, ""), " BnF ", COALESCE(?isniBnF, ""), " NTA ", COALESCE(?isniNTA, "")) AS ?isniInfo)
+      }
+      
+       #
+      # WIKIDATA SOURCE
+      #
+      OPTIONAL {
+         graph <http://beltrans-contributors> { ?person schema:sameAs ?wdURI . }
+         graph <http://wikidata> { ?wdURI a schema:Person . }
+         OPTIONAL { graph <http://wikidata> { ?wdURI rdfs:label ?wdLabel . } }
+         OPTIONAL {
+           graph <http://wikidata> {
+             ?wdURI bf:identifiedBy ?wdISNIEntity .
+             ?wdISNIEntity a bf:Isni ;
+                            rdf:value ?wdISNI .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://wikidata> {
+             ?wdURI bf:identifiedBy ?wdVIAFEntity .
+             ?wdVIAFEntity a bf:Identifier ;
+                            rdfs:label "VIAF" ;
+                            rdf:value ?wdVIAF .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://wikidata> {
+             ?wdURI bf:identifiedBy ?wdWDEntity .
+             ?wdWDEntity a bf:Identifier ;
+                          rdfs:label "Wikidata" ;
+                          rdf:value ?wdWD .
+           }
+         }
+            
+         OPTIONAL {
+           graph <http://wikidata> {
+             ?wdURI bf:identifiedBy ?wdBnFEntity .
+             ?wdBnFEntity a bf:Identifier ;
+                          rdfs:label "BNF" ;
+                          rdf:value ?wdBnF .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://wikidata> {
+             ?wdURI bf:identifiedBy ?wdNTAEntity .
+             ?wdNTAEntity a bf:Identifier ;
+                          rdfs:label "NTA" ;
+                          rdf:value ?wdNTA .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://wikidata> {
+             ?wdURI bf:identifiedBy ?wdKBREntity .
+             ?wdKBREntity a bf:Identifier ;
+                          rdfs:label "KBR" ;
+                          rdf:value ?wdKBR .
+           }
+         }
+
+         BIND(CONCAT(?wdLabel, ", ISNI ", COALESCE(?wdISNI, ""), ", VIAF ", COALESCE(?wdVIAF, ""), " WD ", COALESCE(?wdWD, ""), " BnF ", COALESCE(?wdBnF, ""), " NTA ", COALESCE(?wdNTA, ""), " KBR ", COALESCE(?wdKBR, "")) AS ?wdInfo)
+      }
+            
+      OPTIONAL {
+         graph <http://beltrans-contributors> { ?person schema:sameAs ?kbrURI . }
+         graph <http://kbr-linked-authorities> { ?kbrURI a schema:Person . }
+         OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrURI rdfs:label ?kbrLabel . } }
+         OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrURI dcterms:identifier ?kbrIdentifier . } }
+         OPTIONAL {
+           graph <http://kbr-linked-authorities> {
+             ?kbrURI bf:identifiedBy ?kbrISNIEntity .
+             ?kbrISNIEntity a bf:Isni ;
+                            rdf:value ?kbrISNI .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://kbr-linked-authorities> {
+             ?kbrURI bf:identifiedBy ?kbrVIAFEntity .
+             ?kbrVIAFEntity a bf:Identifier ;
+                            rdfs:label "VIAF" ;
+                            rdf:value ?kbrVIAF .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://kbr-linked-authorities> {
+             ?kbrURI bf:identifiedBy ?kbrWDEntity .
+             ?kbrWDEntity a bf:Identifier ;
+                          rdfs:label "Wikidata" ;
+                          rdf:value ?kbrWD .
+           }
+         }
+
+         BIND(CONCAT(?kbrIdentifier, " ", ?kbrLabel, ", ISNI ", COALESCE(?kbrISNI, ""), ", VIAF ", COALESCE(?kbrVIAF, ""), " WD ", COALESCE(?kbrWD, "")) AS ?kbrInfo)
+      }
+
+      OPTIONAL {
+         graph <http://beltrans-contributors> { ?person schema:sameAs ?bnfURI . }
+         graph <http://bnf-contributors> { ?bnfURI a foaf:Person . }
+         OPTIONAL { graph <http://bnf-contributors> { ?bnfURI foaf:name ?bnfLabel . } }
+         OPTIONAL { graph <http://bnf-contributors> { ?bnfURI dcterms:identifier ?bnfIdentifier . } }
+         OPTIONAL {
+           graph <http://bnf-contributors> {
+             ?bnfURI bf:identifiedBy ?bnfISNIEntity .
+             ?bnfISNIEntity a bf:Isni ;
+                            rdf:value ?bnfISNI .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://bnf-contributors> {
+             ?bnfURI bf:identifiedBy ?bnfVIAFEntity .
+             ?bnfVIAFEntity a bf:Identifier ;
+                            rdfs:label "VIAF" ;
+                            rdf:value ?bnfVIAF .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://bnf-contributors> {
+             ?bnfURI bf:identifiedBy ?bnfWDEntity .
+             ?bnfWDEntity a bf:Identifier ;
+                          rdfs:label "Wikidata" ;
+                          rdf:value ?bnfWD .
+           }
+         }
+
+         BIND(CONCAT(?bnfIdentifier, " ", ?bnfLabel, ", ISNI ", COALESCE(?bnfISNI, ""), ", VIAF ", COALESCE(?bnfVIAF, ""), " WD ", COALESCE(?bnfWD, "")) AS ?bnfInfo)
+
+      }
+
+      OPTIONAL {
+         graph <http://beltrans-contributors> { ?person schema:sameAs ?ntaURI . }
+         graph <http://kb-linked-authorities> { ?ntaURI a schema:Person . }
+         OPTIONAL { graph <http://kb-linked-authorities> { ?ntaURI schema:name ?ntaLabel . } }
+         OPTIONAL { graph <http://kb-linked-authorities> { ?ntaURI dcterms:identifier ?ntaIdentifier . } }
+         OPTIONAL {
+           graph <http://kb-linked-authorities> {
+             ?ntaURI bf:identifiedBy ?ntaISNIEntity .
+             ?ntaISNIEntity a bf:Isni ;
+                            rdf:value ?ntaISNI .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://kb-linked-authorities> {
+             ?ntaURI bf:identifiedBy ?ntaVIAFEntity .
+             ?ntaVIAFEntity a bf:Identifier ;
+                            rdfs:label "VIAF" ;
+                            rdf:value ?ntaVIAF .
+           }
+         }
+               
+         OPTIONAL {
+           graph <http://kb-linked-authorities> {
+             ?ntaURI bf:identifiedBy ?ntaWDEntity .
+             ?ntaWDEntity a bf:Identifier ;
+                          rdfs:label "Wikidata" ;
+                          rdf:value ?ntaWD .
+           }
+         }
+
+         BIND(CONCAT(?ntaIdentifier, " ", ?ntaLabel, ", ISNI ", COALESCE(?ntaISNI, ""), ", VIAF ", COALESCE(?ntaVIAF, ""), " WD ", COALESCE(?ntaWD, "")) AS ?ntaInfo)
+      }
+  
+  {
+    SELECT  DISTINCT ?person 
+    WHERE {
+
+      graph <http://beltrans-contributors> {
+        ?person a schema:Person ;
+                bf:identifiedBy ?identifierEntity .
+
+        ?identifierEntity a bf:Isni ;
+                          rdf:value ?identifier .
+      }
+
+      #
+      # the person needs to be linked to a translation of the BELTRANS corpus
+      #
+      {
+        SELECT DISTINCT ?person
+        WHERE {
+          graph <http://beltrans-manifestations> {
+            ?manifestation schema:isPartOf btid:beltransCorpus ;
+                           schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?person .
+          }
+        }
+      }
+    }
+    GROUP BY ?person
+    HAVING (COUNT(?identifier) > 1)
+  }
+}
+GROUP BY ?person
