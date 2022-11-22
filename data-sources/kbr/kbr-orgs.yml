@@ -1,0 +1,161 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  skos: "http://www.w3.org/2004/02/skos/core#"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  schema: "http://schema.org/"
+
+variables:
+  sourceKBROrgs: &sourceKBROrgs ${RML_SOURCE_KBR_ORGS}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  orgs:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates organizational authorities represented as schema Organization from KBR linked authorities."
+    sources:
+      - access: *sourceKBROrgs
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:authority_$(authorityID)
+    po:
+      - [a, schema:Organization]
+      - [dcterms:identifier, $(authorityID)]
+      - [skos:prefLabel, $(prefLabel)]
+      - p: schema:name
+        o: 
+          value: $(nameEN)
+          language: en
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(nameEN)]
+            - [grel:valueParameter2, ""]
+      - p: schema:name
+        o: 
+          value: $(nameNL)
+          language: nl
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(nameNL)]
+            - [grel:valueParameter2, ""]
+      - p: schema:name
+        o: 
+          value: $(nameFR)
+          language: fr
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(nameFR)]
+            - [grel:valueParameter2, ""]
+      - [foaf:isPrimaryTopicOf, btabout:authority_$(authorityID)~iri]
+      - p: schema:address
+        o: btid:address_$(authorityID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(country_code)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_isni_$(authorityID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isni_id)]
+            - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_viaf_$(authorityID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(viaf_id)]
+            - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  addressOrgs:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates an address resource for an organizational authority such that the country can be stored according to schema.org"
+    sources:
+      - access: *sourceKBROrgs
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:address_$(authorityID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(country_code)]
+        - [grel:valueParameter, ""]
+    po:
+      - [a, schema:PostalAddress]
+      - [rdfs:label, "Address of authority $(authorityID)"]
+      - p: schema:addressRegion
+        o: $(country_code)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(country_code)]
+            - [grel:valueParameter2, ""]
+      - p: schema:addressLocality
+        o: $(address_city)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(address_city)]
+            - [grel:valueParameter2, ""]
+      - p: schema:streetAddress
+        o: $(address_street)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(address_street)]
+            - [grel:valueParameter2, ""]
+      - p: schema:postalCode
+        o: $(address_postcode)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(address_postcode)]
+            - [grel:valueParameter2, ""]
+      - p: schema:addressCountry
+        o: countries:be~iri
+        condition:
+          function: grel:string_startsWith
+          parameters:
+            - [grel:valueParameter, $(country_code)]
+            - [grel:string_sub, "BE"]
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsAbout:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates descriptions of authorities represented as schema WebPage."
+    sources:
+#      - access: "kbr/2021-10-25-clean-isni-data.csv"
+      - access: *sourceKBROrgs
+        referenceFormulation: csv
+        delimiter: ','
+    s: btabout:authority_$(authorityID)
+    po:
+      - [a, schema:WebPage]
+      - [foaf:primaryTopic, btid:authority_$(authorityID)~iri]
+
