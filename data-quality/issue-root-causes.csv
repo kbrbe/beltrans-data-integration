@@ -18,4 +18,3 @@
 "rootCause17","kbr2","The authority name of MARC field 264 has a single match with one of the candidate authority records from KBR","fix7"
 "rootCause18","kbr2","The authority name of MARC field 264 has no match with any of the KBR candidate authority records","fix8"
 "rootCause19","kbr2","KBR data quality issue: one or more of the authority record candidates are duplicates of one another","fix9"
-"rootCause20","kbr3",""
