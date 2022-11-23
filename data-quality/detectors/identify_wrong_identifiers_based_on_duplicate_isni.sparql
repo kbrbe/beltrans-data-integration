@@ -23,6 +23,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 SELECT DISTINCT
  ?person
  (group_concat(distinct ?name;SEPARATOR=';') AS ?name)
+ (group_concat(distinct ?duplicateIdentifier;SEPARATOR=';') AS ?duplicateIdentifier)
  (group_concat(distinct ?isniInfo;SEPARATOR='\n') AS ?isniInfo)
  (group_concat(distinct ?wdInfo;SEPARATOR='\n') AS ?wdInfo)
  (group_concat(distinct ?kbrInfo;SEPARATOR='\n') AS ?kbrInfo)
@@ -255,7 +256,7 @@ WHERE {
       }
   
   {
-    SELECT  DISTINCT ?person 
+    SELECT  DISTINCT ?person (group_concat(distinct ?identifier;SEPARATOR=';') AS ?duplicateIdentifier)
     WHERE {
 
       graph <http://beltrans-contributors> {
