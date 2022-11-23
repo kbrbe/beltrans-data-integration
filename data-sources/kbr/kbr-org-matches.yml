@@ -35,5 +35,5 @@ mappings:
         delimiter: ','
     s: btid:authority_$(identifier)
     po:
-      - [btm:matchCandidate, btid:$(candidateID)~iri]
+      - [btm:matchCandidate, btid:authority_$(candidateID)~iri]
 
