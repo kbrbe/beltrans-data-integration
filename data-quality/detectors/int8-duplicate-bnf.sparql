@@ -1,4 +1,4 @@
-# generated at 2022-11-21, 17:28:43 by class <class 'tools.sparql.query_builder.DuplicateIdentifierQuery'>
+# generated at 2022-11-28, 10:37:31 by class <class 'tools.sparql.query_builder.DuplicateIdentifierQuery'>
 
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -24,17 +24,23 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
 
-  SELECT DISTINCT ?person
+  SELECT DISTINCT ?person (group_concat(distinct ?identifier;SEPARATOR=';') AS ?duplicateIdentifiers)
   WHERE {
 
-    graph <http://beltrans-contributors> {
-      ?person a schema:Person ;
-              bf:identifiedBy ?identifierEntity .
+    #
+    # first order the identifiers to ensure reproducible aggregated strings
+    #
+    {
+      SELECT DISTINCT ?person ?identifier
+      WHERE {
+        graph <http://beltrans-contributors> {
+        ?person a schema:Person ;
+                bf:identifiedBy ?identifierEntity .
 
-      ?identifierEntity a bf:Identifier ;
-                        rdfs:label "BnF" ;
-                        rdf:value ?identifier .
-    }
+        ?identifierEntity a bf:Identifier ;
+                          rdfs:label "BnF" ;
+                          rdf:value ?identifier .
+        } 
 
     #
     # the person needs to be linked to a translation of the BELTRANS corpus
@@ -49,6 +55,11 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
     }
   }
-  GROUP BY ?person
-  HAVING (COUNT(?identifier) > 1)
+  ORDER BY ASC(?person) ASC(?identifier)
+  }
+
+}
+GROUP BY ?person
+HAVING (COUNT(?identifier) > 1)
+ORDER BY ASC(?person)
        

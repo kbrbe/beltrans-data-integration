@@ -94,17 +94,23 @@ class DuplicateIdentifierQuery(Query):
             identifierLabelTriple = f'rdfs:label "{self.identifierName}" ;'
        
         pattern = Template("""
-  SELECT DISTINCT ?person
+  SELECT DISTINCT ?person (group_concat(distinct ?identifier;SEPARATOR=';') AS ?duplicateIdentifiers)
   WHERE {
 
-    graph <$contributorNamedGraph> {
-      ?person a $entityType ;
-              bf:identifiedBy ?identifierEntity .
+    #
+    # first order the identifiers to ensure reproducible aggregated strings
+    #
+    {
+      SELECT DISTINCT ?person ?identifier
+      WHERE {
+        graph <$contributorNamedGraph> {
+        ?person a $entityType ;
+                bf:identifiedBy ?identifierEntity .
 
-      ?identifierEntity a $identifierClass ;
-                        $identifierLabelTriple
-                        rdf:value ?identifier .
-    }
+        ?identifierEntity a $identifierClass ;
+                          $identifierLabelTriple
+                          rdf:value ?identifier .
+        } 
 
     #
     # the person needs to be linked to a translation of the BELTRANS corpus
@@ -119,8 +125,13 @@ class DuplicateIdentifierQuery(Query):
       }
     }
   }
-  GROUP BY ?person
-  HAVING (COUNT(?identifier) > 1)
+  ORDER BY ASC(?person) ASC(?identifier)
+  }
+
+}
+GROUP BY ?person
+HAVING (COUNT(?identifier) > 1)
+ORDER BY ASC(?person)
        """)
         return pattern.substitute(contributorNamedGraph=self.contributorNamedGraph, entityType=self.entityType,
                                   identifierClass=identifierClass, identifierLabelTriple=identifierLabelTriple,
