@@ -19,6 +19,7 @@ SELECT DISTINCT
   ?contributorID
   (group_concat(distinct ?contributorLabel;SEPARATOR=';') AS ?name)
   (group_concat(distinct ?nationalityLabel;SEPARATOR=';') AS ?nationalities)
+  (group_concat(distinct ?genderLabel;SEPARATOR=';') AS ?gender)
   (group_concat(distinct ?kbrBirthDate;SEPARATOR=';') AS ?birthDateKBR)
   (group_concat(distinct ?bnfBirthDate;SEPARATOR=';') AS ?birthDateBnF)
   (group_concat(distinct ?ntaBirthDate;SEPARATOR=';') AS ?birthDateNTA)
@@ -52,6 +53,14 @@ WHERE {
     FILTER (lang(?nationalityLabel) = 'en')
   }
 
+  #
+  # GENDER
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?contributorURI schema:gender ?gender . } 
+    graph <http://master-data> { ?gender rdfs:label ?genderLabel . }
+    FILTER (lang(?genderLabel) = 'en')
+  }
   
   # ISNI
   #
