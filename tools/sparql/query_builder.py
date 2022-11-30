@@ -142,6 +142,7 @@ ORDER BY ASC(?person)
 class ContributorQuery(Query, ABC):
     VAR_CONTRIBUTOR_URI = "?contributorURI"
     VAR_CONTRIBUTOR_NATIONALITY = "?contributorNationality"
+    VAR_CONTRIBUTOR_GENDER = "?contributorGender"
     VAR_CONTRIBUTOR_LOCAL_URI = "?localContributorURI"
     VAR_CONTRIBUTOR_FAMILY_NAME = "?familyName"
     VAR_CONTRIBUTOR_GIVEN_NAME = "?givenName"
@@ -165,6 +166,14 @@ class ContributorQuery(Query, ABC):
                                                         'schema:nationality',
                                                         ContributorQuery.VAR_CONTRIBUTOR_NATIONALITY,
                                                         newline=True)
+
+    # ---------------------------------------------------------------------------
+    def _getINSERTGenderTriplePattern(self):
+        return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
+                                                        'schema:gender',
+                                                        ContributorQuery.VAR_CONTRIBUTOR_GENDER,
+                                                        newline=True)
+
 
     # ---------------------------------------------------------------------------
     def _getINSERTCountryTriplePattern(self):
@@ -255,6 +264,20 @@ class ContributorQuery(Query, ABC):
             return 'OPTIONAL { ' + queryPart + ' } '
         else:
             return queryPart
+
+    # ---------------------------------------------------------------------------
+    def _getSourceGenderQuadPattern(self, sourceGraph, genderProperty, optional=False):
+        pattern = Template("""
+    graph <$sourceGraph> { ?localContributorURI $genderProperty ?contributorGender . }
+
+    """)
+        queryPart = pattern.substitute(sourceGraph=sourceGraph, genderProperty=genderProperty)
+
+        if optional:
+            return 'OPTIONAL { ' + queryPart + ' } '
+        else:
+            return queryPart
+
 
     # ---------------------------------------------------------------------------
     def _getSourceCountryQuadPattern(self, sourceGraph, optional=False):
@@ -629,7 +652,7 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
     # -----------------------------------------------------------------------------
     def __init__(self, source, sourceGraph: str, targetGraph: str, identifiersToAdd: list,
                  entitySourceClass, entityTargetClass,
-                 nationalityProperty='schema:nationality', labelProperty='rdfs:label',
+                 nationalityProperty='schema:nationality', genderProperty='schema:gender', labelProperty='rdfs:label',
                  familyNameProperty='schema:familyName', givenNameProperty='schema:givenName'):
         """
 
@@ -647,6 +670,8 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
             and on the other hand to build variable names in the SPARQL query.
         nationalityProperty : str
             The RDF property used to fetch nationality information from the source graph, the default is schema:nationality
+        genderProperty : str
+            The RDF property used to fetch gender information from the source graph, the default is schema:gender
         entitySourceClass : str
             The RDF class used to identify a  record in the source graph,
             e.g. schema:Person, foaf:Person, schema:Organization or foaf:Organization
@@ -664,6 +689,7 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
         self.targetGraph = targetGraph
         self.identifiersToAdd = identifiersToAdd
         self.nationalityProperty = nationalityProperty
+        self.genderProperty = genderProperty
         self.entitySourceClass = entitySourceClass
         self.entityTargetClass = entityTargetClass
         self.labelProperty = labelProperty
@@ -687,6 +713,7 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
                                                           self.entityTargetClass,
                                                           newline=True)
         query += self._getINSERTNationalityTriplePattern()
+        query += self._getINSERTGenderTriplePattern()
         query += self._getINSERTIdentifierTriplePattern()
         query += self._getINSERTSameAsTriplePattern()
         query += self._getINSERTContributorLabelTriplePattern()
@@ -715,7 +742,8 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
         for property, object in [(self.labelProperty, ContributorQuery.VAR_CONTRIBUTOR_LABEL),
                                  (self.familyNameProperty, ContributorQuery.VAR_CONTRIBUTOR_FAMILY_NAME),
                                  (self.givenNameProperty, ContributorQuery.VAR_CONTRIBUTOR_GIVEN_NAME),
-                                 (self.nationalityProperty, ContributorQuery.VAR_CONTRIBUTOR_NATIONALITY)]:
+                                 (self.nationalityProperty, ContributorQuery.VAR_CONTRIBUTOR_NATIONALITY),
+                                 (self.genderProperty, ContributorQuery.VAR_CONTRIBUTOR_GENDER)]:
             query += Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
                                                   property,
                                                   object,
@@ -864,7 +892,7 @@ class ContributorUpdateQuery(ContributorQuery):
 
     # ---------------------------------------------------------------------------
     def __init__(self, source, sourceGraph: str, targetGraph: str, identifierName: str, identifiersToAdd: list,
-                 nationalityProperty='schema:nationality', personClass='schema:Person',
+                 nationalityProperty='schema:nationality', genderProperty='schema:gender', personClass='schema:Person',
                  organizationClass='schema:Organization'):
         """
 
@@ -884,6 +912,8 @@ class ContributorUpdateQuery(ContributorQuery):
             and on the other hand to build variable names in the SPARQL query.
         nationalityProperty : str
             The RDF property used to fetch nationality information from the source graph, the default is schema:nationality
+        genderProperty : str
+            The RDF property used to fetch gender information from the source graph, the default is schema:gender
         personClass : str
             The RDF class used to identify a person record in the source graph, the default is schema:Person
         organizationClass : str
@@ -895,6 +925,7 @@ class ContributorUpdateQuery(ContributorQuery):
         self.identifierName = identifierName
         self.identifiersToAdd = identifiersToAdd
         self.nationalityProperty = nationalityProperty
+        self.genderProperty = genderProperty
         self.personClass = personClass
         self.organizationClass = organizationClass
 
@@ -911,6 +942,7 @@ class ContributorUpdateQuery(ContributorQuery):
 
         query += insertBeginPattern.substitute(targetGraph=self.targetGraph)
         query += self._getINSERTNationalityTriplePattern()
+        query += self._getINSERTGenderTriplePattern()
         query += self._getINSERTSameAsTriplePattern()
 
         # bf:identifiedBy links, e.g. bf:identifiedBy ?viafEntityURI
@@ -929,6 +961,7 @@ class ContributorUpdateQuery(ContributorQuery):
 
         query += self._getFilterSourceQuadPattern(self.sourceGraph, self.personClass, self.organizationClass)
         query += self._getSourceNationalityQuadPattern(self.sourceGraph, self.nationalityProperty, optional=True)
+        query += self._getSourceGenderQuadPattern(self.sourceGraph, self.genderProperty, optional=True)
         query += self._getFilterExistsQuadPattern(self.sourceGraph, self.targetGraph, self.identifierName)
 
         for identifier in self.identifiersToAdd:

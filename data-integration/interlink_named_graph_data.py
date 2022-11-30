@@ -7,7 +7,7 @@ import os
 import re
 import requests
 import utils_sparql
-from integration_queries.query_builder import ContributorUpdateQuery, \
+from tools.sparql.query_builder import ContributorUpdateQuery, \
   OrganizationContributorCreateQuery, PersonContributorCreateQuery, ManifestationCreateQuery, ManifestationUpdateQuery
 from optparse import OptionParser
 from dotenv import load_dotenv
@@ -70,24 +70,28 @@ def generateCreateQueryPersons(sourceName, sourceGraph, targetGraph, identifiers
 
   if sourceName == 'BnF' or sourceName == 'bnf':
     nationalityProperty = 'rdagroup2elements:countryAssociatedWithThePerson'
+    genderProperty = 'schema:gender'
     entitySourceClass = 'foaf:Person'
     labelProperty = 'foaf:name'
     familyNameProperty = 'foaf:familyName'
     givenNameProperty = 'foaf:givenName'
   elif sourceName == 'KBR' or sourceName == 'kbr':
     nationalityProperty = 'schema:nationality'
+    genderProperty = 'schema:gender'
     entitySourceClass = 'schema:Person'
     labelProperty = 'rdfs:label'
     familyNameProperty = 'schema:familyName'
     givenNameProperty = 'schema:givenName'
   elif sourceName == 'NTA' or sourceName == 'nta':
     nationalityProperty = 'schema:nationality'
+    genderProperty = 'schema:gender'
     entitySourceClass = 'schema:Person'
     labelProperty = 'schema:name'
     familyNameProperty = 'schema:familyName'
     givenNameProperty = 'schema:givenName'
   else:
     nationalityProperty = 'schema:nationality'
+    genderProperty = 'schema:gender'
     entitySourceClass = 'schema:Person'
     labelProperty = 'rdfs:label'
     familyNameProperty = 'schema:familyName'
@@ -98,7 +102,7 @@ def generateCreateQueryPersons(sourceName, sourceGraph, targetGraph, identifiers
   qb = PersonContributorCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
                               identifiersToAdd=identifiersToAdd, entitySourceClass=entitySourceClass,
                               entityTargetClass=entityTargetClass, nationalityProperty=nationalityProperty,
-                              labelProperty=labelProperty, familyNameProperty=familyNameProperty,
+                              genderProperty=genderProperty, labelProperty=labelProperty, familyNameProperty=familyNameProperty,
                               givenNameProperty=givenNameProperty)
   return qb.getQueryString()
 
@@ -137,17 +141,19 @@ def generateContributorsUpdateQuery(sourceName, sourceGraph, targetGraph, linkId
 
   if sourceName == 'BnF' or sourceName == 'bnf':
     nationalityProperty = 'rdagroup2elements:countryAssociatedWithThePerson'
+    genderProperty = 'schema:gender'
     personClass = 'foaf:Person'
     organizationClass = 'foaf:Organization'
   else:
     nationalityProperty = 'schema:nationality'
+    genderProperty = 'schema:gender'
     personClass = 'schema:Person'
     organizationClass = 'schema:Organization'
 
   qb = ContributorUpdateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
                               identifierName=linkIdentifierName, identifiersToAdd=identifiersToAdd,
-                              nationalityProperty=nationalityProperty, personClass=personClass,
-                              organizationClass=organizationClass)
+                              nationalityProperty=nationalityProperty, genderProperty=genderProperty, 
+                              personClass=personClass, organizationClass=organizationClass)
 
   return qb.getQueryString()
 
