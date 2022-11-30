@@ -7,4 +7,4 @@ Data from different heterogenous data sources is integrated to create a FAIR cor
 Preprocessing scripts for the different data sources are stored in the respective data-source folder. This mainly includes Python scripts but also [RML](https://rml.io) mapping documents.
 The data integration is currently controlled by a bash script in the data-integration folder.
 
-![BELTRANS data integration overview](https://user-images.githubusercontent.com/3501171/153832514-e763ace1-de0f-4f96-b872-36c0864beae8.png)
+![BELTRANS data integration overview](https://user-images.githubusercontent.com/3501171/204752537-d58fb277-9f3a-4ab8-934c-e5faee94802b.png)
