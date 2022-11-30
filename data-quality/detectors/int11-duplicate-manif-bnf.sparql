@@ -1,0 +1,65 @@
+# generated at 2022-11-28, 10:37:33 by class <class 'tools.sparql.query_builder.DuplicateIdentifierQuery'>
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+
+
+  SELECT DISTINCT ?person (group_concat(distinct ?identifier;SEPARATOR=';') AS ?duplicateIdentifiers)
+  WHERE {
+
+    #
+    # first order the identifiers to ensure reproducible aggregated strings
+    #
+    {
+      SELECT DISTINCT ?person ?identifier
+      WHERE {
+        graph <http://beltrans-manifestations> {
+        ?person a schema:CreativeWork ;
+                bf:identifiedBy ?identifierEntity .
+
+        ?identifierEntity a bf:Identifier ;
+                          rdfs:label "BnF" ;
+                          rdf:value ?identifier .
+        } 
+
+    #
+    # the person needs to be linked to a translation of the BELTRANS corpus
+    #
+    {
+      SELECT DISTINCT ?person
+      WHERE {
+        graph <http://beltrans-manifestations> {
+          ?manifestation schema:isPartOf btid:beltransCorpus ;
+                         schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?person .
+        }
+      }
+    }
+  }
+  ORDER BY ASC(?person) ASC(?identifier)
+  }
+
+}
+GROUP BY ?person
+HAVING (COUNT(?identifier) > 1)
+ORDER BY ASC(?person)
+       

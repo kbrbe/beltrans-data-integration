@@ -1,0 +1,7 @@
+"ID","Name","Description","Where can the issue be detected?"
+"1","No link from an authority name to an authority record","A data source only provides the name of an authority.","data source pre-processing"
+"2","Several links from an authority name to an authority record","A data source only provides the name of an authority, automatic linking identified several candidate records.","data source pre-processing"
+"3","Conflicting dates","Different local records of an integrated record have a conflicting date","after data integration"
+"4","Several international identifiers","An integrated record (linking with sameAs to several local records) contains more than one identifier of a kind","after data integration"
+"5","Several library authority identifiers","An integrated authority record (linking with sameAs to several local records) refers to more than one library identifier of a kind","after data integration"
+"6","Several bibliographic library identifiers","An integrated bibliograhpic record (linking wiht sameAs to several local records) refers to more than one library identifier of a kind","after data integration"

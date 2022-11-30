@@ -33,6 +33,10 @@ def addAuthorityFieldsToCSV(elem, writer, stats):
   isniRaw = utils.getElementValue(elem.xpath('./marc:datafield[@tag="024"]/marc:subfield[@code="2" and text()="isni"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
   viafRaw = utils.getElementValue(elem.xpath('./marc:datafield[@tag="024"]/marc:subfield[@code="2" and text()="viaf"]/../marc:subfield[@code="a"]', namespaces=ALL_NS))
   countryCode = utils.getElementValue(elem.find('./marc:datafield[@tag="043"]/marc:subfield[@code="c"]', ALL_NS))
+  addressCountry = utils.getElementValue(elem.find('./marc:datafield[@tag="371"]/marc:subfield[@code="d"]', ALL_NS))
+  addressStreet = utils.getElementValue(elem.find('./marc:datafield[@tag="371"]/marc:subfield[@code="a"]', ALL_NS))
+  addressCity = utils.getElementValue(elem.find('./marc:datafield[@tag="371"]/marc:subfield[@code="b"]', ALL_NS))
+  addressPostcode = utils.getElementValue(elem.find('./marc:datafield[@tag="371"]/marc:subfield[@code="e"]', ALL_NS))
  
   # elif because we only want one of it
   prefLabel = ''
@@ -53,7 +57,11 @@ def addAuthorityFieldsToCSV(elem, writer, stats):
     'prefLabel': utils.getNormalizedString(prefLabel),
     'isni_id': utils.extractIdentifier(authorityID, f'ISNI {isniRaw}', pattern='ISNI'),
     'viaf_id': utils.extractIdentifier(authorityID, f'VIAF {viafRaw}', pattern='VIAF'),
-    'country_code': countryCode
+    'country_code': countryCode,
+    'address_country': addressCountry,
+    'address_street': addressStreet,
+    'address_city': addressCity,
+    'address_postcode': addressPostcode
   }
 
   writer.writerow(newRecord)
@@ -80,7 +88,7 @@ def main():
   with open(options.output_file, 'w') as outFile:
 
     stats = {}
-    outputFields = ['authorityID', 'nameEN', 'nameNL', 'nameFR', 'prefLabel', 'isni_id', 'viaf_id', 'country_code']
+    outputFields = ['authorityID', 'nameEN', 'nameNL', 'nameFR', 'prefLabel', 'isni_id', 'viaf_id', 'country_code', 'address_country', 'address_street', 'address_city', 'address_postcode']
     outputWriter = csv.DictWriter(outFile, fieldnames=outputFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     outputWriter.writeheader()
 

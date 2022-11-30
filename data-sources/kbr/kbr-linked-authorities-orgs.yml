@@ -20,7 +20,7 @@ prefixes:
   schema: "http://schema.org/"
 
 variables:
-  sourceKBROrgs: &sourceKBROrgs ${RML_SOURCE_KBR_ORGS}
+  sourceKBROrgs: &sourceKBROrgs ${RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS}
 
 mappings:
 
@@ -106,34 +106,6 @@ mappings:
     po:
       - [a, schema:PostalAddress]
       - [rdfs:label, "Address of authority $(authorityID)"]
-      - p: schema:addressRegion
-        o: $(country_code)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(country_code)]
-            - [grel:valueParameter2, ""]
-      - p: schema:addressLocality
-        o: $(address_city)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(address_city)]
-            - [grel:valueParameter2, ""]
-      - p: schema:streetAddress
-        o: $(address_street)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(address_street)]
-            - [grel:valueParameter2, ""]
-      - p: schema:postalCode
-        o: $(address_postcode)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(address_postcode)]
-            - [grel:valueParameter2, ""]
       - p: schema:addressCountry
         o: countries:be~iri
         condition:

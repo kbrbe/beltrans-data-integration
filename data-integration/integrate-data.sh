@@ -144,6 +144,8 @@ TRIPLE_STORE_GRAPH_MASTER="http://master-data"
 TRIPLE_STORE_GRAPH_WIKIDATA="http://wikidata"
 TRIPLE_STORE_GRAPH_KBCODE="http://kbcode"
 
+TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES="http://kbr-publisher-matches"
+
 # if it is a blazegraph triple store
 TRIPLE_STORE_NAMESPACE="integration"
 
@@ -176,6 +178,8 @@ CREATE_QUERY_BNF_VIAF="sparql-queries/create-bnf-viaf.sparql"
 CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 
 CREATE_QUERY_KB_TRL_PBL="sparql-queries/link-kb-translations-to-publishers.sparql"
+
+ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
 
 LINK_QUERY_CONT_AUTHORS="integration_queries/link-beltrans-manifestations-authors.sparql"
 LINK_QUERY_CONT_TRANSLATORS="integration_queries/link-beltrans-manifestations-translators.sparql"
@@ -255,6 +259,11 @@ SUFFIX_KBR_TRL_FR_BB="fr-translations-bb.csv"
 SUFFIX_KBR_TRL_FR_PUB_COUNTRY="fr-translations-pub-country.csv"
 SUFFIX_KBR_TRL_FR_PUB_PLACE="fr-translations-pub-place.csv"
 SUFFIX_KBR_TRL_FR_COL_LINKS="fr-collection-links.csv"
+
+SUFFIX_KBR_PBL_NO_MATCHES_NL_FR="nl-fr_publishers-no-matches.csv"
+SUFFIX_KBR_PBL_NO_MATCHES_FR_NL="fr-nl_publishers-no-matches.csv"
+SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR="nl-fr_publishers-multiple-matches.csv"
+SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL="fr-nl_publishers-multiple-matches.csv"
 
 
 SUFFIX_KBR_TRL_NL_ISBN10="nl-fr-isbn10.csv"
@@ -416,6 +425,9 @@ SUFFIX_KBR_PERSONS_IDENTIFIERS_NL_FR_LD="nl-fr_persons-identifiers.ttl"
 SUFFIX_KBR_ORGS_IDENTIFIERS_FR_NL_LD="fr-nl_orgs-identifiers.ttl"
 SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD="nl-fr_orgs-identifiers.ttl"
 SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD="belgians-identifiers.ttl"
+
+SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL_LD="fr-nl_orgs-multiple-matches.ttl"
+SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR_LD="nl-fr_orgs-multiple-matches.ttl"
 
 #
 # LINKED DATA - KB
@@ -635,6 +647,9 @@ function integrate {
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" \
     "$LINK_QUERY_CONT_AUTHORS" "$LINK_QUERY_CONT_TRANSLATORS" "$LINK_QUERY_CONT_ILLUSTRATORS" \
     "$LINK_QUERY_CONT_SCENARISTS" "$LINK_QUERY_CONT_PUBLISHING_DIRECTORS"
+
+  echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
 
 }
 
@@ -1344,6 +1359,11 @@ function extractKBRTranslationsAndContributions {
   kbrDutchTranslationsISBN13="$integrationName/$dataSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_NL_ISBN13"
   kbrFrenchTranslationsISBN10="$integrationName/$dataSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_FR_ISBN10"
   kbrFrenchTranslationsISBN13="$integrationName/$dataSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_FR_ISBN13"
+
+  kbrNLFRNoMatches="$integrationName/$dataSourceName/agents/$SUFFIX_KBR_PBL_NO_MATCHES_NL_FR"
+  kbrFRNLNoMatches="$integrationName/$dataSourceName/agents/$SUFFIX_KBR_PBL_NO_MATCHES_FR_NL"
+  kbrNLFRMultipleMatches="$integrationName/$dataSourceName/agents/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR"
+  kbrFRNLMultipleMatches="$integrationName/$dataSourceName/agents/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL"
   
   source py-integration-env/bin/activate
 
@@ -1366,10 +1386,10 @@ function extractKBRTranslationsAndContributions {
   python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrFrenchTranslationsCSVCont -o $kbrFrenchTranslationsCSVContReplaced
 
   echo "Deduplicate newly identified contributors - NL-FR"
-  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrDutchTranslationsCSVContReplaced -o $kbrDutchTranslationsCSVContDedup
+  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrDutchTranslationsCSVContReplaced -o $kbrDutchTranslationsCSVContDedup --no-matches-log $kbrNLFRNoMatches --multiple-matches-log $kbrNLFRMultipleMatches
 
   echo "Deduplicate newly identified contributors - FR-NL"
-  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrFrenchTranslationsCSVContReplaced -o $kbrFrenchTranslationsCSVContDedup
+  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrFrenchTranslationsCSVContReplaced -o $kbrFrenchTranslationsCSVContDedup --no-matches-log $kbrFRNLNoMatches --multiple-matches-log $kbrFRNLMultipleMatches
 
   echo "Extract BB assignments for Dutch translations ..."
   extractBBEntries "$kbrDutchTranslationsCSVWorks" "$kbrDutchTranslationsCSVBB"
@@ -1695,6 +1715,10 @@ function mapKBRLinkedAuthorities {
   kbrOrgsIdentifiersTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD"
   kbrBelgiansIdentifiersTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD"
 
+  kbrOrgMatchesNLFR="$integrationName/$dataSourceName/kbr/agents/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR"
+  kbrOrgMatchesFRNL="$integrationName/$dataSourceName/kbr/agents/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL"
+  kbrOrgMatchesTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL_LD"
+  kbrOrgMatchesTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR_LD"
 
 
   # 2) execute the mapping
@@ -1704,6 +1728,9 @@ function mapKBRLinkedAuthorities {
 
   mapKBROrgs "$kbrOrgsFRNL" "$kbrOrgsTurtleFRNL"
   mapKBROrgs "$kbrOrgsNLFR" "$kbrOrgsTurtleNLFR"
+
+  mapKBROrgMatches "$kbrOrgMatchesFRNL" "$kbrOrgMatchesTurtleFRNL"
+  mapKBROrgMatches "$kbrOrgMatchesNLFR" "$kbrOrgMatchesTurtleNLFR"
 
   mapKBRPlaces "$integrationName" "$kbrPlacesTurtle"
 
@@ -1735,10 +1762,21 @@ function mapKBROrgs {
   local sourceFile=$1
   local outputTurtle=$2
 
-  export RML_SOURCE_KBR_ORGS="$sourceFile"
+  export RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS="$sourceFile"
 
   echo "Map KBR Orgs - $sourceFile"
-  . map.sh ../data-sources/kbr/kbr-orgs.yml $outputTurtle
+  . map.sh ../data-sources/kbr/kbr-linked-authorities-orgs.yml $outputTurtle
+}
+
+# -----------------------------------------------------------------------------
+function mapKBROrgMatches {
+  local sourceFile=$1
+  local outputTurtle=$2
+ 
+  export RML_SOURCE_KBR_MULTIPLE_ORG_MATCHES="$sourceFile"
+
+  echo "Map KBR Orgs possible matches - $sourceFile"
+  . map.sh ../data-sources/kbr/kbr-org-matches.yml $outputTurtle
 }
 
 # -----------------------------------------------------------------------------
@@ -1936,6 +1974,9 @@ function loadKBRLinkedAuthorities {
   local kbrOrgsIdentifiersTurtleNLFR="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD"
   local kbrBelgiansIdentifiersTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD"
 
+  local kbrOrgMatchesTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL_LD"
+  local kbrOrgMatchesTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR_LD"
+
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   # upload newly identified authorities to the linked authorities named graph
@@ -1944,6 +1985,10 @@ function loadKBRLinkedAuthorities {
     "$kbrPersonsFRNL" "$kbrPersonsNLFR" "$kbrOrgsFRNL" "$kbrOrgsNLFR" "$kbrPlaces" \
     "$kbrPersonsIdentifiersTurtleFRNL" "$kbrPersonsIdentifiersTurtleNLFR" "$kbrOrgsIdentifiersTurtleFRNL" \
     "$kbrOrgsIdentifiersTurtleNLFR" "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
+
+  echo "Load possible KBR publisher matches ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES \
+    "$kbrOrgMatchesTurtleFRNL" "$kbrOrgMatchesTurtleNLFR"
 
 }
 

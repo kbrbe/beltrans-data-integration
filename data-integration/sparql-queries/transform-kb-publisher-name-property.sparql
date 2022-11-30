@@ -1,0 +1,12 @@
+prefix schema: <http://schema.org/>
+prefix rdagroup1elements: <http://rdvocab.info/elements/>
+
+DELETE {
+  graph <http://kb-publications> { ?publication schema:publisher ?publisherName . }
+}
+INSERT {
+  graph <http://kb-publications> { ?publication rdagroup1elements:publishersName ?publisherName . }
+}
+WHERE {
+  graph <http://kb-publications> { ?publication schema:publisher ?publisherName . }
+}

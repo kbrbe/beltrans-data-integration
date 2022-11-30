@@ -1,0 +1,4 @@
+"ID","issue type","name","description","script","file"
+"kbr1","1","264 field unknown name","A bibliographic record links to an unknown name in MARC field 264, instead of to a known name or a linked authority (MARC field 710). No authority record was found with automatic means either in the 710 field of the record nor in an authority dump of KBR. A new UUID-based identifier was minted","deduplicate-publishers.py","Self-created-publisher-records.csv"
+"kbr2","2","264 field name several authority candidates","A bibliographic record links to an authority name in MARC field 264, for which we have more than one possible linked authority candidate","Deduplicate-records.py",""
+"kbr3","3","Invalid ISBN","A bibliographic record contains an ISBN with an invalid syntax","",""
