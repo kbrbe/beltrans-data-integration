@@ -1,4 +1,4 @@
 date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-05-03,2022-09-27 20:13:24.217784,FR-NL,6891,6250,6252,6125,58,1817,4,13,1096,4,5970,111,111,0,80,97,"Data integrated from KBR, BnF and KB based on ISBN10 and ISBN13 identifiers."
-2022-05-03,2022-09-27 20:13:24.599391,NL-FR,3731,3204,3228,3249,1211,724,208,928,486,247,2687,149,149,0,133,134,"Data integrated from KBR, BnF and KB based on ISBN10 and ISBN13 identifiers."
-2022-05-03,2022-09-27 20:13:24.921394,OTHER,236,190,190,230,65,11,2,59,10,3,201,1,1,0,1,1,"Data integrated from KBR, BnF and KB based on ISBN10 and ISBN13 identifiers."
+2022-05-03,2022-11-30 16:08:05.515911,FR-NL,6891,6250,6252,6125,58,1817,4,13,1096,4,5970,111,111,0,80,97,"Data integrated from KBR, BnF and KB based on ISBN10 and ISBN13 identifiers."
+2022-05-03,2022-11-30 16:08:05.728978,NL-FR,3731,3204,3228,3249,1211,724,208,928,486,247,2687,149,149,0,133,134,"Data integrated from KBR, BnF and KB based on ISBN10 and ISBN13 identifiers."
+2022-05-03,2022-11-30 16:08:06.035082,OTHER,236,190,190,230,65,11,2,59,10,3,201,1,1,0,1,1,"Data integrated from KBR, BnF and KB based on ISBN10 and ISBN13 identifiers."

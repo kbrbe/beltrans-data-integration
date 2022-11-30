@@ -1,4 +1,4 @@
 date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-07-27,2022-09-27 20:13:33.344620,FR-NL,8457,7587,7592,7553,51,2277,4,13,1411,4,7360,149,2603,2277,99,117,Added missing nationalities from Wikidata
-2022-07-27,2022-09-27 20:13:33.487054,NL-FR,4019,3428,3452,3535,1209,742,210,933,497,247,2938,194,1199,742,171,173,Added missing nationalities from Wikidata
-2022-07-27,2022-09-27 20:13:33.561187,OTHER,315,234,234,309,77,11,2,71,10,3,273,4,12,11,2,2,Added missing nationalities from Wikidata
+2022-07-27,2022-11-30 16:08:13.866073,FR-NL,8457,7587,7592,7553,51,2277,4,13,1411,4,7360,149,2603,2277,99,117,Added missing nationalities from Wikidata
+2022-07-27,2022-11-30 16:08:14.082510,NL-FR,4019,3428,3452,3535,1209,742,210,933,497,247,2938,194,1199,742,171,173,Added missing nationalities from Wikidata
+2022-07-27,2022-11-30 16:08:14.224431,OTHER,315,234,234,309,77,11,2,71,10,3,273,4,12,11,2,2,Added missing nationalities from Wikidata

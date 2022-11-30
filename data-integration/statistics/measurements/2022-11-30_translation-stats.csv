@@ -1,0 +1,4 @@
+date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
+2022-11-30,2022-11-30 16:08:19.091913,FR-NL,8501,7591,7598,7666,51,2201,4,13,1404,4,7453,276,2688,2201,184,204,New export from KBR and removed Wikidata correlation list as source
+2022-11-30,2022-11-30 16:08:19.303798,NL-FR,4190,3581,3605,3677,1212,775,210,930,507,247,3078,776,1511,775,660,662,New export from KBR and removed Wikidata correlation list as source
+2022-11-30,2022-11-30 16:08:19.421811,OTHER,329,245,245,323,76,11,2,70,10,3,288,13,18,11,8,8,New export from KBR and removed Wikidata correlation list as source

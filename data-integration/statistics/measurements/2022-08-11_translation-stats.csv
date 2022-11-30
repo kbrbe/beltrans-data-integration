@@ -1,4 +1,4 @@
 date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-08-11,2022-09-27 20:13:34.168664,FR-NL,8502,7600,7605,7594,51,2281,4,13,1411,4,7386,152,2605,2281,102,120,New export from the KBR catalogue
-2022-08-11,2022-09-27 20:13:34.362235,NL-FR,4031,3435,3459,3547,1209,742,210,933,497,247,2947,194,1199,742,171,173,New export from the KBR catalogue
-2022-08-11,2022-09-27 20:13:34.435093,OTHER,565,447,462,559,77,11,2,71,10,3,273,4,12,11,2,2,New export from the KBR catalogue
+2022-08-11,2022-11-30 16:08:14.913280,FR-NL,8502,7600,7605,7594,51,2281,4,13,1411,4,7386,152,2605,2281,102,120,New export from the KBR catalogue
+2022-08-11,2022-11-30 16:08:15.136187,NL-FR,4031,3435,3459,3547,1209,742,210,933,497,247,2947,194,1199,742,171,173,New export from the KBR catalogue
+2022-08-11,2022-11-30 16:08:15.268295,OTHER,565,447,462,559,77,11,2,71,10,3,273,4,12,11,2,2,New export from the KBR catalogue
