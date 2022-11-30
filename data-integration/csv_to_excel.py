@@ -68,7 +68,9 @@ def main(output_file, sheet_names, csvFiles):
         #print(f'r {r} and row {row}')
         #for c, val in enumerate(row):
         #  sheet.write_row(r, c, row)
-        sheet.write_row(r, 0, row)
+        #sheet.write_row(r, 0, row)
+        for c, col in enumerate(row):
+          sheet.write_string(r, c, col) 
 
   wb.close()
 
