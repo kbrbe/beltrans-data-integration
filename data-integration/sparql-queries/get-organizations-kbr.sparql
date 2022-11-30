@@ -1,0 +1,27 @@
+prefix schema: <http://schema.org/>
+prefix dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?name ?kbrID ?isniID
+WHERE {
+
+  graph <http://beltrans-contributors> {
+    ?contributor a schema:Organization ;
+                 schema:sameAs ?kbrURI .
+  }
+
+  graph <http://kbr-linked-authorities> {
+    ?kbrURI a schema:Organization ;
+           dcterms:identifier ?kbrID ;
+           skos:prefLabel ?name .
+  }
+
+  OPTIONAL {
+    graph <http://beltrans-contributors> {
+      ?contributor bf:IdentifiedBy ?isniEntity .
+      ?isniEntity a bf:Isni ;
+                  rdf:value ?isniID .
+    }
+  }
+}
