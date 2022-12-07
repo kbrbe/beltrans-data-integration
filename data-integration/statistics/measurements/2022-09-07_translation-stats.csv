@@ -1,4 +1,4 @@
-date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,comment
-2022-09-07,2022-11-30 16:08:16.749429,FR-NL,8553,7645,7650,7597,51,2330,4,13,1412,4,7388,151,2605,2330,101,119,Added a KBR export of Belgian person authorities
-2022-09-07,2022-11-30 16:08:16.935927,NL-FR,4065,3463,3487,3554,1209,775,210,933,503,247,2953,193,1200,775,171,173,Added a KBR export of Belgian person authorities
-2022-09-07,2022-11-30 16:08:17.219570,OTHER,318,236,236,312,77,11,2,71,10,3,276,6,14,11,3,3,Added a KBR export of Belgian person authorities
+date,measurementTime,corpus,numberTranslations,withTargetISBN10,withTargetISBN13,withKBRIdentifier,withBnFIdentifier,withKBIdentifier,withKBRBnFAndKBIdentifier,withKBRAndBnFIdentifier,withKBRAndKBIdentifier,withBnFAndKBIdentifier,withBBThesaurusID,withSourceKBRIdentifier,withKBRSourceTitle,withKBSourceTitle,withSourceISBN10,withSourceISBN13,withKBRPublisher,withBnFPublisher,withKBPublisher,comment
+2022-09-07,2022-12-07 10:03:40.252091,FR-NL,8553,7645,7650,7597,51,2330,4,13,1412,4,7388,151,2605,2330,101,119,7559,51,2321,Added a KBR export of Belgian person authorities
+2022-09-07,2022-12-07 10:03:40.479790,NL-FR,4065,3463,3487,3554,1209,775,210,933,503,247,2953,193,1200,775,171,173,3460,1208,763,Added a KBR export of Belgian person authorities
+2022-09-07,2022-12-07 10:03:40.570918,OTHER,318,236,236,312,77,11,2,71,10,3,276,6,14,11,3,3,292,77,11,Added a KBR export of Belgian person authorities

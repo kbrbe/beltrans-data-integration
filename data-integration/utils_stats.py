@@ -104,6 +104,9 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withKBSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKB') if 'sourceTitleKB' in corpus else 0,
     'withSourceISBN10': countRowsWithValueForColumn(corpus, 'sourceISBN10'),
     'withSourceISBN13': countRowsWithValueForColumn(corpus, 'sourceISBN13'),
+    'withKBRPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierKBR'),
+    'withBnFPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierBnF'),
+    'withKBPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierKB'),
     'comment': comment
   }
   return measurement
