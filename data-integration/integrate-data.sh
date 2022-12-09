@@ -49,6 +49,8 @@ SCRIPT_POSTPROCESS_AGG_QUERY_RESULT="post-process-manifestations.py"
 SCRIPT_POSTPROCESS_QUERY_CONT_RESULT="post-process-contributors.py"
 SCRIPT_POSTPROCESS_DERIVE_COUNTRIES="add_country.py"
 SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION="add_coordinates.py"
+MODULE_POSTPROCESS_SORT_COLUMN_VALUES="tools.csv.sort_values_in_columns"
+
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
 KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
@@ -179,6 +181,7 @@ CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 CREATE_QUERY_BNF_GENDER="sparql-queries/create-bnf-contributors-gender.sparql"
 
 CREATE_QUERY_KB_TRL_PBL="sparql-queries/link-kb-translations-to-publishers.sparql"
+CREATE_QUERY_KB_PBL_IDENTIFIERS="sparql-queries/create-kb-org-identifier.sparql"
 
 ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
 
@@ -205,6 +208,7 @@ DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 
 SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-persons-all-info.csv"
+SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE_SORTED="contributors-persons-all-info-sorted.csv"
 SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE="contributors-persons.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_PERSONS="all-persons.csv"
 SUFFIX_DATA_PROFILE_CONT_ORGS_FILE="contributors-orgs.csv"
@@ -223,6 +227,7 @@ SUFFIX_DATA_PROFILE_DTYPES="dataprofile-dtypes.csv"
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
 SUFFIX_DATA_PROFILE_FILE_ALL="integrated-data-all-info.csv"
 SUFFIX_DATA_PROFILE_FILE_ENRICHED="integrated-data-enriched.csv"
+SUFFIX_DATA_PROFILE_FILE_ENRICHED_SORTED="integrated-data-enriched-sorted.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED="integrated-data-contributors-belgian.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.csv"
@@ -696,9 +701,13 @@ function postprocess {
   integratedAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
+  integratedDataEnrichedSorted="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED_SORTED"
+
   placeOfPublicationsGeonames="$integrationName/csv/$SUFFIX_PLACE_OF_PUBLICATION_GEONAMES"
   unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
+
   contributorsPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
+  contributorsPersonsAllDataSorted="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE_SORTED"
   contributorsPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE"
   allPersons="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_PERSONS"
   tmp1="$integrationName/csv/kbr-enriched-not-yet-bnf-and-kb.csv"
@@ -728,14 +737,24 @@ function postprocess {
   echo "Create geonames relationships for place of publications ..."
   time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonames
 
-  echo "Postprocess contributor data ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllData -m $integratedDataEnriched -o $contributorsPersons
+  
+  echo "Sort certain columns in the contributors CSV"
+  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $contributorsPersonsAllData -o $contributorsPersonsAllDataSorted \
+       -c "nationalities" -c "gender"
 
   echo "Postprocess contributor data ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllData -m $integratedDataEnriched -o $allPersons --keep-non-contributors
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $contributorsPersons
+
+  echo "Postprocess contributor data (keep non-contributors)..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $allPersons --keep-non-contributors
+
+  echo "Sort certain columns in the manifestation CSV"
+  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataEnriched -o $integratedDataEnrichedSorted \
+       -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication"
+
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnriched $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "KBCode" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "KBCode" -o $excelData
 
 }
 
@@ -2043,6 +2062,9 @@ function loadKB {
 
   echo "Link KB translations to publisher authority records ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KB_TRL_PBL"
+
+  echo "Create dcterms:identifier properties for KB publishers ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KB_PBL_IDENTIFIERS"
 
 }
 
