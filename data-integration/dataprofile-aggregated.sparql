@@ -58,7 +58,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
     (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierKBR)
     (group_concat(distinct ?bnfPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierBnF)
-    (group_concat(distinct ?kbPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierKB)
+    (group_concat(distinct ?kbPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierKB)
 
     (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
     (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
@@ -252,7 +252,19 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:bookEdition ?kbTargetManifestationEdition . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:locationCreated ?kbLocationCreated . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdfs:comment ?kbResponsibilityStatement . }}
-      OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdagroup1elements:publishersName ?kbPublisherName . }}
+
+      OPTIONAL {
+        graph <http://kb-publications> { ?kbManifestation rdagroup1elements:publishersName ?kbPublisherName . }
+
+        OPTIONAL {
+          graph <http://kb-publishers> {
+            ?kbPublisher schema:name|schema:alternateName ?kbPublisherName ;
+                         dcterms:identifier ?kbPublisherID . 
+         }
+        }
+        BIND(COALESCE(?kbPublisherID, "") AS ?kbPublisherIDString)
+        BIND(CONCAT( COALESCE(?kbPublisherName, "missing name"), IF(str(?kbPublisherIDString) = "", "", CONCAT(" (", str(?kbPublisherIDString), ")"))) AS ?kbPublisherNameID)
+      }
 
       OPTIONAL {
         graph <http://kb-publications> { ?kbManifestation schema:about ?genre . }
