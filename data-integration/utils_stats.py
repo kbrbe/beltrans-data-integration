@@ -9,7 +9,15 @@ def countRowsWithValueForColumn(df, column):
   >>> data1 = pd.DataFrame([{'id': '1', 'value': ''},{'id': '2', 'value': '2'},{'id': 3},{'id': '4', 'value': '4'},{'id': '5', 'value': 5}])
   >>> countRowsWithValueForColumn(data1, 'value')
   3
+
+  A column which does not exist should lead to 0 rows with a value
+  Like this we ensure that measurements on newly added columns can also be executed on old corpus versions 
+  >>> countRowsWithValueForColumn(data1, 'newColumn')
+  0
   """
+  if column not in df.columns:
+    return 0
+
   myDf = df.fillna('')
   return (myDf[column].values != '').sum()
 
@@ -23,7 +31,7 @@ def countRowsWithValueForColumns(df, columns, whereColumnsEmpty=None):
   ... {'id': 3},
   ... {'id': '4', 'value': '4'},
   ... {'id': '5', 'value': 5}])
-  >>> countRowsWithValueForColumn(data1, ['value'])
+  >>> countRowsWithValueForColumns(data1, ['value'])
   3
 
   >>> data2 = pd.DataFrame([
@@ -53,6 +61,7 @@ def countRowsWithValueForColumns(df, columns, whereColumnsEmpty=None):
   ... {'id': '8', 'KBRID': '8', 'BnFID': '8'}])
   >>> countRowsWithValueForColumns(data3, ['KBRID'], ['nationality'])
   4
+ 
   """
 
   # set empty values to nan such that the isnull()/notnull() approach below will work properly
@@ -107,6 +116,12 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withKBRPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierKBR'),
     'withBnFPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierBnF'),
     'withKBPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierKB'),
+    'withIntegratedAuthor': countRowsWithValueForColumn(corpus, 'authorIdentifiers'),
+    'withIntegratedTranslator': countRowsWithValueForColumn(corpus, 'translatorIdentifiers'),
+    'withIntegratedIllustrator': countRowsWithValueForColumn(corpus, 'illustratorIdentifiers'),
+    'withIntegratedScenarist': countRowsWithValueForColumn(corpus, 'scenaristIdentifiers'),
+    'withIntegratedPublishingDirector': countRowsWithValueForColumn(corpus, 'publishingDirectorIdentifiers'),
+    'withIntegratedPublisher': countRowsWithValueForColumn(corpus, 'publisherIdentifiers'),
     'comment': comment
   }
   return measurement
