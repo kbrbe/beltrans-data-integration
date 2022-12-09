@@ -38,6 +38,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?illustratorNameID;SEPARATOR=';') AS ?illustratorIdentifiers)
     (group_concat(distinct ?scenaristNameID;SEPARATOR=';') AS ?scenaristIdentifiers)
     (group_concat(distinct ?publishingDirectorNameID;SEPARATOR=';') AS ?publishingDirectorIdentifiers)
+    (group_concat(distinct ?publisherNameID;SEPARATOR=';') AS ?publisherIdentifiers)
 
     (group_concat(distinct ?kbrManifestationID;SEPARATOR=';') AS ?targetKBRIdentifier)
     (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetBnFIdentifier)
@@ -407,6 +408,34 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
           ?publishingDirector schema:sameAs/dcterms:identifier ?publishingDirectorIdentifier . 
         }
         group by ?manifestation ?publishingDirector
+      }
+    }
+
+    # #########################################################################
+    #
+    # PUBLISHER
+    #
+    OPTIONAL {
+      graph <http://beltrans-manifestations> { ?manifestation schema:publisher ?publisher . }
+      OPTIONAL {
+        graph <http://beltrans-contributors> { ?publisher schema:nationality|schema:location/schema:addressCountry ?publisherNationality . } 
+        graph <http://master-data> { ?publisherNationality mads:authoritativeLabel ?publisherNationalityLabel . }
+        FILTER (lang(?publisherNationalityLabel) = 'en')
+      }
+      OPTIONAL { graph <http://beltrans-contributors> { ?publisher rdfs:label ?publisherLabel . } }
+
+      BIND(CONCAT( COALESCE(?publisherLabel, "missing name"), " (", ?publisherIdentifiers, ")") as ?publisherNameID)
+      # This subquery retrieves the local identifiers of the author
+      {
+        SELECT DISTINCT ?manifestation ?publisher (group_concat(distinct ?publisherIdentifier;SEPARATOR=',') as ?publisherIdentifiers)
+        WHERE { 
+          graph <http://beltrans-manifestations> {
+            ?manifestation schema:name ?title ;
+                           schema:publisher ?publisher .
+          }    
+          ?publisher schema:sameAs/dcterms:identifier ?publisherIdentifier . 
+        }
+        group by ?manifestation ?publisher
       }
     }
 

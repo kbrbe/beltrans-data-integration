@@ -1,0 +1,13 @@
+prefix rdagroup1elements: <http://rdvocab.info/Elements/>
+prefix rdagroup1elementsWrong: <http://rdvocab.info/elements/>
+
+# delete the wrong property with the wrong namespace and insert it with the correct namespace
+DELETE {
+  graph <http://kb-publications> { ?publication rdagroup1elementsWrong:publishersName ?publisherName . }
+}
+INSERT {
+  graph <http://kb-publications> { ?publication rdagroup1elements:publishersName ?publisherName . }
+}
+WHERE {
+  graph <http://kb-publications> { ?publication rdagroup1elementsWrong:publishersName ?publisherName . }
+}
