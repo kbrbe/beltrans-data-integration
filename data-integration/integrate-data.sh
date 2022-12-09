@@ -187,6 +187,7 @@ LINK_QUERY_CONT_TRANSLATORS="integration_queries/link-beltrans-manifestations-tr
 LINK_QUERY_CONT_ILLUSTRATORS="integration_queries/link-beltrans-manifestations-illustrators.sparql"
 LINK_QUERY_CONT_SCENARISTS="integration_queries/link-beltrans-manifestations-scenarists.sparql"
 LINK_QUERY_CONT_PUBLISHING_DIRECTORS="integration_queries/link-beltrans-manifestations-publishing-directors.sparql"
+LINK_QUERY_CONT_PUBLISHERS="integration_queries/link-beltrans-manifestations-publishers.sparql"
 
 DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
 DATA_PROFILE_QUERY_FILE_CONT_PERSONS="dataprofile-contributors-persons.sparql"
@@ -647,7 +648,7 @@ function integrate {
 
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" \
     "$LINK_QUERY_CONT_AUTHORS" "$LINK_QUERY_CONT_TRANSLATORS" "$LINK_QUERY_CONT_ILLUSTRATORS" \
-    "$LINK_QUERY_CONT_SCENARISTS" "$LINK_QUERY_CONT_PUBLISHING_DIRECTORS"
+    "$LINK_QUERY_CONT_SCENARISTS" "$LINK_QUERY_CONT_PUBLISHING_DIRECTORS" "$LINK_QUERY_CONT_PUBLISHERS"
 
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
