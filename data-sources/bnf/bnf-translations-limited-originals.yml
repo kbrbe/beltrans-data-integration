@@ -49,6 +49,14 @@ mappings:
       - [a, schema:CreativeWork]
       - [a, schema:Book]
       - [schema:name, $(sourceTitle)]
+      - p: schema:workTranslation
+        o:
+          function: grel:array_join
+          parameters:
+            - [grel:p_array_a, "http://data.bnf.fr/"]
+            - [grel:p_array_a, $(uri)]
+          type: iri
+ 
 
 
 
