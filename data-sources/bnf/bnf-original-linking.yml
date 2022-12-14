@@ -1,0 +1,57 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  bibo: "http://purl.org/ontology/bibo/"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  lang: "http://id.loc.gov/vocabulary/languages/"
+  schema: "http://schema.org/"
+  up: "http://users.ugent.be/~tdenies/up/"
+
+variables:
+  sourceTRLFRNL: &sourceTRLFRNL ${RML_SOURCE_BNF_TRL_ORIG_FR_NL}
+  sourceTRLNLFR: &sourceTRLNLFR ${RML_SOURCE_BNF_TRL_ORIG_NL_FR}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsSources:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping adds the language to the Dutch source of a creative work, currently on the LRM level of manifestations."
+    sources:
+      - access: *sourceTRLNLFR
+        referenceFormulation: csv
+        delimiter: ';' 
+      - access: *sourceTRLFRNL
+        referenceFormulation: csv
+        delimiter: ';' 
+    s:
+      function: grel:array_join
+      parameters:
+        - [grel:p_array_a, "http://data.bnf.fr/"]
+        - [grel:p_array_a, $(uri)]
+    po:
+      - p: schema:translationOfWork
+        o:
+          function: grel:array_join
+          parameters:
+            - [grel:p_array_a, "http://data.bnf.fr/"]
+            - [grel:p_array_a, $(uri)]
+            - [grel:p_array_a, "_source"]
+          type: iri
+
+
