@@ -55,6 +55,7 @@ mappings:
           parameters:
             - [grel:p_array_a, "http://data.bnf.fr/"]
             - [grel:p_array_a, $(uri)]
+            - [grel:p_array_a, "#about"]
           type: iri
  
 

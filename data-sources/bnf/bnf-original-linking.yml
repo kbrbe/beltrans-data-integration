@@ -44,6 +44,7 @@ mappings:
       parameters:
         - [grel:p_array_a, "http://data.bnf.fr/"]
         - [grel:p_array_a, $(uri)]
+        - [grel:p_array_a, "#about"]
     po:
       - p: schema:translationOfWork
         o:
