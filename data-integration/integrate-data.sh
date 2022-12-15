@@ -1043,10 +1043,10 @@ function extractBnF {
   time python -m $MODULE_NORMALIZE_1_N_COLUMNS -i $INPUT_BNF_TRL_ORIGINAL_LIST_NL_FR -o $bnfNormalizedSourceNLFR --delimiter ';' --number-of-columns 4
 
   echo "EXTRACTION - Normalize header names of BnF source titles list - FR-NL"
-  time python -m $MODULE_NORMALIZE_HEADERS -i $bnfNormalizedSourceFRNL --delimiter ';' --header-mapping-file $BNF_CSV_HEADER_CONVERSION -o $bnfNormalizedSourceAdaptedHeadersFRNL
+  time python -m $MODULE_NORMALIZE_HEADERS -i $bnfNormalizedSourceFRNL --delimiter ';' --header-mapping-file $BNF_CSV_HEADER_CONVERSION -o $bnfNormalizedSourceAdaptedHeaderFRNL
 
   echo "EXTRACTION - Normalize header names of BnF source titles list - NL-FR"
-  time python -m $MODULE_NORMALIZE_HEADERS -i $bnfNormalizedSourceNLFR --delimiter ';' --header-mapping-file $BNF_CSV_HEADER_CONVERSION -o $bnfNormalizedSourceAdaptedHeadersNLFR
+  time python -m $MODULE_NORMALIZE_HEADERS -i $bnfNormalizedSourceNLFR --delimiter ';' --header-mapping-file $BNF_CSV_HEADER_CONVERSION -o $bnfNormalizedSourceAdaptedHeaderNLFR
 
 }
 
