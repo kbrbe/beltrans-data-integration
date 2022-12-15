@@ -8,7 +8,7 @@ SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
 SCRIPT_EXTRACT_AGENTS_ORGS="../data-sources/kbr/authority-orgs-marc-to-csv.py"
 SCRIPT_EXTRACT_AGENTS_PERSONS="../data-sources/kbr/authority-persons-marc-to-csv.py"
 SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
-SCRIPT_NORMALIZE_HEADERS="../data-sources/kbr/replace-headers.py"
+MODULE_NORMALIZE_HEADERS="tools.csv.replace-headers"
 SCRIPT_CHANGE_PUBLISHER_NAME="../data-sources/kbr/change-publisher-name.py"
 SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-authorities.sh"
 SCRIPT_EXTRACT_SEPARATED_COL="../data-sources/kbr/extract-and-normalize-separated-strings.py"
@@ -34,6 +34,8 @@ MODULE_GET_RDF_XML_SUBJECTS="tools.xml.get-subjects"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
 MODULE_EXTRACT_COLUMNS="tools.csv.extract_columns"
 
+MODULE_NORMALIZE_1_N_COLUMNS="tools.csv.normalize_1_n_relationship"
+
 # the following script is an older deprecated version of the script above
 SCRIPT_EXTRACT_COLUMN="../data-sources/bnf/extractColumn.py" 
 
@@ -53,6 +55,7 @@ MODULE_POSTPROCESS_SORT_COLUMN_VALUES="tools.csv.sort_values_in_columns"
 
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
+BNF_CSV_HEADER_CONVERSION="../data-sources/bnf/export-headers-mapping.csv"
 KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 
 # #############################################################################
@@ -96,6 +99,8 @@ INPUT_BNF_TRL_NL_FR="../data-sources/bnf/BnF_NL-FR_1970-2020_3762notices.csv"
 INPUT_BNF_CONT_ISNI="../data-sources/bnf/external/dump_extref-isni_exact_match.xml"
 INPUT_BNF_CONT_VIAF="../data-sources/bnf/external/dump_extref-viaf_exact_match.xml"
 INPUT_BNF_CONT_WIKIDATA="../data-sources/bnf/external/dump_extref-wikidata_exact_match.xml"
+INPUT_BNF_TRL_ORIGINAL_LIST_FR_NL="../data-sources/bnf/Bnf_FR-NL_1970-2020_598notices_source-titles.csv"
+INPUT_BNF_TRL_ORIGINAL_LIST_NL_FR="../data-sources/bnf/Bnf_NL-FR_1970-2020_3770notices_source-titles.csv"
 
 
 # KB
@@ -135,6 +140,7 @@ TRIPLE_STORE_GRAPH_BNF_CONT="http://bnf-contributors"
 TRIPLE_STORE_GRAPH_BNF_CONT_ISNI="http://bnf-contributors-isni"
 TRIPLE_STORE_GRAPH_BNF_CONT_VIAF="http://bnf-contributors-viaf"
 TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA="http://bnf-contributors-wikidata"
+TRIPLE_STORE_GRAPH_BNF_TRL_ORIG="http://bnf-originals"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_ORIG_LA="http://kbr-originals-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
@@ -369,6 +375,11 @@ SUFFIX_BNF_TRL_IDS_FR_NL="bnf-translation-ids-fr-nl.csv"
 SUFFIX_BNF_TRL_IDS_NL_FR="bnf-translation-ids-nl-fr.csv"
 SUFFIX_BNF_TRL_IDS="bnf-translation-ids.csv"
 
+SUFFIX_BNF_TRL_ORIG_FR_NL="bnf-originals-fr-nl.csv"
+SUFFIX_BNF_TRL_ORIG_NORM_FR_NL="bnf-originals-fr-nl-normalized.csv"
+SUFFIX_BNF_TRL_ORIG_NL_FR="bnf-originals-nl-fr.csv"
+SUFFIX_BNF_TRL_ORIG_NORM_NL_FR="bnf-originals-nl-fr-normalized.csv"
+
 SUFFIX_BNF_ISBN10_ISBN13_CSV="bnf-isbn10-isbn13.csv"
 SUFFIX_BNF_ISBN10_ISBN13_ENRICHED_CSV="bnf-isbn10-isbn13-enriched.ttl"
 SUFFIX_BNF_ISBN13_NO_HYPHEN_CSV="bnf-records-no-isbn13-hyphen.csv"
@@ -456,6 +467,9 @@ SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
 #
 SUFFIX_BNF_TRL_FR_NL_LD="fr_nl-translations.xml"
 SUFFIX_BNF_TRL_NL_FR_LD="nl_fr-translations.xml"
+
+SUFFIX_BNF_TRL_ORIG_LD="bnf-limited-originals.ttl"
+SUFFIX_BNF_TRL_ORIG_LINKS_LD="bnf-limited-originals-links.ttl"
 
 SUFFIX_BNF_CONT_LD="bnf-contributors-persons.xml"
 SUFFIX_BNF_CONT_ORGS_LD="bnf-contributors-orgs.xml"
@@ -945,6 +959,11 @@ function extractBnF {
   bnfBelgianPublications="$integrationName/bnf/translations/$SUFFIX_BNF_BELGIAN_PUBS_IDS"
   bnfTranslationIDs="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS"
 
+  bnfNormalizedSourceAdaptedHeaderFRNL="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_NORM_FR_NL"
+  bnfNormalizedSourceAdaptedHeaderNLFR="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_NORM_NL_FR"
+  bnfNormalizedSourceFRNL="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_FR_NL"
+  bnfNormalizedSourceNLFR="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_NL_FR"
+
   bnfFRNLRelevantTranslationData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_NL_LD"
   bnfNLFRRelevantTranslationData="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_FR_LD"
   bnfContributorDataPersons="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_LD"
@@ -995,24 +1014,40 @@ function extractBnF {
 
   # extract the actual data of all BELTRANS translations contributors - persons
   echo "EXTRACTION - Extract BnF contributor data (persons)"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_PERSON_AUTHORS -o $bnfContributorDataPersons -f $bnfPersonsBELTRANS
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_PERSON_AUTHORS -o $bnfContributorDataPersons -f $bnfPersonsBELTRANS
 
   # extract the actual data of all BELTRANS translations contributors - orgs
   echo "EXTRACTION - Extract BnF contributor data (orgs)"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_ORG_AUTHORS -o $bnfContributorDataOrgs -f $bnfOrgsBELTRANS
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_ORG_AUTHORS -o $bnfContributorDataOrgs -f $bnfOrgsBELTRANS
   
   # extract the actual links between publications and contributors (not just looking up things) - ALL links are taken as the subject with all properties is extracted
   echo "EXTRACTION - Extract links between BELTRANS relevant BnF publications and BnF contributors"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONTRIBUTIONS -o $bnfContributionLinksData -f $bnfBelgianPublications -f $bnfTranslationIDs
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONTRIBUTIONS -o $bnfContributionLinksData -f $bnfBelgianPublications -f $bnfTranslationIDs
 
   echo "EXTRACTION - Extract links between BnF contributors and ISNI"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfPersonsBELTRANS
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfPersonsBELTRANS
 
   echo "EXTRACTION - Extract links between BnF contributors and VIAF"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfPersonsBELTRANS
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfPersonsBELTRANS
 
   echo "EXTRACTION - Extract links between BnF contributors and Wikidata"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfPersonsBELTRANS
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfPersonsBELTRANS
+
+  #
+  # We also have a list of source titles for BnF translations
+  #
+  echo "EXTRACTION - Normalize list of BnF source titles (create 1:n relations) - FR-NL"
+  time python -m $MODULE_NORMALIZE_1_N_COLUMNS -i $INPUT_BNF_TRL_ORIGINAL_LIST_FR_NL -o $bnfNormalizedSourceFRNL --delimiter ';' --number-of-columns 4
+
+  echo "EXTRACTION - Normalize list of BnF source titles (create 1:n relations) - NL-FR"
+  time python -m $MODULE_NORMALIZE_1_N_COLUMNS -i $INPUT_BNF_TRL_ORIGINAL_LIST_NL_FR -o $bnfNormalizedSourceNLFR --delimiter ';' --number-of-columns 4
+
+  echo "EXTRACTION - Normalize header names of BnF source titles list - FR-NL"
+  time python -m $MODULE_NORMALIZE_HEADERS -i $bnfNormalizedSourceFRNL --delimiter ';' --header-mapping-file $BNF_CSV_HEADER_CONVERSION -o $bnfNormalizedSourceAdaptedHeaderFRNL
+
+  echo "EXTRACTION - Normalize header names of BnF source titles list - NL-FR"
+  time python -m $MODULE_NORMALIZE_HEADERS -i $bnfNormalizedSourceNLFR --delimiter ';' --header-mapping-file $BNF_CSV_HEADER_CONVERSION -o $bnfNormalizedSourceAdaptedHeaderNLFR
+
 }
 
 # -----------------------------------------------------------------------------
@@ -1283,8 +1318,25 @@ function transformKB {
 
 # -----------------------------------------------------------------------------
 function transformBnF {
+
   local integrationName=$1
   echo "TRANSFORMATION - Map BnF translation data to RDF (nothing to do, the extraction step already produced RDF)"
+
+  mkdir -p $integrationName/bnf/rdf 
+
+  local bnfLimitedOriginalInformationTurtle="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_ORIG_LD"
+  local bnfLimitedOriginalInformationLinksTurtle="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_ORIG_LINKS_LD"
+
+  # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
+  export RML_SOURCE_BNF_TRL_ORIG_FR_NL="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_NORM_FR_NL"
+  export RML_SOURCE_BNF_TRL_ORIG_NL_FR="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_NORM_NL_FR"
+
+  # 2) execute the mapping
+  echo "TRANSFORMATION - Map BnF translation's limited source information ..."
+  . map.sh ../data-sources/bnf/bnf-translations-limited-originals.yml $bnfLimitedOriginalInformationTurtle
+
+  echo "TRANSFORMATION - Map links from BnF translations to limited source information ..."
+  . map.sh ../data-sources/bnf/bnf-original-linking.yml $bnfLimitedOriginalInformationLinksTurtle
 }
 
 # -----------------------------------------------------------------------------
@@ -2112,6 +2164,9 @@ function loadBnF {
   local bnfContributorVIAFData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
   local bnfContributorWikidataData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
 
+  local bnfLimitedOriginalInformationTurtle="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_ORIG_LD"
+  local bnfLimitedOriginalInformationLinksTurtle="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_ORIG_LINKS_LD"
+
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load BNF translations FR-NL ..."
@@ -2122,7 +2177,6 @@ function loadBnF {
 
   echo "Load BnF contributors persons and organizations ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData" "$bnfContributorDataOrgs"
-
 
   echo "Load BnF publication-contributor links ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS" "$bnfContributionLinksData"
@@ -2138,6 +2192,12 @@ function loadBnF {
 
   echo "Load BnF publication data to a single named graph"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$TRANSFORM_QUERY_BNF_TRL_FR_NL" "$TRANSFORM_QUERY_BNF_TRL_NL_FR"
+
+  echo "Load BnF limited originals into separate named graph ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_ORIG" "$bnfLimitedOriginalInformationTurtle"
+
+  echo "Load BnF original links into the single BnF named graph ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" "$bnfLimitedOriginalInformationLinksTurtle"
 
 
   bnfISBN10ISBN13="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN10_ISBN13_CSV"
@@ -2325,7 +2385,7 @@ function normalizeCSVHeaders {
 
   checkFile $input
   checkFile $headerConversionTable
-  python $SCRIPT_NORMALIZE_HEADERS -i $input -o $output -m $headerConversionTable -d ';'
+  python -m $MODULE_NORMALIZE_HEADERS -i $input -o $output -m $headerConversionTable -d ';'
 }
 
 # -----------------------------------------------------------------------------
