@@ -60,12 +60,13 @@ def main():
 
   numberRecords = options.number_records
   maxRecords = options.max_records
-  secondsBetweenAPIRequests = 5
+  secondsBetweenAPIRequests = 10
   baseURL = 'https://isni-m.oclc.org/sru'
-  # query = 'pica.noi="BE"'
+  query = 'pica.noi = "BE" and pica.st = "A"'
+  #query = 'pica.noi="BE"'
   # query = 'pica.cn="KBR"'
   # it should not be already url encoded query = 'pica.cn%3D+%22KBR+%22'
-  query='pica.cn=KBR and pica.st=a'
+  #query='pica.cn=KBR and pica.st=a'
   dateString = date.today().strftime('%Y-%m-%d')
   outputFilePrefix = dateString + "-sru-result"
 
