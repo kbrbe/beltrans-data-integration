@@ -19,6 +19,10 @@ prefixes:
   countries: "http://id.loc.gov/vocabulary/countries/"
   schema: "http://schema.org/"
 
+variables:
+  authorities: &authorities "isni/2022-12-22_isni-sru-authorities.csv"
+  authorityLinks: &authorityLinks "isni/2022-12-22_isni-sru-identifier-links.csv"
+
 mappings:
 
   # ---------------------------------------------------------------------------
@@ -28,7 +32,7 @@ mappings:
     description: "This mapping creates authorities represented as schema Person."
     sources:
 #      - [kbr/belgian-authors-enriched.csv~csv]
-      - access: "isni/2022-04-21-isni-authorities-belgian.csv"
+      - access: *authorities
         referenceFormulation: csv
         delimiter: ','
     s: btisni:authority_$(ISNI)
@@ -79,7 +83,7 @@ mappings:
     description: "This mapping creates links to other identifiers"
     sources:
 #      - [kbr/belgian-authors-enriched.csv~csv]
-      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
+      - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
     s: btisni:authority_$(ISNI)
@@ -126,7 +130,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for ISNI identifiers according to BIBFRAME."
     sources:
-      - access: "isni/2022-04-21-isni-authorities-belgian.csv"
+      - access: *authorities
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_isni_$(ISNI)
@@ -141,7 +145,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
     sources:
-      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
+      - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_viaf_$(ISNI)
@@ -162,7 +166,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for BNF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated BNF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'BNF' identifiers."
     sources:
-      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
+      - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_bnf_$(ISNI)
@@ -183,7 +187,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for NTA identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated NTA subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'NTA' identifiers."
     sources:
-      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
+      - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_nta_$(ISNI)
@@ -204,7 +208,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for DNB identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated DNB subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'DNB' identifiers."
     sources:
-      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
+      - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_dnb_$(ISNI)
@@ -224,7 +228,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for Wikidata identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated Wikidata subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'Wikidata' identifiers."
     sources:
-      - access: "isni/2022-04-21-isni-authorities-identifiers.csv"
+      - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
     s: btisni:identifier_wikidata_$(ISNI)
@@ -245,7 +249,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates descriptions of authorities represented as schema WebPage."
     sources:
-      - access: "isni/2022-04-21-isni-authorities-belgian.csv"
+      - access: *authorities
         referenceFormulation: csv
         delimiter: ','
     s: btabout:authority_$(ISNI)
