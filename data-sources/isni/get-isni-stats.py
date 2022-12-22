@@ -94,7 +94,7 @@ def parseIdentity(stats, identityTag):
       parsePersonOrFiction(stats, identityField)
     if identityField.tag == 'organisation':
       pass
- 
+
 # -----------------------------------------------------------------------------
 def parseISNINotAssignedMetadata(stats, metadataField):
   """This function parses the 'ISNIMetadata' field of 'ISNINotAssigned' records of the ISNI extended schema: https://isni.oclc.org:2443/isni/ISNI_enquiry_response/ISNI_enquiry_response_xsd.html#responseRecord_responseRecord_ISNINotAssigned_ISNIMetadata"""
@@ -107,9 +107,44 @@ def parseISNINotAssignedMetadata(stats, metadataField):
 def parseISNIAssignedMetadata(stats, metadataField):
   """This function parses the 'ISNIMetadata' field of 'ISNIAssigned' records of the ISNI extended schema: https://isni.oclc.org:2443/isni/ISNI_enquiry_response/ISNI_enquiry_response_xsd.html#responseRecord_responseRecord_ISNIAssigned_ISNIMetadata"""
 
+
   for metadata in metadataField:
     if metadata.tag == 'identity':
       parseIdentity(stats, metadata)
+
+  sources = metadataField.findall('./sources')
+
+  sourcesOfThisRecord = set()
+  sourceIdentifiersOfThisRecord = {}
+  for source in sources:
+
+    # get the name and identifier of the source
+    sourceName = source.find('./codeOfSource').text
+    sourceIdentifierElement = source.find('./sourceIdentifier')
+    sourceIdentifier = sourceIdentifierElement.text if sourceIdentifierElement else ''
+
+    # if we already processed this source this is now (one of the) duplicate source identifier(s)
+    if sourceName in sourcesOfThisRecord:
+
+      # already count a duplicate for this sourceName, 
+      # independent of how many duplicates there are for this source name
+      utils.count(stats, 'duplicate-records-' + sourceName)
+
+      # add the found identifier to a key value list, for example "kbr: [123,456]"
+      # like this we can create more sophisticated statistics
+      # about the number of duplicates for this source name
+      sourceIdentifiersOfThisRecord[sourceName].append(sourceIdentifier)
+         
+    else:
+      # we did not yet process any sourceName of this record, thus count it
+      # like this we count the first occurrance of sourceName
+      utils.count(stats, f'source-{sourceName}')
+      sourcesOfThisRecord.add(sourceName)
+      sourceIdentifiersOfThisRecord[sourceName] = [sourceIdentifier]
+
+  for sourceName, identifierList in sourceIdentifiersOfThisRecord.items():
+    if len(identifierList) > 1: 
+      utils.count(stats, f'duplicate-{len(identifierList)}-records-{sourceName}')
 
 # -----------------------------------------------------------------------------
 def parseISNIXMLFile(stats, uniqueISNINumbers, filename):
