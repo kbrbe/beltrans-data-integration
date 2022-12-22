@@ -23,12 +23,18 @@ def addIdentifiersToFile(elem, writer):
       sourceName = utils.getElementValue(source.find('codeOfSource'))
       identifier = utils.getElementValue(source.find('sourceIdentifier'))
 
-      newRecord = {
-       'ISNI': isniID,
-       'source': sourceName,
-       'identifier': identifier
-      }
-      writer.writerow(newRecord)
+      # sometimes a source of the ISNI is ISNI, but the value then is prefixed with VIAF or BnF,
+      # in those cases the VIAF might not be valid and the actual VIAF is in a separate source
+      # with sourceName 'VIAF', thus skip the sources with sourceName 'ISNI'
+      if sourceName == 'ISNI':
+        pass
+      else:
+        newRecord = {
+         'ISNI': isniID,
+         'source': sourceName,
+         'identifier': identifier
+        }
+        writer.writerow(newRecord)
 
     # Wikidata identifiers are often only mentioned in a name-variant of a source of the record
     for name in elem.findall('./ISNIMetadata/identity/personOrFiction/personalName'):
@@ -129,6 +135,7 @@ def main():
       if filename.endswith('.xml'):
         f = os.path.join(options.input_folder, filename)
 
+        print(f'processing file {filename} ...')
         for event, elem in ET.iterparse(f, events=('start', 'end')):
 
           # The parser finished reading one responseRecord, get information and then discard the record
