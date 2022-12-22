@@ -2,6 +2,9 @@
 
 Via the member area of OCLC we have access to **60,564** Belgians. We use the Python script `retrieveSRURecords.py` to obtain data from the Search/Retrieve via URL (SRU) API of OCLC.
 
+November 2021: 60,564 Belgians
+November 2022: 62,484 Belgians (46,460 with status assigned, from which 34,036 are persons)
+
 ## Download ISNI records via the SRU API
 ```
 # create and use a new python environment
@@ -20,6 +23,962 @@ Via the script `get-isni-stats.py` we can compute the statistics of the collecte
 ```
 python get-isni-stats.py --input-folder .
 ```
+
+### December 2022
+
+python get-isni-stats.py -i sru-xml/2022-12-12_isni-assigned_belgian/
+unique unformatted ISNI numbers 48460
+ISNIAssigned
+	48460
+assignedConfidence
+	min 30.0, max 99.0, avg 55.07513413124226, amount 48460
+duplicate-10-records-ZETO
+	2
+duplicate-11-records-ZETO
+	2
+duplicate-12-records-ZETO
+	3
+duplicate-13-records-ZETO
+	6
+duplicate-15-records-ZETO
+	1
+duplicate-2-records-BAnQ
+	4
+duplicate-2-records-BL
+	1
+duplicate-2-records-BLSA
+	1
+duplicate-2-records-BNF
+	208
+duplicate-2-records-BNL
+	2
+duplicate-2-records-BOEK
+	1
+duplicate-2-records-CDR
+	1
+duplicate-2-records-CEDA
+	12
+duplicate-2-records-DAI
+	6
+duplicate-2-records-ETHOS
+	1
+duplicate-2-records-ISNI
+	50
+duplicate-2-records-KBR
+	1152
+duplicate-2-records-LCNACO
+	57
+duplicate-2-records-MUBZ
+	14
+duplicate-2-records-NLFIN
+	2
+duplicate-2-records-NLN
+	221
+duplicate-2-records-NLS
+	3
+duplicate-2-records-NTA
+	208
+duplicate-2-records-OCLCT
+	1313
+duplicate-2-records-VIAF
+	631
+duplicate-2-records-ZETO
+	61
+duplicate-20-records-ZETO
+	1
+duplicate-23-records-ZETO
+	1
+duplicate-24-records-ZETO
+	1
+duplicate-28-records-ZETO
+	1
+duplicate-3-records-BNF
+	4
+duplicate-3-records-ISNI
+	2
+duplicate-3-records-MUBZ
+	2
+duplicate-3-records-NTA
+	5
+duplicate-3-records-OCLCT
+	14
+duplicate-3-records-VIAF
+	45
+duplicate-3-records-ZETO
+	29
+duplicate-38-records-ZETO
+	1
+duplicate-4-records-CDR
+	1
+duplicate-4-records-CEDA
+	1
+duplicate-4-records-ISNI
+	1
+duplicate-4-records-NLFIN
+	1
+duplicate-4-records-OCLCT
+	7
+duplicate-4-records-VIAF
+	8
+duplicate-4-records-ZETO
+	20
+duplicate-5-records-VIAF
+	3
+duplicate-5-records-ZETO
+	16
+duplicate-6-records-ISNI
+	1
+duplicate-6-records-VIAF
+	1
+duplicate-6-records-ZETO
+	11
+duplicate-7-records-ZETO
+	5
+duplicate-8-records-BOWKER
+	1
+duplicate-8-records-ZETO
+	2
+duplicate-9-records-ZETO
+	4
+duplicate-records-BAnQ
+	4
+duplicate-records-BL
+	1
+duplicate-records-BLSA
+	1
+duplicate-records-BNF
+	216
+duplicate-records-BNL
+	2
+duplicate-records-BOEK
+	1
+duplicate-records-BOWKER
+	7
+duplicate-records-CDR
+	4
+duplicate-records-CEDA
+	15
+duplicate-records-DAI
+	6
+duplicate-records-ETHOS
+	1
+duplicate-records-ISNI
+	62
+duplicate-records-KBR
+	1152
+duplicate-records-LCNACO
+	57
+duplicate-records-MUBZ
+	18
+duplicate-records-NLFIN
+	5
+duplicate-records-NLN
+	221
+duplicate-records-NLS
+	3
+duplicate-records-NTA
+	218
+duplicate-records-OCLCT
+	1362
+duplicate-records-VIAF
+	762
+duplicate-records-ZETO
+	659
+multipleAssociatedCountries
+	min 0.0, max 1.0, avg 0.8086588484260647, amount 34023
+multipleGenders
+	min 0.0, max 1.0, avg 0.03626958234135732, amount 34023
+multipleNationalities
+	min 0.0, max 1.0, avg 0.03288951591570408, amount 34023
+name-language-ara
+	3
+name-language-dut
+	9
+name-language-eng
+	2
+name-language-fre
+	56
+name-language-geo
+	1
+name-language-ger
+	3
+name-language-lat
+	16
+name-language-mac
+	1
+name-language-rus
+	1
+name-language-spa
+	2
+name-language-srp
+	1
+numberOfOrgs
+	14424
+numberOfPersons
+	34036
+organisation
+	14424
+person-associated-AD
+	9
+person-associated-AE
+	3
+person-associated-AF
+	2
+person-associated-AG
+	4
+person-associated-AI
+	1
+person-associated-AL
+	12
+person-associated-AM
+	2
+person-associated-AO
+	2
+person-associated-AR
+	151
+person-associated-AS
+	1
+person-associated-AT
+	866
+person-associated-AU
+	177
+person-associated-AZ
+	1
+person-associated-BA
+	14
+person-associated-BB
+	2
+person-associated-BD
+	25
+person-associated-BE
+	56167
+person-associated-BF
+	4
+person-associated-BG
+	57
+person-associated-BH
+	1
+person-associated-BI
+	14
+person-associated-BJ
+	2
+person-associated-BM
+	2
+person-associated-BO
+	2
+person-associated-BR
+	446
+person-associated-BS
+	1
+person-associated-BY
+	25
+person-associated-BZ
+	7
+person-associated-CA
+	1916
+person-associated-CD
+	194
+person-associated-CF
+	1
+person-associated-CG
+	19
+person-associated-CH
+	3635
+person-associated-CI
+	7
+person-associated-CL
+	41
+person-associated-CM
+	20
+person-associated-CN
+	143
+person-associated-CO
+	47
+person-associated-CR
+	7
+person-associated-CS
+	89
+person-associated-CU
+	12
+person-associated-CV
+	1
+person-associated-CW
+	10
+person-associated-CY
+	8
+person-associated-CZ
+	542
+person-associated-DE
+	11631
+person-associated-DK
+	579
+person-associated-DO
+	7
+person-associated-DZ
+	20
+person-associated-EC
+	16
+person-associated-EE
+	14
+person-associated-EG
+	103
+person-associated-ES
+	2034
+person-associated-ET
+	6
+person-associated-FI
+	148
+person-associated-FK
+	1
+person-associated-FO
+	3
+person-associated-FR
+	29221
+person-associated-GA
+	4
+person-associated-GB
+	6698
+person-associated-GE
+	17
+person-associated-GF
+	3
+person-associated-GH
+	1
+person-associated-GL
+	1
+person-associated-GN
+	2
+person-associated-GP
+	4
+person-associated-GQ
+	13
+person-associated-GR
+	146
+person-associated-GT
+	3
+person-associated-GW
+	22
+person-associated-HK
+	8
+person-associated-HN
+	4
+person-associated-HR
+	304
+person-associated-HT
+	4
+person-associated-HU
+	248
+person-associated-ID
+	59
+person-associated-IE
+	188
+person-associated-IL
+	151
+person-associated-IN
+	160
+person-associated-IQ
+	2
+person-associated-IR
+	16
+person-associated-IS
+	6
+person-associated-IT
+	3520
+person-associated-JE
+	1
+person-associated-JM
+	4
+person-associated-JP
+	660
+person-associated-KE
+	12
+person-associated-KH
+	2
+person-associated-KI
+	805
+person-associated-KP
+	3
+person-associated-KR
+	12
+person-associated-KW
+	2
+person-associated-LB
+	70
+person-associated-LI
+	56
+person-associated-LK
+	5
+person-associated-LR
+	15
+person-associated-LT
+	41
+person-associated-LU
+	573
+person-associated-LV
+	86
+person-associated-LY
+	2
+person-associated-MA
+	18
+person-associated-MC
+	294
+person-associated-MD
+	2
+person-associated-ME
+	1
+person-associated-MG
+	4
+person-associated-MK
+	10
+person-associated-ML
+	6
+person-associated-MM
+	37
+person-associated-MN
+	3
+person-associated-MO
+	1
+person-associated-MR
+	1
+person-associated-MT
+	5
+person-associated-MU
+	2
+person-associated-MV
+	9
+person-associated-MX
+	128
+person-associated-MY
+	2
+person-associated-MZ
+	3
+person-associated-NC
+	1487
+person-associated-NE
+	76
+person-associated-NG
+	10
+person-associated-NI
+	7
+person-associated-NL
+	14180
+person-associated-NO
+	92
+person-associated-NP
+	1
+person-associated-NR
+	1
+person-associated-NZ
+	13
+person-associated-PA
+	2
+person-associated-PE
+	35
+person-associated-PF
+	2
+person-associated-PH
+	5
+person-associated-PK
+	6
+person-associated-PL
+	1732
+person-associated-PR
+	4
+person-associated-PT
+	718
+person-associated-PY
+	7
+person-associated-QA
+	1
+person-associated-RE
+	12
+person-associated-RO
+	105
+person-associated-RS
+	10
+person-associated-RU
+	451
+person-associated-RW
+	25
+person-associated-SA
+	30
+person-associated-SC
+	24
+person-associated-SE
+	366
+person-associated-SG
+	104
+person-associated-SI
+	45
+person-associated-SK
+	62
+person-associated-SL
+	3
+person-associated-SN
+	48
+person-associated-SR
+	18
+person-associated-SV
+	103
+person-associated-SY
+	22
+person-associated-SZ
+	6
+person-associated-TD
+	18
+person-associated-TG
+	1
+person-associated-TH
+	24
+person-associated-TJ
+	6
+person-associated-TL
+	28
+person-associated-TN
+	21
+person-associated-TR
+	123
+person-associated-TT
+	7
+person-associated-TW
+	578
+person-associated-TZ
+	8
+person-associated-UA
+	78
+person-associated-UG
+	5
+person-associated-UM
+	1
+person-associated-US
+	6788
+person-associated-UY
+	13
+person-associated-VA
+	159
+person-associated-VC
+	1
+person-associated-VE
+	46
+person-associated-VN
+	18
+person-associated-YT
+	1
+person-associated-ZA
+	101
+person-associated-ZM
+	7
+person-associated-ZW
+	10
+person-gender-female
+	7395
+person-gender-male
+	27206
+person-gender-unknown
+	203
+person-nationality-AF
+	1
+person-nationality-AG
+	1
+person-nationality-AL
+	10
+person-nationality-AM
+	2
+person-nationality-AO
+	2
+person-nationality-AR
+	25
+person-nationality-AT
+	137
+person-nationality-AU
+	19
+person-nationality-BA
+	2
+person-nationality-BE
+	42031
+person-nationality-BF
+	1
+person-nationality-BG
+	22
+person-nationality-BI
+	5
+person-nationality-BJ
+	2
+person-nationality-BL
+	11
+person-nationality-BR
+	24
+person-nationality-BY
+	2
+person-nationality-BZ
+	1
+person-nationality-CA
+	90
+person-nationality-CD
+	47
+person-nationality-CG
+	8
+person-nationality-CH
+	220
+person-nationality-CL
+	11
+person-nationality-CM
+	4
+person-nationality-CN
+	20
+person-nationality-CO
+	6
+person-nationality-CU
+	4
+person-nationality-CZ
+	23
+person-nationality-DE
+	993
+person-nationality-DK
+	16
+person-nationality-DZ
+	2
+person-nationality-EC
+	1
+person-nationality-EE
+	1
+person-nationality-EG
+	15
+person-nationality-ES
+	143
+person-nationality-FI
+	4
+person-nationality-FR
+	2024
+person-nationality-GA
+	2
+person-nationality-GB
+	188
+person-nationality-GE
+	5
+person-nationality-GH
+	1
+person-nationality-GR
+	18
+person-nationality-GT
+	1
+person-nationality-HK
+	1
+person-nationality-HR
+	4
+person-nationality-HU
+	23
+person-nationality-ID
+	7
+person-nationality-IE
+	15
+person-nationality-IL
+	32
+person-nationality-IN
+	23
+person-nationality-IQ
+	3
+person-nationality-IR
+	3
+person-nationality-IS
+	4
+person-nationality-IT
+	343
+person-nationality-JO
+	2
+person-nationality-JP
+	10
+person-nationality-KE
+	1
+person-nationality-KR
+	4
+person-nationality-LB
+	6
+person-nationality-LK
+	1
+person-nationality-LT
+	2
+person-nationality-LU
+	66
+person-nationality-LV
+	3
+person-nationality-MA
+	14
+person-nationality-MC
+	1
+person-nationality-MD
+	1
+person-nationality-ME
+	4
+person-nationality-MK
+	3
+person-nationality-ML
+	1
+person-nationality-MQ
+	1
+person-nationality-MX
+	12
+person-nationality-MY
+	1
+person-nationality-NC
+	8
+person-nationality-NE
+	4
+person-nationality-NF
+	2
+person-nationality-NG
+	3
+person-nationality-NL
+	2017
+person-nationality-NO
+	12
+person-nationality-NZ
+	2
+person-nationality-PE
+	4
+person-nationality-PL
+	64
+person-nationality-PR
+	1
+person-nationality-PT
+	29
+person-nationality-PY
+	2
+person-nationality-RO
+	14
+person-nationality-RS
+	13
+person-nationality-RU
+	44
+person-nationality-RW
+	3
+person-nationality-SE
+	47
+person-nationality-SG
+	3
+person-nationality-SI
+	2
+person-nationality-SN
+	3
+person-nationality-SR
+	5
+person-nationality-SY
+	2
+person-nationality-TH
+	1
+person-nationality-TN
+	2
+person-nationality-TR
+	10
+person-nationality-TZ
+	1
+person-nationality-UA
+	3
+person-nationality-US
+	306
+person-nationality-UY
+	3
+person-nationality-VA
+	4
+person-nationality-VE
+	1
+person-nationality-ZA
+	17
+person-nationality-ZW
+	1
+person-nationality-al
+	1
+person-nationality-at
+	8
+person-nationality-au
+	1
+person-nationality-be
+	4618
+person-nationality-belgië
+	42
+person-nationality-br
+	2
+person-nationality-by
+	1
+person-nationality-ca
+	7
+person-nationality-ch
+	10
+person-nationality-cn
+	2
+person-nationality-de
+	20
+person-nationality-dm
+	1
+person-nationality-es
+	5
+person-nationality-flemish
+	1
+person-nationality-fr
+	153
+person-nationality-gb
+	9
+person-nationality-ht
+	1
+person-nationality-hu
+	1
+person-nationality-il
+	4
+person-nationality-iq
+	1
+person-nationality-it
+	12
+person-nationality-lb
+	1
+person-nationality-lu
+	6
+person-nationality-ma
+	3
+person-nationality-mk
+	2
+person-nationality-nl
+	41
+person-nationality-pl
+	5
+person-nationality-pt
+	5
+person-nationality-rs
+	1
+person-nationality-ru
+	2
+person-nationality-sk
+	1
+person-nationality-tr
+	1
+person-nationality-us
+	16
+person-nationality-uy
+	1
+person-nationality-xx
+	5
+person-nationality-za
+	2
+personOrFiction
+	34036
+responseRecord
+	48460
+source-ALCS
+	54
+source-AMS
+	10
+source-AUVLU
+	1
+source-BAnQ
+	1179
+source-BL
+	6
+source-BLSA
+	61
+source-BNF
+	24801
+source-BNL
+	61
+source-BOEK
+	498
+source-BOWKER
+	1
+source-BOWP
+	1
+source-BTLF
+	143
+source-CASALINI
+	1
+source-CDR
+	1817
+source-CEDA
+	1640
+source-CEDR
+	3
+source-DAI
+	252
+source-ETHOS
+	32
+source-GOOG
+	31
+source-HARV
+	7
+source-ICLA
+	1
+source-ICON
+	5
+source-IPDA
+	460
+source-ISNI
+	465
+source-JNAM
+	9
+source-KBR
+	20917
+source-KOREA
+	65
+source-LCNACO
+	19766
+source-MUBZ
+	6234
+source-NG
+	2
+source-NLFIN
+	164
+source-NLGRU
+	6
+source-NLL2U
+	24
+source-NLMAA
+	6
+source-NLN
+	6314
+source-NLQGE
+	10
+source-NLQGJ
+	14
+source-NLQGK
+	9
+source-NLQHU
+	3
+source-NLS
+	788
+source-NLVUAMS
+	5
+source-NLWURST
+	1
+source-NTA
+	19336
+source-OCLCT
+	3033
+source-OPENL
+	140
+source-ORCID
+	17
+source-PROL
+	8
+source-PROQ
+	9
+source-QUANSIC
+	34
+source-SCHU
+	195
+source-SNDEXCH
+	33
+source-SWISP
+	7
+source-VIAF
+	28134
+source-WISEBAND
+	4
+source-ZETO
+	496
+source-scholarKR
+	3
+unformattedISNINumbers
+	48460
+
+
+### November 2021
 
 We computed the statistics shown in the next section, but the most important statistics (based on proximity to Belgium and higher numbers) are probably:
 
