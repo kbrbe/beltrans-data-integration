@@ -96,6 +96,13 @@ mappings:
             - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "VIAF"]
       - p: bf:identifiedBy
+        o: btisni:identifier_kbr_$(ISNI)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(source)]
+            - [grel:valueParameter2, "KBR"]
+      - p: bf:identifiedBy
         o: btisni:identifier_bnf_$(ISNI)~iri
         condition:
           function: idlab-fn:equal
