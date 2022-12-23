@@ -100,6 +100,15 @@ mappings:
           parameters:
             - [grel:valueParameter, $(viaf_id)]
             - [grel:valueParameter2, ""]
+      - p: bf:identifiedBy
+        o: btid:identifier_kbr_$(authorityID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(authorityID)]
+            - [grel:valueParameter2, ""]
+
+
 
 
 
