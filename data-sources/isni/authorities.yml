@@ -227,7 +227,7 @@ mappings:
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "NTA"]
-      - [rdf:value, $(identifier)]
+      - [rdf:value, p$(identifier)]
 
 
   # ---------------------------------------------------------------------------
