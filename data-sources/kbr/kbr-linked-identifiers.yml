@@ -65,4 +65,24 @@ mappings:
       - [rdfs:label, "VIAF"]
       - [rdf:value, $(viaf_id)]
 
+  # ---------------------------------------------------------------------------
+  #
+  authorsKBR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates entities for KBR identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated KBR subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'KBR' identifiers."
+    sources:
+      - access: *sourceKBRLinkedAuthorities
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:identifier_kbr_$(authorityID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(authorityID)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "KBR"]
+      - [rdf:value, $(authorityID)]
+
 

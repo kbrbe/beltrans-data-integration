@@ -1,5 +1,5 @@
 "sourceType","sourceName","identifiersToAdd","sourceGraph"
-"persons","ISNI-SRU","ISNI,VIAF,NTA,Wikidata","http://isni-sru"
+"persons","ISNI-SRU","ISNI,VIAF,NTA,KBR,Wikidata","http://isni-sru"
 "persons","KBR","KBR,ISNI,VIAF,Wikidata","http://kbr-linked-authorities"
 "persons","BnF","BnF,ISNI,VIAF,Wikidata","http://bnf-contributors"
 "persons","NTA","NTA,ISNI,VIAF,Wikidata","http://kb-linked-authorities"

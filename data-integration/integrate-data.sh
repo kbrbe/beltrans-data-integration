@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Make the locally developed python package accessible via python -m 
-export PYTHONPATH=/home/slieber/repos/beltrans-data
+export PYTHONPATH=/home/slieber/repos/kbr/beltrans-data
 
 SCRIPT_CLEAN_TRANSLATIONS="../data-sources/kbr/clean-marc-slim.py"
 SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
@@ -640,10 +640,14 @@ function integrate {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
+  mkdir -p "$integrationName/integration"
+
   createManifestationsQueries="config-integration-manifestations-create.csv"
   createContributorsQueries="config-integration-contributors-create.csv"
   updateManifestationsQueries="config-integration-manifestations-update.csv"
   updateContributorsQueries="config-integration-contributors-update.csv"
+
+  queryLogDir="$integrationName/integration"
 
   integrationNamespace="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
@@ -657,11 +661,11 @@ function integrate {
   source ./py-integration-env/bin/activate
   echo "Integrate manifestations ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
-    --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2
+    --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
 
   echo "Integrate contributors ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
-    --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3
+    --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
 
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists and publishing directors) ..."
 
@@ -2620,7 +2624,7 @@ else
 
   elif [ "$1" = "iqp" ];
   then
-    integrate $2 $3
+    integrate $3
     query $3
     postprocess $3
 
@@ -2628,7 +2632,7 @@ else
   then
     transform $2 $3
     load $2 $3
-    integrate $2 $3
+    integrate $3
     query $3
     postprocess $3
 
