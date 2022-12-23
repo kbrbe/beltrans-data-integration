@@ -28,6 +28,8 @@ def checkArguments():
                     help='A CSV file containing SPARQL UPDATE generation configutation to create URIs for data not yet linked to other sources')
   parser.add_option('--number-updates', action='store', default=2, type='int',
                     help='The number of update cycles after each creation (should be number of sources-1), default is 2')
+  parser.add_option('--query-log-dir', action='store',
+                    help='The optional name of a directory in which generated SPARQL queries will be stored')
   (options, args) = parser.parse_args()
 
   #
@@ -212,8 +214,19 @@ def getUpdateQueryString(queryType, sourceName, sourceGraph, targetGraph, origin
 
   return queryString
 
+
 # -----------------------------------------------------------------------------
-def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, numberUpdates):
+def logSPARQLQuery(queryLogDir, queryString, queryFilename):
+
+  try:
+    with open(os.path.join(queryLogDir, queryFilename), 'w') as queryOut:
+      queryOut.write(queryString)
+  except Exception as e:
+    print(f'Warning: the query log "{queryFilename}" could not be created in the folder {queryLogDir}')
+    print(e)
+
+# -----------------------------------------------------------------------------
+def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, numberUpdates, queryLogDir=None):
   """This script uses SPARQL INSERT/UPDATE queries to create a single named graph of data. For all creation queries all updates are executed several times."""
 
 
@@ -229,6 +242,12 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
     print(f'continuing without authentication')
   else:
     auth=(user,password)
+
+  # If an optional query log directory is given, first check if it actually exists
+  if queryLogDir:
+    if not os.path.isdir(queryLogDir):
+      print(f'Given optional query log directory does not exist, please provide a valid directory')
+      exit(1)
 
   with open(updateQueriesConfig, 'r', encoding='utf-8') as updateQueriesFile, \
        open(createQueriesConfig, 'r', encoding='utf-8') as createQueriesFile:
@@ -249,13 +268,18 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
 
       creationQueryName = f'Create {creationSourceName}'
 
-      # create data
       print(f'CREATE {creationSourceType} data from {creationSourceName}')
-
+      # Generate SPARQL query
+      # For manifestations, the 'identifiersToAdd' will not be added, i.e. ISBN10 and ISBN13 will not become bf:identifiedBy, bf:Identifier
       creationQueryString = getCreateQueryString(queryType, creationSourceType, creationSourceName,
                                                  createConfigEntry['sourceGraph'], targetGraph, creationOriginalsGraph,
                                                  createIdentifiersToAdd)
 
+      # Optionally serialize SPARQL query
+      if queryLogDir:
+        logSPARQLQuery(queryLogDir, creationQueryString, f'create-{queryType}-{creationSourceName}.sparql')
+
+      # Execute SPARQL query
       utils_sparql.sparqlUpdate(url, creationQueryString, 'application/sparql-update', creationQueryName, auth=auth)
 
       # perform update query per source to link found data to created URIs via sameAs
@@ -274,9 +298,15 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
           updateQueryString = getUpdateQueryString(queryType, updateSourceName, updateConfigEntry['sourceGraph'], targetGraph,
                                                    updateOriginalsGraph, linkIdentifier, updateIdentifiersToAdd)
 
+
+          # Optionally serialize SPARQL query (only the first time of the update cyclus)
+          if queryLogDir and i == 0:
+            logSPARQLQuery(queryLogDir, updateQueryString, f'update-{queryType}-{updateSourceName}-{linkIdentifier}.sparql')
+
+          # Execute SPARQL query
           utils_sparql.sparqlUpdate(url, updateQueryString, 'application/sparql-update', updateQueryName, auth=auth)
 
 if __name__ == '__main__':
   (options, args) = checkArguments()
   main(options.url, options.query_type, options.target_graph,
-       options.create_queries, options.update_queries, options.number_updates)
+       options.create_queries, options.update_queries, options.number_updates, options.query_log_dir)
