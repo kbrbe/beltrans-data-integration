@@ -120,6 +120,14 @@ INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography
 # WIKIDATA
 INPUT_WIKIDATA_ENRICHED="../data-sources/wikidata/2022-04-14-beltrans-wikidata-manually-enriched.csv"
 
+# UNESCO INDEX TRANSLATIONUM
+INPUT_UNESCO_ENRICHED_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-translationum_11899.csv"
+INPUT_UNESCO_ENRICHED_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_3349.csv"
+INPUT_UNESCO_ENRICHED_ISBN10_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-translationum_isbn10.csv"
+INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-translationum_isbn13.csv"
+INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
+INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
+
 
 # #############################################################################
 
@@ -405,6 +413,16 @@ SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
 #
 SUFFIX_WIKIDATA_ENRICHED="manually-enriched-wikidata.csv"
 
+# DATA SOURCE - UNESCO INDEX TRANSLATIONUM
+#
+SUFFIX_UNESCO_ENRICHED_FR_NL="enriched-unesco_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_NL_FR="enriched-unesco_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL="enriched-unesco-isbn10_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL="enriched-unesco-isbn13_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR="enriched-unesco-isbn10_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR="enriched-unesco-isbn13_nl-fr.csv"
+
+
 # DATA SOURCE - BNFISNI enrichment
 #
 SUFFIX_BNFISNI_IDENTIFIERS_ISNI="isni-identifiers-without-nationality.csv"
@@ -531,6 +549,9 @@ function extract {
   elif [ "$dataSource" = "bnfisni" ];
   then
     extractNationalityFromBnFViaISNI $integrationFolderName
+  elif [ "$dataSource" = "unesco" ];
+  then
+    extractUnesco $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
@@ -540,6 +561,7 @@ function extract {
     extractMasterData $integrationFolderName
     extractWikidata $integrationFolderName
     extractNationalityFromBnFViaISNI $integrationFolderName
+    extractUnesco $integrationFolderName
   fi
   
 }
@@ -1208,6 +1230,23 @@ function extractWikidata {
   echo "EXTRACTION - Nothing to extract from Wikidata, copying files"
   cp "$INPUT_WIKIDATA_ENRICHED" "$integrationName/wikidata/$SUFFIX_WIKIDATA_ENRICHED"
 
+}
+
+# -----------------------------------------------------------------------------
+function extractUnesco {
+
+  local integrationName=$1
+
+  # create the folders to place the extracted translations and agents
+  mkdir -p $integrationName/unesco
+  
+  echo "EXTRACTION - copying scraped files"
+  cp $INPUT_UNESCO_ENRICHED_FR_NL "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_FR_NL"
+  cp $INPUT_UNESCO_ENRICHED_NL_FR "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_NL_FR"
+  cp $INPUT_UNESCO_ENRICHED_ISBN10_FR_NL "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
+  cp $INPUT_UNESCO_ENRICHED_ISBN13_FR_NL "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
+  cp $INPUT_UNESCO_ENRICHED_ISBN10_NL_FR "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
+  cp $INPUT_UNESCO_ENRICHED_ISBN13_NL_FR "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
 }
 
 # -----------------------------------------------------------------------------
