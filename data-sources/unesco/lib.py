@@ -8,7 +8,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html1 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr></table></body></html>'
   >>> foundFields = set()
   >>> getStructuredRecord(html1, foundFields)
-  [{'id': '1/2', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2/2', 'sn_year': '2020', 'publisher': 'PBL'}]
+  [{'id': '1-2', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'sn_year': '2020', 'publisher': 'PBL'}]
   >>> sorted(foundFields)
   ['isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
   """ 
@@ -19,7 +19,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   for row in rows:
     record = {}
     rowID = row.find('td[@class="res1"]').text
-    record['id'] = rowID
+    record['id'] = rowID.replace('/', '-')
     fields = row.findall('td[@class="res2"]/span')
     for field in fields:
       fieldName = field.attrib['class']
