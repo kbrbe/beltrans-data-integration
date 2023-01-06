@@ -11,21 +11,21 @@ def parseContributor(row, nameClass, firstnameClass, qualifierClass):
   >>> html1 = '<tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Lieber</span>, <span class="sn_auth_firstname">Sven</span>; <span class="sn_auth_name">Fake institution</span>, <span class="sn_auth_quality">Paris</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr>'
   >>> doc1 = lxml.html.fromstring(html1)
   >>> parseContributor(doc1, 'sn_auth_name', 'sn_auth_firstname', 'sn_auth_quality')
-  [{'type': 'person', 'name': 'Lieber', 'firstname': 'Sven'}, {'type': 'org', 'name': 'Fake institution', 'place': 'Paris'}]
+  [{'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber'}, {'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution'}]
 
   It can also find both, if the person is missing a firstname (however, it can not be determined if the person is a person, hence it is 'unknown')
 
   >>> html2 = '<tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Lieber</span>,; <span class="sn_auth_name">Fake institution</span>, <span class="sn_auth_quality">Paris</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr>'
   >>> doc2 = lxml.html.fromstring(html2)
   >>> parseContributor(doc2, 'sn_auth_name', 'sn_auth_firstname', 'sn_auth_quality')
-  [{'type': 'unknown', 'name': 'Lieber'}, {'type': 'org', 'name': 'Fake institution', 'place': 'Paris'}]
+  [{'type': 'unknown', 'place': '', 'firstname': '', 'name': 'Lieber'}, {'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution'}]
 
   Similarly, it can also find both if the non person is missing the qualifier
 
   >>> html3 = '<tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Lieber</span>, <span class="sn_auth_firstname">Sven</span>; <span class="sn_auth_name">Fake institution</span>, : <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr>'
   >>> doc3 = lxml.html.fromstring(html3)
   >>> parseContributor(doc3, 'sn_auth_name', 'sn_auth_firstname', 'sn_auth_quality')
-  [{'type': 'person', 'name': 'Lieber', 'firstname': 'Sven'}, {'type': 'unknown', 'name': 'Fake institution'}]
+  [{'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber'}, {'type': 'unknown', 'place': '', 'firstname': '', 'name': 'Fake institution'}]
 
 
 
@@ -34,21 +34,21 @@ def parseContributor(row, nameClass, firstnameClass, qualifierClass):
   >>> html4 = '<tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Fake institution</span>, <span class="sn_auth_quality">Paris</span>; <span class="sn_auth_name">Lieber</span>, <span class="sn_auth_firstname">Sven</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr>'
   >>> doc4 = lxml.html.fromstring(html4)
   >>> parseContributor(doc4, 'sn_auth_name', 'sn_auth_firstname', 'sn_auth_quality')
-  [{'type': 'org', 'name': 'Fake institution', 'place': 'Paris'}, {'type': 'person', 'name': 'Lieber', 'firstname': 'Sven'}]
+  [{'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution'}, {'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber'}]
 
   Also if the first non person author has missing attributes
 
   >>> html5 = '<tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Fake institution</span>, ; <span class="sn_auth_name">Lieber</span>, <span class="sn_auth_firstname">Sven</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr>'
   >>> doc5 = lxml.html.fromstring(html5)
   >>> parseContributor(doc5, 'sn_auth_name', 'sn_auth_firstname', 'sn_auth_quality')
-  [{'type': 'unknown', 'name': 'Fake institution'}, {'type': 'person', 'name': 'Lieber', 'firstname': 'Sven'}]
+  [{'type': 'unknown', 'place': '', 'firstname': '', 'name': 'Fake institution'}, {'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber'}]
 
   Or the second person author has missing attributes
 
   >>> html6 = '<tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Fake institution</span>, <span class="sn_auth_quality">Paris</span>; <span class="sn_auth_name">Lieber</span>, : <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr>'
   >>> doc6 = lxml.html.fromstring(html6)
   >>> parseContributor(doc6, 'sn_auth_name', 'sn_auth_firstname', 'sn_auth_quality')
-  [{'type': 'org', 'name': 'Fake institution', 'place': 'Paris'}, {'type': 'unknown', 'name': 'Lieber'}]
+  [{'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution'}, {'type': 'unknown', 'place': '', 'firstname': '', 'name': 'Lieber'}]
 
   """
   allFields = row.findall('td[@class="res2"]/span', {})
@@ -69,6 +69,8 @@ def parseContributor(row, nameClass, firstnameClass, qualifierClass):
         currentContributor = {}
       # a new contributor
       currentContributor['type'] = 'unknown'
+      currentContributor['place'] = ''
+      currentContributor['firstname'] = ''
       currentContributor['name'] = field.text
       lastClass = fieldName
     elif fieldName == firstnameClass:
@@ -115,7 +117,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html1 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr></table></body></html>'
   >>> foundFields = set()
   >>> getStructuredRecord(html1, foundFields)
-  [{'id': '1-2', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'sn_year': '2020', 'publisher': 'PBL'}]
+  ([{'id': '1-2', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '2-930367-10-5'}, {'id': '1-2', 'isbn13': '90-77213-05-8'}, {'id': '1-2', 'isbn13': '90-77213-07-4'}], [])
   >>> sorted(foundFields)
   ['isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
@@ -124,7 +126,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html2 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Bobsen</span>, <span class="sn_auth_firstname">Bob</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]<span class="sn_transl_name">Lieber</span>, <span class="sn_transl_firstname">Sven</span>; <span class="sn_transl_name">Doe</span>, <span class="sn_transl_firstname">John</span></td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_auth_name">Jannssen</span>, <span class="sn_auth_firstname">Jan</span>: <span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span><span class="sn_transl_name">Alisson</span>, <span class="sn_transl_firstname">Alice</span></td></tr></table></body></html>'
   >>> foundFields2 = set()
   >>> getStructuredRecord(html2, foundFields2)
-  [{'id': '1-2', 'authors': 'type=person,name=Bobsen,firstname=Bob', 'translators': 'type=person,name=Lieber,firstname=Sven;type=person,name=Doe,firstname=John', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,name=Jannssen,firstname=Jan', 'translators': 'type=person,name=Alisson,firstname=Alice', 'sn_year': '2020', 'publisher': 'PBL'}]
+  ([{'id': '1-2', 'authors': 'type=person,place=,firstname=Bob,name=Bobsen', 'translators': 'type=person,place=,firstname=Sven,name=Lieber;type=person,place=,firstname=John,name=Doe', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen', 'translators': 'type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '2-930367-10-5'}, {'id': '1-2', 'isbn13': '90-77213-05-8'}, {'id': '1-2', 'isbn13': '90-77213-07-4'}], [{'type': 'person', 'place': '', 'firstname': 'Bob', 'name': 'Bobsen', 'id': '1-2', 'contributorType': 'author'}, {'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber', 'id': '1-2', 'contributorType': 'translator'}, {'type': 'person', 'place': '', 'firstname': 'John', 'name': 'Doe', 'id': '1-2', 'contributorType': 'translator'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'translator'}])
   >>> sorted(foundFields2)
   ['authors', 'isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year', 'translators']
 
@@ -133,7 +135,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html3 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Bobsen</span>, <span class="sn_auth_firstname">Bob</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_auth_name">Jannssen</span>, <span class="sn_auth_firstname">Jan</span>; <span class="sn_auth_name">Alisson</span>, <span class="sn_auth_firstname">Alice</span>: <span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr></table></body></html>'
   >>> foundFields3 = set()
   >>> getStructuredRecord(html3, foundFields3)
-  [{'id': '1-2', 'authors': 'type=person,name=Bobsen,firstname=Bob', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,name=Jannssen,firstname=Jan;type=person,name=Alisson,firstname=Alice', 'sn_year': '2020', 'publisher': 'PBL'}]
+  ([{'id': '1-2', 'authors': 'type=person,place=,firstname=Bob,name=Bobsen', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen;type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '2-930367-10-5'}, {'id': '1-2', 'isbn13': '90-77213-05-8'}, {'id': '1-2', 'isbn13': '90-77213-07-4'}], [{'type': 'person', 'place': '', 'firstname': 'Bob', 'name': 'Bobsen', 'id': '1-2', 'contributorType': 'author'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'author'}])
   >>> sorted(foundFields3)
   ['authors', 'isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
@@ -142,7 +144,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html4 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Fake institution</span>, <span class="sn_auth_quality">Paris</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_auth_name">Jannssen</span>, <span class="sn_auth_firstname">Jan</span>; <span class="sn_auth_name">Alisson</span>, <span class="sn_auth_firstname">Alice</span>: <span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr></table></body></html>'
   >>> foundFields4 = set()
   >>> getStructuredRecord(html4, foundFields4)
-  [{'id': '1-2', 'authors': 'type=org,name=Fake institution,place=Paris', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,name=Jannssen,firstname=Jan;type=person,name=Alisson,firstname=Alice', 'sn_year': '2020', 'publisher': 'PBL'}]
+  ([{'id': '1-2', 'authors': 'type=org,place=Paris,firstname=,name=Fake institution', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen;type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '2-930367-10-5'}, {'id': '1-2', 'isbn13': '90-77213-05-8'}, {'id': '1-2', 'isbn13': '90-77213-07-4'}], [{'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution', 'id': '1-2', 'contributorType': 'author'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'author'}])
   >>> sorted(foundFields4)
   ['authors', 'isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
@@ -151,7 +153,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html5 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Lieber</span>, <span class="sn_auth_firstname">Sven</span>; <span class="sn_auth_name">Fake institution</span>, <span class="sn_auth_quality">Paris</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_auth_name">Jannssen</span>, <span class="sn_auth_firstname">Jan</span>; <span class="sn_auth_name">Alisson</span>, <span class="sn_auth_firstname">Alice</span>: <span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr></table></body></html>'
   >>> foundFields5 = set()
   >>> getStructuredRecord(html5, foundFields5)
-  [{'id': '1-2', 'authors': 'type=person,name=Lieber,firstname=Sven;type=org,name=Fake institution,place=Paris', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,name=Jannssen,firstname=Jan;type=person,name=Alisson,firstname=Alice', 'sn_year': '2020', 'publisher': 'PBL'}]
+  ([{'id': '1-2', 'authors': 'type=person,place=,firstname=Sven,name=Lieber;type=org,place=Paris,firstname=,name=Fake institution', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen;type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '2-930367-10-5'}, {'id': '1-2', 'isbn13': '90-77213-05-8'}, {'id': '1-2', 'isbn13': '90-77213-07-4'}], [{'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber', 'id': '1-2', 'contributorType': 'author'}, {'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution', 'id': '1-2', 'contributorType': 'author'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'author'}])
   >>> sorted(foundFields5)
   ['authors', 'isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
@@ -161,11 +163,16 @@ def getStructuredRecord(htmlElement, encounteredFields):
   doc = lxml.html.fromstring(htmlElement)
 
   records = []
+  isbn10Relations = []
+  isbn13Relations = []
+  contributorRelations = []
+
   rows = doc.findall('body/table[@class="restable"]/tr', {})
   for row in rows:
     record = {}
     rowID = row.find('td[@class="res1"]').text
-    record['id'] = rowID.replace('/', '-')
+    rowID = rowID.replace('/', '-')
+    record['id'] = rowID
     fields = row.findall('td[@class="res2"]/span')
 
 
@@ -175,10 +182,18 @@ def getStructuredRecord(htmlElement, encounteredFields):
     if len(authors) > 0:
       encounteredFields.add('authors')
       record['authors'] = serializeContributorsToString(authors)
+      authors = [dict(item, id=rowID) for item in authors]
+      authors = [dict(item, contributorType='author') for item in authors]
+      for author in authors:
+        contributorRelations.append(author)
 
     if len(translators) > 0:
       encounteredFields.add('translators')
       record['translators'] = serializeContributorsToString(translators)
+      translators = [dict(item, id=rowID) for item in translators]
+      translators = [dict(item, contributorType='translator') for item in translators]
+      for translator in translators:
+        contributorRelations.append(translator)
 
     # for all other fields
     for field in fields:
@@ -207,6 +222,10 @@ def getStructuredRecord(htmlElement, encounteredFields):
         record['isbn13'] = ';'.join(sorted(isbn13Set))
         encounteredFields.add('isbn10')
         encounteredFields.add('isbn13')
+        for isbn10 in sorted(isbn10Set):
+          isbn10Relations.append({'id': rowID, 'isbn10': isbn10})
+        for isbn13 in sorted(isbn10Set):
+          isbn13Relations.append({'id': rowID, 'isbn13': isbn13})
       elif fieldName in ['sn_auth_name', 'sn_auth_firstname', 'sn_auth_quality', 'sn_transl_name', 'sn_transl_firstname', 'sn_transl_quality']:
         # we already handled authors and translators separately because there can be more than one, thus skip related fields
         pass
@@ -214,7 +233,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
         record[fieldName] = field.text
         encounteredFields.add(fieldName)
     records.append(record)
-  return records
+  return (records, isbn10Relations, isbn13Relations, contributorRelations)
 
 # -----------------------------------------------------------------------------
 def dictToString(dictionary, keySeparator='_', valueSeparator='-'):
