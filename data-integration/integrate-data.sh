@@ -43,6 +43,8 @@ MODULE_FILTER_RDF_XML_SUBJECTS="tools.xml.filter-subjects-xml"
 
 SCRIPT_UNION_IDS="../data-sources/bnf/union.py"
 
+SCRIPT_PARSE_UNESCO_HTML="../data-sources/unesco/parse-content.py"
+
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
 SCRIPT_QUERY_DATA="../utils/query-data.sh"
@@ -121,6 +123,9 @@ INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography
 INPUT_WIKIDATA_ENRICHED="../data-sources/wikidata/2022-04-14-beltrans-wikidata-manually-enriched.csv"
 
 # UNESCO INDEX TRANSLATIONUM
+INPUT_UNESCO_HTML_DIR_FR_NL="../data-sources/unesco/2023-01-06_FR-NL_lg-0_sl-fra_l-nld_from-1970_to-2020"
+INPUT_UNESCO_HTML_DIR_NL_FR="../data-sources/unesco/2023-01-06_NL-FR_lg-0_sl-nld_l-fra_from-1970_to-2020"
+
 INPUT_UNESCO_ENRICHED_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-translationum_11899.csv"
 INPUT_UNESCO_ENRICHED_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_3349.csv"
 INPUT_UNESCO_ENRICHED_ISBN10_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-translationum_isbn10.csv"
@@ -415,12 +420,15 @@ SUFFIX_WIKIDATA_ENRICHED="manually-enriched-wikidata.csv"
 
 # DATA SOURCE - UNESCO INDEX TRANSLATIONUM
 #
-SUFFIX_UNESCO_ENRICHED_FR_NL="enriched-unesco_fr-nl.csv"
-SUFFIX_UNESCO_ENRICHED_NL_FR="enriched-unesco_nl-fr.csv"
-SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL="enriched-unesco-isbn10_fr-nl.csv"
-SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL="enriched-unesco-isbn13_fr-nl.csv"
-SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR="enriched-unesco-isbn10_nl-fr.csv"
-SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR="enriched-unesco-isbn13_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED_FR_NL="unesco_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_NL_FR="unesco_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED_CONT_FR_NL="unesco-contributions_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_CONT_NL_FR="unesco-contributions_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL="unesco-isbn10_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL="unesco-isbn13_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR="unesco-isbn10_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR="unesco-isbn13_nl-fr.csv"
+SUFFIX_UNESCO_ISBN_LD="unesco-isbn.ttl"
 
 
 # DATA SOURCE - BNFISNI enrichment
@@ -598,6 +606,9 @@ function transform {
   elif [ "$dataSource" = "bnfisni" ];
   then
     transformNationalityFromBnFViaISNI $integrationFolderName
+  elif [ "$dataSource" = "unesco" ];
+  then
+    transformUnesco $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
@@ -607,6 +618,7 @@ function transform {
     transformMasterData $integrationFolderName
     transformWikidata $integrationFolderName
     transformNationalityFromBnFViaISNI $integrationFolderName
+    transformUnesco $integrationFolderName
   fi
   
 }
@@ -1239,14 +1251,27 @@ function extractUnesco {
 
   # create the folders to place the extracted translations and agents
   mkdir -p $integrationName/unesco
+
+  local unescoTranslationsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_FR_NL"
+  local unescoTranslationsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_NL_FR"
+
+  local unescoISBN10FRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
+  local unescoISBN10NLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
+
+  local unescoISBN13FRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
+  local unescoISBN13NLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
+
+  local unescoContributionsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT_FR_NL"
+  local unescoContributionsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT_NL_FR"
+
+  echo "EXTRACTION - parse HTML translations FR-NL"
+  time python $SCRIPT_PARSE_UNESCO_HTML -i $INPUT_UNESCO_HTML_DIR_FR_NL -o $unescoTranslationsFRNL \
+    --isbn10-file $unescoISBN10FRNL --isbn13-file $unescoISBN13FRNL --contribution-file $unescoContributionsFRNL
+
+  echo "EXTRACTION - parse HTML translations NL-FR"
+  time python $SCRIPT_PARSE_UNESCO_HTML -i $INPUT_UNESCO_HTML_DIR_NL_FR -o $unescoTranslationsNLFR \
+    --isbn10-file $unescoISBN10NLFR --isbn13-file $unescoISBN13NLFR --contribution-file $unescoContributionsNLFR
   
-  echo "EXTRACTION - copying scraped files"
-  cp $INPUT_UNESCO_ENRICHED_FR_NL "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_FR_NL"
-  cp $INPUT_UNESCO_ENRICHED_NL_FR "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_NL_FR"
-  cp $INPUT_UNESCO_ENRICHED_ISBN10_FR_NL "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
-  cp $INPUT_UNESCO_ENRICHED_ISBN13_FR_NL "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
-  cp $INPUT_UNESCO_ENRICHED_ISBN10_NL_FR "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
-  cp $INPUT_UNESCO_ENRICHED_ISBN13_NL_FR "$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
 }
 
 # -----------------------------------------------------------------------------
@@ -1941,6 +1966,21 @@ function mapMasterData {
   
 }
 
+# -----------------------------------------------------------------------------
+function transformUnesco {
+  local integrationName=$1
+
+  mkdir -p "$integrationName/unesco/rdf"
+  local outputTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_ISBN_LD"
+
+  export RML_SOURCE_UNESCO_ISBN10_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
+  export RML_SOURCE_UNESCO_ISBN13_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
+  export RML_SOURCE_UNESCO_ISBN10_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
+  export RML_SOURCE_UNESCO_ISBN13_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
+
+  echo "Map KBR Orgs possible matches - $sourceFile"
+  . map.sh ../data-sources/unesco/unesco-isbn.yml $outputTurtle
+}
 
 # -----------------------------------------------------------------------------
 function loadKBR {
