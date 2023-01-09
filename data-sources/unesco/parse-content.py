@@ -82,7 +82,7 @@ def main():
     outputWriter.writerows(records)
       
     isbn10Writer = csv.DictWriter(isbn10Out, fieldnames=['id', 'isbn10'])
-    isbn13Writer = csv.DictWriter(isbn10Out, fieldnames=['id', 'isbn13'])
+    isbn13Writer = csv.DictWriter(isbn13Out, fieldnames=['id', 'isbn13'])
     contributionWriter = csv.DictWriter(contributionOut, fieldnames=['id', 'contributorType', 'type', 'name', 'firstname', 'place'])
 
     isbn10Writer.writeheader()
