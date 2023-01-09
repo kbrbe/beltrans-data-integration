@@ -1,11 +1,8 @@
 import time
 import lxml.etree as ET
-import requests
-import rdflib
-import os
+import csv
 import pandas as pd
-
-
+import os
 
 # -----------------------------------------------------------------------------
 def addToMismatchLog(mismatchLog, dateType, roleType, contributorURI, s, value):
@@ -201,9 +198,32 @@ def getElementValue(elem, sep=';'):
   return ''
 
 
+# -----------------------------------------------------------------------------
+def countValues(inputDict, inputKey, statsKey, statsDict, valuePrefix=''):
+  """This function counts found values and adds it to the statsDict.
 
-
-
+   >>> dict1 = {'myCol': 'author'}
+   >>> dict2 = {'myCol': 'author'}
+   >>> dict3 = {'myCol': 'translator'}
+   >>> dict4 = {'myCol': 'author'}
+   >>> dict5 = {'myCol': 'translator'}
+   >>> dict6 = {'myCol': ''}
+   >>> statsDict = {}
+   >>> for myDict in [dict1, dict2, dict3, dict4, dict5, dict6]: countValues(myDict, 'myCol', 'myKey', statsDict)
+   >>> statsDict
+   {'myKey': {'author': 3, 'translator': 2, '': 1}}
+  """
+  if inputKey in inputDict:
+    value = inputDict[inputKey]
+    valueName = valuePrefix + '-' + value
+    if statsKey in statsDict:
+      stats = statsDict[statsKey]
+      if valueName in stats:
+        stats[valueName] += 1
+      else:
+        stats[valueName] = 1
+    else:
+      statsDict[statsKey] = {valueName: 1}
 
 
 # -----------------------------------------------------------------------------

@@ -44,6 +44,7 @@ MODULE_FILTER_RDF_XML_SUBJECTS="tools.xml.filter-subjects-xml"
 SCRIPT_UNION_IDS="../data-sources/bnf/union.py"
 
 SCRIPT_PARSE_UNESCO_HTML="../data-sources/unesco/parse-content.py"
+MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS="tools.csv.count_unique_values"
 
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
@@ -428,6 +429,8 @@ SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL="unesco-isbn10_fr-nl.csv"
 SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL="unesco-isbn13_fr-nl.csv"
 SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR="unesco-isbn10_nl-fr.csv"
 SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR="unesco-isbn13_nl-fr.csv"
+SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_FR_NL="unesco-unique-contributors_fr-nl.csv"
+SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_NL_FR="unesco-unique-contributors_nl-fr.csv"
 SUFFIX_UNESCO_ISBN_LD="unesco-isbn.ttl"
 
 
@@ -1264,6 +1267,9 @@ function extractUnesco {
   local unescoContributionsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT_FR_NL"
   local unescoContributionsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT_NL_FR"
 
+  local unescoUniqueContributorsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_FR_NL"
+  local unescoUniqueContributorsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_NL_FR"
+
   echo "EXTRACTION - parse HTML translations FR-NL"
   time python $SCRIPT_PARSE_UNESCO_HTML -i $INPUT_UNESCO_HTML_DIR_FR_NL -o $unescoTranslationsFRNL \
     --isbn10-file $unescoISBN10FRNL --isbn13-file $unescoISBN13FRNL --contribution-file $unescoContributionsFRNL
@@ -1271,7 +1277,15 @@ function extractUnesco {
   echo "EXTRACTION - parse HTML translations NL-FR"
   time python $SCRIPT_PARSE_UNESCO_HTML -i $INPUT_UNESCO_HTML_DIR_NL_FR -o $unescoTranslationsNLFR \
     --isbn10-file $unescoISBN10NLFR --isbn13-file $unescoISBN13NLFR --contribution-file $unescoContributionsNLFR
-  
+
+  echo "EXTRACTION - extract unique contributors FR-NL"
+  time python -m $MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS -i $unescoContributionsFRNL -o $unescoUniqueContributorsFRNL \
+    -c "name" -c "firstname" -c "type" -c "place" -s "contributorType"
+
+  echo "EXTRACTION - extract unique contributors NL-FR"
+  time python -m $MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS -i $unescoContributionsNLFR -o $unescoUniqueContributorsNLFR \
+    -c "name" -c "firstname" -c "type" -c "place" -s "contributorType"
+ 
 }
 
 # -----------------------------------------------------------------------------
