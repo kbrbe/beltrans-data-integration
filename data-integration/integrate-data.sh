@@ -165,6 +165,8 @@ TRIPLE_STORE_GRAPH_KB_PBL="http://kb-publishers"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
 TRIPLE_STORE_GRAPH_WIKIDATA="http://wikidata"
 TRIPLE_STORE_GRAPH_KBCODE="http://kbcode"
+TRIPLE_STORE_GRAPH_UNESCO="http://unesco"
+TRIPLE_STORE_GRAPH_UNESCO_ORIG="http://unesco-originals"
 
 TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES="http://kbr-publisher-matches"
 
@@ -661,6 +663,9 @@ function load {
   elif [ "$dataSource" = "bnfisni" ];
   then
     loadNationalityFromBnFViaISNI $integrationFolderName
+  elif [ "$dataSource" = "unesco" ];
+  then
+    loadUnesco $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
@@ -669,6 +674,7 @@ function load {
     loadKB $integrationFolderName
     loadWikidata $integrationFolderName
     loadNationalityFromBnFViaISNI $integrationFolderName
+    loadUnesco $integrationFolderName
   fi
 
 }
@@ -2371,6 +2377,30 @@ function loadBnF {
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" \
     "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA" "$CREATE_QUERY_BNF_GENDER"
 
+}
+
+# -----------------------------------------------------------------------------
+function loadUnesco {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_UNESCO"
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  local translationTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LD"
+  local translationOriginalTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD"
+  local isbnTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_ISBN_LD"
+
+  echo "Load Unesco Index Translationum translation data"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO \
+    "$translationTurtle" "$isbnTurtle"
+
+  echo "Load Unesco Index Translationum original information"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_ORIG \
+    "$translationOriginalTurtle"
 }
 
 # -----------------------------------------------------------------------------
