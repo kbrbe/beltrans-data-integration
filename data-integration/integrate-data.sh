@@ -431,6 +431,9 @@ SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR="unesco-isbn10_nl-fr.csv"
 SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR="unesco-isbn13_nl-fr.csv"
 SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_FR_NL="unesco-unique-contributors_fr-nl.csv"
 SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_NL_FR="unesco-unique-contributors_nl-fr.csv"
+
+SUFFIX_UNESCO_TRANSLATIONS_LD="unesco-translation-data.ttl"
+SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD="unesco-limited-original-data.ttl"
 SUFFIX_UNESCO_ISBN_LD="unesco-isbn.ttl"
 
 
@@ -1985,15 +1988,29 @@ function transformUnesco {
   local integrationName=$1
 
   mkdir -p "$integrationName/unesco/rdf"
-  local outputTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_ISBN_LD"
+
+  local translationTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LD"
+  local translationOriginalTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD"
+  local isbnTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_ISBN_LD"
+
+  # export environment variables used by the YARRRML mapping files
+  export RML_SOURCE_WORKS_UNESCO_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_FR_NL"
+  export RML_SOURCE_WORKS_UNESCO_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_NL_FR"
 
   export RML_SOURCE_UNESCO_ISBN10_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
   export RML_SOURCE_UNESCO_ISBN13_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
   export RML_SOURCE_UNESCO_ISBN10_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
   export RML_SOURCE_UNESCO_ISBN13_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
 
-  echo "Map KBR Orgs possible matches - $sourceFile"
-  . map.sh ../data-sources/unesco/unesco-isbn.yml $outputTurtle
+  echo "Map Unesco translation data"
+  . map.sh ../data-sources/unesco/unesco-translations.yml $translationTurtle
+
+  echo "Map Unesco translation source data based on minimal information in the translation data"
+  . map.sh ../data-sources/unesco/unesco-translations-limited-originals.yml $translationOriginalTurtle
+
+  echo "Map Unesco ISBN relationships"
+  . map.sh ../data-sources/unesco/unesco-isbn.yml $isbnTurtle
+
 }
 
 # -----------------------------------------------------------------------------
