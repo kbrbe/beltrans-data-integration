@@ -30,6 +30,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
     (group_concat(distinct ?kbTargetManifestationKBCodeLabel;SEPARATOR=';') AS ?targetThesaurusKBCode)
+    (group_concat(distinct ?bnfTargetManifestationRameauLabel;SEPARATOR=';') AS ?targetThesaurusRameau)
     (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetCollectionIdentifier)
     #(group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
 
@@ -223,6 +224,11 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { 
         graph <http://bnf-publications> { ?bnfManifestation schema:translationOfWork ?bnfOriginal . }
         graph <http://bnf-originals> { ?bnfOriginal schema:name ?bnfSourceManifestationTitle . } 
+      }
+
+      OPTIONAL {
+        graph <http://bnf-publications> { ?bnfManifestation dcterms:subject ?genre . }
+        graph <http://http://bnf-trl-rameau-links> { ?genre skos:prefLabel ?bnfTargetManifestationRameauLabel . }
       }
 
       #
