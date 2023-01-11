@@ -104,6 +104,7 @@ INPUT_BNF_CONT_VIAF="../data-sources/bnf/external/dump_extref-viaf_exact_match.x
 INPUT_BNF_CONT_WIKIDATA="../data-sources/bnf/external/dump_extref-wikidata_exact_match.xml"
 INPUT_BNF_TRL_ORIGINAL_LIST_FR_NL="../data-sources/bnf/Bnf_FR-NL_1970-2020_598notices_source-titles.csv"
 INPUT_BNF_TRL_ORIGINAL_LIST_NL_FR="../data-sources/bnf/Bnf_NL-FR_1970-2020_3770notices_source-titles.csv"
+INPUT_BNF_RAMEAU_FILENAME_PATTERN="../data-sources/bnf/rameau/databnf_rameau_nosubjects__skos*"
 
 
 # KB
@@ -155,6 +156,7 @@ TRIPLE_STORE_GRAPH_BNF_CONT_ISNI="http://bnf-contributors-isni"
 TRIPLE_STORE_GRAPH_BNF_CONT_VIAF="http://bnf-contributors-viaf"
 TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA="http://bnf-contributors-wikidata"
 TRIPLE_STORE_GRAPH_BNF_TRL_ORIG="http://bnf-originals"
+TRIPLE_STORE_GRAPH_RAMEAU="http://rameau"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_ORIG_LA="http://kbr-originals-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
@@ -556,6 +558,9 @@ function extract {
   elif [ "$dataSource" = "kbcode" ];
   then
     extractKBCode $integrationFolderName
+  elif [ "$dataSource" = "rameau" ];
+  then
+    extractRameau $integrationFolderName
   elif [ "$dataSource" = "wikidata" ];
   then
     extractWikidata $integrationFolderName
@@ -990,6 +995,18 @@ function extractKBCode {
   echo "EXTRACT, TRANSFORM and LOAD the KBCode hierarchy with a federated SPARQL UPDATE query"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$INSERT_KBCODE_QUERY_FILE"
   
+}
+
+# -----------------------------------------------------------------------------
+function extractRameau {
+  local $integrationName
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  echo "EXTRACT, TRANSFORM and LOAD the RAMEAU entities from the BnF dumps"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_RAMEAU" $INPUT_BNF_RAMEAU_FILENAME_PATTERN
 }
 
 # -----------------------------------------------------------------------------
