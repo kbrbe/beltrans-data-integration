@@ -104,6 +104,8 @@ INPUT_BNF_CONT_VIAF="../data-sources/bnf/external/dump_extref-viaf_exact_match.x
 INPUT_BNF_CONT_WIKIDATA="../data-sources/bnf/external/dump_extref-wikidata_exact_match.xml"
 INPUT_BNF_TRL_ORIGINAL_LIST_FR_NL="../data-sources/bnf/Bnf_FR-NL_1970-2020_598notices_source-titles.csv"
 INPUT_BNF_TRL_ORIGINAL_LIST_NL_FR="../data-sources/bnf/Bnf_NL-FR_1970-2020_3770notices_source-titles.csv"
+
+INPUT_BNF_RAMEAU_SUBJECT_CLASSIFICATION="../data-sources/bnf/rameau-subject-classifications"
 INPUT_BNF_RAMEAU_FILENAME_PATTERN="../data-sources/bnf/rameau/databnf_rameau_nosubjects__skos*"
 
 
@@ -156,6 +158,7 @@ TRIPLE_STORE_GRAPH_BNF_CONT_ISNI="http://bnf-contributors-isni"
 TRIPLE_STORE_GRAPH_BNF_CONT_VIAF="http://bnf-contributors-viaf"
 TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA="http://bnf-contributors-wikidata"
 TRIPLE_STORE_GRAPH_BNF_TRL_ORIG="http://bnf-originals"
+TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS="http://bnf-trl-rameau-links"
 TRIPLE_STORE_GRAPH_RAMEAU="http://rameau"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_ORIG_LA="http://kbr-originals-linked-authorities"
@@ -392,6 +395,7 @@ SUFFIX_BNF_TRL_CONT_IDS="bnf-translation-contributor-persons-ids.csv"
 SUFFIX_BNF_TRL_IDS_FR_NL="bnf-translation-ids-fr-nl.csv"
 SUFFIX_BNF_TRL_IDS_NL_FR="bnf-translation-ids-nl-fr.csv"
 SUFFIX_BNF_TRL_IDS="bnf-translation-ids.csv"
+SUFFIX_BNF_TRL_IDS_ABOUT="bnf-translation-ids-about.csv"
 
 SUFFIX_BNF_TRL_ORIG_FR_NL="bnf-originals-fr-nl.csv"
 SUFFIX_BNF_TRL_ORIG_NORM_FR_NL="bnf-originals-fr-nl-normalized.csv"
@@ -506,6 +510,9 @@ SUFFIX_BNF_TRL_NL_FR_LD="nl_fr-translations.xml"
 
 SUFFIX_BNF_TRL_ORIG_LD="bnf-limited-originals.ttl"
 SUFFIX_BNF_TRL_ORIG_LINKS_LD="bnf-limited-originals-links.ttl"
+
+
+SUFFIX_BNF_TRL_RAMEAU="bnf-translations-rameau-classifications.xml"
 
 SUFFIX_BNF_CONT_LD="bnf-contributors-persons.xml"
 SUFFIX_BNF_CONT_ORGS_LD="bnf-contributors-orgs.xml"
@@ -1025,6 +1032,9 @@ function extractBnF {
   bnfFRNLTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_FR_NL"
   bnfBelgianPublications="$integrationName/bnf/translations/$SUFFIX_BNF_BELGIAN_PUBS_IDS"
   bnfTranslationIDs="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS"
+  bnfTranslationIDsAbout="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_ABOUT"
+
+  bnfRameauClassifications="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_RAMEAU"
 
   bnfNormalizedSourceAdaptedHeaderFRNL="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_NORM_FR_NL"
   bnfNormalizedSourceAdaptedHeaderNLFR="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_NORM_NL_FR"
@@ -1068,8 +1078,17 @@ function extractBnF {
   #
   source py-integration-env/bin/activate
 
+  # the following command will create a CSV file with BnF catalogue URIs
   echo "EXTRACTION - Create list of both NL and FR BnF translation IDs"
-  time python $SCRIPT_UNION_IDS $bnfFRNLTranslations $bnfNLFRTranslations -o $bnfTranslationIDs -d ';'
+  time python $SCRIPT_UNION_IDS $bnfFRNLTranslations $bnfNLFRTranslations -o $bnfTranslationIDs -d ' '
+
+  # we replace the 'catalogue' part of the URIs with 'data',
+  # because all other files in which we want to look up things have 'data' URIs
+  sed -i 's/catalogue/data/' $bnfTranslationIDs
+
+  # Mostly the expression URLs are used which have the URI with trailing '#about'
+  cp $bnfTranslationIDs $bnfTranslationIDsAbout
+  sed -i 's/\r$/#about/' -i $bnfTranslationIDsAbout
 
   # extract contributor IDs of all translation contributors (also non-Belgian contributors)
   echo "EXTRACTION - Extract all BnF contributor IDs of BELTRANS translations (despite the nationality)"
@@ -1099,6 +1118,12 @@ function extractBnF {
 
   echo "EXTRACTION - Extract links between BnF contributors and Wikidata"
   time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfPersonsBELTRANS
+
+  #
+  # There are also Rameau classifications
+  #
+  echo "EXTRACTION - Extract links between translations and their Rameau classifications"
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_RAMEAU_SUBJECT_CLASSIFICATION -o $bnfRameauClassifications -f $bnfTranslationIDsAbout
 
   #
   # We also have a list of source titles for BnF translations
@@ -2301,6 +2326,9 @@ function loadBnF {
   local bnfContributorVIAFData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
   local bnfContributorWikidataData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
 
+  local bnfRameauClassifications="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_RAMEAU"
+
+
   local bnfLimitedOriginalInformationTurtle="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_ORIG_LD"
   local bnfLimitedOriginalInformationLinksTurtle="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_ORIG_LINKS_LD"
 
@@ -2314,6 +2342,9 @@ function loadBnF {
 
   echo "Load BnF contributors persons and organizations ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData" "$bnfContributorDataOrgs"
+
+  echo "Load BnF publication-rameau links ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS" "$bnfRameauClassifications"
 
   echo "Load BnF publication-contributor links ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS" "$bnfContributionLinksData"
