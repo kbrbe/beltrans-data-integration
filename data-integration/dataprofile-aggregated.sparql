@@ -227,8 +227,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
 
       OPTIONAL {
-        graph <http://bnf-publications> { ?bnfManifestation dcterms:subject ?genre . }
-        graph <http://http://bnf-trl-rameau-links> { ?genre skos:prefLabel ?bnfTargetManifestationRameauLabel . }
+        graph <http://bnf-trl-rameau-links> { ?bnfManifestation dcterms:subject ?genre . }
+        graph <http://rameau> { ?genre skos:prefLabel ?bnfTargetManifestationRameauLabel . }
       }
 
       #
