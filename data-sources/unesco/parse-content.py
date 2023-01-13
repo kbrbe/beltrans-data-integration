@@ -13,6 +13,31 @@ import lib
 
 
 # -----------------------------------------------------------------------------
+def parseFile(filename, foundFields, records, isbn10Records, isbn13Records, contributionRecords):
+  """This function parses a single file."""
+
+  with open(filename, 'r') as fIn:
+
+    htmlString = fIn.read()
+    (newRecords, newISBN10Relations, newISBN13Relations, newContributionRelations) = lib.getStructuredRecord(htmlString, foundFields)
+
+    if newRecords:
+      records.extend(newRecords)
+    else:
+      print(f'Issue for file {filename}, no records found!')
+
+    if newISBN10Relations:
+      isbn10Records.extend(newISBN10Relations)
+
+    if newISBN13Relations:
+      isbn13Records.extend(newISBN13Relations)
+
+    if newContributionRelations:
+      contributionRecords.extend(newContributionRelations)
+
+
+
+# -----------------------------------------------------------------------------
 def main():
 
   parser = argparse.ArgumentParser()
@@ -21,52 +46,47 @@ def main():
   parser.add_argument('--isbn10-file', action='store', help='The name of the output CSV file containing 1:n relations between translations and ISBN 10 identifiers')
   parser.add_argument('--isbn13-file', action='store', help='The name of the output CSV file containing 1:n relations between translations and ISBN 13 identifiers')
   parser.add_argument('--contribution-file', action='store', help='The name of the output CSV file containing 1:n relations between translations and contributors')
+  parser.add_argument('input', nargs='+')
   options = parser.parse_args()
 
   #
   # Check if we got all required arguments
   #
-  if( (not options.output_file) or (not options.input_folder) or (not options.isbn10_file) or (not options.isbn13_file) or (not options.contribution_file) ):
+  if not options.input:
+    print(f'No input given! Input folders or files have to be given as arguments')
     parser.print_help()
     exit(1)
 
-  inputFolder = options.input_folder
+  if( (not options.output_file) or (not options.isbn10_file) or (not options.isbn13_file) or (not options.contribution_file) ):
+    parser.print_help()
+    exit(1)
+
   outputFilename = options.output_file
   isbn10Filename = options.isbn10_file
   isbn13Filename = options.isbn13_file
   contributionFilename = options.contribution_file
 
-  if not os.path.isdir(inputFolder):
-    print(f'The given input folder does not exist: "{inputFolder}"')
 
+  # declaring data structures to keep (counts of) parsed content
   records = []
   isbn10Records = []
   isbn13Records = []
   contributionRecords = []
   foundFields = set(['id'])
 
-  # try to parse each file found in the input directory
-  for filename in os.listdir(inputFolder):
+  # try to parse each file or folder given via arguments
+  for fileOrFolder in options.input:
     
-    with open(os.path.join(inputFolder, filename), 'r') as fIn:
-
-
-      htmlString = fIn.read()
-      (newRecords, newISBN10Relations, newISBN13Relations, newContributionRelations) = lib.getStructuredRecord(htmlString, foundFields)
-
-      if newRecords:
-        records.extend(newRecords)
-      else:
-        print(f'Issue for file {filename}, no records found!')
-
-      if newISBN10Relations:
-        isbn10Records.extend(newISBN10Relations)
-
-      if newISBN13Relations:
-        isbn13Records.extend(newISBN13Relations)
-
-      if newContributionRelations:
-        contributionRecords.extend(newContributionRelations)
+    if os.path.isdir(fileOrFolder):
+      print(f'Processing directory "{fileOrFolder}"')
+      for filename in os.listdir(fileOrFolder):
+        #print(f'Processing file "{filename}" of directory "{fileOrFolder}"')
+        parseFile(os.path.join(fileOrFolder, filename), foundFields, records, isbn10Records, isbn13Records, contributionRecords)
+    elif os.path.isfile(fileOrFolder):
+      print(f'Processing file "{fileOrFolder}"')
+      parseFile(fileOrFolder, foundFields, records, isbn10Records, isbn13Records, contributionRecords)
+    else:
+      print(f'Skipping "{fileOrFolder}", it is not a directory nor a file!')
 
   # it is difficult to immediately write parsed content in a streaming fashion
   # because we do not yet know all possible headers
@@ -83,7 +103,7 @@ def main():
       
     isbn10Writer = csv.DictWriter(isbn10Out, fieldnames=['id', 'isbn10'])
     isbn13Writer = csv.DictWriter(isbn13Out, fieldnames=['id', 'isbn13'])
-    contributionWriter = csv.DictWriter(contributionOut, fieldnames=['id', 'contributorType', 'type', 'name', 'firstname', 'place'])
+    contributionWriter = csv.DictWriter(contributionOut, fieldnames=['contributorID', 'id', 'contributorType', 'type', 'name', 'firstname', 'place'])
 
     isbn10Writer.writeheader()
     isbn13Writer.writeheader()
