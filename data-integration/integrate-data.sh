@@ -43,6 +43,9 @@ MODULE_FILTER_RDF_XML_SUBJECTS="tools.xml.filter-subjects-xml"
 
 SCRIPT_UNION_IDS="../data-sources/bnf/union.py"
 
+SCRIPT_PARSE_UNESCO_HTML="../data-sources/unesco/parse-content.py"
+MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS="tools.csv.count_unique_values"
+
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
 SCRIPT_QUERY_DATA="../utils/query-data.sh"
@@ -102,6 +105,9 @@ INPUT_BNF_CONT_WIKIDATA="../data-sources/bnf/external/dump_extref-wikidata_exact
 INPUT_BNF_TRL_ORIGINAL_LIST_FR_NL="../data-sources/bnf/Bnf_FR-NL_1970-2020_598notices_source-titles.csv"
 INPUT_BNF_TRL_ORIGINAL_LIST_NL_FR="../data-sources/bnf/Bnf_NL-FR_1970-2020_3770notices_source-titles.csv"
 
+INPUT_BNF_RAMEAU_SUBJECT_CLASSIFICATION="../data-sources/bnf/rameau-subject-classifications"
+INPUT_BNF_RAMEAU_FILENAME_PATTERN="../data-sources/bnf/rameau/databnf_rameau_nosubjects__skos*"
+
 
 # KB
 INPUT_KB_ORGS_DIR="../data-sources/kb/orgs"
@@ -119,6 +125,17 @@ INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography
 
 # WIKIDATA
 INPUT_WIKIDATA_ENRICHED="../data-sources/wikidata/2022-04-14-beltrans-wikidata-manually-enriched.csv"
+
+# UNESCO INDEX TRANSLATIONUM
+INPUT_UNESCO_HTML_DIR_FR_NL="../data-sources/unesco/2023-01-06_FR-NL_lg-0_sl-fra_l-nld_from-1970_to-2020"
+INPUT_UNESCO_HTML_DIR_NL_FR="../data-sources/unesco/2023-01-06_NL-FR_lg-0_sl-nld_l-fra_from-1970_to-2020"
+
+INPUT_UNESCO_ENRICHED_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-translationum_11899.csv"
+INPUT_UNESCO_ENRICHED_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_3349.csv"
+INPUT_UNESCO_ENRICHED_ISBN10_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-translationum_isbn10.csv"
+INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-translationum_isbn13.csv"
+INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
+INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
 
 # #############################################################################
@@ -141,6 +158,8 @@ TRIPLE_STORE_GRAPH_BNF_CONT_ISNI="http://bnf-contributors-isni"
 TRIPLE_STORE_GRAPH_BNF_CONT_VIAF="http://bnf-contributors-viaf"
 TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA="http://bnf-contributors-wikidata"
 TRIPLE_STORE_GRAPH_BNF_TRL_ORIG="http://bnf-originals"
+TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS="http://bnf-trl-rameau-links"
+TRIPLE_STORE_GRAPH_RAMEAU="http://rameau"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_ORIG_LA="http://kbr-originals-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
@@ -151,6 +170,8 @@ TRIPLE_STORE_GRAPH_KB_PBL="http://kb-publishers"
 TRIPLE_STORE_GRAPH_MASTER="http://master-data"
 TRIPLE_STORE_GRAPH_WIKIDATA="http://wikidata"
 TRIPLE_STORE_GRAPH_KBCODE="http://kbcode"
+TRIPLE_STORE_GRAPH_UNESCO="http://unesco"
+TRIPLE_STORE_GRAPH_UNESCO_ORIG="http://unesco-originals"
 
 TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES="http://kbr-publisher-matches"
 
@@ -374,6 +395,7 @@ SUFFIX_BNF_TRL_CONT_IDS="bnf-translation-contributor-persons-ids.csv"
 SUFFIX_BNF_TRL_IDS_FR_NL="bnf-translation-ids-fr-nl.csv"
 SUFFIX_BNF_TRL_IDS_NL_FR="bnf-translation-ids-nl-fr.csv"
 SUFFIX_BNF_TRL_IDS="bnf-translation-ids.csv"
+SUFFIX_BNF_TRL_IDS_ABOUT="bnf-translation-ids-about.csv"
 
 SUFFIX_BNF_TRL_ORIG_FR_NL="bnf-originals-fr-nl.csv"
 SUFFIX_BNF_TRL_ORIG_NORM_FR_NL="bnf-originals-fr-nl-normalized.csv"
@@ -404,6 +426,24 @@ SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
 # DATA SOURCE - WIKIDATA
 #
 SUFFIX_WIKIDATA_ENRICHED="manually-enriched-wikidata.csv"
+
+# DATA SOURCE - UNESCO INDEX TRANSLATIONUM
+#
+SUFFIX_UNESCO_ENRICHED_FR_NL="unesco_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_NL_FR="unesco_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED_CONT_FR_NL="unesco-contributions_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_CONT_NL_FR="unesco-contributions_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL="unesco-isbn10_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL="unesco-isbn13_fr-nl.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR="unesco-isbn10_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR="unesco-isbn13_nl-fr.csv"
+SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_FR_NL="unesco-unique-contributors_fr-nl.csv"
+SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_NL_FR="unesco-unique-contributors_nl-fr.csv"
+
+SUFFIX_UNESCO_TRANSLATIONS_LD="unesco-translation-data.ttl"
+SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD="unesco-limited-original-data.ttl"
+SUFFIX_UNESCO_ISBN_LD="unesco-isbn.ttl"
+
 
 # DATA SOURCE - BNFISNI enrichment
 #
@@ -471,6 +511,9 @@ SUFFIX_BNF_TRL_NL_FR_LD="nl_fr-translations.xml"
 SUFFIX_BNF_TRL_ORIG_LD="bnf-limited-originals.ttl"
 SUFFIX_BNF_TRL_ORIG_LINKS_LD="bnf-limited-originals-links.ttl"
 
+
+SUFFIX_BNF_TRL_RAMEAU="bnf-translations-rameau-classifications.xml"
+
 SUFFIX_BNF_CONT_LD="bnf-contributors-persons.xml"
 SUFFIX_BNF_CONT_ORGS_LD="bnf-contributors-orgs.xml"
 SUFFIX_BNF_TRL_CONT_LINKS_LD="bnf-editions-contributor-links.xml"
@@ -522,6 +565,9 @@ function extract {
   elif [ "$dataSource" = "kbcode" ];
   then
     extractKBCode $integrationFolderName
+  elif [ "$dataSource" = "rameau" ];
+  then
+    extractRameau $integrationFolderName
   elif [ "$dataSource" = "wikidata" ];
   then
     extractWikidata $integrationFolderName
@@ -531,6 +577,9 @@ function extract {
   elif [ "$dataSource" = "bnfisni" ];
   then
     extractNationalityFromBnFViaISNI $integrationFolderName
+  elif [ "$dataSource" = "unesco" ];
+  then
+    extractUnesco $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
@@ -540,6 +589,7 @@ function extract {
     extractMasterData $integrationFolderName
     extractWikidata $integrationFolderName
     extractNationalityFromBnFViaISNI $integrationFolderName
+    extractUnesco $integrationFolderName
   fi
   
 }
@@ -576,6 +626,9 @@ function transform {
   elif [ "$dataSource" = "bnfisni" ];
   then
     transformNationalityFromBnFViaISNI $integrationFolderName
+  elif [ "$dataSource" = "unesco" ];
+  then
+    transformUnesco $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
@@ -585,6 +638,7 @@ function transform {
     transformMasterData $integrationFolderName
     transformWikidata $integrationFolderName
     transformNationalityFromBnFViaISNI $integrationFolderName
+    transformUnesco $integrationFolderName
   fi
   
 }
@@ -621,6 +675,9 @@ function load {
   elif [ "$dataSource" = "bnfisni" ];
   then
     loadNationalityFromBnFViaISNI $integrationFolderName
+  elif [ "$dataSource" = "unesco" ];
+  then
+    loadUnesco $integrationFolderName
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
@@ -629,6 +686,7 @@ function load {
     loadKB $integrationFolderName
     loadWikidata $integrationFolderName
     loadNationalityFromBnFViaISNI $integrationFolderName
+    loadUnesco $integrationFolderName
   fi
 
 }
@@ -947,6 +1005,18 @@ function extractKBCode {
 }
 
 # -----------------------------------------------------------------------------
+function extractRameau {
+  local $integrationName
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  echo "EXTRACT, TRANSFORM and LOAD the RAMEAU entities from the BnF dumps"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_RAMEAU" $INPUT_BNF_RAMEAU_FILENAME_PATTERN
+}
+
+# -----------------------------------------------------------------------------
 function extractBnF {
 
   local integrationName=$1
@@ -962,6 +1032,9 @@ function extractBnF {
   bnfFRNLTranslations="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_FR_NL"
   bnfBelgianPublications="$integrationName/bnf/translations/$SUFFIX_BNF_BELGIAN_PUBS_IDS"
   bnfTranslationIDs="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS"
+  bnfTranslationIDsAbout="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_IDS_ABOUT"
+
+  bnfRameauClassifications="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_RAMEAU"
 
   bnfNormalizedSourceAdaptedHeaderFRNL="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_NORM_FR_NL"
   bnfNormalizedSourceAdaptedHeaderNLFR="$integrationName/bnf/translations/$SUFFIX_BNF_TRL_ORIG_NORM_NL_FR"
@@ -1005,8 +1078,17 @@ function extractBnF {
   #
   source py-integration-env/bin/activate
 
+  # the following command will create a CSV file with BnF catalogue URIs
   echo "EXTRACTION - Create list of both NL and FR BnF translation IDs"
-  time python $SCRIPT_UNION_IDS $bnfFRNLTranslations $bnfNLFRTranslations -o $bnfTranslationIDs -d ';'
+  time python $SCRIPT_UNION_IDS $bnfFRNLTranslations $bnfNLFRTranslations -o $bnfTranslationIDs -d ' '
+
+  # we replace the 'catalogue' part of the URIs with 'data',
+  # because all other files in which we want to look up things have 'data' URIs
+  sed -i 's/catalogue/data/' $bnfTranslationIDs
+
+  # Mostly the expression URLs are used which have the URI with trailing '#about'
+  cp $bnfTranslationIDs $bnfTranslationIDsAbout
+  sed -i 's/\r$/#about/' -i $bnfTranslationIDsAbout
 
   # extract contributor IDs of all translation contributors (also non-Belgian contributors)
   echo "EXTRACTION - Extract all BnF contributor IDs of BELTRANS translations (despite the nationality)"
@@ -1036,6 +1118,12 @@ function extractBnF {
 
   echo "EXTRACTION - Extract links between BnF contributors and Wikidata"
   time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfPersonsBELTRANS
+
+  #
+  # There are also Rameau classifications
+  #
+  echo "EXTRACTION - Extract links between translations and their Rameau classifications"
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_RAMEAU_SUBJECT_CLASSIFICATION -o $bnfRameauClassifications -f $bnfTranslationIDsAbout
 
   #
   # We also have a list of source titles for BnF translations
@@ -1208,6 +1296,47 @@ function extractWikidata {
   echo "EXTRACTION - Nothing to extract from Wikidata, copying files"
   cp "$INPUT_WIKIDATA_ENRICHED" "$integrationName/wikidata/$SUFFIX_WIKIDATA_ENRICHED"
 
+}
+
+# -----------------------------------------------------------------------------
+function extractUnesco {
+
+  local integrationName=$1
+
+  # create the folders to place the extracted translations and agents
+  mkdir -p $integrationName/unesco
+
+  local unescoTranslationsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_FR_NL"
+  local unescoTranslationsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_NL_FR"
+
+  local unescoISBN10FRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
+  local unescoISBN10NLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
+
+  local unescoISBN13FRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
+  local unescoISBN13NLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
+
+  local unescoContributionsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT_FR_NL"
+  local unescoContributionsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT_NL_FR"
+
+  local unescoUniqueContributorsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_FR_NL"
+  local unescoUniqueContributorsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_NL_FR"
+
+  echo "EXTRACTION - parse HTML translations FR-NL"
+  time python $SCRIPT_PARSE_UNESCO_HTML -i $INPUT_UNESCO_HTML_DIR_FR_NL -o $unescoTranslationsFRNL \
+    --isbn10-file $unescoISBN10FRNL --isbn13-file $unescoISBN13FRNL --contribution-file $unescoContributionsFRNL
+
+  echo "EXTRACTION - parse HTML translations NL-FR"
+  time python $SCRIPT_PARSE_UNESCO_HTML -i $INPUT_UNESCO_HTML_DIR_NL_FR -o $unescoTranslationsNLFR \
+    --isbn10-file $unescoISBN10NLFR --isbn13-file $unescoISBN13NLFR --contribution-file $unescoContributionsNLFR
+
+  echo "EXTRACTION - extract unique contributors FR-NL"
+  time python -m $MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS -i $unescoContributionsFRNL -o $unescoUniqueContributorsFRNL \
+    -c "name" -c "firstname" -c "type" -c "place" -s "contributorType"
+
+  echo "EXTRACTION - extract unique contributors NL-FR"
+  time python -m $MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS -i $unescoContributionsNLFR -o $unescoUniqueContributorsNLFR \
+    -c "name" -c "firstname" -c "type" -c "place" -s "contributorType"
+ 
 }
 
 # -----------------------------------------------------------------------------
@@ -1902,6 +2031,35 @@ function mapMasterData {
   
 }
 
+# -----------------------------------------------------------------------------
+function transformUnesco {
+  local integrationName=$1
+
+  mkdir -p "$integrationName/unesco/rdf"
+
+  local translationTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LD"
+  local translationOriginalTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD"
+  local isbnTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_ISBN_LD"
+
+  # export environment variables used by the YARRRML mapping files
+  export RML_SOURCE_WORKS_UNESCO_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_FR_NL"
+  export RML_SOURCE_WORKS_UNESCO_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_NL_FR"
+
+  export RML_SOURCE_UNESCO_ISBN10_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
+  export RML_SOURCE_UNESCO_ISBN13_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
+  export RML_SOURCE_UNESCO_ISBN10_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
+  export RML_SOURCE_UNESCO_ISBN13_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
+
+  echo "Map Unesco translation data"
+  . map.sh ../data-sources/unesco/unesco-translations.yml $translationTurtle
+
+  echo "Map Unesco translation source data based on minimal information in the translation data"
+  . map.sh ../data-sources/unesco/unesco-translations-limited-originals.yml $translationOriginalTurtle
+
+  echo "Map Unesco ISBN relationships"
+  . map.sh ../data-sources/unesco/unesco-isbn.yml $isbnTurtle
+
+}
 
 # -----------------------------------------------------------------------------
 function loadKBR {
@@ -2168,6 +2326,9 @@ function loadBnF {
   local bnfContributorVIAFData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_VIAF_LD"
   local bnfContributorWikidataData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_WIKIDATA_LD"
 
+  local bnfRameauClassifications="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_RAMEAU"
+
+
   local bnfLimitedOriginalInformationTurtle="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_ORIG_LD"
   local bnfLimitedOriginalInformationLinksTurtle="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_ORIG_LINKS_LD"
 
@@ -2181,6 +2342,9 @@ function loadBnF {
 
   echo "Load BnF contributors persons and organizations ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData" "$bnfContributorDataOrgs"
+
+  echo "Load BnF publication-rameau links ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS" "$bnfRameauClassifications"
 
   echo "Load BnF publication-contributor links ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS" "$bnfContributionLinksData"
@@ -2261,6 +2425,30 @@ function loadBnF {
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" \
     "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA" "$CREATE_QUERY_BNF_GENDER"
 
+}
+
+# -----------------------------------------------------------------------------
+function loadUnesco {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_UNESCO"
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+
+  local translationTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LD"
+  local translationOriginalTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD"
+  local isbnTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_ISBN_LD"
+
+  echo "Load Unesco Index Translationum translation data"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO \
+    "$translationTurtle" "$isbnTurtle"
+
+  echo "Load Unesco Index Translationum original information"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_ORIG \
+    "$translationOriginalTurtle"
 }
 
 # -----------------------------------------------------------------------------

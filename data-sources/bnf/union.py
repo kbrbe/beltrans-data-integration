@@ -31,7 +31,7 @@ def main():
       currentFileIDCounter = 0
       reader = csv.reader(fIn, delimiter=delimiter)
       for row in reader:
-        identifier = utils.extractBnFIdentifier(row[0])
+        identifier = row[0]
         currentSet.add(identifier)
         currentFileIDCounter += 1
       numberUniqueIDs = len(currentSet)
