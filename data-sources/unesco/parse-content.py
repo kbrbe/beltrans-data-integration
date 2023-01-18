@@ -10,10 +10,11 @@ import urllib
 from io import BytesIO
 import argparse
 import lib
+from contributions import Contribution
 
 
 # -----------------------------------------------------------------------------
-def parseFile(filename, foundFields, records, isbn10Records, isbn13Records, contributionRecords):
+def parseFile(filename, foundFields, records, isbn10Records, isbn13Records, contributionRecords, contributionIDs):
   """This function parses a single file."""
 
   with open(filename, 'r') as fIn:
@@ -33,6 +34,8 @@ def parseFile(filename, foundFields, records, isbn10Records, isbn13Records, cont
       isbn13Records.extend(newISBN13Relations)
 
     if newContributionRelations:
+      for cont in newContributionRelations:
+        cont['contributorIDShort'] = contributionIDs.getShortIdentifier(cont['contributorID'])
       contributionRecords.extend(newContributionRelations)
 
 
@@ -74,6 +77,9 @@ def main():
   contributionRecords = []
   foundFields = set(['id'])
 
+  # create an object for the mapping between long and short identifiers
+  contributionIDs = Contribution()
+
   # try to parse each file or folder given via arguments
   for fileOrFolder in options.input:
     
@@ -81,10 +87,10 @@ def main():
       print(f'Processing directory "{fileOrFolder}"')
       for filename in os.listdir(fileOrFolder):
         #print(f'Processing file "{filename}" of directory "{fileOrFolder}"')
-        parseFile(os.path.join(fileOrFolder, filename), foundFields, records, isbn10Records, isbn13Records, contributionRecords)
+        parseFile(os.path.join(fileOrFolder, filename), foundFields, records, isbn10Records, isbn13Records, contributionRecords, contributionIDs)
     elif os.path.isfile(fileOrFolder):
       print(f'Processing file "{fileOrFolder}"')
-      parseFile(fileOrFolder, foundFields, records, isbn10Records, isbn13Records, contributionRecords)
+      parseFile(fileOrFolder, foundFields, records, isbn10Records, isbn13Records, contributionRecords, contributionIDs)
     else:
       print(f'Skipping "{fileOrFolder}", it is not a directory nor a file!')
 
@@ -103,7 +109,7 @@ def main():
       
     isbn10Writer = csv.DictWriter(isbn10Out, fieldnames=['id', 'isbn10'])
     isbn13Writer = csv.DictWriter(isbn13Out, fieldnames=['id', 'isbn13'])
-    contributionWriter = csv.DictWriter(contributionOut, fieldnames=['contributorID', 'id', 'contributorType', 'type', 'name', 'firstname', 'place'])
+    contributionWriter = csv.DictWriter(contributionOut, fieldnames=['contributorIDShort', 'contributorID', 'id', 'contributorType', 'type', 'name', 'firstname', 'place'])
 
     isbn10Writer.writeheader()
     isbn13Writer.writeheader()
