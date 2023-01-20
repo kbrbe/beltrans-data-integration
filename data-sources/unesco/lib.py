@@ -5,10 +5,10 @@ import hashlib
 from tools.string import utils_string
 
 # -----------------------------------------------------------------------------
-def addUniqueContributorID(contributorDict):
+def addUniqueContributorID(contributorDict, fields):
   """This function will add a 'contributorID' field based on the MD5 hash of some input fields."""
 
-  uniqueName = utils_string.getUniqueName(contributorDict, ['name', 'firstname', 'type', 'place'], delimiter=' ; ')
+  uniqueName = utils_string.getUniqueName(contributorDict, fields, delimiter=' ; ')
   uniqueID = hashlib.md5(uniqueName.encode('utf-8')).hexdigest()
   contributorDict['contributorID'] = uniqueID
 
@@ -138,7 +138,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html1 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr></table></body></html>'
   >>> foundFields = set()
   >>> getStructuredRecord(html1, foundFields)
-  ([{'id': '1-2', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [])
+  ([{'id': '1-2', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [{'id': '2-2', 'type': 'org', 'contributorType': 'publisher', 'name': 'PBL', 'contributorID': '25f66d09583995c8fbf858e439e0ab33'}])
   >>> sorted(foundFields)
   ['isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
@@ -147,7 +147,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html2 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Bobsen</span>, <span class="sn_auth_firstname">Bob</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]<span class="sn_transl_name">Lieber</span>, <span class="sn_transl_firstname">Sven</span>; <span class="sn_transl_name">Doe</span>, <span class="sn_transl_firstname">John</span></td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_auth_name">Jannssen</span>, <span class="sn_auth_firstname">Jan</span>: <span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span><span class="sn_transl_name">Alisson</span>, <span class="sn_transl_firstname">Alice</span></td></tr></table></body></html>'
   >>> foundFields2 = set()
   >>> getStructuredRecord(html2, foundFields2)
-  ([{'id': '1-2', 'authors': 'type=person,place=,firstname=Bob,name=Bobsen', 'translators': 'type=person,place=,firstname=Sven,name=Lieber;type=person,place=,firstname=John,name=Doe', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen', 'translators': 'type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [{'type': 'person', 'place': '', 'firstname': 'Bob', 'name': 'Bobsen', 'id': '1-2', 'contributorType': 'author', 'contributorID': 'd4cdbac08551ba4f814e7771232b892f'}, {'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber', 'id': '1-2', 'contributorType': 'translator', 'contributorID': '7ceb6f92f75d083c05ebba6e75a6183c'}, {'type': 'person', 'place': '', 'firstname': 'John', 'name': 'Doe', 'id': '1-2', 'contributorType': 'translator', 'contributorID': 'daa492317e3b91cad9a83acc6d942483'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author', 'contributorID': '4660ec616eb1402e8870602a870c0372'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'translator', 'contributorID': '42d20ec48c9822d93a41a6b74dd8f549'}])
+  ([{'id': '1-2', 'authors': 'type=person,place=,firstname=Bob,name=Bobsen', 'translators': 'type=person,place=,firstname=Sven,name=Lieber;type=person,place=,firstname=John,name=Doe', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen', 'translators': 'type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [{'type': 'person', 'place': '', 'firstname': 'Bob', 'name': 'Bobsen', 'id': '1-2', 'contributorType': 'author', 'contributorID': 'd4cdbac08551ba4f814e7771232b892f'}, {'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber', 'id': '1-2', 'contributorType': 'translator', 'contributorID': '7ceb6f92f75d083c05ebba6e75a6183c'}, {'type': 'person', 'place': '', 'firstname': 'John', 'name': 'Doe', 'id': '1-2', 'contributorType': 'translator', 'contributorID': 'daa492317e3b91cad9a83acc6d942483'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author', 'contributorID': '4660ec616eb1402e8870602a870c0372'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'translator', 'contributorID': '42d20ec48c9822d93a41a6b74dd8f549'}, {'id': '2-2', 'type': 'org', 'contributorType': 'publisher', 'name': 'PBL', 'contributorID': '25f66d09583995c8fbf858e439e0ab33'}])
   >>> sorted(foundFields2)
   ['authors', 'isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year', 'translators']
 
@@ -156,7 +156,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html3 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Bobsen</span>, <span class="sn_auth_firstname">Bob</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_auth_name">Jannssen</span>, <span class="sn_auth_firstname">Jan</span>; <span class="sn_auth_name">Alisson</span>, <span class="sn_auth_firstname">Alice</span>: <span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr></table></body></html>'
   >>> foundFields3 = set()
   >>> getStructuredRecord(html3, foundFields3)
-  ([{'id': '1-2', 'authors': 'type=person,place=,firstname=Bob,name=Bobsen', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen;type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [{'type': 'person', 'place': '', 'firstname': 'Bob', 'name': 'Bobsen', 'id': '1-2', 'contributorType': 'author', 'contributorID': 'd4cdbac08551ba4f814e7771232b892f'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author', 'contributorID': '4660ec616eb1402e8870602a870c0372'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'author', 'contributorID': '42d20ec48c9822d93a41a6b74dd8f549'}])
+  ([{'id': '1-2', 'authors': 'type=person,place=,firstname=Bob,name=Bobsen', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen;type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [{'type': 'person', 'place': '', 'firstname': 'Bob', 'name': 'Bobsen', 'id': '1-2', 'contributorType': 'author', 'contributorID': 'd4cdbac08551ba4f814e7771232b892f'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author', 'contributorID': '4660ec616eb1402e8870602a870c0372'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'author', 'contributorID': '42d20ec48c9822d93a41a6b74dd8f549'}, {'id': '2-2', 'type': 'org', 'contributorType': 'publisher', 'name': 'PBL', 'contributorID': '25f66d09583995c8fbf858e439e0ab33'}])
   >>> sorted(foundFields3)
   ['authors', 'isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
@@ -165,7 +165,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html4 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Fake institution</span>, <span class="sn_auth_quality">Paris</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_auth_name">Jannssen</span>, <span class="sn_auth_firstname">Jan</span>; <span class="sn_auth_name">Alisson</span>, <span class="sn_auth_firstname">Alice</span>: <span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr></table></body></html>'
   >>> foundFields4 = set()
   >>> getStructuredRecord(html4, foundFields4)
-  ([{'id': '1-2', 'authors': 'type=org,place=Paris,firstname=,name=Fake institution', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen;type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [{'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution', 'id': '1-2', 'contributorType': 'author', 'contributorID': '4b69f9d8cea7742dac9ec30431198926'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author', 'contributorID': '4660ec616eb1402e8870602a870c0372'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'author', 'contributorID': '42d20ec48c9822d93a41a6b74dd8f549'}])
+  ([{'id': '1-2', 'authors': 'type=org,place=Paris,firstname=,name=Fake institution', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen;type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [{'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution', 'id': '1-2', 'contributorType': 'author', 'contributorID': '4b69f9d8cea7742dac9ec30431198926'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author', 'contributorID': '4660ec616eb1402e8870602a870c0372'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'author', 'contributorID': '42d20ec48c9822d93a41a6b74dd8f549'}, {'id': '2-2', 'type': 'org', 'contributorType': 'publisher', 'name': 'PBL', 'contributorID': '25f66d09583995c8fbf858e439e0ab33'}])
   >>> sorted(foundFields4)
   ['authors', 'isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
@@ -174,7 +174,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html5 = '<html><body><table class="restable"><tr><td class="res1">1/2</td><td class="res2"><span class="sn_auth_name">Lieber</span>, <span class="sn_auth_firstname">Sven</span>; <span class="sn_auth_name">Fake institution</span>, <span class="sn_auth_quality">Paris</span>: <span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]</td></tr><tr><td class="res1">2/2</td><td class="res2"><span class="sn_auth_name">Jannssen</span>, <span class="sn_auth_firstname">Jan</span>; <span class="sn_auth_name">Alisson</span>, <span class="sn_auth_firstname">Alice</span>: <span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr></table></body></html>'
   >>> foundFields5 = set()
   >>> getStructuredRecord(html5, foundFields5)
-  ([{'id': '1-2', 'authors': 'type=person,place=,firstname=Sven,name=Lieber;type=org,place=Paris,firstname=,name=Fake institution', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen;type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [{'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber', 'id': '1-2', 'contributorType': 'author', 'contributorID': '7ceb6f92f75d083c05ebba6e75a6183c'}, {'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution', 'id': '1-2', 'contributorType': 'author', 'contributorID': '4b69f9d8cea7742dac9ec30431198926'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author', 'contributorID': '4660ec616eb1402e8870602a870c0372'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'author', 'contributorID': '42d20ec48c9822d93a41a6b74dd8f549'}])
+  ([{'id': '1-2', 'authors': 'type=person,place=,firstname=Sven,name=Lieber;type=org,place=Paris,firstname=,name=Fake institution', 'isbn10': '2-930367-10-5;90-77213-05-8;90-77213-07-4', 'isbn13': '978-2-930367-10-1;978-90-77213-05-6;978-90-77213-07-0', 'sn_year': '2022', 'sn_orig_lang': 'Dutch'}, {'id': '2-2', 'authors': 'type=person,place=,firstname=Jan,name=Jannssen;type=person,place=,firstname=Alice,name=Alisson', 'sn_year': '2020', 'publisher': 'PBL'}], [{'id': '1-2', 'isbn10': '2-930367-10-5'}, {'id': '1-2', 'isbn10': '90-77213-05-8'}, {'id': '1-2', 'isbn10': '90-77213-07-4'}], [{'id': '1-2', 'isbn13': '978-2-930367-10-1'}, {'id': '1-2', 'isbn13': '978-90-77213-05-6'}, {'id': '1-2', 'isbn13': '978-90-77213-07-0'}], [{'type': 'person', 'place': '', 'firstname': 'Sven', 'name': 'Lieber', 'id': '1-2', 'contributorType': 'author', 'contributorID': '7ceb6f92f75d083c05ebba6e75a6183c'}, {'type': 'org', 'place': 'Paris', 'firstname': '', 'name': 'Fake institution', 'id': '1-2', 'contributorType': 'author', 'contributorID': '4b69f9d8cea7742dac9ec30431198926'}, {'type': 'person', 'place': '', 'firstname': 'Jan', 'name': 'Jannssen', 'id': '2-2', 'contributorType': 'author', 'contributorID': '4660ec616eb1402e8870602a870c0372'}, {'type': 'person', 'place': '', 'firstname': 'Alice', 'name': 'Alisson', 'id': '2-2', 'contributorType': 'author', 'contributorID': '42d20ec48c9822d93a41a6b74dd8f549'}, {'id': '2-2', 'type': 'org', 'contributorType': 'publisher', 'name': 'PBL', 'contributorID': '25f66d09583995c8fbf858e439e0ab33'}])
   >>> sorted(foundFields5)
   ['authors', 'isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
@@ -183,7 +183,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> html6 = '<html><body><table class="restable"><tr><td class="res1">1/3</td><td class="res2"><span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]<span class="sn_interm_lang">English</span></td></tr><tr><td class="res1">2/3</td><td class="res2"><span class="sn_isbn">"(ISBN: 9077213058)"</span><span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr><tr><td class="res1">3/3</td><td class="res2"><span class="sn_year">2021</span><span class="sn_interm_lang"></span></td></tr></table></body></html>'
   >>> foundFields6 = set()
   >>> getStructuredRecord(html6, foundFields6)
-  ([{'id': '2-3', 'isbn10': '90-77213-05-8', 'isbn13': '978-90-77213-05-6', 'sn_year': '2020', 'publisher': 'PBL'}, {'id': '3-3', 'sn_year': '2021', 'sn_interm_lang': None}], [{'id': '2-3', 'isbn10': '90-77213-05-8'}], [{'id': '2-3', 'isbn13': '978-90-77213-05-6'}], [])
+  ([{'id': '2-3', 'isbn10': '90-77213-05-8', 'isbn13': '978-90-77213-05-6', 'sn_year': '2020', 'publisher': 'PBL'}, {'id': '3-3', 'sn_year': '2021', 'sn_interm_lang': None}], [{'id': '2-3', 'isbn10': '90-77213-05-8'}], [{'id': '2-3', 'isbn13': '978-90-77213-05-6'}], [{'id': '2-3', 'type': 'org', 'contributorType': 'publisher', 'name': 'PBL', 'contributorID': '25f66d09583995c8fbf858e439e0ab33'}])
   >>> sorted(foundFields)
   ['isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
@@ -213,13 +213,14 @@ def getStructuredRecord(htmlElement, encounteredFields):
     authors = parseContributor(row, 'sn_auth_name', 'sn_auth_firstname', 'sn_auth_quality')
     translators = parseContributor(row, 'sn_transl_name', 'sn_transl_firstname', 'sn_transl_quality')    
 
+    authorAndTranslatorUniqueNameFields = ['name', 'firstname', 'type', 'place']
     if len(authors) > 0:
       encounteredFields.add('authors')
       record['authors'] = serializeContributorsToString(authors)
       authors = [dict(item, id=rowID) for item in authors]
       authors = [dict(item, contributorType='author') for item in authors]
       for author in authors:
-        addUniqueContributorID(author)
+        addUniqueContributorID(author,authorAndTranslatorUniqueNameFields)
         contributorRelations.append(author)
 
     if len(translators) > 0:
@@ -228,7 +229,7 @@ def getStructuredRecord(htmlElement, encounteredFields):
       translators = [dict(item, id=rowID) for item in translators]
       translators = [dict(item, contributorType='translator') for item in translators]
       for translator in translators:
-        addUniqueContributorID(translator)
+        addUniqueContributorID(translator, authorAndTranslatorUniqueNameFields)
         contributorRelations.append(translator)
 
     # for all other fields
@@ -237,10 +238,17 @@ def getStructuredRecord(htmlElement, encounteredFields):
 
       if fieldName == 'sn_pub':
         publisherData = field.findall('span')
+        # the following will usually find the fields 'publisher', 'place' and 'sn_country'
         for publisherField in publisherData:
           publisherFieldName = publisherField.attrib['class']
           record[publisherFieldName] = publisherField.text
           encounteredFields.add(publisherFieldName)
+          # additionaly, add the publisher as contributor with specific role
+          if publisherFieldName == 'publisher':
+            publisherContributionRecord = {'id': rowID, 'type': 'org', 'contributorType': 'publisher', 'name': publisherField.text}
+            addUniqueContributorID(publisherContributionRecord, ['name'])
+            contributorRelations.append(publisherContributionRecord)
+       
       elif fieldName == 'sn_isbn':
         isbnIdentifiersString = re.findall('\(ISBN: (.*)\)', field.text)[0]
         isbnIdentifiers = isbnIdentifiersString.split(',')

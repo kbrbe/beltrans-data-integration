@@ -128,4 +128,11 @@ mappings:
           parameters:
             - [grel:valueParameter, $(contributorType)]
             - [grel:valueParameter2, "author"] 
+      - p: schema:publisher
+        o: btid:unesco_authority_u$(contributorIDShort)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorType)]
+            - [grel:valueParameter2, "publisher"] 
 
