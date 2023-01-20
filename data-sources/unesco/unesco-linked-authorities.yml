@@ -45,6 +45,7 @@ mappings:
     po:
       - [a, schema:Person]
       - [dcterms:identifier, u$(contributorIDShort)]
+      - [rdfs:label, "$(name), $(firstname)"]
       - p: schema:familyName
         o: $(name)
         condition:
@@ -113,6 +114,7 @@ mappings:
     po:
       - [a, schema:Organization]
       - [dcterms:identifier, u$(contributorIDShort)]
+      - [rdfs:label, $(name)]
       - p: schema:name
         o: $(name)
         condition:
