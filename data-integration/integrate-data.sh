@@ -439,6 +439,7 @@ SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS="unesco-unique-contributors.csv"
 SUFFIX_UNESCO_TRANSLATIONS_LD="unesco-translation-data.ttl"
 SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD="unesco-limited-original-data.ttl"
 SUFFIX_UNESCO_ISBN_LD="unesco-isbn.ttl"
+SUFFIX_UNESCO_AUTHORITIES_LD="unesco-linked-authorities.ttl"
 
 
 # DATA SOURCE - BNFISNI enrichment
@@ -2020,15 +2021,15 @@ function transformUnesco {
   local translationTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LD"
   local translationOriginalTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD"
   local isbnTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_ISBN_LD"
+  local authorityTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_AUTHORITIES_LD"
 
   # export environment variables used by the YARRRML mapping files
-  export RML_SOURCE_WORKS_UNESCO_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_FR_NL"
-  export RML_SOURCE_WORKS_UNESCO_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_NL_FR"
+  export RML_SOURCE_WORKS_UNESCO="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED"
 
-  export RML_SOURCE_UNESCO_ISBN10_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
-  export RML_SOURCE_UNESCO_ISBN13_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
-  export RML_SOURCE_UNESCO_ISBN10_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
-  export RML_SOURCE_UNESCO_ISBN13_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
+  export RML_SOURCE_UNESCO_ISBN10="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10"
+  export RML_SOURCE_UNESCO_ISBN13="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13"
+  export RML_SOURCE_UNESCO_UNIQUE_CONTRIBUTORS="$integrationName/unesco/$SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS"
+  export RML_SOURCE_WORKS_UNESCO_CONTRIBUTIONS="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT"
 
   echo "Map Unesco translation data"
   . map.sh ../data-sources/unesco/unesco-translations.yml $translationTurtle
@@ -2039,6 +2040,8 @@ function transformUnesco {
   echo "Map Unesco ISBN relationships"
   . map.sh ../data-sources/unesco/unesco-isbn.yml $isbnTurtle
 
+  echo "Map Unesco identified contributors"
+  . map.sh ../data-sources/unesco/unesco-linked-authorities.yml $authorityTurtle
 }
 
 # -----------------------------------------------------------------------------
