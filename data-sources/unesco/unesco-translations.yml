@@ -57,6 +57,13 @@ mappings:
           parameters:
             - [grel:valueParameter, $(place)]
             - [grel:valueParameter2, ""] 
+      - p: schema:countryOfOrigin
+        o: $(sn_country)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(sn_country)]
+            - [grel:valueParameter2, ""] 
       - p: schema:datePublished
         o: $(sn_year)
         condition:
