@@ -178,6 +178,15 @@ def getStructuredRecord(htmlElement, encounteredFields):
   >>> sorted(foundFields5)
   ['authors', 'isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
 
+  Rows containing 'sn_interm_lang' should be filtered out
+
+  >>> html6 = '<html><body><table class="restable"><tr><td class="res1">1/3</td><td class="res2"><span class="sn_isbn">"(ISBN: 2930367105, 9077213058, 9077213074)"</span><span class="sn_year">2022</span>[<span class="sn_orig_lang">Dutch</span>]<span class="sn_interm_lang">English</span></td></tr><tr><td class="res1">2/3</td><td class="res2"><span class="sn_isbn">"(ISBN: 9077213058)"</span><span class="sn_year">2020</span><span class="sn_pub"><span class="publisher">PBL</span></span></td></tr><tr><td class="res1">3/3</td><td class="res2"><span class="sn_year">2021</span><span class="sn_interm_lang"></span></td></tr></table></body></html>'
+  >>> foundFields6 = set()
+  >>> getStructuredRecord(html6, foundFields6)
+  ([{'id': '2-3', 'isbn10': '90-77213-05-8', 'isbn13': '978-90-77213-05-6', 'sn_year': '2020', 'publisher': 'PBL'}, {'id': '3-3', 'sn_year': '2021', 'sn_interm_lang': None}], [{'id': '2-3', 'isbn10': '90-77213-05-8'}], [{'id': '2-3', 'isbn13': '978-90-77213-05-6'}], [])
+  >>> sorted(foundFields)
+  ['isbn10', 'isbn13', 'publisher', 'sn_orig_lang', 'sn_year']
+
 
 
   """ 
@@ -196,7 +205,11 @@ def getStructuredRecord(htmlElement, encounteredFields):
     record['id'] = rowID
     fields = row.findall('td[@class="res2"]/span')
 
-
+    # before we do anything, if this row contains a value for an intermediary language, skip it!
+    # this will be out of scope of the BELTRANS project
+    if any(field.attrib['class'] == 'sn_interm_lang' and field.text is not None for field in fields):
+      continue
+      
     authors = parseContributor(row, 'sn_auth_name', 'sn_auth_firstname', 'sn_auth_quality')
     translators = parseContributor(row, 'sn_transl_name', 'sn_transl_firstname', 'sn_transl_quality')    
 
