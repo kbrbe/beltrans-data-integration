@@ -40,6 +40,8 @@ mappings:
         delimiter: ','
     s: btid:manifestation_unesco_$(id)
     po:
+      - [a, schema:CreativeWork]
+      - [a, schema:Book]
       - [dcterms:identifier, $(id)]
       - [schema:name, $(sn_target_title)]
       - [schema:translationOfWork, btid:manifestation_unesco_source_$(id)~iri]
