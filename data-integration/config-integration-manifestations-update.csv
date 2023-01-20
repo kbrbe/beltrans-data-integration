@@ -3,3 +3,5 @@
 "BnF","ISBN13","ISBN10","http://bnf-publications",""
 "KB","ISBN10","ISBN13","http://kb-publications","http://kb-originals"
 "KB","ISBN13","ISBN10","http://kb-publications","http://kb-originals"
+"Unesco","ISBN10","ISBN13","http://unesco","http://unesco-originals"
+"Unesco","ISBN13","ISBN10","http://unesco","http://unesco-originals"

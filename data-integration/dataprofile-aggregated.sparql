@@ -27,6 +27,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbrTitle;SEPARATOR=';') AS ?targetKBRTitle)
     (group_concat(distinct ?bnfTitle;SEPARATOR=';') AS ?targetBnFTitle)
     (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetKBTitle)
+    (group_concat(distinct ?unescoTitle;SEPARATOR=';') AS ?targetUnescoTitle)
 
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
     (group_concat(distinct ?kbTargetManifestationKBCodeLabel;SEPARATOR=';') AS ?targetThesaurusKBCode)
@@ -44,11 +45,13 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbrManifestationID;SEPARATOR=';') AS ?targetKBRIdentifier)
     (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetBnFIdentifier)
     (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
+    (group_concat(distinct ?unescoManifestationID;SEPARATOR=';') AS ?targetUnescoIdentifier)
 
     (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceKBRIdentifier)
     (group_concat(distinct ?kbrSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleKBR)
     (group_concat(distinct ?kbSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleKB)
     (group_concat(distinct ?bnfSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleBnF)
+    (group_concat(distinct ?unescoSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleUnesco)
     (group_concat(distinct ?kbrSourceManifestationISBN10;SEPARATOR=';') AS ?sourceISBN10)
     (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceISBN13)
 
@@ -61,18 +64,22 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierKBR)
     (group_concat(distinct ?bnfPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierBnF)
     (group_concat(distinct ?kbPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierKB)
+    (group_concat(distinct ?unescoPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierUnesco)
 
     (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
     (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
     (group_concat(distinct ?kbDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationKB)
+    (group_concat(distinct ?unescoDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationUnesco)
 
     (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKBR)
     (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationBnF)
     (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKB)
+    (group_concat(distinct ?unescoLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationUnesco)
 
     (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublicationKBR)
     ("" AS ?targetCountryOfPublicationBnF)
     ("" AS ?targetCountryOfPublicationKB)
+    (group_concat(distinct ?unescoCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublicationUnesco)
 
     (group_concat(distinct ?authorNationalityLabel;SEPARATOR=';') AS ?authorNationalities)
     (group_concat(distinct ?illustratorNationalityLabel;SEPARATOR=';') AS ?illustratorNationalities)
@@ -298,6 +305,43 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
 
     } # end optional KB
+
+    # #########################################################################
+    #
+    # DATA OF THIS MANIFESTATION WE HAVE FROM UNESCO
+    #
+    OPTIONAL {
+      graph <http://beltrans-manifestations> { ?manifestation schema:sameAs ?unescoManifestation . }
+      graph <http://unesco> { ?unescoManifestation a schema:CreativeWork . }
+
+      # optional attributes of the translation itself
+      OPTIONAL { graph <http://unesco> { ?unescoManifestation dcterms:identifier ?unescoManifestationID . }}
+      OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:name ?unescoTitle . }}
+      OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:datePublished ?unescoDatePublished . }}
+      OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:locationCreated ?unescoLocationCreated . }}
+      OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:countryOfOrigin ?unescoCountryOfOriginLabel . }}
+      OPTIONAL {
+        graph <http://unesco> { ?unescoManifestation schema:publisher ?unescoPublisher . }
+        OPTIONAL {
+          graph <http://unesco-linked-authorities> {
+            ?unescoPublisher schema:name ?unescoPublisherName ;
+                             dcterms:identifier ?unescoPublisherID .
+          }
+        }
+        BIND(CONCAT(?unescoPublisherName, ' (', ?unescoPublisherID, ')') AS ?unescoPublisherNameID)
+      }
+
+      #
+      # SOURCE INFORMATION
+      #
+      OPTIONAL { 
+        graph <http://unesco> { ?unescoManifestation schema:translationOfWork ?unescoOriginal . }
+        graph <http://unesco-originals> { ?unescoOriginal schema:name ?unescoSourceManifestationTitle . } 
+      }
+
+    } # end optional UNESCO
+
+
         
 
     # #########################################################################
