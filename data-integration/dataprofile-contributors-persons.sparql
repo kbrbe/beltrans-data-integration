@@ -31,6 +31,8 @@ SELECT DISTINCT
   (group_concat(distinct ?kbrID;SEPARATOR=';') AS ?kbrIDs)
   (group_concat(distinct ?bnfID;SEPARATOR=';') AS ?bnfIDs)
   (group_concat(distinct ?ntaID;SEPARATOR=';') AS ?ntaIDs)
+  (group_concat(distinct ?unescoID;SEPARATOR=';') AS ?unescoIDs)
+  (group_concat(distinct ?unescoIDLong;SEPARATOR=';') AS ?unescoIDsLong)
   (group_concat(distinct ?isni;SEPARATOR=';') AS ?isniIDs)
   (group_concat(distinct ?viaf;SEPARATOR=';') AS ?viafIDs)
   (group_concat(distinct ?wikidata;SEPARATOR=';') AS ?wikidataIDs)
@@ -136,6 +138,23 @@ WHERE {
 
     OPTIONAL { graph <http://kbr-linked-authorities> { ?ntaURI schema:birthDate ?ntaBirthDate . } }
     OPTIONAL { graph <http://kbr-linked-authorities> { ?ntaURI schema:deathDate ?ntaDeathDate . } }
+  }
+
+  # SOURCE DATA: UNESCO
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?contributorURI schema:sameAs ?unescoURI . } 
+    graph <http://unesco-linked-authorities> {
+      ?unescoURI a schema:Person ;
+                 dcterms:identifier ?unescoID .
+
+      ?unescoURI bf:identifiedBy ?unescoLongEntity .
+
+      ?unescoLongEntity a bf:Identifier ;
+                        rdfs:label "UnescoLong" ;
+                        rdf:value ?unescoIDLong .
+    }
+
   }
 
 

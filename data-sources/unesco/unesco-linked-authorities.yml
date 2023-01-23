@@ -88,7 +88,7 @@ mappings:
       - access: *sourceCont
         referenceFormulation: csv
         delimiter: ','
-    s: btid:identifier_unesco_long_u$(contributorIDShort)
+    s: btid:identifier_unesco_long_u$(contributorID)
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "UnescoLong"]
@@ -123,6 +123,6 @@ mappings:
             - [grel:valueParameter, $(name)]
             - [grel:valueParameter2, ""]
       - [bf:identifiedBy, btid:identifier_unesco_u$(contributorIDShort)~iri]
-      - [bf:identifiedBy, btid:identifier_unesco_ulong_$(contributorID)~iri]
+      - [bf:identifiedBy, btid:identifier_unesco_long_u$(contributorID)~iri]
 
 
