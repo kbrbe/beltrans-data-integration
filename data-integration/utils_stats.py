@@ -61,11 +61,21 @@ def countRowsWithValueForColumns(df, columns, whereColumnsEmpty=None):
   ... {'id': '8', 'KBRID': '8', 'BnFID': '8'}])
   >>> countRowsWithValueForColumns(data3, ['KBRID'], ['nationality'])
   4
+
+  It should also work if a non-existent columns is used
+
+  >>> countRowsWithValueForColumns(data3, ['KBRID', 'targetUnescoIdentifier'])
+  0
  
   """
 
+  myDf = df.copy() 
+  for col in columns:
+    if col not in df.columns:
+      myDf[col] = ''
+
   # set empty values to nan such that the isnull()/notnull() approach below will work properly
-  myDf = df.replace('', np.nan)
+  myDf = myDf.replace('', np.nan)
 
   # filter step: rows with the optionally given column should have an empty value for that column
   if whereColumnsEmpty is not None:
@@ -103,20 +113,27 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withKBRIdentifier': countRowsWithValueForColumn(corpus, 'targetKBRIdentifier'),
     'withBnFIdentifier': countRowsWithValueForColumn(corpus, 'targetBnFIdentifier'),
     'withKBIdentifier': countRowsWithValueForColumn(corpus, 'targetKBIdentifier'),
+    'withUnescoIdentifier': countRowsWithValueForColumn(corpus, 'targetUnescoIdentifier'),
+    'withKBRBnFKBAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetBnFIdentifier', 'targetKBIdentifier', 'targetUnescoIdentifier']),
     'withKBRBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetBnFIdentifier', 'targetKBIdentifier']),
     'withKBRAndBnFIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetBnFIdentifier']),
     'withKBRAndKBIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetKBIdentifier']),
+    'withKBRAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetKBIdentifier', 'targetUnescoIdentifier']),
     'withBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['targetBnFIdentifier', 'targetKBIdentifier']),
+    'withBnFAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['targetBnFIdentifier', 'targetUnescoIdentifier']),
+    'withKBAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['targetKBIdentifier', 'targetUnescoIdentifier']),
     'withBBThesaurusID': countRowsWithValueForColumn(corpus, 'targetThesaurusBB'),
     'withSourceKBRIdentifier': countRowsWithValueForColumn(corpus, 'sourceKBRIdentifier'),
     'withKBRSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKBR'),
     'withKBSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKB') if 'sourceTitleKB' in corpus else 0,
     'withBnFSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleBnF') if 'sourceTitleBnF' in corpus else 0,
+    'withUnescoSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleUnesco') if 'sourceTitleUnesco' in corpus else 0,
     'withSourceISBN10': countRowsWithValueForColumn(corpus, 'sourceISBN10'),
     'withSourceISBN13': countRowsWithValueForColumn(corpus, 'sourceISBN13'),
     'withKBRPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierKBR'),
     'withBnFPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierBnF'),
     'withKBPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierKB'),
+    'withUnescoPublisher': countRowsWithValueForColumn(corpus, 'targetPublisherIdentifierUnesco'),
     'withIntegratedAuthor': countRowsWithValueForColumn(corpus, 'authorIdentifiers'),
     'withIntegratedTranslator': countRowsWithValueForColumn(corpus, 'translatorIdentifiers'),
     'withIntegratedIllustrator': countRowsWithValueForColumn(corpus, 'illustratorIdentifiers'),
@@ -138,10 +155,12 @@ def createContributorCorpusMeasurements(corpus, corpusDate, comment):
     'withKBRIdentifier': countRowsWithValueForColumn(corpus, 'kbrIDs'),
     'withBnFIdentifier': countRowsWithValueForColumn(corpus, 'bnfIDs'),
     'withKBIdentifier': countRowsWithValueForColumn(corpus, 'ntaIDs'),
+    'withUnescoIdentifier': countRowsWithValueForColumn(corpus, 'unescoIDs'),
     'withKBRBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'bnfIDs',
                                                                        'ntaIDs']),
     'withKBRAndBnFIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'bnfIDs']),
     'withKBRAndKBIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'ntaIDs']),
+    'withKBRAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'unescoIDs']),
     'withBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'ntaIDs']),
     'withKBRAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'isniIDs']),
     'withKBRAndVIAFIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'viafIDs']),
@@ -152,6 +171,7 @@ def createContributorCorpusMeasurements(corpus, corpusDate, comment):
     'withKBAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'isniIDs']),
     'withKBAndVIAFIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'viafIDs']),
     'withKBAndWikidataIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'wikidataIDs']),
+    'withUnescoAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['unescoIDs', 'isniIDs']),
     'withISNIIdentifier': countRowsWithValueForColumn(corpus, 'isniIDs'),
     'withVIAFIdentifier': countRowsWithValueForColumn(corpus, 'viafIDs'),
     'withWikidataIdentifier': countRowsWithValueForColumn(corpus, 'wikidataIDs'),
