@@ -23,6 +23,7 @@ SELECT DISTINCT
   (group_concat(distinct ?kbr;SEPARATOR=';') AS ?kbrID)
   (group_concat(distinct ?bnf;SEPARATOR=';') AS ?bnfID)
   (group_concat(distinct ?nta;SEPARATOR=';') AS ?ntaID)
+  (group_concat(distinct ?unesco;SEPARATOR=';') AS ?unescoID)
   (group_concat(distinct ?isni;SEPARATOR=';') AS ?isniID)
   (group_concat(distinct ?viaf;SEPARATOR=';') AS ?viafID)
   (group_concat(distinct ?wikidata;SEPARATOR=';') AS ?wikidataID)
@@ -84,6 +85,7 @@ WHERE {
              }
   }
 
+
   OPTIONAL { graph <http://beltrans-contributors> {
                  ?contributor bf:identifiedBy ?ntaEntity .
                  ?ntaEntity a bf:Identifier ;
@@ -91,6 +93,16 @@ WHERE {
                             rdf:value ?nta .
              }
   }
+
+  OPTIONAL { graph <http://beltrans-contributors> {
+                 ?contributor bf:identifiedBy ?unescoEntity .
+                 ?unescoEntity a bf:Identifier ;
+                               rdfs:label "Unesco" ;
+                               rdf:value ?unesco .
+             }
+  }
+
+
 
 
   FILTER NOT EXISTS {
