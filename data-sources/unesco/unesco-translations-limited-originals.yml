@@ -22,8 +22,7 @@ prefixes:
   up: "http://users.ugent.be/~tdenies/up/"
 
 variables:
-  sourceTRLFRNL: &sourceTRLFRNL ${RML_SOURCE_WORKS_UNESCO_FR_NL}
-  sourceTRLNLFR: &sourceTRLNLFR ${RML_SOURCE_WORKS_UNESCO_NL_FR}
+  sourceTRL: &sourceTRL ${RML_SOURCE_WORKS_UNESCO}
 
 mappings:
 
@@ -33,13 +32,10 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping adds the language to the Dutch source of a creative work, currently on the LRM level of manifestations."
     sources:
-      - access: *sourceTRLNLFR
+      - access: *sourceTRL
         referenceFormulation: csv
         delimiter: ',' 
-      - access: *sourceTRLFRNL
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_source_$(id)
+    s: btid:manifestation_unesco_source_$(id)
     condition:
       function: idlab-fn:notEqual
       parameters:
@@ -56,10 +52,10 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping adds the language to the Dutch source of a creative work, currently on the LRM level of manifestations."
     sources:
-      - access: *sourceTRLNLFR
+      - access: *sourceTRL
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:manifestation_source_$(id)
+    s: btid:manifestation_unesco_source_$(id)
     condition:
       function: idlab-fn:notEqual
       parameters:
@@ -68,27 +64,19 @@ mappings:
     po:
       - [a, schema:CreativeWork]
       - [a, schema:Book]
-      - [schema:inLanguage, lang:dut~iri]
+      - p: schema:inLanguage
+        o: lang:fre~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sn_orig_lang)]
+            - [grel:valueParameter2, "French"] 
+      - p: schema:inLanguage
+        o: lang:dut~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sn_orig_lang)]
+            - [grel:valueParameter2, "Dutch"] 
 
 
-  # ---------------------------------------------------------------------------
-  #
-  manifestationsSourcesFRNL:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping adds the language to the French source of a creative work, currently on the LRM level of manifestations."
-    sources:
-      - access: *sourceTRLFRNL
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_source_$(id)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(sn_orig_lang)]
-        - [grel:valueParameter2, ""] 
-    po:
-      - [a, schema:CreativeWork]
-      - [a, schema:Book]
-      - [schema:inLanguage, lang:fre~iri]
-
-  

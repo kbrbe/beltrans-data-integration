@@ -24,8 +24,8 @@ prefixes:
   rdagroup1elements: "http://rdvocab.info/elements/"
 
 variables:
-  sourceWorksFR: &sourceWorksFR ${RML_SOURCE_WORKS_UNESCO_FR_NL}
-  sourceWorksNL: &sourceWorksNL ${RML_SOURCE_WORKS_UNESCO_NL_FR}
+  sourceWorks: &sourceWorks ${RML_SOURCE_WORKS_UNESCO}
+  sourceWorksCont: &sourceWorksCont ${RML_SOURCE_WORKS_UNESCO_CONTRIBUTIONS}
 
 mappings:
 
@@ -35,17 +35,16 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates creative works, currently on the LRM level of manifestations."
     sources:
-      - access: *sourceWorksFR
+      - access: *sourceWorks
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_$(id)
+    s: btid:manifestation_unesco_$(id)
     po:
+      - [a, schema:CreativeWork]
+      - [a, schema:Book]
       - [dcterms:identifier, $(id)]
       - [schema:name, $(sn_target_title)]
-      - [schema:translationOfWork, btid:manifestation_source_$(id)~iri]
+      - [schema:translationOfWork, btid:manifestation_unesco_source_$(id)~iri]
       - p: rdagroup1elements:publishersName
         o: $(publisher)
         condition:
@@ -60,6 +59,13 @@ mappings:
           parameters:
             - [grel:valueParameter, $(place)]
             - [grel:valueParameter2, ""] 
+      - p: schema:countryOfOrigin
+        o: $(sn_country)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(sn_country)]
+            - [grel:valueParameter2, ""] 
       - p: schema:datePublished
         o: $(sn_year)
         condition:
@@ -67,7 +73,20 @@ mappings:
           parameters:
             - [grel:valueParameter, $(sn_year)]
             - [grel:valueParameter2, ""] 
-
+      - p: schema:inLanguage
+        o: lang:fre~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sn_target_lang)]
+            - [grel:valueParameter2, "French"] 
+      - p: schema:inLanguage
+        o: lang:dut~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sn_target_lang)]
+            - [grel:valueParameter2, "Dutch"] 
 
 
   # ---------------------------------------------------------------------------
@@ -76,42 +95,46 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity. The mapping is only executed if there is no source identifier, thus it will link to a created dummy of the source with prefix _source_."
     sources:
-      - access: *sourceWorksFR
+      - access: *sourceWorks
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:translationActivity_$(id)
     po:
       - [rdfs:label, "Translation context of $(id)", en~lang]
       - [a, prov:Activity]
-      - [prov:generated, btid:manifestation_$(id)~iri]
-      - [prov:used, btid:manifestation_source_$(id)~iri]
+      - [prov:generated, btid:manifestation_unesco_$(id)~iri]
+      - [prov:used, btid:manifestation_unesco_source_$(id)~iri]
 
   # ---------------------------------------------------------------------------
   #
-  manifestationsFRNL:
+  directContributions:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates the language property for French manifestations."
+    description: "This mapping creates direct schema.org links for authors and translators from the translated manifestation."
     sources:
-      - access: *sourceWorksFR
+      - access: *sourceWorksCont
         referenceFormulation: csv
         delimiter: ','
-    s: btid:manifestation_$(id)
+    s: btid:manifestation_unesco_$(id)
     po:
-      - [schema:inLanguage, lang:fre~iri]
-
-  # ---------------------------------------------------------------------------
-  #
-  manifestationsNLFR:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates the language property for Dutch manifestations."
-    sources:
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:manifestation_$(id)
-    po:
-      - [schema:inLanguage, lang:dut~iri]
+      - p: schema:translator
+        o: btid:unesco_authority_u$(contributorIDShort)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorType)]
+            - [grel:valueParameter2, "translator"] 
+      - p: schema:author
+        o: btid:unesco_authority_u$(contributorIDShort)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorType)]
+            - [grel:valueParameter2, "author"] 
+      - p: schema:publisher
+        o: btid:unesco_authority_u$(contributorIDShort)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(contributorType)]
+            - [grel:valueParameter2, "publisher"] 
 

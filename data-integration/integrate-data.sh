@@ -45,6 +45,7 @@ SCRIPT_UNION_IDS="../data-sources/bnf/union.py"
 
 SCRIPT_PARSE_UNESCO_HTML="../data-sources/unesco/parse-content.py"
 MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS="tools.csv.count_unique_values"
+MODULE_GROUP_BY="tools.csv.group_by"
 
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
@@ -172,6 +173,7 @@ TRIPLE_STORE_GRAPH_WIKIDATA="http://wikidata"
 TRIPLE_STORE_GRAPH_KBCODE="http://kbcode"
 TRIPLE_STORE_GRAPH_UNESCO="http://unesco"
 TRIPLE_STORE_GRAPH_UNESCO_ORIG="http://unesco-originals"
+TRIPLE_STORE_GRAPH_UNESCO_LA="http://unesco-linked-authorities"
 
 TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES="http://kbr-publisher-matches"
 
@@ -429,20 +431,16 @@ SUFFIX_WIKIDATA_ENRICHED="manually-enriched-wikidata.csv"
 
 # DATA SOURCE - UNESCO INDEX TRANSLATIONUM
 #
-SUFFIX_UNESCO_ENRICHED_FR_NL="unesco_fr-nl.csv"
-SUFFIX_UNESCO_ENRICHED_NL_FR="unesco_nl-fr.csv"
-SUFFIX_UNESCO_ENRICHED_CONT_FR_NL="unesco-contributions_fr-nl.csv"
-SUFFIX_UNESCO_ENRICHED_CONT_NL_FR="unesco-contributions_nl-fr.csv"
-SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL="unesco-isbn10_fr-nl.csv"
-SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL="unesco-isbn13_fr-nl.csv"
-SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR="unesco-isbn10_nl-fr.csv"
-SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR="unesco-isbn13_nl-fr.csv"
-SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_FR_NL="unesco-unique-contributors_fr-nl.csv"
-SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_NL_FR="unesco-unique-contributors_nl-fr.csv"
+SUFFIX_UNESCO_ENRICHED="unesco_translations.csv"
+SUFFIX_UNESCO_ENRICHED_CONT="unesco-contributions.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN10="unesco-isbn10.csv"
+SUFFIX_UNESCO_ENRICHED_ISBN13="unesco-isbn13.csv"
+SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS="unesco-unique-contributors.csv"
 
 SUFFIX_UNESCO_TRANSLATIONS_LD="unesco-translation-data.ttl"
 SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD="unesco-limited-original-data.ttl"
 SUFFIX_UNESCO_ISBN_LD="unesco-isbn.ttl"
+SUFFIX_UNESCO_AUTHORITIES_LD="unesco-linked-authorities.ttl"
 
 
 # DATA SOURCE - BNFISNI enrichment
@@ -1306,37 +1304,21 @@ function extractUnesco {
   # create the folders to place the extracted translations and agents
   mkdir -p $integrationName/unesco
 
-  local unescoTranslationsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_FR_NL"
-  local unescoTranslationsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_NL_FR"
+  local unescoTranslations="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED"
+  local unescoISBN10="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10"
+  local unescoISBN13="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13"
+  local unescoContributions="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT"
+  local unescoUniqueContributors="$integrationName/unesco/$SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS"
 
-  local unescoISBN10FRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
-  local unescoISBN10NLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
+  echo "EXTRACTION - parse HTML translations"
+  time python $SCRIPT_PARSE_UNESCO_HTML -o $unescoTranslations \
+    --isbn10-file $unescoISBN10 --isbn13-file $unescoISBN13 --contribution-file $unescoContributions \
+    $INPUT_UNESCO_HTML_DIR_FR_NL $INPUT_UNESCO_HTML_DIR_NL_FR
 
-  local unescoISBN13FRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
-  local unescoISBN13NLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
+  echo "EXTRACTION - extract unique contributors"
+  time python -m $MODULE_GROUP_BY -i $unescoContributions -o $unescoUniqueContributors \
+    --id-column "contributorIDShort" -c "contributorID" -c "name" -c "firstname" -c "type" -c "place" -s "contributorType"
 
-  local unescoContributionsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT_FR_NL"
-  local unescoContributionsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT_NL_FR"
-
-  local unescoUniqueContributorsFRNL="$integrationName/unesco/$SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_FR_NL"
-  local unescoUniqueContributorsNLFR="$integrationName/unesco/$SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS_NL_FR"
-
-  echo "EXTRACTION - parse HTML translations FR-NL"
-  time python $SCRIPT_PARSE_UNESCO_HTML -i $INPUT_UNESCO_HTML_DIR_FR_NL -o $unescoTranslationsFRNL \
-    --isbn10-file $unescoISBN10FRNL --isbn13-file $unescoISBN13FRNL --contribution-file $unescoContributionsFRNL
-
-  echo "EXTRACTION - parse HTML translations NL-FR"
-  time python $SCRIPT_PARSE_UNESCO_HTML -i $INPUT_UNESCO_HTML_DIR_NL_FR -o $unescoTranslationsNLFR \
-    --isbn10-file $unescoISBN10NLFR --isbn13-file $unescoISBN13NLFR --contribution-file $unescoContributionsNLFR
-
-  echo "EXTRACTION - extract unique contributors FR-NL"
-  time python -m $MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS -i $unescoContributionsFRNL -o $unescoUniqueContributorsFRNL \
-    -c "name" -c "firstname" -c "type" -c "place" -s "contributorType"
-
-  echo "EXTRACTION - extract unique contributors NL-FR"
-  time python -m $MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS -i $unescoContributionsNLFR -o $unescoUniqueContributorsNLFR \
-    -c "name" -c "firstname" -c "type" -c "place" -s "contributorType"
- 
 }
 
 # -----------------------------------------------------------------------------
@@ -2040,15 +2022,15 @@ function transformUnesco {
   local translationTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LD"
   local translationOriginalTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD"
   local isbnTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_ISBN_LD"
+  local authorityTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_AUTHORITIES_LD"
 
   # export environment variables used by the YARRRML mapping files
-  export RML_SOURCE_WORKS_UNESCO_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_FR_NL"
-  export RML_SOURCE_WORKS_UNESCO_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_NL_FR"
+  export RML_SOURCE_WORKS_UNESCO="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED"
 
-  export RML_SOURCE_UNESCO_ISBN10_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_FR_NL"
-  export RML_SOURCE_UNESCO_ISBN13_FR_NL="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_FR_NL"
-  export RML_SOURCE_UNESCO_ISBN10_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10_NL_FR"
-  export RML_SOURCE_UNESCO_ISBN13_NL_FR="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13_NL_FR"
+  export RML_SOURCE_UNESCO_ISBN10="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN10"
+  export RML_SOURCE_UNESCO_ISBN13="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_ISBN13"
+  export RML_SOURCE_UNESCO_UNIQUE_CONTRIBUTORS="$integrationName/unesco/$SUFFIX_UNESCO_UNIQUE_CONTRIBUTORS"
+  export RML_SOURCE_WORKS_UNESCO_CONTRIBUTIONS="$integrationName/unesco/$SUFFIX_UNESCO_ENRICHED_CONT"
 
   echo "Map Unesco translation data"
   . map.sh ../data-sources/unesco/unesco-translations.yml $translationTurtle
@@ -2059,6 +2041,8 @@ function transformUnesco {
   echo "Map Unesco ISBN relationships"
   . map.sh ../data-sources/unesco/unesco-isbn.yml $isbnTurtle
 
+  echo "Map Unesco identified contributors"
+  . map.sh ../data-sources/unesco/unesco-linked-authorities.yml $authorityTurtle
 }
 
 # -----------------------------------------------------------------------------
@@ -2435,20 +2419,27 @@ function loadUnesco {
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_UNESCO"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_UNESCO_ORIG"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_UNESCO_LA"
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   local translationTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LD"
   local translationOriginalTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_TRANSLATIONS_LIMITED_ORIGINAL_LD"
   local isbnTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_ISBN_LD"
+  local authorityTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_AUTHORITIES_LD"
 
-  echo "Load Unesco Index Translationum translation data"
+  echo "Load Unesco Index Translationum translation data (translations, contributions and ISBN relationships)"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO \
     "$translationTurtle" "$isbnTurtle"
 
   echo "Load Unesco Index Translationum original information"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_ORIG \
     "$translationOriginalTurtle"
+
+  echo "Load Unesco authority records"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_LA \
+    "$authorityTurtle"
 }
 
 # -----------------------------------------------------------------------------

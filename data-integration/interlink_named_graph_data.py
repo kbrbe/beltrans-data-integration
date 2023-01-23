@@ -277,7 +277,8 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
 
       # Optionally serialize SPARQL query
       if queryLogDir:
-        logSPARQLQuery(queryLogDir, creationQueryString, f'create-{queryType}-{creationSourceName}.sparql')
+        creationSourceInfoString = f'{creationSourceType}-{creationSourceName}' if creationSourceType != '' else f'{creationSourceName}'
+        logSPARQLQuery(queryLogDir, creationQueryString, f'create-{queryType}-{creationSourceInfoString}.sparql')
 
       # Execute SPARQL query
       utils_sparql.sparqlUpdate(url, creationQueryString, 'application/sparql-update', creationQueryName, auth=auth)

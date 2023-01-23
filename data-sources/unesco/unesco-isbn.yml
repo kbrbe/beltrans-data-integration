@@ -21,10 +21,8 @@ prefixes:
   up: "http://users.ugent.be/~tdenies/up/"
 
 variables:
-  ISBN10FR: &ISBN10FR ${RML_SOURCE_UNESCO_ISBN10_FR_NL}
-  ISBN10NL: &ISBN10NL ${RML_SOURCE_UNESCO_ISBN10_NL_FR}
-  ISBN13FR: &ISBN13FR ${RML_SOURCE_UNESCO_ISBN13_FR_NL}
-  ISBN13NL: &ISBN13NL ${RML_SOURCE_UNESCO_ISBN13_NL_FR}
+  ISBN10: &ISBN10 ${RML_SOURCE_UNESCO_ISBN10}
+  ISBN13: &ISBN13 ${RML_SOURCE_UNESCO_ISBN13}
 
 mappings:
 
@@ -34,13 +32,10 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates associations between manifestations and their ISBN10 (workaround because of bug https://github.com/RMLio/yarrrml-parser/issues/146)."
     sources:
-      - access: *ISBN10FR
+      - access: *ISBN10
         referenceFormulation: csv
         delimiter: ','
-      - access: *ISBN10NL
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_$(id)
+    s: btid:manifestation_unesco_$(id)
     po:
       - [bibo:isbn10, $(isbn10)]
 
@@ -50,13 +45,10 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates associations between manifestations and their ISBN13 (workaround because of bug https://github.com/RMLio/yarrrml-parser/issues/146)."
     sources:
-      - access: *ISBN13FR
+      - access: *ISBN13
         referenceFormulation: csv
         delimiter: ','
-      - access: *ISBN13NL
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_$(id)
+    s: btid:manifestation_unesco_$(id)
     po:
       - [bibo:isbn13, $(isbn13)]
 

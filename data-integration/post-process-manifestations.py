@@ -32,9 +32,9 @@ def main():
 
     # In the output we only want a single publication year column
     # thus first remove the respective columns from different data sources
-    yearHeadersToRemove = ['targetYearOfPublicationKBR', 'targetYearOfPublicationBnF', 'targetYearOfPublicationKB']
-    placeHeadersToRemove = ['targetPlaceOfPublicationKBR', 'targetPlaceOfPublicationBnF', 'targetPlaceOfPublicationKB']
-    countryHeadersToRemove = ['targetCountryOfPublicationKBR', 'targetCountryOfPublicationBnF', 'targetCountryOfPublicationKB']
+    yearHeadersToRemove = ['targetYearOfPublicationKBR', 'targetYearOfPublicationBnF', 'targetYearOfPublicationKB', 'targetYearOfPublicationUnesco']
+    placeHeadersToRemove = ['targetPlaceOfPublicationKBR', 'targetPlaceOfPublicationBnF', 'targetPlaceOfPublicationKB', 'targetPlaceOfPublicationUnesco']
+    countryHeadersToRemove = ['targetCountryOfPublicationKBR', 'targetCountryOfPublicationBnF', 'targetCountryOfPublicationKB', 'targetCountryOfPublicationUnesco']
 
 
     # and then add the single output columns we want per type
@@ -55,7 +55,7 @@ def main():
     outputWriter.writeheader()
 
     # used to parse certain columns based on their name, e.g. authorBirthDateKBR and authorBirthDateISNI
-    sources = ['KBR', 'BnF', 'KB']
+    sources = ['KBR', 'BnF', 'KB', 'Unesco']
     mismatchLog = {}
 
     # write relevant data to output
