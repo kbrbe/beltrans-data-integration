@@ -212,6 +212,9 @@ CREATE_QUERY_BNF_GENDER="sparql-queries/create-bnf-contributors-gender.sparql"
 CREATE_QUERY_KB_TRL_PBL="sparql-queries/link-kb-translations-to-publishers.sparql"
 CREATE_QUERY_KB_PBL_IDENTIFIERS="sparql-queries/create-kb-org-identifier.sparql"
 
+CREATE_QUERY_BIBFRAME_TITLES="sparql-queries/create-bibframe-titles.sparql"
+CREATE_QUERY_SCHEMA_TITLES="sparql-queries/derive-single-title-from-bibframe-titles.sparql"
+
 ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
 
 LINK_QUERY_CONT_AUTHORS="integration_queries/link-beltrans-manifestations-authors.sparql"
@@ -714,6 +717,15 @@ function integrate {
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_CONT>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
 
+  echo "Create title/subtitles according to the BIBFRAME ontology for records which do not yet have those"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+
+  #
+  # schema:name properties have to exist as they are required in the triple pattern for the data integration
+  #
+  echo "Create schema:name properties based on BIBFRAME titles/subtitles for records which do not yet have schema:name"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
+
   source ./py-integration-env/bin/activate
   echo "Integrate manifestations ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
@@ -731,6 +743,9 @@ function integrate {
 
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
+
+  echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
 }
 

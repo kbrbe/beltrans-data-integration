@@ -24,10 +24,9 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?isbn10;SEPARATOR=';') AS ?targetISBN10) 
     (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetISBN13) 
 
-    (group_concat(distinct ?kbrTitle;SEPARATOR=';') AS ?targetKBRTitle)
-    (group_concat(distinct ?bnfTitle;SEPARATOR=';') AS ?targetBnFTitle)
-    (group_concat(distinct ?kbTitle;SEPARATOR=';') AS ?targetKBTitle)
-    (group_concat(distinct ?unescoTitle;SEPARATOR=';') AS ?targetUnescoTitle)
+    (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTitle)
+    (group_concat(distinct ?manifestationSubtitle;SEPARATOR=';') AS ?targetSubtitle)
+
 
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
     (group_concat(distinct ?kbTargetManifestationKBCodeLabel;SEPARATOR=';') AS ?targetThesaurusKBCode)
@@ -94,8 +93,25 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
     graph <http://beltrans-manifestations> { 
       ?manifestation a schema:CreativeWork ;
-                     dcterms:identifier ?manifestationID ;
-                     schema:name ?manifestationTitle .
+                     dcterms:identifier ?manifestationID .
+    }
+
+    OPTIONAL {
+      graph <http://beltrans-manifestations> {
+        ?manifestation bf:title ?titleEntity .
+
+        ?titleEntity a bf:Title ;
+                     bf:mainTitle ?manifestationTitle .
+      }
+    }
+
+    OPTIONAL {
+      graph <http://beltrans-manifestations> {
+        ?manifestation bf:title ?titleEntity .
+
+        ?titleEntity a bf:Title ;
+                     bf:subtitle ?manifestationSubtitle .
+      }
     }
 
     OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation bibo:isbn10 ?isbn10 . } }
