@@ -144,6 +144,7 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
   isbns = elem.findall('./marc:datafield[@tag="020"]/marc:subfield[@code="a"]', ALL_NS)
   bindingType = utils.getElementValue(elem.find('./marc:datafield[@tag="020"]/marc:subfield[@code="q"]', ALL_NS))
   title = utils.getElementValue(elem.find('./marc:datafield[@tag="245"]/marc:subfield[@code="a"]', ALL_NS))
+  subtitle = utils.getElementValue(elem.find('./marc:datafield[@tag="245"]/marc:subfield[@code="b"]', ALL_NS))
   responsibilityStatement = utils.getElementValue(elem.find('./marc:datafield[@tag="245"]/marc:subfield[@code="c"]', ALL_NS))
   placesOfPublication = utils.getElementValue(elem.findall('./marc:datafield[@tag="264"]/marc:subfield[@code="a"]', ALL_NS))
   yearOfPublication = utils.getElementValue(elem.find('./marc:datafield[@tag="264"]/marc:subfield[@code="c"]', ALL_NS))
@@ -206,6 +207,7 @@ def addWorkFieldsToWorkCSV(elem, writer, stats):
     'isbn10': ';'.join(isbn10s),
     'isbn13': ';'.join(isbn13s),
     'title': title,
+    'subtitle': subtitle,
     'languages': langURIsString,
     'placeOfPublication': placesOfPublication,
     'countryOfPublication': countryURIsString,
@@ -269,7 +271,7 @@ def main():
        open(options.output_collection_links_file, 'w') as outCollectionLinksFile, \
        open(options.output_work_file, 'w') as outWorkFile:
 
-    workFields = ['KBRID', 'sourceKBRID', 'isbn10', 'isbn13', 'sourceISBN10', 'sourceISBN13', 'title', 'sourceTitle', 'originalTitle', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
+    workFields = ['KBRID', 'sourceKBRID', 'isbn10', 'isbn13', 'sourceISBN10', 'sourceISBN13', 'title', 'subtitle', 'sourceTitle', 'originalTitle', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
     contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
     collectionLinksFields = ['KBRID', 'collectionID', 'collection-name']
 
