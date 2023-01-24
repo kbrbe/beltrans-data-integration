@@ -48,6 +48,7 @@ mappings:
     po:
       - [a, schema:CreativeWork]
       - [dcterms:identifier, $(KBRID)]
+      - [bf:title, btid:manifestation_title_$(KBRID)~iri]
       - p: rdf:type
         o: btm:MultiLingualManifestation~iri
         condition:
@@ -55,7 +56,6 @@ mappings:
           parameters:
             - [grel:valueParameter, $(languages)]
             - [grel:string_sub, ";"]
-      - [schema:name, $(title) ]
       - p: rdfs:comment
         o: $(responsibilityStatement)
         condition:
@@ -231,6 +231,38 @@ mappings:
 #          parameters:
 #            - [grel:valueParameter, $(languages)]
 #            - [grel:string_sub, ";"]
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsTitles:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a title/subtitle combination according to the BIBFRAME ontology."
+    sources:
+      - access: *sourceWorksFR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceWorksNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_title_$(KBRID)
+    po:
+      - [a, bf:Title]
+      - p: bf:mainTitle
+        o: $(title)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(title)]
+            - [grel:valueParameter2, ""] 
+      - p: bf:subtitle
+        o: $(subtitle)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(subtitle)]
+            - [grel:valueParameter2, ""] 
+
+
 
 
 

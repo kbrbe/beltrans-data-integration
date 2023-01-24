@@ -1,0 +1,51 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix lang: <http://id.loc.gov/vocabulary/languages/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
+PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+
+
+INSERT {
+  graph ?g { 
+    ?book bf:title ?titleEntityURI .
+
+    ?titleEntityURI a bf:Title ;
+                    bf:mainTitle ?newMainTitle ;
+                    bf:subtitle ?newSubTitle .
+  }
+}
+WHERE {
+
+  graph ?g {
+    ?book a schema:CreativeWork ;
+          dcterms:identifier ?identifier ;
+          schema:name ?fullTitle .
+  }
+
+  FILTER NOT EXISTS { graph ?g { ?book bf:title ?titleEntity . } }
+
+  BIND( STRBEFORE(?fullTitle, ' : ') AS ?mainTitle)
+  BIND( STRAFTER(?fullTitle, ' : ') AS ?subTitle)
+  BIND( IF(?mainTitle = "", ?fullTitle, ?mainTitle) AS ?newMainTitle)
+
+  # We do not want to create empty subtitles, but we also cannot "unbind" a varialbe
+  # The solution is to use the expression 1+"", which I assume returns an error and thus "unbinds" the variable
+  # This workaround is from https://github.com/w3c/sparql-12/issues/62
+  BIND( IF(?subTitle = "", 1+"", ?subTitle) AS ?newSubTitle)
+  BIND( IRI( CONCAT("http://kbr.be/id/data/title_", ?identifier) ) AS ?titleEntityURI)
+}
