@@ -19,11 +19,11 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 SELECT
   ?manifestationID
-    (group_concat(distinct ?authorNameID;SEPARATOR='\n') AS ?authors)
-    (group_concat(distinct ?kbrNameID;SEPARATOR='\n') AS ?kbrNames)
-    (group_concat(distinct ?bnfNameID;SEPARATOR='\n') AS ?bnfNames)
-    (group_concat(distinct ?ntaNameID;SEPARATOR='\n') AS ?ntaNames)
-    (group_concat(distinct ?unescoNameID;SEPARATOR='\n') AS ?unescoNames)
+    (group_concat(distinct ?translatorNameID;SEPARATOR=';') AS ?translators)
+    (group_concat(distinct ?kbrNameID;SEPARATOR=';') AS ?kbrNames)
+    (group_concat(distinct ?bnfNameID;SEPARATOR=';') AS ?bnfNames)
+    (group_concat(distinct ?ntaNameID;SEPARATOR=';') AS ?ntaNames)
+    (group_concat(distinct ?unescoNameID;SEPARATOR=';') AS ?unescoNames)
 WHERE {
 
   graph <http://beltrans-manifestations> {
@@ -32,37 +32,40 @@ WHERE {
                    schema:isPartOf btid:beltransCorpus .
   }
 
-  # AUTHOR
+  # TRANSLATOR
   #
   OPTIONAL {
-    graph <http://beltrans-manifestations> { ?manifestation schema:author ?author . }
-    OPTIONAL { graph <http://beltrans-contributors> { ?author rdfs:label ?authorLabel . } }
+    graph <http://beltrans-manifestations> { ?manifestation schema:translator ?translator . }
+    OPTIONAL {
+      graph <http://beltrans-contributors> { ?translator rdfs:label ?translatorLabel . } 
+      BIND(REPLACE(?translatorLabel, ";", "", "i") AS ?translatorLabelNorm)
+    }
 
-    BIND(CONCAT( COALESCE(?authorLabel, "missing name"), " (", ?authorID, ": ", ?authorIdentifiers, ")") as ?authorNameID)
-    # This subquery retrieves the local identifiers of the author
+    BIND(CONCAT( COALESCE(?translatorLabelNorm, "missing name"), " (", ?translatorID, ": ", ?translatorIdentifiers, ")") as ?translatorNameID)
+    # This subquery retrieves the local identifiers of the translator
     {
-      SELECT DISTINCT ?manifestation ?author ?authorID (group_concat(distinct ?authorLocalIdentifier;SEPARATOR=',') as ?authorIdentifiers)
+      SELECT DISTINCT ?manifestation ?translator ?translatorID (group_concat(distinct ?translatorLocalIdentifier;SEPARATOR=',') as ?translatorIdentifiers)
       WHERE { 
         graph <http://beltrans-manifestations> {
           ?manifestation schema:name ?title ;
-                         schema:author ?author .
+                         schema:translator ?translator .
         }    
-        ?author dcterms:identifier ?authorID .
-        ?author schema:sameAs/dcterms:identifier ?authorLocalIdentifier . 
+        ?translator dcterms:identifier ?translatorID .
+        ?translator schema:sameAs/dcterms:identifier ?translatorLocalIdentifier . 
       }
-      group by ?manifestation ?author ?authorID
+      GROUP BY ?manifestation ?translator ?translatorID
     }
 
     OPTIONAL {
-      graph <http://beltrans-contributors> { ?author schema:sameAs ?kbrURI . }
+      graph <http://beltrans-contributors> { ?translator schema:sameAs ?kbrURI . }
       graph <http://kbr-linked-authorities> { ?kbrURI dcterms:identifier ?kbrID . }
-      graph <http://kbr-linked-authorities> { ?kbrURI rdfs:label ?kbrName . }
+      graph <http://kbr-linked-authorities> { ?kbrURI rdfs:label|skos:prefLabel ?kbrName . }
 
       BIND( CONCAT(?kbrName, ' (', ?kbrID, ')') AS ?kbrNameID)
     }
 
     OPTIONAL {
-      graph <http://beltrans-contributors> { ?author schema:sameAs ?bnfURI . }
+      graph <http://beltrans-contributors> { ?translator schema:sameAs ?bnfURI . }
       graph <http://bnf-contributors> { ?bnfURI dcterms:identifier ?bnfID . }
       graph <http://bnf-contributors> { ?bnfURI foaf:name ?bnfName . }
 
@@ -70,7 +73,7 @@ WHERE {
     }
 
     OPTIONAL {
-      graph <http://beltrans-contributors> { ?author schema:sameAs ?ntaURI . }
+      graph <http://beltrans-contributors> { ?translator schema:sameAs ?ntaURI . }
       graph <http://kb-linked-authorities> { ?ntaURI dcterms:identifier ?ntaID . }
       graph <http://kb-linked-authorities> { ?ntaURI schema:name ?ntaName . }
 
@@ -78,7 +81,7 @@ WHERE {
     }
 
     OPTIONAL {
-      graph <http://beltrans-contributors> { ?author schema:sameAs ?unescoURI . }
+      graph <http://beltrans-contributors> { ?translator schema:sameAs ?unescoURI . }
       graph <http://unesco-linked-authorities> { ?unescoURI dcterms:identifier ?unescoID . }
       graph <http://unesco-linked-authorities> { ?unescoURI rdfs:label ?unescoName . }
 
@@ -88,3 +91,4 @@ WHERE {
   }
 }
 GROUP BY ?manifestationID
+HAVING(count(?translator) > 1)
