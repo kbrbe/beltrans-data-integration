@@ -1,4 +1,5 @@
 import unicodedata as ud
+from itertools import combinations
 import re
 
 def normalizeDelimiters(value, delimiter=';'):
@@ -78,8 +79,7 @@ def extractStringFromBrackets(value):
 # -----------------------------------------------------------------------------
 def overlappingValues(values):
   """This function returns true if a value of one array element is also part of another array element.
-  >>> data = ['Jan Janssen', 'Janssen, Jan', 'John Doe']
-  >>> overlappingValues(data)
+  >>> overlappingValues(['Jan Janssen', 'Janssen, Jan', 'John Doe'])
   True
   >>> data1 = ['John Doe', 'Alice', 'Bob', 'Pascal Renard, ']
   >>> overlappingValues(data1)
@@ -88,22 +88,33 @@ def overlappingValues(values):
   The function returns False if an empty array is given
   >>> overlappingValues([])
   False
+
+  An overlap in the same string should NOT be taken into account
+  >>> overlappingValues(['John, John', 'Alice Alice', 'Bob Bobsen'])
+  False
   """
-  lookup = {}
+  lookup = []
+
+  # first create a lookup list per string
   for value in values:
+    lookupValues = set()
     parts = value.replace(',', ' ').split(' ')
     for p in parts:
       namePart = getNormalizedString(p).strip()
       if namePart != '':
-        if namePart in lookup:
-          lookup[namePart] = True
-        else:
-          lookup[namePart] = False
+        lookupValues.add(namePart)
+    lookup.append(lookupValues)
 
-  if True in lookup.values():
-    return True
-  else:
+  if len(lookup) == 0:
     return False
+
+  # we have now a list of sets, e.g. [{'jan', 'janssen'}, {'janssen'}, {'doe'}]
+  # now compare values across the different lookup lists
+  for i in combinations(lookup, 2):
+    if i[0].intersection(i[1]):
+      return True
+
+  return False
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":

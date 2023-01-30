@@ -1,0 +1,94 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+
+SELECT
+  ?manifestationID
+    (group_concat(distinct ?translatorNameID;SEPARATOR=';') AS ?translators)
+    (group_concat(distinct ?kbrNameID;SEPARATOR=';') AS ?kbrNames)
+    (group_concat(distinct ?bnfNameID;SEPARATOR=';') AS ?bnfNames)
+    (group_concat(distinct ?ntaNameID;SEPARATOR=';') AS ?ntaNames)
+    (group_concat(distinct ?unescoNameID;SEPARATOR=';') AS ?unescoNames)
+WHERE {
+
+  graph <http://beltrans-manifestations> {
+    ?manifestation a schema:CreativeWork ;
+                   dcterms:identifier ?manifestationID ;
+                   schema:isPartOf btid:beltransCorpus .
+  }
+
+  # TRANSLATOR
+  #
+  OPTIONAL {
+    graph <http://beltrans-manifestations> { ?manifestation schema:translator ?translator . }
+    OPTIONAL {
+      graph <http://beltrans-contributors> { ?translator rdfs:label ?translatorLabel . } 
+      BIND(REPLACE(?translatorLabel, ";", "", "i") AS ?translatorLabelNorm)
+    }
+
+    BIND(CONCAT( COALESCE(?translatorLabelNorm, "missing name"), " (", ?translatorID, ": ", ?translatorIdentifiers, ")") as ?translatorNameID)
+    # This subquery retrieves the local identifiers of the translator
+    {
+      SELECT DISTINCT ?manifestation ?translator ?translatorID (group_concat(distinct ?translatorLocalIdentifier;SEPARATOR=',') as ?translatorIdentifiers)
+      WHERE { 
+        graph <http://beltrans-manifestations> {
+          ?manifestation schema:name ?title ;
+                         schema:translator ?translator .
+        }    
+        ?translator dcterms:identifier ?translatorID .
+        ?translator schema:sameAs/dcterms:identifier ?translatorLocalIdentifier . 
+      }
+      GROUP BY ?manifestation ?translator ?translatorID
+    }
+
+    OPTIONAL {
+      graph <http://beltrans-contributors> { ?translator schema:sameAs ?kbrURI . }
+      graph <http://kbr-linked-authorities> { ?kbrURI dcterms:identifier ?kbrID . }
+      graph <http://kbr-linked-authorities> { ?kbrURI rdfs:label|skos:prefLabel ?kbrName . }
+
+      BIND( CONCAT(?kbrName, ' (', ?kbrID, ')') AS ?kbrNameID)
+    }
+
+    OPTIONAL {
+      graph <http://beltrans-contributors> { ?translator schema:sameAs ?bnfURI . }
+      graph <http://bnf-contributors> { ?bnfURI dcterms:identifier ?bnfID . }
+      graph <http://bnf-contributors> { ?bnfURI foaf:name ?bnfName . }
+
+      BIND( CONCAT(?bnfName, ' (', ?bnfID, ')') AS ?bnfNameID)
+    }
+
+    OPTIONAL {
+      graph <http://beltrans-contributors> { ?translator schema:sameAs ?ntaURI . }
+      graph <http://kb-linked-authorities> { ?ntaURI dcterms:identifier ?ntaID . }
+      graph <http://kb-linked-authorities> { ?ntaURI schema:name ?ntaName . }
+
+      BIND( CONCAT(?ntaName, ' (', ?ntaID, ')') AS ?ntaNameID)
+    }
+
+    OPTIONAL {
+      graph <http://beltrans-contributors> { ?translator schema:sameAs ?unescoURI . }
+      graph <http://unesco-linked-authorities> { ?unescoURI dcterms:identifier ?unescoID . }
+      graph <http://unesco-linked-authorities> { ?unescoURI rdfs:label ?unescoName . }
+
+      BIND( CONCAT(?unescoName, ' (', ?unescoID, ')') AS ?unescoNameID)
+    }
+
+  }
+}
+GROUP BY ?manifestationID
+HAVING(count(?translator) > 1)

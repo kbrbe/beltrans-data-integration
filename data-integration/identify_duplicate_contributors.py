@@ -38,10 +38,10 @@ def main(inputFile, outputFile, outputColumns, columnName, csvDelimiter, columnV
 
     inputReader = csv.DictReader(inFile, delimiter=csvDelimiter)
 
-    utils.checkIfColumnsExist(inputReader.fieldnames, outputColumns + [columnName])
+    wantedColumns = outputColumns + [columnName]
+    utils.checkIfColumnsExist(inputReader.fieldnames, wantedColumns)
 
-    # not using list(wantedColumns) as fieldnames because we want to determine the order
-    outputWriter = csv.DictWriter(outFile, fieldnames=outputColumns + [columnName], delimiter=csvDelimiter)
+    outputWriter = csv.DictWriter(outFile, fieldnames=wantedColumns, delimiter=csvDelimiter)
 
     identifiers = set()
     numberRows = 0
