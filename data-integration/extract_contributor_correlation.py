@@ -18,6 +18,7 @@ def checkArguments():
                     help='column name of the CSV in which it is checked for missing contributor overlap')
   parser.add_option('--csv-delimiter', action='store', default=',', help='Delimiter of the input CSV, default is a comma')
   parser.add_option('--column-value-delimiter', action='store', default=';', help='Delimiter used within a column to separate different names we want to compare')
+  parser.add_option('--filter-duplicates', action='store_true', help='If this flag is set, identifier columns with more than one identifier are skipped')
 
   (options, args) = parser.parse_args()
 
@@ -29,7 +30,7 @@ def checkArguments():
   return options, args
    
 # -----------------------------------------------------------------------------
-def main(inputFile, outputFile, columnName, csvDelimiter, columnValueDelimiter):
+def main(inputFile, outputFile, columnName, csvDelimiter, columnValueDelimiter, filterDuplicates):
   """This script reads a CSV files and checks if parts of the value in a given column occur more than once in the column.
      For example "Sven Lieber (int1: abc, def); Lieber, Sven (int2: abc)" where the first name but also the last name occur twice."""
 
@@ -61,13 +62,21 @@ def main(inputFile, outputFile, columnName, csvDelimiter, columnValueDelimiter):
     outputWriter.writeheader()
 
     numberRows = 0
+    numberWritten = 0
     for possibleMatch in contributorLookup.getCorrelationsLocalIdentifiers():
-      outputWriter.writerow(possibleMatch)
+      keep = True
+      for source in ['KBR', 'BnF', 'NTA', 'Unesco']:
+        if source in possibleMatch and ';' in possibleMatch[source]:
+          keep = False
+          break
+      if keep:
+        outputWriter.writerow(possibleMatch)
+        numberWritten += 1
       numberRows += 1
 
-    print(f'Successfully wrote {numberRows} output rows!')
+    print(f'Successfully wrote {numberWritten}/{numberRows} output rows (the skipped once contained possible non-matches)!')
 
 if __name__ == '__main__':
   (options, args) = checkArguments()
-  main(options.input, options.output, options.column, options.csv_delimiter, options.column_value_delimiter)
+  main(options.input, options.output, options.column, options.csv_delimiter, options.column_value_delimiter, options.filter_duplicates)
 
