@@ -108,19 +108,46 @@ class TestDataIntegrationContributorsSPARQL():
 
   # ---------------------------------------------------------------------------
   def testNoAutomaticIntegrationForCorrelationList(self):
-    """This function tests if the entry KBR authority with a wrong ISNI is not automatically integrated because it is part of the correlation list."""
+    """This function tests if the KBR authority with a wrong VIAF is not automatically integrated because it is part of the correlation list."""
     kbrID = 'kbrAuthorBE14'
     bnfID = 'bnfAuthorBE8'
     result  = self.getData().identifiersOnSameRow(('kbrIDs', kbrID), [('bnfIDs', bnfID)])
     
     self.assertFalse(result, msg=f'There is a wrong match between "{kbrID}" and "{bnfID}" (they have a common ID, but this should be neglected for {kbrID} because it was added via a correlation list)')
 
+  # ---------------------------------------------------------------------------
+  def testNationalityAddedForBnFAndKBCorrelationAuthority(self):
+    """This function tests if the additional attribute 'nationality' is added for the BnF and KB correlation list authority."""
+    recordID = 'correlationAuthorBE13'
+    nationalityShould = 'Belgium'
+    nationality = self.getData().getColumnValueForRow('contributorID', recordID, 'nationalities')
+    self.assertEqual(nationality, nationalityShould, msg=f'The nationality of {recordID} should be "{nationalityShould}, the information has to be added after integration"')
+
 
   # ---------------------------------------------------------------------------
-  def testThirdPartyIdentifiersAddedAfterIntegration(self):
-    """This function tests if mentioned third party identifiers of local records are still added after the automatic data integration."""
-    # to be determined if this feature is needed (https://github.com/kbrbe/beltrans-data-integration/issues/176)
-    pass
+  def testNationalityAddedForKBRBnFAndKBCorrelationAuthority(self):
+    """This function tests if the additional attribute 'nationality' is added for the KBR, BnF and KB correlation list authority."""
+    recordID = 'correlationAuthorBE14'
+    nationalityShould = 'Belgium'
+    nationality = self.getData().getColumnValueForRow('contributorID', recordID, 'nationalities')
+    self.assertEqual(nationality, nationalityShould, msg=f'The nationality of {recordID} should be "{nationalityShould}, the information has to be added after integration"')
+
+  # ---------------------------------------------------------------------------
+  def testThirdPartyIdentifiersAddedAfterIntegrationBE13(self):
+    """This function tests if mentioned third party identifiers of the local records with ID 13 are still added after the automatic data integration."""
+    recordID = 'correlationAuthorBE13'
+    isniIDShould = '0000000000000013'
+    identifier = self.getData().getColumnValueForRow('contributorID', recordID, 'isniIDs')
+    self.assertEqual(identifier, isniIDShould, msg=f'The ISNI of {recordID} should be "{isniIDShould}, the information has to be added after integration"')
+
+  # ---------------------------------------------------------------------------
+  def testThirdPartyIdentifiersAddedAfterIntegrationBE14(self):
+    """This function tests if mentioned third party identifiers of the local records with ID 14 are still added after the automatic data integration."""
+    recordID = 'correlationAuthorBE14'
+    isniIDShould = '0000000000000014'
+    identifier = self.getData().getColumnValueForRow('contributorID', recordID, 'isniIDs')
+    self.assertEqual(identifier, isniIDShould, msg=f'The ISNI of {recordID} should be "{isniIDShould}, the information has to be added after integration"')
+
 
 
 # -----------------------------------------------------------------------------
@@ -217,6 +244,9 @@ class TestDataIntegrationContributorsSPARQLConfig(TestDataIntegrationContributor
                                 numberUpdates=numberUpdates,
                                 queryLogDir=cls.tempLogDir)
 
+      # Add local data for BELTRANS contributors created from correlation lists
+      addLocalDataQuery = utils.readSPARQLQuery('./sparql-queries/add-contributors-local-data.sparql')
+      utils.sparqlUpdate(uploadURL, addLocalDataQuery)
 
       # query data from our test fixture
       with open(cls.tempAgg, 'wb') as resultFileAgg:
@@ -229,7 +259,7 @@ class TestDataIntegrationContributorsSPARQLConfig(TestDataIntegrationContributor
         csvReader = csv.DictReader(allIn, delimiter=',')
         csvData = [dict(d) for d in csvReader]
         cls.data = DataprofileTestHelper(csvData)
-        print(cls.data.df[['contributorID', 'kbrIDs', 'bnfIDs', 'ntaIDs', 'isniIDs', 'viafIDs', 'wikidataIDs']])
+        print(cls.data.df[['contributorID', 'nationalities', 'kbrIDs', 'bnfIDs', 'ntaIDs', 'isniIDs', 'viafIDs', 'wikidataIDs']])
 
       # In case we want to debug the test fixture (using the query interface on localhost:8080)
       #print("sleep")

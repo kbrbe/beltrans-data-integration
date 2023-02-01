@@ -328,6 +328,24 @@ class DataprofileTestHelper:
     selection = utils.getDfCellValue(self.df, 'targetIdentifier', identifier, 'targetKBIdentifier')
     return (kbIdentifierString in selection)
 
+  # ---------------------------------------------------------------------------
+  def getColumnValueForTargetIdentifier(self, identifier, columnName):
+    """Returns the content of the given column for the given identifier.
+    >>> data = DataprofileTestHelper([{'targetIdentifier': '1', 'nationality': 'BE'},{'targetIdentifier': '2'}])
+    >>> data.getColumnValueForTargetIdentifier('1', 'nationality')
+    'BE'
+    """
+    return utils.getDfCellValue(self.df, 'targetIdentifier', identifier, columnName)
+
+  # ---------------------------------------------------------------------------
+  def getColumnValueForRow(self, rowName, rowIdentifier, columnName):
+    """Returns the content of the given column for the given identifier.
+    >>> data = DataprofileTestHelper([{'contributorID': '1', 'nationality': 'BE'},{'contributorID': '2'}])
+    >>> data.getColumnValueForRow('contributorID', '1', 'nationality')
+    'BE'
+    """
+    return utils.getDfCellValue(self.df, rowName, rowIdentifier, columnName)
+
 
 
 # -----------------------------------------------------------------------------
