@@ -65,7 +65,7 @@ WHERE {
     BIND(iri(concat("http://kbr.be/id/data/identifier_VIAF_", ?viaf)) as ?viafEntityURI)
     ?localContributorURI bf:identifiedBy ?viafEntity .
     ?viafEntity a bf:Identifier ;
-                rdfs:value "VIAF" ;
+                rdfs:label "VIAF" ;
                 rdf:value ?viaf .
   }
           
@@ -73,7 +73,7 @@ WHERE {
     BIND(iri(concat("http://kbr.be/id/data/identifier_Wikidata_", ?wd)) as ?wikidataEntityURI)
     ?localContributorURI bf:identifiedBy ?wdEntity .
     ?wdEntity a bf:Identifier ;
-                rdfs:value "Wikidata" ;
+                rdfs:label "Wikidata" ;
                 rdf:value ?wd .
   }
                 

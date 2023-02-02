@@ -1033,12 +1033,12 @@ class ContributorUpdateQuery(ContributorQuery):
 
     # We do not want to add our local identifiers to an integrated record
     # which was created by a correlation list
-    FILTER NOT EXISTS {
-      graph <$targetGraph> {
-        ?correlationActivity a btm:CorrelationActivity ;
-                             prov:generated ?contributorURI .
-      }
-    }
+    #FILTER NOT EXISTS {
+    #  graph <$targetGraph> {
+    #    ?correlationActivity a btm:CorrelationActivity ;
+    #                         prov:generated ?contributorURI .
+    #  }
+    #}
 
     # We also do not want to add our local identifiers to a regularly integrated record
     # if this local record belongs to an integrated record made from a correlation list
