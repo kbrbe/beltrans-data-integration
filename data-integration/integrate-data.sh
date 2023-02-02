@@ -138,6 +138,8 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
+INPUT_CORRELATION="../data-sources/correlation/2023-02-01_Correlation-list_import.csv"
+
 
 # #############################################################################
 
@@ -216,6 +218,8 @@ CREATE_QUERY_BIBFRAME_TITLES="sparql-queries/create-bibframe-titles.sparql"
 CREATE_QUERY_SCHEMA_TITLES="sparql-queries/derive-single-title-from-bibframe-titles.sparql"
 
 ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
+
+CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
 
 LINK_QUERY_CONT_AUTHORS="integration_queries/link-beltrans-manifestations-authors.sparql"
 LINK_QUERY_CONT_TRANSLATORS="integration_queries/link-beltrans-manifestations-translators.sparql"
@@ -454,6 +458,18 @@ SUFFIX_BNFISNI_IDENTIFIERS_BNF="bnf-identifiers.csv"
 SUFFIX_BNFISNI_CONT_LD="bnf-data-of-missing-nationalities.xml"
 
 #
+# CORRELATIONS
+#
+SUFFIX_CORRELATION="correlation-entities"
+SUFFIX_CORRELATION_NATIONALITY="correlation-nationalities.csv"
+SUFFIX_CORRELATION_KBR="correlation-kbr.csv"
+SUFFIX_CORRELATION_BNF="correlation-bnf.csv"
+SUFFIX_CORRELATION_NTA="correlation-nta.csv"
+SUFFIX_CORRELATION_UNESCO="correlation-unesco.csv"
+SUFFIX_CORRELATION_ISNI="correlation-isni.csv"
+
+
+#
 # LINKED DATA - KBR TRANSLATIONS
 #
 SUFFIX_KBR_BOOK_LD="book-data-and-contributions.ttl"
@@ -532,6 +548,11 @@ SUFFIX_MASTER_LD="master-data.ttl"
 # LINKED DATA - WIKIDATA
 #
 SUFFIX_WIKIDATA_LD="from-manually-enriched-wikidata.ttl"
+
+#
+# LINKED DATA - CORRELATION
+#
+SUFFIX_CORRELATION_LD="correlation-entities.ttl"
 
 # -----------------------------------------------------------------------------
 function extract {
@@ -692,6 +713,7 @@ function load {
 
 }
 
+
 # -----------------------------------------------------------------------------
 function integrate {
   local integrationName=$1
@@ -709,6 +731,7 @@ function integrate {
   queryLogDir="$integrationName/integration"
 
   integrationNamespace="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+  source ./py-integration-env/bin/activate
 
   # first delete content of the named graph in case it already exists
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_TRL>"
@@ -726,12 +749,16 @@ function integrate {
   echo "Create schema:name properties based on BIBFRAME titles/subtitles for records which do not yet have schema:name"
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
 
-  source ./py-integration-env/bin/activate
-  echo "Integrate manifestations ..."
+  echo "Create BELTRANS contributors based on correlation lists"
+  extractContributorCorrelationList "$integrationName"
+  transformContributorCorrelationList "$integrationName"
+  loadContributorCorrelationList "$integrationName" "$integrationNamespace"
+
+  echo "Automatically integrate manifestations ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
     --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
 
-  echo "Integrate contributors ..."
+  echo "Automatically integrate contributors ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
     --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
 
@@ -746,6 +773,9 @@ function integrate {
 
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+
+  echo "Add local data to integrated contributors from a correlation list"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_CORRELATION_DATA"
 
 }
 
@@ -2059,6 +2089,77 @@ function transformUnesco {
   echo "Map Unesco identified contributors"
   . map.sh ../data-sources/unesco/unesco-linked-authorities.yml $authorityTurtle
 }
+
+# -----------------------------------------------------------------------------
+function extractContributorCorrelationList {
+  local integrationName=$1
+
+  mkdir -p "$integrationName/correlation"
+
+  local correlationList="$INPUT_CORRELATION"
+  local correlationListNationalities="$integrationName/correlation/$SUFFIX_CORRELATION_NATIONALITY"
+  local correlationListKBRIDs="$integrationName/correlation/$SUFFIX_CORRELATION_KBR"
+  local correlationListBnFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_BNF"
+  local correlationListNTAIDs="$integrationName/correlation/$SUFFIX_CORRELATION_NTA"
+  local correlationListUnescoIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO"
+  local correlationListISNIIDs="$integrationName/correlation/$SUFFIX_CORRELATION_ISNI"
+
+  echo "Extract 1:n relationships of different correlation list columns"
+  extractSeparatedColumn $correlationList $correlationListNationalities "id" "nationality" "id" "nationality"
+  extractSeparatedColumn $correlationList $correlationListKBRIDs "id" "KBR" "id" "KBR"
+  extractSeparatedColumn $correlationList $correlationListBnFIDs "id" "BnF" "id" "BnF"
+  extractSeparatedColumn $correlationList $correlationListNTAIDs "id" "NTA" "id" "NTA"
+  extractSeparatedColumn $correlationList $correlationListUnescoIDs "id" "Unesco" "id" "Unesco"
+  extractSeparatedColumn $correlationList $correlationListISNIIDs "id" "ISNI" "id" "ISNI"
+}
+
+# -----------------------------------------------------------------------------
+function transformContributorCorrelationList {
+  local integrationName=$1
+
+  mkdir -p "$integrationName/correlation/rdf"
+
+  local correlationList="$INPUT_CORRELATION"
+  local correlationListNationalities="$integrationName/correlation/$SUFFIX_CORRELATION_NATIONALITY"
+  local correlationListKBRIDs="$integrationName/correlation/$SUFFIX_CORRELATION_KBR"
+  local correlationListBnFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_BNF"
+  local correlationListNTAIDs="$integrationName/correlation/$SUFFIX_CORRELATION_NTA"
+  local correlationListUnescoIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO"
+  local correlationListISNIIDs="$integrationName/correlation/$SUFFIX_CORRELATION_ISNI"
+
+  local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_LD"
+
+
+  export RML_SOURCE_CORRELATION_CONTRIBUTORS="$correlationList"
+  export RML_SOURCE_CORRELATION_NATIONALITY="$correlationListNationalities"
+  export RML_SOURCE_CORRELATION_KBR="$correlationListKBRIDs"
+  export RML_SOURCE_CORRELATION_BNF="$correlationListBnFIDs"
+  export RML_SOURCE_CORRELATION_NTA="$correlationListNTAIDs"
+  export RML_SOURCE_CORRELATION_UNESCO="$correlationListUnescoIDs"
+  export RML_SOURCE_CORRELATION_ISNI="$correlationListISNIIDs"
+
+  echo "Map manual correlation data"
+  . map.sh ../data-sources/correlation/correlation-contributors.yml $correlationTurtle
+
+}
+
+
+# -----------------------------------------------------------------------------
+function loadContributorCorrelationList {
+  local integrationName=$1
+  local integrationNamespace=$2
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+  local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_LD"
+
+  echo "Load correlation list"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    "$correlationTurtle"
+}
+  
 
 # -----------------------------------------------------------------------------
 function loadKBR {

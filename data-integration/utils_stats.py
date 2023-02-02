@@ -96,7 +96,12 @@ def countRowsWithMultipleValuesForColumn(df, column, delimiter=';'):
   >>> countRowsWithMultipleValuesForColumn(data1, 'value')
   2
   """
-  myDf = df.fillna('')
+  myDf = df.copy() 
+  if column not in df.columns:
+    myDf[column] = ''
+
+ 
+  myDf = myDf.fillna('')
   return (myDf[column].str.contains(delimiter)).sum()
 
 # -----------------------------------------------------------------------------
@@ -156,22 +161,32 @@ def createContributorCorpusMeasurements(corpus, corpusDate, comment):
     'withBnFIdentifier': countRowsWithValueForColumn(corpus, 'bnfIDs'),
     'withKBIdentifier': countRowsWithValueForColumn(corpus, 'ntaIDs'),
     'withUnescoIdentifier': countRowsWithValueForColumn(corpus, 'unescoIDs'),
+    'withKBRBnFKBAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'bnfIDs',
+                                                                       'ntaIDs', 'unescoIDs']),
     'withKBRBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'bnfIDs',
                                                                        'ntaIDs']),
     'withKBRAndBnFIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'bnfIDs']),
     'withKBRAndKBIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'ntaIDs']),
     'withKBRAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'unescoIDs']),
     'withBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'ntaIDs']),
+    'withBnFAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'unescoIDs']),
+    'withKBAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'unescoIDs']),
     'withKBRAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'isniIDs']),
     'withKBRAndVIAFIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'viafIDs']),
     'withKBRAndWikidataIdentifier': countRowsWithValueForColumns(corpus, ['kbrIDs', 'wikidataIDs']),
+    'withKBRAndNationality': countRowsWithValueForColumns(corpus, ['kbrIDs', 'nationalities']),
     'withBnFAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'isniIDs']),
     'withBnFAndVIAFIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'viafIDs']),
     'withBnFAndWikidataIdentifier': countRowsWithValueForColumns(corpus, ['bnfIDs', 'wikidataIDs']),
+    'withBnFAndNationality': countRowsWithValueForColumns(corpus, ['bnfIDs', 'nationalities']),
     'withKBAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'isniIDs']),
     'withKBAndVIAFIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'viafIDs']),
     'withKBAndWikidataIdentifier': countRowsWithValueForColumns(corpus, ['ntaIDs', 'wikidataIDs']),
+    'withKBAndNationality': countRowsWithValueForColumns(corpus, ['ntaIDs', 'nationalities']),
     'withUnescoAndISNIIdentifier': countRowsWithValueForColumns(corpus, ['unescoIDs', 'isniIDs']),
+    'withUnescoAndVIAFIdentifier': countRowsWithValueForColumns(corpus, ['unescoIDs', 'viafIDs']),
+    'withUnescoAndWikidataIdentifier': countRowsWithValueForColumns(corpus, ['unescoIDs', 'wikidataIDs']),
+    'withUnescoAndNationality': countRowsWithValueForColumns(corpus, ['unescoIDs', 'nationalities']),
     'withISNIIdentifier': countRowsWithValueForColumn(corpus, 'isniIDs'),
     'withVIAFIdentifier': countRowsWithValueForColumn(corpus, 'viafIDs'),
     'withWikidataIdentifier': countRowsWithValueForColumn(corpus, 'wikidataIDs'),
@@ -195,6 +210,7 @@ def createContributorCorpusMeasurements(corpus, corpusDate, comment):
     'withMultipleKBRIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'kbrIDs'),
     'withMultipleBnFIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'bnfIDs'),
     'withMultipleNTAIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'ntaIDs'),
+    'withMultipleUnescoIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'unescoIDs'),
     'withMultipleISNIIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'isniIDs'),
     'withMultipleVIAFIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'viafIDs'),
     'withMultipleWikidataIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'wikidataIDs'),

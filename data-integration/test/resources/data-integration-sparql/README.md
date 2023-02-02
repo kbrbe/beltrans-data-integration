@@ -55,4 +55,7 @@ This test data reflects the following cases.
 ## Authority data matching from a correlation list based on library identifiers 
 
 * A person record from a correlation list, which should create a match between a BnF and a KB record
+* A person record from a correlation list, which should create a match between a KBR, BnF and a KB record
+  * One of the sources (`kbrAuthorBE14`) contains a wrong VIAF identifier according to the source which would integrate with `bnfAuthorBE8`
+  * Only if the correlation list is properly handled and data integration via identifiers excluded for the list members, there won't be a wrong link
 

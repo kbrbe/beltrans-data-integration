@@ -40,7 +40,7 @@ mappings:
           parameters:
             - [grel:valueParameter, $(id)]
             - [grel:valueParameter2, ""] 
-      - p: skos:prefLabel
+      - p: rdfs:label
         o: $(name)
         condition:
           function: idlab-fn:notEqual
@@ -68,6 +68,29 @@ mappings:
           parameters:
             - [grel:valueParameter, $(NTA)]
             - [grel:valueParameter2, ""]
+      - p: schema:sameAs
+        o: btid:$(KBR)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(KBR)]
+            - [grel:valueParameter2, ""]
+      - p: schema:sameAs
+        o: btid:$(BnF)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(BnF)]
+            - [grel:valueParameter2, ""]
+      - p: schema:sameAs
+        o: btid:$(NTA)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(NTA)]
+            - [grel:valueParameter2, ""]
+
+
 
   # ---------------------------------------------------------------------------
   #
@@ -195,4 +218,39 @@ mappings:
       - [a, bf:Identifier]
       - [rdfs:label, "NTA"]
       - [rdf:value, $(NTA)]
+
+  # ---------------------------------------------------------------------------
+  #
+  CorrelationAnnotation:
+    sources:
+      - access: ${RML_TEST_SOURCE_CONTRIBUTORS}
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:correlation_$(id)
+    po:
+      - [a, btm:CorrelationActivity]
+      - [rdfs:label, "Curation of correlation"]
+      - [prov:generated, btid:$(id)~iri]
+      - p: prov:used
+        o: btid:$(KBR)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(KBR)]
+            - [grel:valueParameter2, ""]
+      - p: prov:used
+        o: btid:$(BnF)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(BnF)]
+            - [grel:valueParameter2, ""]
+      - p: prov:used
+        o: btid:$(NTA)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(NTA)]
+            - [grel:valueParameter2, ""]
+
 

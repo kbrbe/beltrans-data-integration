@@ -288,7 +288,7 @@ class ContributorQuery(Query, ABC):
         queryPart = pattern.substitute(sourceGraph=sourceGraph, countryProperty=self.countryProperty,
                                        countryVar=ContributorQuery.VAR_COUNTRY)
 
-        bindPart = f'BIND(iri(concat("{self.baseURL}", {ContributorQuery.VAR_CONTRIBUTOR_UUID})) as {ContributorQuery.VAR_COUNTRY_ENTITY})'
+        bindPart = f'BIND(iri(concat("{self.baseURL}address_", {ContributorQuery.VAR_CONTRIBUTOR_UUID})) as {ContributorQuery.VAR_COUNTRY_ENTITY})'
         if optional:
             return 'OPTIONAL { ' + queryPart + ' } ' + bindPart + ' '
         else:
@@ -963,6 +963,7 @@ class ContributorUpdateQuery(ContributorQuery):
         query += self._getSourceNationalityQuadPattern(self.sourceGraph, self.nationalityProperty, optional=True)
         query += self._getSourceGenderQuadPattern(self.sourceGraph, self.genderProperty, optional=True)
         query += self._getFilterExistsQuadPattern(self.sourceGraph, self.targetGraph, self.identifierName)
+        query += self._getFilterCorrelationNotExist(self.targetGraph)
 
         for identifier in self.identifiersToAdd:
             query += self._getIdentifierQuadPattern(identifier, self.sourceGraph, optional=True)
@@ -1021,6 +1022,39 @@ class ContributorUpdateQuery(ContributorQuery):
     }
    """)
         return pattern.substitute(sourceGraph=sourceGraph, targetGraph=targetGraph, identifier=identifier)
+
+    # ---------------------------------------------------------------------------
+    def _getFilterCorrelationNotExist(self, targetGraph):
+        """This function returns triple patterns for the WHERE clause used for the update functionality,
+           i.e. only if the filter returns false the update will be performed.
+
+        """
+        pattern = Template("""
+
+    # We do not want to add our local identifiers to an integrated record
+    # which was created by a correlation list
+    #FILTER NOT EXISTS {
+    #  graph <$targetGraph> {
+    #    ?correlationActivity a btm:CorrelationActivity ;
+    #                         prov:generated ?contributorURI .
+    #  }
+    #}
+
+    # We also do not want to add our local identifiers to a regularly integrated record
+    # if this local record belongs to an integrated record made from a correlation list
+    FILTER NOT EXISTS {
+      graph <http://beltrans-contributors> {
+        
+        ?anyIntegratedContributorURI schema:sameAs ?localContributorURI .
+        ?anyCorrelationActivity a btm:CorrelationActivity ;
+                                prov:generated ?anyIntegratedContributorURI .
+      }
+    }
+   """)
+        return pattern.substitute(targetGraph=targetGraph)
+
+
+
 
 
 # -----------------------------------------------------------------------------
