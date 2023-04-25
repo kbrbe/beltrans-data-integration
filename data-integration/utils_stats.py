@@ -252,6 +252,17 @@ def mergeMeasurementsToDataFrame(folder, files):
 
 
 # -----------------------------------------------------------------------------
+def getContributorName(nameIDString):
+  """
+  >>> getContributorName('Lieber, Sven (123,4546)')
+  'Lieber, Sven'
+  >>> getContributorName('Lieber, Sven ')
+  'Lieber, Sven'
+  """
+  contributorName = nameIDString.split('(')[0] if '(' in nameIDString else nameIDString
+  return contributorName.strip()
+
+# -----------------------------------------------------------------------------
 def countContribution(value, counter, valueDelimiter=';'):
   """This function counts contributors.
   >>> counter = {}
@@ -272,8 +283,7 @@ def countContribution(value, counter, valueDelimiter=';'):
     contributors = value.split(valueDelimiter) if valueDelimiter in value else [value]
     alreadyProcessed = set()
     for c in contributors:
-      contributorName = c.split('(')[0] if '(' in c else c
-      contributorName = contributorName.strip()
+      contributorName = getContributorName(c)
       if contributorName not in alreadyProcessed:
         alreadyProcessed.add(contributorName)
         if contributorName in counter:
