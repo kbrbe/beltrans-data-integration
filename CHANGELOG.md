@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
-## [20220203] - 2022-02-03
+## [20230203] - 2022-02-03
 
 The biggest changes in this version was the addition of a big 4th data source (Unesco Index Translationum) in the data integration pipeline and a feature which allows to specify a correlation list of person contributors excluded from the automatic data integration based on identifiers.
 
