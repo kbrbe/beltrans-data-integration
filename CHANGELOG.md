@@ -6,6 +6,55 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
+## [20220203] - 2022-02-03
+
+The biggest changes in this version was the addition of a big 4th data source (Unesco Index Translationum) in the data integration pipeline and a feature which allows to specify a correlation list of person contributors excluded from the automatic data integration based on identifiers.
+
+### Added
+
+The following new data or features were added (Unesco, person correlation list, KB organizations, BnF source titles, BnF Rameau classifications)
+
+* We added Unesco Index Translationum as a 4th big data source to the data integration pipeline ([168](https://github.com/kbrbe/beltrans-data-integration/issues/168)), that also included semi-automatic matching between person authorities based on translations ([174](https://github.com/kbrbe/beltrans-data-integration/issues/174) with the `identify_duplicate_contributors.py` script described below)
+* Use a manually curated person correlation list whose records are excluded from the automatic data integration via identifiers to avoid a wrong integration due to wrong identifiers in data sources ([176](https://github.com/kbrbe/beltrans-data-integration/issues/176))
+* ETL organizations from KB based on provided RDF/XML dumps ([152](https://github.com/kbrbe/beltrans-data-integration/issues/152))
+* Not only ETL BnF translations, but also information about originals ([129](https://github.com/kbrbe/beltrans-data-integration/issues/129), [163](https://github.com/kbrbe/beltrans-data-integration/pull/163))
+* ETL Rameau classifications of BnF translations and display them in the dataprofile CSV ([171](https://github.com/kbrbe/beltrans-data-integration/pull/171))
+
+
+The following scripts were added to perform certain subtasks
+
+* To support the integration of contributors without identifiers in common, we added the `identify_duplicate_contributors.py` script that identifies occurrences of translation contributors that have a similar name ([144](https://github.com/kbrbe/beltrans-data-integration/issues/144), relevant is also the fix of [146](https://github.com/kbrbe/beltrans-data-integration/issues/146) for the integration *with* identifier)
+* Documentation about a script to match organizations from two different data sources, for example KBR and KB ([c40cd46](https://github.com/kbrbe/beltrans-data-integration/commit/c40cd46959cf0393df5d574c98e720ea382e9e6e)) integrated publishers will also be shown in a name-id version, e.g. "PublisherA (kbr1, kb1337)" ([153](https://github.com/kbrbe/beltrans-data-integration/issues/153))
+* Added a script to normalize 1:n relationships with the initial usecase of multiline BnF unimarc CSV files ([336582](https://github.com/kbrbe/beltrans-data-integration/commit/336582c823fc9da6f4da281b031613118faaedd2))
+* Added a script to find overlapping content in two CSV Files ([aabaf23](https://github.com/kbrbe/beltrans-data-integration/commit/aabaf23302ebf2553a00d51db4fefa66307a5338))
+* Added a reusable `checkIfColumnExists` function to check if a CSV file contains given columns ([139406](https://github.com/kbrbe/beltrans-data-integration/commit/1394060a257330dca3910927aac185246d777c9d))
+* Added an `activate.sh` bash script to quickly activate the Python environment (incl. setting Python path correctly for the `tools` module)
+
+The following miscellaneous features were added to fix issues
+
+* Show gender information in the person authority list that also includes gender information from BnF ([160](https://github.com/kbrbe/beltrans-data-integration/issues/160))
+* SPARQL queries to identify instances of previously defined data quality metrics ([milestone 5](https://github.com/kbrbe/beltrans-data-integration/milestone/5))
+
+### Changed
+
+Changes in the dataprofile CSV
+
+* Display a publisher as a combination of name and identifiers in the dataprofile CSV similar to person contributors ([2d1aa6](https://github.com/kbrbe/beltrans-data-integration/commit/2d1aa614bf882fd209976a140c956ef630d64987))
+* Titles and subtitles of books are now stored separately based on the BIBFRAME ontology ([169](https://github.com/kbrbe/beltrans-data-integration/issues/169), when possible based on already splitted/structured data source data, otherwise automatically based on a title splitting) and a single Title/Subtitle is shown in the dataprofile CSV ([170](https://github.com/kbrbe/beltrans-data-integration/issues/170))
+* Columns containing several delimited values are now sorted in a postprocessing step to ease working with pivot tables ([162](https://github.com/kbrbe/beltrans-data-integration/issues/162))
+* Write dataprofile Excel cell values explicitly as string, e.g. to avoid cutting of leading zeros in ISNI identifiers ([467a1d](https://github.com/kbrbe/beltrans-data-integration/commit/467a1de2c3b954cbf5e9aa46df3def394edebbef))
+
+Other noteworthy changes
+
+* Explicitly annotate translations that fulfill the BELTRANS criteria (`schema:isPartOf btid:beltransCorpus`), helpful among others to query quality indicators for a Librarian-In-The-Loop only for a relevant subset ([156](https://github.com/kbrbe/beltrans-data-integration/issues/156))
+* The script `tools.xml.get-subjects`, used to identify and extract subject URIs in RDF/XML based on filter criteria, can now be configured with the type of resource (e.g. `schema:Organization`  instead of `RDF:Description` [df1973d](https://github.com/kbrbe/beltrans-data-integration/commit/df1973d237cd7d577d0f913aec5dd58829046d93))
+* Automatically generated SPARQL queries for the data integration are now saved in files to ease debugging afterwards ([164](https://github.com/kbrbe/beltrans-data-integration/issues/164))
+
+### Fixed
+
+* Fixed a bug in the SPARQL queries of the contributor integration and added a test to test and verify it ([146](https://github.com/kbrbe/beltrans-data-integration/issues/146))
+* Improved the integration from the ISNI-SRU dumps, persons from the ISNI dump now properly link to KBR persons (added missing triple pattern in RML mapping[164](https://github.com/kbrbe/beltrans-data-integration/issues/164)) and to KB persons (added missing prefix `p` to KB identifier [166](https://github.com/kbrbe/beltrans-data-integration/issues/166))
+* Fixed missing KB publisher names ([53a133](https://github.com/kbrbe/beltrans-data-integration/commit/53a133e583844e18ed3f6897cc2d5be573bc612c))
 
 ## [20220912] - 2022-09-12
 
@@ -198,3 +247,4 @@ This version corresponds to the milestone https://github.com/SvenLieber/beltrans
 [20220624]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-04-25...2022-06-24
 [20220811]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-06-24...2022-08-11
 [20220912]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-08-11...2022-09-12
+[20230203]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-09-12...2023-02-03
