@@ -19,6 +19,7 @@ The following new data or features were added (Unesco, person correlation list, 
 * ETL organizations from KB based on provided RDF/XML dumps ([152](https://github.com/kbrbe/beltrans-data-integration/issues/152))
 * Not only ETL BnF translations, but also information about originals ([129](https://github.com/kbrbe/beltrans-data-integration/issues/129), [163](https://github.com/kbrbe/beltrans-data-integration/pull/163))
 * ETL Rameau classifications of BnF translations and display them in the dataprofile CSV ([171](https://github.com/kbrbe/beltrans-data-integration/pull/171))
+* Publisher names in book records that have multiple matches with a KBR organization dump are ETL'ed and added to the `http://kbr-publisher-matches` named graph with a `btm:matchCandidate` property. Based on that, a list with possible candidates is easily created with SPARQL ([158](https://github.com/kbrbe/beltrans-data-integration/issues/158))
 
 
 The following scripts were added to perform certain subtasks
