@@ -21,13 +21,11 @@ PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
 
 
 INSERT {
-  graph <http://bnf-publications> { ?publicationAbout dcterms:identifier ?identifier . }
+  graph <http://bnf-publications> { ?publication dcterms:identifier ?identifier . }
 }
 WHERE {
   graph <http://bnf-publications> {
-    ?publication foaf:focus ?publicationAbout .
-
-    ?publiationAbout a foaf:Person .
+    ?publication a schema:CreativeWork .
   }             
-  BIND(strafter(str(?publication), "12148/") AS ?identifier)
+  BIND(strbefore(strafter(str(?publication), "12148/"), "#about") AS ?identifier)
 }
