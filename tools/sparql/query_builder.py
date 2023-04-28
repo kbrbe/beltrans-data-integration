@@ -240,7 +240,8 @@ class ContributorQuery(Query, ABC):
     def _getINSERTIdentifierDeclarationTriplePattern(self, identifier, source, additionalCommentText):
         """"""
 
-        identifierType = ' a bf:Isni ; ' if identifier == 'ISNI' or identifier == 'isni' else ' a bf:Identifier ; rdfs:label "$identifier" ; '
+        #identifierType = ' a bf:Isni ; ' if identifier == 'ISNI' or identifier == 'isni' else ' a bf:Identifier ; rdfs:label "$identifier" ; '
+        identifierType = ' a bf:Isni ; rdfs:label "ISNI" ; ' if identifier == 'ISNI' or identifier == 'isni' else ' a bf:Identifier ; rdfs:label "$identifier" ; '
 
         pattern = Template("""
     ?${identifier}EntityURI """ + identifierType +
@@ -1053,6 +1054,152 @@ class ContributorUpdateQuery(ContributorQuery):
    """)
         return pattern.substitute(targetGraph=targetGraph)
 
+
+
+# -----------------------------------------------------------------------------
+class ContributorSingleUpdateQuery(ContributorQuery):
+    """
+    With this query builder class, one can generate a SPARQL UPDATE query to update a person or organization
+    of a target graph with certain properties from a source graph and a schema:sameAs link back to the person/organization
+    of the source graph.
+
+    The properties added to the target graph are identifiers described using the BIBFRAME ontology,
+    i.e. instances of bf:Identifier or bf:Isni to which is linked via bf:identifiedBy.
+    The update will always add the nationality from the source graph as well as add a schema:sameAs link from target to source.
+
+    With instances of this class it cannot be configured which identifiers will be used to identify a match
+    between source and target graph: all identifiers are taken into account via a generic triple pattern.
+    However,it can be configured which identifiers from the source will be added to the target.
+
+    For example, the following call will generate a SPARQL UPDATE query which tries to make a link between
+    source and target graph using all available identifiers and will add VIAF and Wikidata identifiers to the target.
+
+    qb = ContributorUpdateQuery("KBR", "http://kbr-data", "http://integrated-data", ["VIAF", "Wikidata"])
+    """
+
+    # ---------------------------------------------------------------------------
+    def __init__(self, source, sourceGraph: str, targetGraph: str, identifiersToAdd: list,
+                 nationalityProperty='schema:nationality', genderProperty='schema:gender', personClass='schema:Person',
+                 organizationClass='schema:Organization', correlationListFilter=False):
+        """
+
+        Parameters
+        ----------
+        source : str
+            The name of the data source which will be used for comments, for example "KBR"
+        sourceGraph : str
+            The name of the source graph without brackets, e.g. http://kbr-linked-authorities
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-contributors
+        identifiersToAdd : list
+            The names of other identifiers which will be added from source to target if a match was found.
+            On the one hand, this name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+            and on the other hand to build variable names in the SPARQL query.
+        nationalityProperty : str
+            The RDF property used to fetch nationality information from the source graph, the default is schema:nationality
+        genderProperty : str
+            The RDF property used to fetch gender information from the source graph, the default is schema:gender
+        personClass : str
+            The RDF class used to identify a person record in the source graph, the default is schema:Person
+        organizationClass : str
+            The RDF class used to identify an organization record in the source graph, the default is schema:Organization
+        correlationListFilter : boolean
+            A boolean flag indicating if a matching should only be performed if the target was not generated based on a correlation list,
+            the default is False
+        """
+        self.source = source
+        self.sourceGraph = sourceGraph
+        self.targetGraph = targetGraph
+        self.identifiersToAdd = identifiersToAdd
+        self.nationalityProperty = nationalityProperty
+        self.genderProperty = genderProperty
+        self.personClass = personClass
+        self.organizationClass = organizationClass
+        self.correlationListFilter = correlationListFilter
+
+        self.baseURL = "http://kbr.be/id/data/"
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        insertBeginPattern = Template("""
+    graph <$targetGraph> {
+    """)
+
+        query = "INSERT { "
+
+        query += insertBeginPattern.substitute(targetGraph=self.targetGraph)
+        query += self._getINSERTNationalityTriplePattern()
+        query += self._getINSERTGenderTriplePattern()
+        query += self._getINSERTSameAsTriplePattern()
+
+        # bf:identifiedBy links, e.g. bf:identifiedBy ?viafEntityURI
+        for identifier in self.identifiersToAdd:
+            query += self._getINSERTIdentifiedByTriplePattern(identifier)
+
+        # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
+        for identifier in self.identifiersToAdd:
+            query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source,
+                                                                       f'Added from {self.source} via ?typeLabel')
+
+        query += "} "  # end of graph block
+        query += "} "  # end of INSERT block
+
+        query += "WHERE { "
+
+        query += self._getFilterSourceQuadPattern(self.sourceGraph, self.personClass, self.organizationClass)
+
+        query += self._getGenericIdentifierQuadPattern(self.sourceGraph, self.targetGraph, self.correlationListFilter)
+        query += self._getSourceNationalityQuadPattern(self.sourceGraph, self.nationalityProperty, optional=True)
+        query += self._getSourceGenderQuadPattern(self.sourceGraph, self.genderProperty, optional=True)
+
+        for identifier in self.identifiersToAdd:
+            query += self._getIdentifierQuadPattern(identifier, self.sourceGraph, optional=True)
+
+        query += ' }'
+        return query
+
+    # ---------------------------------------------------------------------------
+    def _getFilterSourceQuadPattern(self, sourceGraph, personClass, organizationClass):
+        pattern = Template("""
+    graph <$sourceGraph> { ?localContributorURI a ?contributorType . }
+    FILTER( ?contributorType IN ($personClass, $organizationClass) ) 
+    
+    """)
+        return pattern.substitute(sourceGraph=sourceGraph, personClass=personClass, organizationClass=organizationClass)
+
+    # ---------------------------------------------------------------------------
+    def _getGenericIdentifierQuadPattern(self, sourceGraph, targetGraph, correlationListFilter=False):
+        """This function returns triple patterns for the WHERE clause used for the update functionality."""
+
+        queryPart = """
+        graph <$sourceGraph> {
+          ?localContributorURI bf:identifiedBy ?localIdentifierEntity .
+    
+          ?localIdentifierEntity a ?type ;
+                                 rdfs:label ?typeLabel ;
+                                 rdf:value ?identifierLocal .
+        }
+
+        graph <$targetGraph> {
+          ?contributorURI bf:identifiedBy ?identifierTargetEntity .
+
+          ?identifierTargetEntity a ?type ;
+                                  rdfs:label ?typeLabel ;
+                                  rdf:value ?identifierLocal .
+        }
+        """
+
+        if correlationListFilter:
+          queryPart += """
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:used ?localContributorURI . } }
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:generated ?contributorURI . } }
+          FILTER( !bound(?activity) ) 
+        """
+
+        pattern = Template(queryPart)
+
+        return pattern.substitute(sourceGraph=sourceGraph, targetGraph=targetGraph)
 
 
 
