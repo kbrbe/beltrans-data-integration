@@ -143,6 +143,7 @@ mappings:
     s: btisni:identifier_isni_$(ISNI)
     po:
       - [a, bf:Isni]
+      - [rdfs:label, "ISNI"]
       - [rdf:value, $(ISNI)]
 
 

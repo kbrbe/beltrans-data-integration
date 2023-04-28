@@ -42,6 +42,7 @@ mappings:
         - [grel:valueParameter2, ""]
     po:
       - [a, bf:Isni]
+      - [rdfs:label, "ISNI"]
       - [rdf:value, $(isni_id)]
 
 
