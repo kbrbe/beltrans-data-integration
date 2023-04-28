@@ -55,6 +55,7 @@ mappings:
       - [a, schema:CreativeWork]
       - [a, schema:Book]
       - [dcterms:identifier, "p$(manifestationID)"]
+      - [bf:identifiedBy, btid:kbid_$(manifestationID)~iri]
       - p: schema:translationOfWork
         o: btid:manifestation_source_$(manifestationID)~iri
         condition:
@@ -105,6 +106,20 @@ mappings:
           parameters:
             - [grel:valueParameter, $(isbn13)]
             - [grel:valueParameter2, ""] 
+      - p: bf:identifiedBy
+        o: btid:isbn10_$(manifestationID)_$(isbn10)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isbn10)]
+            - [grel:valueParameter2, ""] 
+      - p: bf:identifiedBy
+        o: btid:isbn13_$(manifestationID)_$(isbn13)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isbn13)]
+            - [grel:valueParameter2, ""] 
       - p: schema:isbn
         o: $(isbn13)
         condition:
@@ -120,7 +135,75 @@ mappings:
             - [grel:valueParameter, $(publisherName)]
             - [grel:valueParameter2, ""] 
 
+  # ---------------------------------------------------------------------------
+  #
+  bibframeIdentifierISBN10:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates ISBN-10 identifier triples according to the BIBFRAME ontology, such that we use the same syntax/semantics as for contributors"
+    sources:
+      - access: *sourceTRLFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceTRLNLFR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:isbn10_$(manifestationID)_$(isbn10)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(isbn10)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "ISBN-10"]
+      - [rdf:value, $(isbn10)]
 
+   # ---------------------------------------------------------------------------
+  #
+  bibframeIdentifierISBN13:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates ISBN-13 identifier triples according to the BIBFRAME ontology, such that we use the same syntax/semantics as for contributors"
+    sources:
+      - access: *sourceTRLFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceTRLNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:isbn13_$(manifestationID)_$(isbn13)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(isbn13)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "ISBN-13"]
+      - [rdf:value, $(isbn13)]
+ 
+  # ---------------------------------------------------------------------------
+  #
+  bibframeIdentifierKB:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates KB identifier triples according to the BIBFRAME ontology, such that we use the same syntax/semantics as for contributors"
+    sources:
+      - access: *sourceTRLFRNL
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *sourceTRLNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:kbid_$(manifestationID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(manifestationID)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "KB"]
+      - [rdf:value, $(manifestationID)]
+ 
 
   # ---------------------------------------------------------------------------
   #

@@ -55,20 +55,6 @@ mappings:
           parameters:
             - [grel:valueParameter, $(comment)]
             - [grel:valueParameter2, ""] 
-      - p: bibo:isbn10
-        o: $(isbn10)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(isbn10)]
-            - [grel:valueParameter2, ""] 
-      - p: bibo:isbn13
-        o: $(isbn13)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(isbn13)]
-            - [grel:valueParameter2, ""] 
       - p: schema:author
         o: btid:$(author)~iri
         condition:
@@ -90,4 +76,5 @@ mappings:
           parameters:
             - [grel:valueParameter, $(targetLanguage)]
             - [grel:valueParameter2, ""] 
+
 
