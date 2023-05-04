@@ -191,9 +191,9 @@ def getCreateQueryString(queryType, creationSourceType, creationSourceName, sour
 def getLinkIdentifierTuple(identifierName):
   """This function is a workaround, given an identifier name, hard coded properties are returned,
   e.g. given 'ISBN10' a tuple ('bibo:isbn10', 'ISBN10') is returned."""
-  if identifierName == 'ISBN10':
+  if identifierName == 'ISBN-10':
     return ('bibo:isbn10', identifierName)
-  elif identifierName == 'ISBN13':
+  elif identifierName == 'ISBN-13':
     return ('bibo:isbn13', identifierName)
   else:
     return ''

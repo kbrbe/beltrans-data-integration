@@ -337,11 +337,12 @@ class TestDataIntegrationContributorsSPARQLConfigSingleUpdate(TestDataIntegratio
   # ---------------------------------------------------------------------------
   @classmethod
   def tearDownClass(cls):
-    pass
-    #if os.path.isfile(cls.tempAgg):
-    #  os.remove(cls.tempAgg)
-    #if os.path.isdir(cls.tempLogDir):
-    #  shutil.rmtree(cls.tempLogDir)
+    # comment the following in case you want to debug the generated SPARQL queries
+    # after running the tests
+    if os.path.isfile(cls.tempAgg):
+      os.remove(cls.tempAgg)
+    if os.path.isdir(cls.tempLogDir):
+      shutil.rmtree(cls.tempLogDir)
 
 
 

@@ -8,7 +8,9 @@ import re
 import requests
 import utils_sparql
 from tools.sparql.query_builder import ContributorSingleUpdateQuery, \
-  OrganizationContributorCreateQuery, PersonContributorCreateQuery, ManifestationCreateQuery, ManifestationUpdateQuery
+  OrganizationContributorCreateQuery, PersonContributorCreateQuery, \
+  ManifestationCreateQuery, ManifestationCreateQueryIdentifiers, ManifestationUpdateQuery, \
+  ManifestationSingleUpdateQuery
 from optparse import OptionParser
 from dotenv import load_dotenv
 import time
@@ -53,15 +55,16 @@ def checkArguments():
   return (options, args)
 
 # -----------------------------------------------------------------------------
-def generateCreateQueryManifestations(sourceName, sourceGraph, targetGraph, originalsGraph):
+def generateCreateQueryManifestations(sourceName, sourceGraph, targetGraph, originalsGraph, identifiersToAdd):
   """This function uses the imported query generation module to generate a SPARQL INSERT query for manifestations."""
 
   entitySourceClass = 'schema:CreativeWork'
   entityTargetClass = 'schema:CreativeWork'
   titleProperty = 'schema:name'
 
-  qb = ManifestationCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
-                                originalsGraph=originalsGraph, entitySourceClass=entitySourceClass,
+  qb = ManifestationCreateQueryIdentifiers(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
+                                originalsGraph=originalsGraph, identifiersToAdd=identifiersToAdd,
+                                entitySourceClass=entitySourceClass,
                                 entityTargetClass=entityTargetClass, titleProperty=titleProperty)
 
   return qb.getQueryString()
@@ -163,10 +166,9 @@ def generateContributorsUpdateQuery(sourceName, sourceGraph, targetGraph, identi
 def generateManifestationsUpdateQuery(sourceName, sourceGraph, targetGraph, originalsGraph, linkIdentifierName, identifiersToAdd):
   """This function uses the imported query generation module to generate a SPARQL UPDATE query for manifestations."""
 
-  qb = ManifestationUpdateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
+  qb = ManifestationSingleUpdateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
                                 entitySourceClass='schema:CreativeWork',
-                                originalsGraph=originalsGraph, linkIdentifier=linkIdentifierName,
-                                identifiersToAdd=identifiersToAdd)
+                                originalsGraph=originalsGraph, identifiersToAdd=identifiersToAdd)
   return qb.getQueryString()
 
 # -----------------------------------------------------------------------------
@@ -176,7 +178,7 @@ def getCreateQueryString(queryType, creationSourceType, creationSourceName, sour
 
   queryString = ''
   if queryType == 'manifestations':
-    queryString = generateCreateQueryManifestations(creationSourceName, sourceGraph, targetGraph, originalsGraph)
+    queryString = generateCreateQueryManifestations(creationSourceName, sourceGraph, targetGraph, originalsGraph, identifiersToAdd)
   elif queryType == 'contributors':
     if creationSourceType == 'persons':
       queryString = generateCreateQueryPersons(creationSourceName, sourceGraph,
@@ -191,9 +193,9 @@ def getCreateQueryString(queryType, creationSourceType, creationSourceName, sour
 def getLinkIdentifierTuple(identifierName):
   """This function is a workaround, given an identifier name, hard coded properties are returned,
   e.g. given 'ISBN10' a tuple ('bibo:isbn10', 'ISBN10') is returned."""
-  if identifierName == 'ISBN10':
+  if identifierName == 'ISBN-10':
     return ('bibo:isbn10', identifierName)
-  elif identifierName == 'ISBN13':
+  elif identifierName == 'ISBN-13':
     return ('bibo:isbn13', identifierName)
   else:
     return ''
@@ -270,7 +272,6 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
 
       print(f'CREATE {creationSourceType} data from {creationSourceName}')
       # Generate SPARQL query
-      # For manifestations, the 'identifiersToAdd' will not be added, i.e. ISBN10 and ISBN13 will not become bf:identifiedBy, bf:Identifier
       creationQueryString = getCreateQueryString(queryType, creationSourceType, creationSourceName,
                                                  createConfigEntry['sourceGraph'], targetGraph, creationOriginalsGraph,
                                                  createIdentifiersToAdd)
