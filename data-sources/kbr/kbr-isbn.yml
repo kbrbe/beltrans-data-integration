@@ -60,3 +60,74 @@ mappings:
     po:
       - [bibo:isbn13, $(isbn13)]
 
+  # ---------------------------------------------------------------------------
+  #
+  bibframeISBN13Subject:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates associations between manifestations and their ISBN13 using the BIBFRAME ontology."
+    sources:
+      - access: *ISBN13FR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *ISBN13NL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(KBRID)
+    po:
+      - [bf:identifiedBy, btid:isbn13_$(KBRID)_$(isbn13)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  bibframeISBN10Subject:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates associations between manifestations and their ISBN10 using the BIBFRAME ontology."
+    sources:
+      - access: *ISBN10FR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *ISBN10NL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_$(KBRID)
+    po:
+      - [bf:identifiedBy, btid:isbn10_$(KBRID)_$(isbn10)~iri]
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  bibframeISBN10Object:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a BIBFRAME ontology Identifier for a KBR ISBN-10 identifier."
+    sources:
+      - access: *ISBN10FR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *ISBN10NL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:isbn10_$(KBRID)_$(isbn10)
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "ISBN-10"]
+      - [rdf:value, $(isbn10)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  bibframeISBN13Object:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a BIBFRAME ontology Identifier for a KBR ISBN-13 identifier."
+    sources:
+      - access: *ISBN13FR
+        referenceFormulation: csv
+        delimiter: ','
+      - access: *ISBN13NL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:isbn13_$(KBRID)_$(isbn13)
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "ISBN-13"]
+      - [rdf:value, $(isbn13)]
+

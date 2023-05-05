@@ -144,6 +144,7 @@ mappings:
         - [grel:valueParameter2, ""]
     po:
       - [a, bf:Isni]
+      - [rdfs:label, "ISNI"]
       - p: rdf:value
         o:
           - function: grel:string_replace

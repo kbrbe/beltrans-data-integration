@@ -9,6 +9,7 @@ import os
 import integration
 from interlink_named_graph_data_files import main as integrateDataSPARQLFiles
 from interlink_named_graph_data import main as integrateDataSPARQLConfig
+from interlink_named_graph_data_single_update import main as integrateDataSPARQLConfigSingleUpdate
 from dataprofileTestHelper import DataprofileTestHelper
 from BlazegraphIntegrationTestContainer import BlazegraphIntegrationTestContainer
 
@@ -272,6 +273,79 @@ class TestDataIntegrationContributorsSPARQLConfig(TestDataIntegrationContributor
       os.remove(cls.tempAgg)
     if os.path.isdir(cls.tempLogDir):
       shutil.rmtree(cls.tempLogDir)
+
+# -----------------------------------------------------------------------------
+class TestDataIntegrationContributorsSPARQLConfigSingleUpdate(TestDataIntegrationContributorsSPARQL, unittest.TestCase):
+
+  def getData(self):
+    return TestDataIntegrationContributorsSPARQLConfigSingleUpdate.data
+
+  # ---------------------------------------------------------------------------
+  @classmethod
+  def setUpClass(cls):
+    # use temporary files which will be deleted in the tearDownClass function
+    cls.tempAgg = os.path.join(tempfile.gettempdir(), 'aggregated-data.csv')
+    cls.tempLogDir = os.path.join(tempfile.gettempdir(), 'integration-sparql-test-log')
+    os.makedirs(cls.tempLogDir)
+
+    # start a local Blazegraph and insert our test data
+    internalBlazegraphHostname = 'blz'
+    with BlazegraphIntegrationTestContainer(imageName="data-integration_blazegraph-test",
+                                            hostName=internalBlazegraphHostname) as blazegraph:
+      time.sleep(10)
+
+      loadConfig = {
+        'http://kbr-linked-authorities': ['./test/resources/data-integration-sparql/kbr-contributors.ttl'],
+        'http://bnf-contributors': ['./test/resources/data-integration-sparql/bnf-contributors.ttl'],
+        'http://kb-linked-authorities': ['./test/resources/data-integration-sparql/kb-contributors.ttl'],
+        'http://master-data': ['./test/resources/data-integration-sparql/master-data.ttl'],
+        'http://beltrans-contributors': ['./test/resources/data-integration-sparql/correlation-list-contributors.ttl']
+      }
+      # uploadURL = 'http://' + internalBlazegraphHostname + '/namespace/kb'
+      uploadURL = 'http://localhost:8080/bigdata/namespace/kb/sparql'
+      utils.addTestData(uploadURL, loadConfig)
+
+      # integrate the data (this integration we actually want to test)
+      numberUpdates = 3
+      integrateDataSPARQLConfigSingleUpdate(url=uploadURL, queryType='contributors', targetGraph="http://beltrans-contributors",
+                                createQueriesConfig='config-integration-contributors-create.csv',
+                                updateQueriesConfig='config-integration-contributors-single-update.csv',
+                                numberUpdates=numberUpdates,
+                                queryLogDir=cls.tempLogDir)
+
+      # Add local data for BELTRANS contributors created from correlation lists
+      addLocalDataQuery = utils.readSPARQLQuery('./sparql-queries/add-contributors-local-data.sparql')
+      utils.sparqlUpdate(uploadURL, addLocalDataQuery)
+
+      # query data from our test fixture
+      with open(cls.tempAgg, 'wb') as resultFileAgg:
+        queryAgg = utils.readSPARQLQuery('./sparql-queries/get-integrated-contributors.sparql')
+        # queryAgg = utils.readSPARQLQuery('sparql-queries/get-all.sparql')
+        utils.query(uploadURL, queryAgg, resultFileAgg)
+
+      # read and store the queried/integrated data such that we can easily use it in the test functions
+      with open(cls.tempAgg, 'r') as allIn:
+        csvReader = csv.DictReader(allIn, delimiter=',')
+        csvData = [dict(d) for d in csvReader]
+        cls.data = DataprofileTestHelper(csvData)
+        print(cls.data.df[['contributorID', 'nationalities', 'kbrIDs', 'bnfIDs', 'ntaIDs', 'isniIDs', 'viafIDs', 'wikidataIDs']])
+
+      # In case we want to debug the test fixture (using the query interface on localhost:8080)
+      #print("sleep")
+      #time.sleep(5000)
+
+  # ---------------------------------------------------------------------------
+  @classmethod
+  def tearDownClass(cls):
+    # comment the following in case you want to debug the generated SPARQL queries
+    # after running the tests
+    if os.path.isfile(cls.tempAgg):
+      os.remove(cls.tempAgg)
+    if os.path.isdir(cls.tempLogDir):
+      shutil.rmtree(cls.tempLogDir)
+
+
+
 
 
 if __name__ == '__main__':

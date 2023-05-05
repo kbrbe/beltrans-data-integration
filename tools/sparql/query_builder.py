@@ -5,6 +5,20 @@ from datetime import datetime
 class Query(ABC):
 
     BASE_URL = 'http://kbr.be/id/data/'
+    VAR_IDENTIFIER_UPDATE_COMMENT = "?identifierComment"
+    VAR_IDENTIFIER_TYPE_LABEL = "?typeLabel"
+
+    # ---------------------------------------------------------------------------
+    @classmethod
+    def normalizeVarName(cls, identifierName):
+        return identifierName.replace('-', '')
+
+    # ---------------------------------------------------------------------------
+    @classmethod
+    def getIdentifierVarName(cls, identifierName):
+        identifierName = Query.normalizeVarName(identifierName)
+        return f'?identifier{identifierName}'
+
     # ---------------------------------------------------------------------------
     @classmethod
     def _getSimpleTriplePattern(cls, subject, predicate, object, graph=None, optional=False, newline=False):
@@ -40,6 +54,117 @@ class Query(ABC):
       """
         else:
             return queryPart
+
+   # ---------------------------------------------------------------------------
+    @classmethod
+    def _getINSERTIdentifierDeclarationTriplePattern(cls, identifier, source, graph=None):
+        """"""
+
+        #identifierType = ' a bf:Isni ; ' if identifier == 'ISNI' or identifier == 'isni' else ' a bf:Identifier ; rdfs:label "$identifier" ; '
+        identifierType = ' a bf:Isni ; rdfs:label "ISNI" ; ' if identifier == 'ISNI' or identifier == 'isni' else ' a bf:Identifier ; rdfs:label "$identifierLabel" ; '
+
+        identifierLabel = identifier
+        identifier = cls.normalizeVarName(identifier)
+
+        pattern = Template("""
+    ?${identifier}EntityURI """ + identifierType +
+                           """
+                               rdfs:comment $commentTextVariable ;
+                               rdf:value ?${identifier} .
+                       
+                           """
+                           )
+        queryPart = pattern.substitute(identifier=identifier,
+                                       identifierLabel=identifierLabel,
+                                       source=source,
+                                       commentTextVariable=cls.VAR_IDENTIFIER_UPDATE_COMMENT)
+        if graph != None:
+            queryPart = f'graph <{graph}> ' + '{ ' + queryPart + """ }
+                         """
+
+        return queryPart
+
+    # ---------------------------------------------------------------------------
+    @classmethod
+    def _getUpdateCommentBindText(cls, commentText):
+        pattern = Template("""  
+    BIND( "$commentText" as $updateCommentVariable)
+    """)
+        return pattern.substitute(updateCommentVariable=cls.VAR_IDENTIFIER_UPDATE_COMMENT,
+                                  commentText=commentText)
+
+    # ---------------------------------------------------------------------------
+    @classmethod
+    def _getUpdateCommentBindConcat(cls, commentText, additionalTextVariable):
+        pattern = Template("""  
+    BIND( CONCAT("$commentText", $additionalTextVariable) as $updateCommentVariable)
+    """)
+        return pattern.substitute(updateCommentVariable=cls.VAR_IDENTIFIER_UPDATE_COMMENT,
+                                  commentText=commentText,
+                                  additionalTextVariable=additionalTextVariable)
+
+
+
+
+    # ---------------------------------------------------------------------------
+    @classmethod
+    def _getIdentifierStringPatternBIBFRAME(cls, identifier, subjectURIVariable, baseURL=None, graph=None, optional=False):
+        identifierType = ' a bf:Isni ; rdfs:label "$identifier" ; ' if identifier == 'ISNI' or identifier == 'isni' else ' a bf:Identifier ; rdfs:label "$identifierLabel" ; '
+
+        # We cannot give Query.BASE_URL or cls.BASE_URL as default in the parameter list
+        # That's why we do it here
+        baseURL = baseURL if baseURL != None else cls.BASE_URL
+
+        identifierLabel = identifier
+        identifier = cls.normalizeVarName(identifier)
+
+        queryPart = """
+            $subjectURIVariable bf:identifiedBy ?${identifier}Entity .
+    
+            ?${identifier}Entity""" + identifierType + \
+            """
+                                               rdf:value ?${identifier} . 
+        """
+
+        if graph != None:
+            queryPart = f'graph <{graph}> ' + '{ ' + queryPart + """ } """
+
+        if optional:
+            queryPart = 'OPTIONAL { ' + queryPart + ' } ' + """
+            """
+
+        pattern = Template(queryPart + """
+        BIND(iri(concat("${baseURL}identifier_${identifier}_", ?${identifier})) as ?${identifier}EntityURI)
+        """)
+        queryPart = pattern.substitute(subjectURIVariable=subjectURIVariable, identifier=identifier, identifierLabel=identifierLabel, graph=graph, baseURL=baseURL)
+        return queryPart
+
+    # ---------------------------------------------------------------------------
+    @classmethod
+    def _getGenericIdentifierQuadPattern(cls, sourceGraph, localURIVariable, targetURIVariable, targetGraph):
+        """This function returns triple patterns for the WHERE clause used for the update functionality."""
+
+        pattern = Template("""
+        graph <$sourceGraph> {
+          $localURIVariable bf:identifiedBy ?localIdentifierEntity .
+    
+          ?localIdentifierEntity a ?type ;
+                                 rdfs:label ?typeLabel ;
+                                 rdf:value ?identifierLocal .
+        }
+
+        graph <$targetGraph> {
+          $targetURIVariable bf:identifiedBy ?identifierTargetEntity .
+
+          ?identifierTargetEntity a ?type ;
+                                  rdfs:label ?typeLabel ;
+                                  rdf:value ?identifierLocal .
+        }
+        """)
+
+        return pattern.substitute(sourceGraph=sourceGraph, localURIVariable=localURIVariable, targetURIVariable=targetURIVariable, targetGraph=targetGraph)
+
+
 
     @classmethod
     def _getPrefixList(cls):
@@ -155,6 +280,7 @@ class ContributorQuery(Query, ABC):
 
     # ---------------------------------------------------------------------------
     def _getINSERTIdentifiedByTriplePattern(self, identifier):
+        identifier = Query.normalizeVarName(identifier)
         return Query._getSimpleTriplePattern(ContributorQuery.VAR_CONTRIBUTOR_URI,
                                                         'bf:identifiedBy',
                                                         f'?{identifier}EntityURI',
@@ -236,23 +362,7 @@ class ContributorQuery(Query, ABC):
                                                         f'"{comment}"',
                                                         newline=True)
 
-    # ---------------------------------------------------------------------------
-    def _getINSERTIdentifierDeclarationTriplePattern(self, identifier, source, additionalCommentText):
-        """"""
-
-        identifierType = ' a bf:Isni ; ' if identifier == 'ISNI' or identifier == 'isni' else ' a bf:Identifier ; rdfs:label "$identifier" ; '
-
-        pattern = Template("""
-    ?${identifier}EntityURI """ + identifierType +
-                           """
-                               rdfs:comment "$additionalCommentText" ;
-                               rdf:value ?${identifier} .
-                       
-                           """
-                           )
-        return pattern.substitute(identifier=identifier, source=source, additionalCommentText=additionalCommentText)
-
-    # ---------------------------------------------------------------------------
+     # ---------------------------------------------------------------------------
     def _getSourceNationalityQuadPattern(self, sourceGraph, nationalityProperty, optional=False):
         pattern = Template("""
     graph <$sourceGraph> { ?localContributorURI $nationalityProperty ?contributorNationality . }
@@ -296,30 +406,19 @@ class ContributorQuery(Query, ABC):
 
     # ---------------------------------------------------------------------------
     @classmethod
-    def _getIdentifierStringPatternBIBFRAME(cls, identifier):
-        identifierType = ' a bf:Isni ; ' if identifier == 'ISNI' or identifier == 'isni' else ' a bf:Identifier ; rdfs:label "$identifier" ; '
+    def _getIdentifierStringPatternDCTERMS(cls, identifier, subjectURIVariable, baseURL=None, graph=None):
+        queryPart = "$subjectURIVariable dcterms:identifier ?${identifier} ."
 
-        pattern = """
-        graph <$graph> {
-            $localContributorURIVariable bf:identifiedBy ?${identifier}Entity .
-    
-            ?${identifier}Entity""" + identifierType + \
-            """
-                                               rdf:value ?${identifier} .
-        }
+        # We cannot give Query.BASE_URL or cls.BASE_URL as default in the parameter list
+        # That's why we do it here
+        baseURL = baseURL if baseURL != None else cls.BASE_URL
+        if graph != None:
+            queryPart = f'graph <{graph}> ' + '{ ' + queryPart + """ } """
+            
+        pattern = Template(queryPart + """
         BIND(iri(concat("${baseURL}identifier_${identifier}_", ?${identifier})) as ?${identifier}EntityURI)
-        
-        """
-        return pattern
-
-    # ---------------------------------------------------------------------------
-    @classmethod
-    def _getIdentifierStringPatternDCTERMS(cls):
-        pattern = """
-        graph <$graph> { $localContributorURIVariable dcterms:identifier ?${identifier} . }
-        BIND(iri(concat("${baseURL}identifier_${identifier}_", ?${identifier})) as ?${identifier}EntityURI)
-        """
-        return pattern
+        """)
+        return pattern.substitute(subjectURIVariable=subjectURIVariable, identifier=identifier, baseURL=baseURL)
 
     # ---------------------------------------------------------------------------
     def _getIdentifierQuadPattern(self, identifier, namedGraph, optional=False):
@@ -328,13 +427,13 @@ class ContributorQuery(Query, ABC):
         """
 
         if identifier == self.source:
-            pattern = Template(ContributorQuery._getIdentifierStringPatternDCTERMS())
+            queryPart = ContributorQuery._getIdentifierStringPatternDCTERMS(identifier,
+                                                                            subjectURIVariable=ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
+                                                                            graph=namedGraph)
         else:
-            pattern = Template(ContributorQuery._getIdentifierStringPatternBIBFRAME(identifier))
-        queryPart = pattern.substitute(identifier=identifier,
-                                       graph=namedGraph,
-                                       baseURL=self.baseURL,
-                                       localContributorURIVariable=ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI)
+            queryPart = Query._getIdentifierStringPatternBIBFRAME(identifier,
+                                                                  subjectURIVariable=ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI,
+                                                                  graph=namedGraph)
         if optional:
             return 'OPTIONAL { ' + queryPart + ' } '
         else:
@@ -352,6 +451,17 @@ class ManifestationQuery(Query, ABC):
     VAR_MANIFESTATION_ISBN10 = '?isbn10'
     VAR_MANIFESTATION_ISBN13 = '?isbn13'
 
+
+    # ---------------------------------------------------------------------------
+    def _getINSERTIdentifiedByTriplePattern(self, identifier, graph=None, optional=False):
+        identifier = Query.normalizeVarName(identifier)
+        return Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_URI,
+                                                        'bf:identifiedBy',
+                                                        f'?{identifier}EntityURI',
+                                                        graph=graph,
+                                                        optional=optional,
+                                                        newline=True)
+
     # ---------------------------------------------------------------------------
     @classmethod
     def _getUUIDAndLabelCreationAndBind(cls):
@@ -364,6 +474,167 @@ class ManifestationQuery(Query, ABC):
         return pattern.substitute(baseURL=Query.BASE_URL, uuidVariable=ManifestationQuery.VAR_MANIFESTATION_UUID,
                                   URIVariable=ManifestationQuery.VAR_MANIFESTATION_URI,
                                   labelVariable=ManifestationQuery.VAR_MANIFESTATION_LABEL)
+
+    # ---------------------------------------------------------------------------
+    def _getIdentifierQuadPattern(self, identifier, namedGraph, optional=False):
+        """This function returns possibly optional quad patterns for the WHERE clause,
+           for example if a particular identifier such as VIAF or Wikidata should be queried too.
+        """
+
+        queryPart = Query._getIdentifierStringPatternBIBFRAME(identifier,
+                                                              subjectURIVariable=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                                              graph=namedGraph)
+        if optional:
+            return 'OPTIONAL { ' + queryPart + ' } '
+        else:
+            return queryPart
+
+
+class ManifestationCreateQueryIdentifiers(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, source, sourceGraph: str, targetGraph: str, originalsGraph: str,
+                 identifiersToAdd: list,
+                 entitySourceClass, entityTargetClass,
+                 titleProperty='schema:name'):
+        """
+
+        Parameters
+        ----------
+        source : str
+            The name of the data source. It will be used for comments.
+        sourceGraph : str
+            The name of the source graph without brackets, e.g. http://kb-manifestations
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        originalsGraph : str
+            The name of the graph with information about the translation's original, e.g. http://kb-originals
+        identifiersToAdd : list
+            The names of other identifiers which will be added from source to target if a match was found.
+            On the one hand, this name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+            and on the other hand to build variable names in the SPARQL query.
+        entitySourceClass : str
+            The RDF class used to identify a  record in the source graph,
+            e.g. schema:CreativeWork or schema:Book
+        entityTargetClass : str
+            The RDF class used to specify the type of a newly created entity in the target graph
+        titleProperty : str
+            The RDF property used to fetch a name label in the source graph, the default is rdfs:label
+        """
+        self.source = source
+        self.sourceGraph = sourceGraph
+        self.targetGraph = targetGraph
+        self.originalsGraph = originalsGraph
+        self.identifiersToAdd = identifiersToAdd
+        self.entitySourceClass = entitySourceClass
+        self.entityTargetClass = entityTargetClass
+        self.titleProperty = titleProperty
+
+    # ---------------------------------------------------------------------------
+    def _getFilterSourceQuadPattern(self):
+#        pattern = Template("""
+#
+#       FILTER NOT EXISTS {
+#         graph <$targetGraph> {
+#           ?entity a $entityType ;
+#                   schema:sameAs $localContributorURI .
+#         }
+#       }
+#       """)
+
+        pattern = Template("""
+        OPTIONAL { graph <$targetGraph> { ?entity schema:sameAs $localContributorURI . } }
+        FILTER(!bound(?entity))
+        """)
+        return pattern.substitute(targetGraph=self.targetGraph, entityType=self.entityTargetClass,
+                                  localContributorURI=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI)
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        query = "INSERT { "
+        for property, object in [('a', self.entityTargetClass),
+                                 ('dcterms:identifier', ManifestationQuery.VAR_MANIFESTATION_UUID),
+                                 ('rdfs:label', ManifestationQuery.VAR_MANIFESTATION_LABEL),
+                                 ('schema:name', ManifestationQuery.VAR_MANIFESTATION_TITLE),
+                                 ('schema:inLanguage', ManifestationQuery.VAR_MANIFESTATION_TARGET_LANG),
+                                 ('btm:sourceLanguage', ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG),
+                                 ('schema:sameAs', ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI),
+                                 ('bibo:isbn10', ManifestationQuery.VAR_MANIFESTATION_ISBN10),
+                                 ('bibo:isbn13', ManifestationQuery.VAR_MANIFESTATION_ISBN13),
+                                 ('rdfs:comment', f'"Created from {self.source} data"')]:
+            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_URI,
+                                                  property,
+                                                  object,
+                                                  graph=self.targetGraph,
+                                                  optional=False,
+                                                  newline=True)
+
+        query += """
+          graph <""" + self.targetGraph + """> {
+        """
+        # bf:identifiedBy links, e.g. bf:identifiedBy ?viafEntityURI
+        for identifier in self.identifiersToAdd:
+            if identifier != '':
+                query += self._getINSERTIdentifiedByTriplePattern(identifier)
+
+        # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
+        for identifier in self.identifiersToAdd:
+            query += Query._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source)
+
+
+
+        query += "} \n" # end of graph block for identifiers
+        query += "} \n"  # end of INSERT block
+
+        query += "WHERE { "
+
+
+        for property, object, optional in [('a', self.entitySourceClass, False),
+                                           (self.titleProperty, ManifestationQuery.VAR_MANIFESTATION_TITLE, False),
+                                           ('schema:inLanguage', ManifestationQuery.VAR_MANIFESTATION_TARGET_LANG, True),
+                                           ('bibo:isbn10', ManifestationQuery.VAR_MANIFESTATION_ISBN10, True),
+                                           ('bibo:isbn13', ManifestationQuery.VAR_MANIFESTATION_ISBN13, True)]:
+            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                                  property,
+                                                  object,
+                                                  graph=self.sourceGraph,
+                                                  optional=optional,
+                                                  newline=True)
+
+        query += Query._getUpdateCommentBindText(f'Created from {self.source} data')
+
+        for identifier in self.identifiersToAdd:
+            if identifier != '':
+                query += self._getIdentifierQuadPattern(identifier, self.sourceGraph, optional=True)
+
+
+
+        if self.source == 'BnF' or self.source == 'bnf':
+            pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar btm:sourceLanguage $sourceLangVar . } }
+            """)
+            query += pattern.substitute(sourceGraph=self.sourceGraph, localURIVar=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                        sourceLangVar=ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG)
+        else:
+            pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar schema:translationOfWork ?originalURI . }
+                                        graph <$originalsGraph> { ?originalURI schema:inLanguage $sourceLangVar . } }
+                          """)
+
+            query += pattern.substitute(sourceGraph=self.sourceGraph, localURIVar=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                    originalsGraph=self.originalsGraph, sourceLangVar=ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG)
+
+        query += pattern.substitute(sourceGraph=self.sourceGraph, localURIVar=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                    originalsGraph=self.originalsGraph, sourceLangVar=ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG)
+
+        query += ManifestationQuery._getUUIDAndLabelCreationAndBind()
+
+
+        query += self._getFilterSourceQuadPattern()
+
+        query += ' }'
+        return query
+
+
 
 class ManifestationCreateQuery(ManifestationQuery):
 
@@ -401,15 +672,20 @@ class ManifestationCreateQuery(ManifestationQuery):
 
     # ---------------------------------------------------------------------------
     def _getFilterSourceQuadPattern(self):
-        pattern = Template("""
+#        pattern = Template("""
+#
+#       FILTER NOT EXISTS {
+#         graph <$targetGraph> {
+#           ?entity a $entityType ;
+#                   schema:sameAs $localContributorURI .
+#         }
+#       }
+#       """)
 
-       FILTER NOT EXISTS {
-         graph <$targetGraph> {
-           ?entity a $entityType ;
-                   schema:sameAs $localContributorURI .
-         }
-       }
-       """)
+        pattern = Template("""
+        OPTIONAL { graph <$targetGraph> { ?entity schema:sameAs $localContributorURI . } }
+        FILTER(!bound(?entity))
+        """)
         return pattern.substitute(targetGraph=self.targetGraph, entityType=self.entityTargetClass,
                                   localContributorURI=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI)
 
@@ -433,6 +709,8 @@ class ManifestationCreateQuery(ManifestationQuery):
                                                   graph=self.targetGraph,
                                                   optional=False,
                                                   newline=True)
+
+
 
         query += "} \n"  # end of INSERT block
 
@@ -526,12 +804,10 @@ class ManifestationUpdateQuery(ManifestationQuery):
                                   identifierVariable=self.getLinkIdentifierVarName(),
                                   entityVar=ManifestationQuery.VAR_MANIFESTATION_URI)
 
-    # ---------------------------------------------------------------------------
-    def getIdentifierVarName(self, identifierName):
-        return f'?identifier{identifierName}'
+
     # ---------------------------------------------------------------------------
     def getLinkIdentifierVarName(self):
-        return self.getIdentifierVarName(self.linkIdentifier[1])
+        return Query.getIdentifierVarName(self.linkIdentifier[1])
 
     # ---------------------------------------------------------------------------
     def _buildQuery(self):
@@ -552,7 +828,7 @@ class ManifestationUpdateQuery(ManifestationQuery):
         for identifierProperty, identifierName in self.identifiersToAdd:
             query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_URI,
                                                    identifierProperty,
-                                                   self.getIdentifierVarName(identifierName),
+                                                   Query.getIdentifierVarName(identifierName),
                                                    graph=self.targetGraph,
                                                    optional=False,
                                                    newline=True)
@@ -571,7 +847,7 @@ class ManifestationUpdateQuery(ManifestationQuery):
 
         query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
                                                self.linkIdentifier[0],
-                                               self.getIdentifierVarName(self.linkIdentifier[1]),
+                                               Query.getIdentifierVarName(self.linkIdentifier[1]),
                                                graph=self.sourceGraph,
                                                optional=False,
                                                newline=True)
@@ -587,7 +863,7 @@ class ManifestationUpdateQuery(ManifestationQuery):
         for identifierProperty, identifierName in self.identifiersToAdd:
             query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
                                                    identifierProperty,
-                                                   self.getIdentifierVarName(identifierName),
+                                                   Query.getIdentifierVarName(identifierName),
                                                    graph=self.sourceGraph,
                                                    optional=True,
                                                    newline=True)
@@ -610,6 +886,162 @@ class ManifestationUpdateQuery(ManifestationQuery):
         query += ' }'
         return query
 
+
+class ManifestationSingleUpdateQuery(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, source, sourceGraph: str, targetGraph: str, originalsGraph: str,
+                 entitySourceClass, identifiersToAdd: list):
+        """
+
+        Parameters
+        ----------
+        source : str
+            The name of the data source. It will be used for comments.
+        sourceGraph : str
+            The name of the source graph without brackets, e.g. http://kb-manifestations
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        originalsGraph : str
+            The name of the graph with information about the translation's original, e.g. http://kb-originals
+        entitySourceClass : str
+            The RDF class used to identify a  record in the source graph,
+            e.g. schema:CreativeWork or schema:Book
+        identifiersToAdd : list
+            A list of (property, name) tuples specifying the name of identifiers and the property with which
+            it can be extracted from the source, e.g. [('bibo:isbn10', 'ISBN10')]
+        """
+        self.source = source
+        self.sourceGraph = sourceGraph
+        self.targetGraph = targetGraph
+        self.originalsGraph = originalsGraph
+        self.entitySourceClass = entitySourceClass
+        self.identifiersToAdd = identifiersToAdd
+
+
+    # ---------------------------------------------------------------------------
+    def _getFilterSourceQuadPattern(self):
+        pattern = Template("""
+        
+       OPTIONAL { graph <$targetGraph> { $entityVar $identifierProperty $identifierVariable . } }
+       FILTER EXISTS {
+         graph <$targetGraph> { $entityVar $identifierProperty $identifierVariable . }
+       }
+       """)
+        return pattern.substitute(targetGraph=self.targetGraph,
+                                  identifierProperty=self.linkIdentifier[0],
+                                  identifierVariable=self.getLinkIdentifierVarName(),
+                                  entityVar=ManifestationQuery.VAR_MANIFESTATION_URI)
+
+
+
+    # ---------------------------------------------------------------------------
+    def getLinkIdentifierVarName(self):
+        return self.getIdentifierVarName(self.linkIdentifier[1])
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        query = "INSERT { "
+        for property, object in [('schema:inLanguage', ManifestationQuery.VAR_MANIFESTATION_TARGET_LANG),
+                                 ('btm:sourceLanguage', ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG),
+                                 ('schema:sameAs', ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI)]:
+
+            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_URI,
+                                                  property,
+                                                  object,
+                                                  graph=self.targetGraph,
+                                                  optional=False,
+                                                  newline=True)
+
+        # Insert other identifiers which are optionally fetched
+        # they are taken based on the first element of the tuple ('bibo:isbn10', 'ISBN-10')
+        for identifierProperty, identifierName in self.identifiersToAdd:
+
+            # create a direct property based on the first tuple element
+            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_URI,
+                                                   identifierProperty,
+                                                   self.getIdentifierVarName(identifierName),
+                                                   graph=self.targetGraph,
+                                                   optional=False,
+                                                   newline=True)
+
+            # create a triple pattern according to the BIBFRAME ontology
+            # thus based on the name (second part of the tuple)
+            query += self._getINSERTIdentifiedByTriplePattern(identifierName,
+                                                              graph=self.targetGraph)
+
+            query += Query._getINSERTIdentifierDeclarationTriplePattern(identifierName, 
+                                                              self.source,
+                                                              graph=self.targetGraph)
+
+        query += "} \n"  # end of INSERT block
+
+        query += "WHERE { "
+
+
+        query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                              'a',
+                                              self.entitySourceClass,
+                                              graph=self.sourceGraph,
+                                              optional=False,
+                                              newline=True)
+
+
+        query += Query._getUpdateCommentBindConcat(f'Added from {self.source} via ', Query.VAR_IDENTIFIER_TYPE_LABEL)
+#        query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+#                                               self.linkIdentifier[0],
+#                                               self.getIdentifierVarName(self.linkIdentifier[1]),
+#                                               graph=self.sourceGraph,
+#                                               optional=False,
+#                                               newline=True)
+
+        query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                               'schema:inLanguage',
+                                               ManifestationQuery.VAR_MANIFESTATION_TARGET_LANG,
+                                               graph=self.sourceGraph,
+                                               optional=True,
+                                               newline=True)
+
+        query += Query._getGenericIdentifierQuadPattern(self.sourceGraph,
+                                                        ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                                        ManifestationQuery.VAR_MANIFESTATION_URI,
+                                                        self.targetGraph)
+        # Optionally fetch other identifiers
+        for identifierProperty, identifierName in self.identifiersToAdd:
+
+            query += Query._getIdentifierStringPatternBIBFRAME(identifierName,
+                                                               subjectURIVariable=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                                               graph=self.sourceGraph,
+                                                               optional=True)
+
+            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                                   identifierProperty,
+                                                   self.getIdentifierVarName(identifierName),
+                                                   graph=self.sourceGraph,
+                                                   optional=True,
+                                                   newline=True)
+
+        if self.source == 'BnF' or self.source == 'bnf':
+            pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar btm:sourceLanguage $sourceLangVar . } }
+            """)
+            query += pattern.substitute(sourceGraph=self.sourceGraph, localURIVar=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                        sourceLangVar=ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG)
+        else:
+            pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar schema:translationOfWork ?originalURI . }
+                                        graph <$originalsGraph> { ?originalURI schema:inLanguage $sourceLangVar . } }
+                          """)
+
+            query += pattern.substitute(sourceGraph=self.sourceGraph, localURIVar=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                    originalsGraph=self.originalsGraph, sourceLangVar=ManifestationQuery.VAR_MANIFESTATION_SOURCE_LANG)
+
+#        query += self._getFilterSourceQuadPattern()
+
+        query += ' }'
+        return query
+
+
+
 # -----------------------------------------------------------------------------
 class ContributorCreateQuery(ContributorQuery, ABC):
     """
@@ -620,15 +1052,20 @@ class ContributorCreateQuery(ContributorQuery, ABC):
 
     # ---------------------------------------------------------------------------
     def _getFilterSourceQuadPattern(self):
+#        pattern = Template("""
+#    
+#    FILTER NOT EXISTS {
+#      graph <$targetGraph> {
+#        ?entity a $entityType ;
+#                schema:sameAs $localContributorURI .
+#      }
+#    }
+#    """)
+
         pattern = Template("""
-    
-    FILTER NOT EXISTS {
-      graph <$targetGraph> {
-        ?entity a $entityType ;
-                schema:sameAs $localContributorURI .
-      }
-    }
-    """)
+        OPTIONAL { graph <$targetGraph> { ?entity schema:sameAs $localContributorURI . } }
+        FILTER(!bound(?entity))
+        """)
         return pattern.substitute(targetGraph=self.targetGraph, entityType=self.entityTargetClass,
                                   localContributorURI=ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI)
 
@@ -696,7 +1133,7 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
         self.familyNameProperty = familyNameProperty
         self.givenNameProperty = givenNameProperty
 
-        self.baseURL = "http://kbr.be/id/data/"
+        self.baseURL = Query.BASE_URL
 
     # ---------------------------------------------------------------------------
     def _buildQuery(self):
@@ -728,7 +1165,7 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
 
         # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
         for identifier in self.identifiersToAdd:
-            query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source, f'Created from {self.source} data')
+            query += Query._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source)
 
         query += "} "  # end of graph block
         query += "} "  # end of INSERT block
@@ -750,6 +1187,7 @@ class PersonContributorCreateQuery(ContributorCreateQuery):
                                                   graph=self.sourceGraph,
                                                   optional=True)
 
+        query += Query._getUpdateCommentBindText(f'Created from {self.source} data')
         query += self._getUUIDCreationAndBind()
         # query += self._getSourceNationalityQuadPattern(self.sourceGraph, self.nationalityProperty)
         # query += self._getFilterExistsQuadPattern(self.sourceGraph, self.targetGraph, self.identifierName)
@@ -839,7 +1277,7 @@ class OrganizationContributorCreateQuery(ContributorCreateQuery):
 
         # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
         for identifier in self.identifiersToAdd:
-            query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source, f'Created from {self.source} data')
+            query += Query._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source)
 
         query += "} "  # end of graph block
         query += "} "  # end of INSERT block
@@ -857,6 +1295,7 @@ class OrganizationContributorCreateQuery(ContributorCreateQuery):
                                                   graph=self.sourceGraph,
                                                   optional=True)
 
+        query += Query._getUpdateCommentBindText(f'Created from {self.source} data')
         query += self._getUUIDCreationAndBind()
         query += self._getSourceCountryQuadPattern(self.sourceGraph, optional=True)
         # query += self._getFilterExistsQuadPattern(self.sourceGraph, self.targetGraph, self.identifierName)
@@ -951,8 +1390,7 @@ class ContributorUpdateQuery(ContributorQuery):
 
         # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
         for identifier in self.identifiersToAdd:
-            query += self._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source,
-                                                                       f'Added from {self.source} via {self.identifierName}')
+            query += Query._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source)
 
         query += "} "  # end of graph block
         query += "} "  # end of INSERT block
@@ -965,6 +1403,7 @@ class ContributorUpdateQuery(ContributorQuery):
         query += self._getFilterExistsQuadPattern(self.sourceGraph, self.targetGraph, self.identifierName)
         query += self._getFilterCorrelationNotExist(self.targetGraph)
 
+        query += Query._getUpdateCommentBindConcat(f'Added from {self.source} via ', Query.VAR_IDENTIFIER_TYPE_LABEL)
         for identifier in self.identifiersToAdd:
             query += self._getIdentifierQuadPattern(identifier, self.sourceGraph, optional=True)
 
@@ -1053,6 +1492,165 @@ class ContributorUpdateQuery(ContributorQuery):
    """)
         return pattern.substitute(targetGraph=targetGraph)
 
+
+
+# -----------------------------------------------------------------------------
+class ContributorSingleUpdateQuery(ContributorQuery):
+    """
+    With this query builder class, one can generate a SPARQL UPDATE query to update a person or organization
+    of a target graph with certain properties from a source graph and a schema:sameAs link back to the person/organization
+    of the source graph.
+
+    The properties added to the target graph are identifiers described using the BIBFRAME ontology,
+    i.e. instances of bf:Identifier or bf:Isni to which is linked via bf:identifiedBy.
+    The update will always add the nationality from the source graph as well as add a schema:sameAs link from target to source.
+
+    With instances of this class it cannot be configured which identifiers will be used to identify a match
+    between source and target graph: all identifiers are taken into account via a generic triple pattern.
+    However,it can be configured which identifiers from the source will be added to the target.
+
+    For example, the following call will generate a SPARQL UPDATE query which tries to make a link between
+    source and target graph using all available identifiers and will add VIAF and Wikidata identifiers to the target.
+
+    qb = ContributorUpdateQuery("KBR", "http://kbr-data", "http://integrated-data", ["VIAF", "Wikidata"])
+    """
+
+    # ---------------------------------------------------------------------------
+    def __init__(self, source, sourceGraph: str, targetGraph: str, identifiersToAdd: list,
+                 nationalityProperty='schema:nationality', genderProperty='schema:gender', personClass='schema:Person',
+                 organizationClass='schema:Organization', correlationListFilter=False):
+        """
+
+        Parameters
+        ----------
+        source : str
+            The name of the data source which will be used for comments, for example "KBR"
+        sourceGraph : str
+            The name of the source graph without brackets, e.g. http://kbr-linked-authorities
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-contributors
+        identifiersToAdd : list
+            The names of other identifiers which will be added from source to target if a match was found.
+            On the one hand, this name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+            and on the other hand to build variable names in the SPARQL query.
+        nationalityProperty : str
+            The RDF property used to fetch nationality information from the source graph, the default is schema:nationality
+        genderProperty : str
+            The RDF property used to fetch gender information from the source graph, the default is schema:gender
+        personClass : str
+            The RDF class used to identify a person record in the source graph, the default is schema:Person
+        organizationClass : str
+            The RDF class used to identify an organization record in the source graph, the default is schema:Organization
+        correlationListFilter : boolean
+            A boolean flag indicating if a matching should only be performed if the target was not generated based on a correlation list,
+            the default is False
+        """
+        self.source = source
+        self.sourceGraph = sourceGraph
+        self.targetGraph = targetGraph
+        self.identifiersToAdd = identifiersToAdd
+        self.nationalityProperty = nationalityProperty
+        self.genderProperty = genderProperty
+        self.personClass = personClass
+        self.organizationClass = organizationClass
+        self.correlationListFilter = correlationListFilter
+
+        self.baseURL = "http://kbr.be/id/data/"
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        insertBeginPattern = Template("""
+    graph <$targetGraph> {
+    """)
+
+        query = "INSERT { "
+
+        query += insertBeginPattern.substitute(targetGraph=self.targetGraph)
+        query += self._getINSERTNationalityTriplePattern()
+        query += self._getINSERTGenderTriplePattern()
+        query += self._getINSERTSameAsTriplePattern()
+
+        # bf:identifiedBy links, e.g. bf:identifiedBy ?viafEntityURI
+        for identifier in self.identifiersToAdd:
+            query += self._getINSERTIdentifiedByTriplePattern(identifier)
+
+        # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
+        for identifier in self.identifiersToAdd:
+            query += Query._getINSERTIdentifierDeclarationTriplePattern(identifier, self.source)
+
+        query += "} "  # end of graph block
+        query += "} "  # end of INSERT block
+
+        query += "WHERE { "
+
+        query += self._getFilterSourceQuadPattern(self.sourceGraph, self.personClass, self.organizationClass)
+
+        #query += self._getGenericIdentifierQuadPattern(self.sourceGraph, self.targetGraph, self.correlationListFilter)
+        query += Query._getGenericIdentifierQuadPattern(self.sourceGraph, ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI, ContributorQuery.VAR_CONTRIBUTOR_URI, self.targetGraph)
+        if self.correlationListFilter:
+            query += self._getCorrelationListFilter(self.targetGraph, ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI, ContributorQuery.VAR_CONTRIBUTOR_URI)
+        query += self._getSourceNationalityQuadPattern(self.sourceGraph, self.nationalityProperty, optional=True)
+        query += self._getSourceGenderQuadPattern(self.sourceGraph, self.genderProperty, optional=True)
+
+        query += Query._getUpdateCommentBindConcat(f'Added from {self.source} via ', Query.VAR_IDENTIFIER_TYPE_LABEL)
+        for identifier in self.identifiersToAdd:
+            query += self._getIdentifierQuadPattern(identifier, self.sourceGraph, optional=True)
+
+        query += ' }'
+        return query
+
+    # ---------------------------------------------------------------------------
+    def _getFilterSourceQuadPattern(self, sourceGraph, personClass, organizationClass):
+        pattern = Template("""
+    graph <$sourceGraph> { ?localContributorURI a ?contributorType . }
+    FILTER( ?contributorType IN ($personClass, $organizationClass) ) 
+    
+    """)
+        return pattern.substitute(sourceGraph=sourceGraph, personClass=personClass, organizationClass=organizationClass)
+
+    # ---------------------------------------------------------------------------
+    def _getCorrelationListFilter(self, targetGraph, localURIVariable, targetURIVariable):
+
+          pattern = Template("""
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:used ?${localURIVariable} . } }
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:generated ?${targetURIVariable} . } }
+          FILTER( !bound(?activity) ) 
+        """)
+          return pattern.substitute(targetGraph=targetGraph, localURIVariable=localURIVariable, targetURIVariable=targetURIVariable)
+
+    # ---------------------------------------------------------------------------
+    def _getGenericIdentifierQuadPattern(self, sourceGraph, targetGraph, correlationListFilter=False):
+        """This function returns triple patterns for the WHERE clause used for the update functionality."""
+
+        queryPart = """
+        graph <$sourceGraph> {
+          ?localContributorURI bf:identifiedBy ?localIdentifierEntity .
+    
+          ?localIdentifierEntity a ?type ;
+                                 rdfs:label ?typeLabel ;
+                                 rdf:value ?identifierLocal .
+        }
+
+        graph <$targetGraph> {
+          ?contributorURI bf:identifiedBy ?identifierTargetEntity .
+
+          ?identifierTargetEntity a ?type ;
+                                  rdfs:label ?typeLabel ;
+                                  rdf:value ?identifierLocal .
+        }
+        """
+
+        if correlationListFilter:
+          queryPart += """
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:used ?localContributorURI . } }
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:generated ?contributorURI . } }
+          FILTER( !bound(?activity) ) 
+        """
+
+        pattern = Template(queryPart)
+
+        return pattern.substitute(sourceGraph=sourceGraph, targetGraph=targetGraph)
 
 
 

@@ -33,48 +33,68 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po:
-      - [a, schema:CreativeWork]
-      - p: dcterms:identifier
-        o: $(id)
+      - p: bibo:isbn10
+        o: $(isbn10)
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(id)]
+            - [grel:valueParameter, $(isbn10)]
             - [grel:valueParameter2, ""] 
-      - p: schema:name
-        o: $(title)
+      - p: bibo:isbn13
+        o: $(isbn13)
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(title)]
+            - [grel:valueParameter, $(isbn13)]
             - [grel:valueParameter2, ""] 
-      - p: rdfs:comment
-        o: $(comment)
+      - p: bf:identifiedBy
+        o: btid:isbn10_$(id)_$(isbn10)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(comment)]
+            - [grel:valueParameter, $(isbn10)]
             - [grel:valueParameter2, ""] 
-      - p: schema:author
-        o: btid:$(author)~iri
+      - p: bf:identifiedBy
+        o: btid:isbn13_$(id)_$(isbn13)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(author)]
-            - [grel:valueParameter2, ""] 
-      - p: schema:translationOfWork
-        o: btid:source_$(id)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(sourceLanguage)]
-            - [grel:valueParameter2, ""] 
-      - p: schema:inLanguage
-        o: lang:$(targetLanguage)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(targetLanguage)]
+            - [grel:valueParameter, $(isbn13)]
             - [grel:valueParameter2, ""] 
 
+  # ---------------------------------------------------------------------------
+  #
+  publicationsISBN10:
+    sources:
+      - access: ${RML_TEST_SOURCE_PUBLICATIONS}
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:isbn10_$(id)_$(isbn10)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(isbn10)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "ISBN-10"]
+      - [rdf:value, $(isbn10)]
 
+  # ---------------------------------------------------------------------------
+  #
+  publicationsISBN13:
+    sources:
+      - access: ${RML_TEST_SOURCE_PUBLICATIONS}
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:isbn13_$(id)_$(isbn13)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(isbn13)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "ISBN-13"]
+      - [rdf:value, $(isbn13)]
+ 

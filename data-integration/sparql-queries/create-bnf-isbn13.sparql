@@ -21,11 +21,24 @@ PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
 
 
 INSERT {
-  graph <http://bnf-publications> { ?publication dcterms:identifier ?identifier . }
+
+  graph <http://bnf-publications> {
+
+    ?publication bf:identifiedBy ?publicationISBN13Entity .
+
+    ?publicationISBN13Entity a bf:Identifier ;
+                             rdfs:label "ISBN-10" ;
+                             rdf:value ?isbn13 .
+  }
 }
 WHERE {
-  graph <http://bnf-publications> {
-    ?publication a schema:CreativeWork .
-  }             
+
+  graph <http://bnf-publications> { 
+    ?publication a schema:CreativeWork ;
+                 bibo:isbn13 ?isbn13 .
+  }
+  
+
   BIND(strbefore(strafter(str(?publication), "12148/"), "#about") AS ?identifier)
+  BIND(iri(concat("http://kbr.be/id/data/identifier_isbn13_", ?identifier, "_", ?isbn13)) AS ?publicationISBN13Entity)
 }

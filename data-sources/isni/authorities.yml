@@ -88,43 +88,44 @@ mappings:
         delimiter: ','
     s: btisni:authority_$(ISNI)
     po:
+      - [bf:identifiedBy, btisni:identifier_isni_$(ISNI)~iri]
       - p: bf:identifiedBy
-        o: btisni:identifier_viaf_$(ISNI)~iri
+        o: btisni:identifier_viaf_$(ISNI)_$(identifier)~iri
         condition:
           function: idlab-fn:equal
           parameters:
             - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "VIAF"]
       - p: bf:identifiedBy
-        o: btisni:identifier_kbr_$(ISNI)~iri
+        o: btisni:identifier_kbr_$(ISNI)_$(identifier)~iri
         condition:
           function: idlab-fn:equal
           parameters:
             - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "KBR"]
       - p: bf:identifiedBy
-        o: btisni:identifier_bnf_$(ISNI)~iri
+        o: btisni:identifier_bnf_$(ISNI)_$(identifier)~iri
         condition:
           function: idlab-fn:equal
           parameters:
             - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "BNF"]
       - p: bf:identifiedBy
-        o: btisni:identifier_nta_$(ISNI)~iri
+        o: btisni:identifier_nta_$(ISNI)_$(identifier)~iri
         condition:
           function: idlab-fn:equal
           parameters:
             - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "NTA"]
       - p: bf:identifiedBy
-        o: btisni:identifier_dnb_$(ISNI)~iri
+        o: btisni:identifier_dnb_$(ISNI)_$(identifier)~iri
         condition:
           function: idlab-fn:equal
           parameters:
             - [grel:valueParameter, $(source)]
             - [grel:valueParameter2, "DNB"]
       - p: bf:identifiedBy
-        o: btisni:identifier_wikidata_$(ISNI)~iri
+        o: btisni:identifier_wikidata_$(ISNI)_$(identifier)~iri
         condition:
           function: idlab-fn:equal
           parameters:
@@ -143,6 +144,7 @@ mappings:
     s: btisni:identifier_isni_$(ISNI)
     po:
       - [a, bf:Isni]
+      - [rdfs:label, "ISNI"]
       - [rdf:value, $(ISNI)]
 
 
@@ -155,7 +157,7 @@ mappings:
       - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
-    s: btisni:identifier_viaf_$(ISNI)
+    s: btisni:identifier_viaf_$(ISNI)_$(identifier)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -175,7 +177,7 @@ mappings:
       - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
-    s: btisni:identifier_kbr_$(ISNI)
+    s: btisni:identifier_kbr_$(ISNI)_$(identifier)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -197,7 +199,7 @@ mappings:
       - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
-    s: btisni:identifier_bnf_$(ISNI)
+    s: btisni:identifier_bnf_$(ISNI)_$(identifier)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -218,7 +220,7 @@ mappings:
       - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
-    s: btisni:identifier_nta_$(ISNI)
+    s: btisni:identifier_nta_$(ISNI)_$(identifier)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -239,7 +241,7 @@ mappings:
       - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
-    s: btisni:identifier_dnb_$(ISNI)
+    s: btisni:identifier_dnb_$(ISNI)_$(identifier)
     condition:
       function: idlab-fn:equal
       parameters:
@@ -259,7 +261,7 @@ mappings:
       - access: *authorityLinks
         referenceFormulation: csv
         delimiter: ','
-    s: btisni:identifier_wikidata_$(ISNI)
+    s: btisni:identifier_wikidata_$(ISNI)_$(identifier)
     condition:
       function: idlab-fn:equal
       parameters:

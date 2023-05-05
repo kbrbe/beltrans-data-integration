@@ -6,21 +6,25 @@ MAPPING_ORIGINALS="originals.yml"
 MAPPING_CONTRIBUTORS="contributors.yml"
 MAPPING_CONTRIBUTORS_BNF="contributors-bnf.yml"
 MAPPING_CONTRIBUTORS_CORRELATION="contributors-correlation.yml"
+MAPPING_ISBN="isbn.yml"
 MAPPING_SAMEAS="sameas.yml"
 
 # build KBR data
 export RML_TEST_SOURCE_PUBLICATIONS=$SOURCE_FOLDER"/kbr-manifestations.csv"
 . map.sh $SOURCE_FOLDER"/"$MAPPING_MANIFESTATIONS $SOURCE_FOLDER"/kbr-manifestations.ttl"
 . map.sh $SOURCE_FOLDER"/"$MAPPING_ORIGINALS $SOURCE_FOLDER"/kbr-originals.ttl"
+. map.sh $SOURCE_FOLDER"/"$MAPPING_ISBN $SOURCE_FOLDER"/kbr-isbns.ttl"
 
 # build BnF data
 export RML_TEST_SOURCE_PUBLICATIONS=$SOURCE_FOLDER"/bnf-manifestations.csv"
 . map.sh $SOURCE_FOLDER"/"$MAPPING_MANIFESTATIONS_BNF $SOURCE_FOLDER"/bnf-manifestations.ttl"
+. map.sh $SOURCE_FOLDER"/"$MAPPING_ISBN $SOURCE_FOLDER"/bnf-isbns.ttl"
 
 # build KB data
 export RML_TEST_SOURCE_PUBLICATIONS=$SOURCE_FOLDER"/kb-manifestations.csv"
 . map.sh $SOURCE_FOLDER"/"$MAPPING_MANIFESTATIONS $SOURCE_FOLDER"/kb-manifestations.ttl"
 . map.sh $SOURCE_FOLDER"/"$MAPPING_ORIGINALS $SOURCE_FOLDER"/kb-originals.ttl"
+. map.sh $SOURCE_FOLDER"/"$MAPPING_ISBN $SOURCE_FOLDER"/kb-isbns.ttl"
 
 
 # build KBR contributor data

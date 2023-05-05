@@ -28,7 +28,7 @@ SCRIPT_CSV_TO_EXCEL="csv_to_excel.py"
 SCRIPT_COMPUTE_STATS="create-publication-stats.py"
 SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
 
-SCRIPT_INTERLINK_DATA="interlink_named_graph_data.py"
+SCRIPT_INTERLINK_DATA="interlink_named_graph_data_single_update.py"
 
 MODULE_GET_RDF_XML_SUBJECTS="tools.xml.get-subjects"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
@@ -70,8 +70,8 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 # KBR - translations
 #INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-17_4745records.xml"
 #INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-17_13126records.xml"
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-02-01.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-02-01.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-05-05.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-05-05.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -79,10 +79,10 @@ INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230201_NL-FR_APEP.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230201_NL-FR_AORG.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230201_FR-NL_APEP.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230201_FR-NL_AORG.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230505_NL-FR_APEP.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230505_NL-FR_AORG.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230505_FR-NL_APEP.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230505_FR-NL_AORG.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
@@ -91,7 +91,7 @@ INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2022-11-30_36345records.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-05-05_38013records.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -214,6 +214,8 @@ CREATE_QUERY_BNF_ISNI="sparql-queries/create-bnf-isni.sparql"
 CREATE_QUERY_BNF_VIAF="sparql-queries/create-bnf-viaf.sparql"
 CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 CREATE_QUERY_BNF_GENDER="sparql-queries/create-bnf-contributors-gender.sparql"
+CREATE_QUERY_BNF_ISBN10_BIBFRAME="sparql-queries/create-bnf-isbn10.sparql"
+CREATE_QUERY_BNF_ISBN13_BIBFRAME="sparql-queries/create-bnf-isbn13.sparql"
 
 CREATE_QUERY_KB_TRL_PBL="sparql-queries/link-kb-translations-to-publishers.sparql"
 CREATE_QUERY_KB_PBL_IDENTIFIERS="sparql-queries/create-kb-org-identifier.sparql"
@@ -729,8 +731,8 @@ function integrate {
 
   createManifestationsQueries="config-integration-manifestations-create.csv"
   createContributorsQueries="config-integration-contributors-create.csv"
-  updateManifestationsQueries="config-integration-manifestations-update.csv"
-  updateContributorsQueries="config-integration-contributors-update.csv"
+  updateManifestationsQueries="config-integration-manifestations-single-update.csv"
+  updateContributorsQueries="config-integration-contributors-single-update.csv"
 
   queryLogDir="$integrationName/integration"
 
@@ -765,6 +767,14 @@ function integrate {
   echo "Automatically integrate contributors ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
     --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
+
+  # 2023-05-04 perform updates which did not finish due to a network interruption
+#  python interlink_updates.py -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+#    --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
+
+  # 2023-05-04 perform remaining INSERT/UPDATE operations with a modified creation config (excluding already integrated sources)
+#  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+#    --create-queries "2023-05-04_config-integration-contributors-create.csv" --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
 
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists and publishing directors) ..."
 
@@ -2179,6 +2189,7 @@ function loadKBR {
 
   # first delete content of the named graph in case it already exists
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$linkedAuthoritiesNamedGraph"
 
   # also delete the original information, we will add limited original information
   # but this also means, that original information from a full original dump needs to be
@@ -2527,7 +2538,8 @@ function loadBnF {
   echo "Add dcterms:identifier to BnF contributors, manifestations as well as add ISNI/VIAF/Wikidata identifier according to the bibframe vocabulary"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" \
-    "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA" "$CREATE_QUERY_BNF_GENDER"
+    "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA" "$CREATE_QUERY_BNF_GENDER" \
+    "$CREATE_QUERY_BNF_ISBN10_BIBFRAME" "$CREATE_QUERY_BNF_ISBN13_BIBFRAME"
 
 }
 

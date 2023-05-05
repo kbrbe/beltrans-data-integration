@@ -1,5 +1,4 @@
 "sourceName","identifiersToAdd","sourceGraph","originalsGraph"
-"KBR","ISBN-10,ISBN-13","http://kbr-syracuse","http://kbr-originals"
-"BnF","ISBN-10,ISBN-13","http://bnf-publications","http://kbr-originals"
+"BnF","ISBN-10,ISBN-13","http://bnf-publications",""
 "KB","ISBN-10,ISBN-13","http://kb-publications","http://kb-originals"
 "Unesco","ISBN-10,ISBN-13","http://unesco","http://unesco-originals"

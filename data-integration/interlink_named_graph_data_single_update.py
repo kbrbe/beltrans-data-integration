@@ -7,8 +7,10 @@ import os
 import re
 import requests
 import utils_sparql
-from tools.sparql.query_builder import ContributorUpdateQuery, \
-  OrganizationContributorCreateQuery, PersonContributorCreateQuery, ManifestationCreateQuery, ManifestationUpdateQuery
+from tools.sparql.query_builder import ContributorSingleUpdateQuery, \
+  OrganizationContributorCreateQuery, PersonContributorCreateQuery, \
+  ManifestationCreateQuery, ManifestationCreateQueryIdentifiers, ManifestationUpdateQuery, \
+  ManifestationSingleUpdateQuery
 from optparse import OptionParser
 from dotenv import load_dotenv
 import time
@@ -53,15 +55,16 @@ def checkArguments():
   return (options, args)
 
 # -----------------------------------------------------------------------------
-def generateCreateQueryManifestations(sourceName, sourceGraph, targetGraph, originalsGraph):
+def generateCreateQueryManifestations(sourceName, sourceGraph, targetGraph, originalsGraph, identifiersToAdd):
   """This function uses the imported query generation module to generate a SPARQL INSERT query for manifestations."""
 
   entitySourceClass = 'schema:CreativeWork'
   entityTargetClass = 'schema:CreativeWork'
   titleProperty = 'schema:name'
 
-  qb = ManifestationCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
-                                originalsGraph=originalsGraph, entitySourceClass=entitySourceClass,
+  qb = ManifestationCreateQueryIdentifiers(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
+                                originalsGraph=originalsGraph, identifiersToAdd=identifiersToAdd,
+                                entitySourceClass=entitySourceClass,
                                 entityTargetClass=entityTargetClass, titleProperty=titleProperty)
 
   return qb.getQueryString()
@@ -138,7 +141,7 @@ def generateCreateQueryOrganizations(sourceName, sourceGraph, targetGraph, ident
 
 
 # -----------------------------------------------------------------------------
-def generateContributorsUpdateQuery(sourceName, sourceGraph, targetGraph, linkIdentifierName, identifiersToAdd):
+def generateContributorsUpdateQuery(sourceName, sourceGraph, targetGraph, identifiersToAdd):
   """This function uses the imported query generation module to generate a SPARQL UPDATE."""
 
   if sourceName == 'BnF' or sourceName == 'bnf':
@@ -152,10 +155,10 @@ def generateContributorsUpdateQuery(sourceName, sourceGraph, targetGraph, linkId
     personClass = 'schema:Person'
     organizationClass = 'schema:Organization'
 
-  qb = ContributorUpdateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
-                              identifierName=linkIdentifierName, identifiersToAdd=identifiersToAdd,
+  qb = ContributorSingleUpdateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
+                              identifiersToAdd=identifiersToAdd,
                               nationalityProperty=nationalityProperty, genderProperty=genderProperty, 
-                              personClass=personClass, organizationClass=organizationClass)
+                              personClass=personClass, organizationClass=organizationClass, correlationListFilter=True)
 
   return qb.getQueryString()
 
@@ -163,10 +166,9 @@ def generateContributorsUpdateQuery(sourceName, sourceGraph, targetGraph, linkId
 def generateManifestationsUpdateQuery(sourceName, sourceGraph, targetGraph, originalsGraph, linkIdentifierName, identifiersToAdd):
   """This function uses the imported query generation module to generate a SPARQL UPDATE query for manifestations."""
 
-  qb = ManifestationUpdateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
+  qb = ManifestationSingleUpdateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
                                 entitySourceClass='schema:CreativeWork',
-                                originalsGraph=originalsGraph, linkIdentifier=linkIdentifierName,
-                                identifiersToAdd=identifiersToAdd)
+                                originalsGraph=originalsGraph, identifiersToAdd=identifiersToAdd)
   return qb.getQueryString()
 
 # -----------------------------------------------------------------------------
@@ -176,7 +178,7 @@ def getCreateQueryString(queryType, creationSourceType, creationSourceName, sour
 
   queryString = ''
   if queryType == 'manifestations':
-    queryString = generateCreateQueryManifestations(creationSourceName, sourceGraph, targetGraph, originalsGraph)
+    queryString = generateCreateQueryManifestations(creationSourceName, sourceGraph, targetGraph, originalsGraph, identifiersToAdd)
   elif queryType == 'contributors':
     if creationSourceType == 'persons':
       queryString = generateCreateQueryPersons(creationSourceName, sourceGraph,
@@ -210,7 +212,7 @@ def getUpdateQueryString(queryType, sourceName, sourceGraph, targetGraph, origin
                                            getLinkIdentifierTuple(linkIdentifier), identifiersToAddTuples)
   elif queryType == 'contributors':
     queryString = generateContributorsUpdateQuery(sourceName, sourceGraph, targetGraph,
-                                         linkIdentifier, identifiersToAdd)
+                                         identifiersToAdd)
 
   return queryString
 
@@ -270,7 +272,6 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
 
       print(f'CREATE {creationSourceType} data from {creationSourceName}')
       # Generate SPARQL query
-      # For manifestations, the 'identifiersToAdd' will not be added, i.e. ISBN10 and ISBN13 will not become bf:identifiedBy, bf:Identifier
       creationQueryString = getCreateQueryString(queryType, creationSourceType, creationSourceName,
                                                  createConfigEntry['sourceGraph'], targetGraph, creationOriginalsGraph,
                                                  createIdentifiersToAdd)
@@ -288,21 +289,21 @@ def main(url, queryType, targetGraph, createQueriesConfig, updateQueriesConfig, 
         print(f'Update cycle {i+1}/{numberUpdates}')
         for updateConfigEntry in updateQueries:
           updateSourceName = updateConfigEntry['sourceName']
-          linkIdentifier = updateConfigEntry['linkIdentifier']
+          identifierName = updateConfigEntry['linkIdentifier'] if 'linkIdentifier' in updateConfigEntry else 'all'
           updateOriginalsGraph = updateConfigEntry['originalsGraph'] if 'originalsGraph' in updateConfigEntry else ''
 
           # the identifiers which should be added during an update of an already existing integrated record
           updateIdentifiersToAdd = updateConfigEntry['identifiersToAdd'].split(',')
-          updateQueryName = f'Update {updateSourceName} via {linkIdentifier}'
+          updateQueryName = f'Update {updateSourceName} via all found identifiers'
 
           # Generate a SPARQL UPDATE query on the fly given the configuration entry updateConfigEntry and execute it
           updateQueryString = getUpdateQueryString(queryType, updateSourceName, updateConfigEntry['sourceGraph'], targetGraph,
-                                                   updateOriginalsGraph, linkIdentifier, updateIdentifiersToAdd)
+                                                   updateOriginalsGraph, identifierName, updateIdentifiersToAdd)
 
 
           # Optionally serialize SPARQL query (only the first time of the update cyclus)
           if queryLogDir and i == 0:
-            logSPARQLQuery(queryLogDir, updateQueryString, f'update-{queryType}-{updateSourceName}-{linkIdentifier}.sparql')
+            logSPARQLQuery(queryLogDir, updateQueryString, f'update-{queryType}-{updateSourceName}-{identifierName}.sparql')
 
           # Execute SPARQL query
           utils_sparql.sparqlUpdate(url, updateQueryString, 'application/sparql-update', updateQueryName, auth=auth)
