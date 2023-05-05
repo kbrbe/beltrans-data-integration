@@ -532,15 +532,20 @@ class ManifestationCreateQueryIdentifiers(ManifestationQuery):
 
     # ---------------------------------------------------------------------------
     def _getFilterSourceQuadPattern(self):
-        pattern = Template("""
+#        pattern = Template("""
+#
+#       FILTER NOT EXISTS {
+#         graph <$targetGraph> {
+#           ?entity a $entityType ;
+#                   schema:sameAs $localContributorURI .
+#         }
+#       }
+#       """)
 
-       FILTER NOT EXISTS {
-         graph <$targetGraph> {
-           ?entity a $entityType ;
-                   schema:sameAs $localContributorURI .
-         }
-       }
-       """)
+        pattern = Template("""
+        OPTIONAL { graph <$targetGraph> { ?entity schema:sameAs $localContributorURI . } }
+        FILTER(!bound(?entity))
+        """)
         return pattern.substitute(targetGraph=self.targetGraph, entityType=self.entityTargetClass,
                                   localContributorURI=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI)
 
@@ -667,15 +672,20 @@ class ManifestationCreateQuery(ManifestationQuery):
 
     # ---------------------------------------------------------------------------
     def _getFilterSourceQuadPattern(self):
-        pattern = Template("""
+#        pattern = Template("""
+#
+#       FILTER NOT EXISTS {
+#         graph <$targetGraph> {
+#           ?entity a $entityType ;
+#                   schema:sameAs $localContributorURI .
+#         }
+#       }
+#       """)
 
-       FILTER NOT EXISTS {
-         graph <$targetGraph> {
-           ?entity a $entityType ;
-                   schema:sameAs $localContributorURI .
-         }
-       }
-       """)
+        pattern = Template("""
+        OPTIONAL { graph <$targetGraph> { ?entity schema:sameAs $localContributorURI . } }
+        FILTER(!bound(?entity))
+        """)
         return pattern.substitute(targetGraph=self.targetGraph, entityType=self.entityTargetClass,
                                   localContributorURI=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI)
 
@@ -1042,15 +1052,20 @@ class ContributorCreateQuery(ContributorQuery, ABC):
 
     # ---------------------------------------------------------------------------
     def _getFilterSourceQuadPattern(self):
+#        pattern = Template("""
+#    
+#    FILTER NOT EXISTS {
+#      graph <$targetGraph> {
+#        ?entity a $entityType ;
+#                schema:sameAs $localContributorURI .
+#      }
+#    }
+#    """)
+
         pattern = Template("""
-    
-    FILTER NOT EXISTS {
-      graph <$targetGraph> {
-        ?entity a $entityType ;
-                schema:sameAs $localContributorURI .
-      }
-    }
-    """)
+        OPTIONAL { graph <$targetGraph> { ?entity schema:sameAs $localContributorURI . } }
+        FILTER(!bound(?entity))
+        """)
         return pattern.substitute(targetGraph=self.targetGraph, entityType=self.entityTargetClass,
                                   localContributorURI=ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI)
 
