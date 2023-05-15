@@ -73,20 +73,6 @@ mappings:
           parameters:
             - [grel:valueParameter, $(country_code)]
             - [grel:valueParameter2, ""]
-      - p: bf:identifiedBy
-        o: btid:identifier_isni_$(authorityID)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(isni_id)]
-            - [grel:valueParameter2, ""]
-      - p: bf:identifiedBy
-        o: btid:identifier_viaf_$(authorityID)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(viaf_id)]
-            - [grel:valueParameter2, ""]
 
   # ---------------------------------------------------------------------------
   #

@@ -335,11 +335,20 @@ SUFFIX_KBR_LA_PERSONS_NL_NORM="nl-translations-linked-authorities-persons-norm.c
 SUFFIX_KBR_LA_ORGS_NL_NORM="nl-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NORM="fr-translations-linked-authorities-persons-norm.csv"
 SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
+
 SUFFIX_KBR_LA_PERSONS_FR_NAT="fr-translations-linked-authorities-nationalities.csv"
 SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.csv"
+SUFFIX_KBR_LA_PERSONS_FR_NAMES="fr-translations-linked-authorities-names.csv"
+SUFFIX_KBR_LA_PERSONS_NL_NAMES="nl-translations-linked-authorities-names.csv"
+SUFFIX_KBR_LA_PERSONS_NL_IDENTIFIERS="nl-translations-linked-authorities-identifiers-persons.csv"
+SUFFIX_KBR_LA_PERSONS_FR_IDENTIFIERS="fr-translations-linked-authorities-identifiers-persons.csv"
+SUFFIX_KBR_LA_ORGS_NL_IDENTIFIERS="nl-translations-linked-authorities-identifiers-orgs.csv"
+SUFFIX_KBR_LA_ORGS_FR_IDENTIFIERS="fr-translations-linked-authorities-identifiers-orgs.csv"
 
 SUFFIX_KBR_BELGIANS_CSV="kbr-belgians.csv"
 SUFFIX_KBR_BELGIANS_NATIONALITIES="kbr-belgians-nationalities.csv"
+SUFFIX_KBR_BELGIANS_NAMES="kbr-belgians-names.csv"
+SUFFIX_KBR_BELGIANS_IDENTIFIERS="kbr-belgians-identifiers.csv"
 
 
 # DATA SOURCE - KBR ORIGINALS MATCHING
@@ -1703,25 +1712,35 @@ function extractKBRLinkedAuthorities {
   kbrNLPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
   kbrFRPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
 
+  kbrNLPersonsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_IDENTIFIERS"
+  kbrFRPersonsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_IDENTIFIERS"
+  kbrFROrgsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_IDENTIFIERS"
+  kbrNLOrgsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_IDENTIFIERS"
+
+  kbrFRPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAMES"
+  kbrNLPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAMES"
+
   kbrBelgianPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
+  kbrBelgianPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NAMES"
+  kbrBelgianPersonsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_IDENTIFIERS"
 
   source py-integration-env/bin/activate
 
   echo "Extract authorities NL-FR - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCSV -n $kbrNLPersonsNationalities
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCSV -n $kbrNLPersonsNationalities --names-csv $kbrNLPersonsNames --identifier-csv $kbrNLPersonsISNIs
 
   echo "Extract authorities NL-FR - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrNLOrgs -o $kbrNLOrgsCSV
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrNLOrgs -o $kbrNLOrgsCSV --identifier-csv $kbrNLOrgsISNIs
 
   echo "Extract authorities FR-NL - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrFRPersons -o $kbrFRPersonsCSV -n $kbrFRPersonsNationalities
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrFRPersons -o $kbrFRPersonsCSV -n $kbrFRPersonsNationalities --names-csv $kbrFRPersonsNames --identifier-csv $kbrFRPersonsISNIs
 
   echo "Extract authorities FR-NL - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrFROrgs -o $kbrFROrgsCSV
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrFROrgs -o $kbrFROrgsCSV --identifier-csv $kbrFROrgsISNIs
 
   echo "Extract authorities KBR-Belgians - Persons ..."
   # these Belgians might have multiple nationalities, thus it is still important to get the nationality information
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrBelgianPersons -o $kbrBelgianPersonsCSV -n $kbrBelgianPersonsNationalities
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrBelgianPersons -o $kbrBelgianPersonsCSV -n $kbrBelgianPersonsNationalities --names-csv $kbrBelgianPersonsNames --identifier-csv $kbrBelgianPersonsISNIs
 
   echo "Copy publisher location information ..."
   cp "$INPUT_KBR_LA_PLACES_VLG" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
@@ -1943,11 +1962,17 @@ function mapKBRLinkedAuthorities {
   kbrPersonsNatFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
   kbrPersonsNatNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
 
+  kbrPersonsISNINLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_IDENTIFIERS"
+  kbrPersonsISNIFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_IDENTIFIERS"
+  kbrOrgsISNIFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_IDENTIFIERS"
+  kbrOrgsISNINL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_IDENTIFIERS"
+
   kbrOrgsFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
   kbrOrgsNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
 
   kbrBelgians="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CSV"
   kbrBelgiansNat="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
+  kbrBelgiansISNI="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_IDENTIFIERS"
 
   # output
   kbrPersonsTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_FR_NL_LD"
@@ -1981,13 +2006,13 @@ function mapKBRLinkedAuthorities {
 
   mapKBRPlaces "$integrationName" "$kbrPlacesTurtle"
 
-  mapKBRLinkedIdentifiers "$kbrPersonsFRNL" "$kbrPersonsIdentifiersTurtleFRNL"
-  mapKBRLinkedIdentifiers "$kbrPersonsNLFR" "$kbrPersonsIdentifiersTurtleNLFR"
+  mapKBRLinkedIdentifiers "$kbrPersonsISNIFRNL" "$kbrPersonsIdentifiersTurtleFRNL"
+  mapKBRLinkedIdentifiers "$kbrPersonsISNINLFR" "$kbrPersonsIdentifiersTurtleNLFR"
 
-  mapKBRLinkedIdentifiers "$kbrOrgsFRNL" "$kbrOrgsIdentifiersTurtleFRNL"
-  mapKBRLinkedIdentifiers "$kbrOrgsNLFR" "$kbrOrgsIdentifiersTurtleNLFR"
+  mapKBRLinkedIdentifiers "$kbrOrgsISNIFR" "$kbrOrgsIdentifiersTurtleFRNL"
+  mapKBRLinkedIdentifiers "$kbrOrgsISNINL" "$kbrOrgsIdentifiersTurtleNLFR"
 
-  mapKBRLinkedIdentifiers "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
+  mapKBRLinkedIdentifiers "$kbrBelgiansISNI" "$kbrBelgiansIdentifiersTurtle"
 
 }
 
