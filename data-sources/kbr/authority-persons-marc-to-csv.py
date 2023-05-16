@@ -176,6 +176,7 @@ def main():
     namesWriter = csv.DictWriter(namesFile, fieldnames=['authorityID', 'authorityType', 'name', 'family_name', 'given_name', 'language', 'sequence_number'],
                                  delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
+    namesWriter.writeheader()
 
     # if the XML file is huge, memory becomes an issue even while streaming because a reference to the parent is kept
     # therefore we first get the root element
