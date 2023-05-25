@@ -516,6 +516,10 @@ SUFFIX_KBR_ORGS_IDENTIFIERS_FR_NL_LD="fr-nl_orgs-identifiers.ttl"
 SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD="nl-fr_orgs-identifiers.ttl"
 SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD="belgians-identifiers.ttl"
 
+SUFFIX_KBR_PERSONS_NAMES_FR_NL_LD="fr-nl_persons-names.ttl"
+SUFFIX_KBR_PERSONS_NAMES_NL_FR_LD="nl-fr_persons-names.ttl"
+SUFFIX_KBR_PERSONS_NAMES_BELGIANS_LD="belgians-names.ttl"
+
 SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL_LD="fr-nl_orgs-multiple-matches.ttl"
 SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR_LD="nl-fr_orgs-multiple-matches.ttl"
 
@@ -1974,6 +1978,11 @@ function mapKBRLinkedAuthorities {
   kbrBelgiansNat="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
   kbrBelgiansISNI="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_IDENTIFIERS"
 
+  local kbrFRPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAMES"
+  local kbrNLPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAMES"
+  local kbrBelgianPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NAMES"
+ 
+
   # output
   kbrPersonsTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_FR_NL_LD"
   kbrPersonsTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NL_FR_LD"
@@ -1987,6 +1996,10 @@ function mapKBRLinkedAuthorities {
   kbrOrgsIdentifiersTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD"
   kbrBelgiansIdentifiersTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD"
 
+  kbrPersonsNamesTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NAMES_FR_NL_LD"
+  kbrPersonsNamesTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NAMES_NL_FR_LD"
+  kbrBelgianPersonsNamesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NAMES_BELGIANS_LD"
+
   kbrOrgMatchesNLFR="$integrationName/$dataSourceName/kbr/agents/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR"
   kbrOrgMatchesFRNL="$integrationName/$dataSourceName/kbr/agents/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL"
   kbrOrgMatchesTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL_LD"
@@ -1997,6 +2010,10 @@ function mapKBRLinkedAuthorities {
   mapKBRPersons "$kbrPersonsFRNL" "$kbrPersonsNatFRNL" "$kbrPersonsTurtleFRNL"
   mapKBRPersons "$kbrPersonsNLFR" "$kbrPersonsNatNLFR" "$kbrPersonsTurtleNLFR"
   mapKBRPersons "$kbrBelgians" "$kbrBelgiansNat" "$kbrBelgiansTurtle"
+
+  mapKBRNames "$kbrFRPersonsNames" "$kbrPersonsNamesTurtleFRNL"
+  mapKBRNames "$kbrNLPersonsNames" "$kbrPersonsNamesTurtleNLFR"
+  mapKBRNames "$kbrBelgianPersonsNames" "$kbrBelgianPersonsNamesTurtle"
 
   mapKBROrgs "$kbrOrgsFRNL" "$kbrOrgsTurtleFRNL"
   mapKBROrgs "$kbrOrgsNLFR" "$kbrOrgsTurtleNLFR"
@@ -2049,6 +2066,17 @@ function mapKBROrgMatches {
 
   echo "Map KBR Orgs possible matches - $sourceFile"
   . map.sh ../data-sources/kbr/kbr-org-matches.yml $outputTurtle
+}
+
+# -----------------------------------------------------------------------------
+function mapKBRNames {
+  local sourceFile=$1
+  local outputTurtle=$2
+
+  export RML_SOURCE_KBR_NAMES="$sourceFile"
+
+  echo "Map KBR Names - $sourceFile"
+  . map.sh ../data-sources/kbr/kbr-pseudonym-names.yml $outputTurtle
 }
 
 # -----------------------------------------------------------------------------

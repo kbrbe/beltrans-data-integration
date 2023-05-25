@@ -39,6 +39,13 @@ mappings:
       - [a, schema:Person]
       - [dcterms:identifier, $(authorityID)]
       - [rdfs:label, $(name)]
+      - p: a
+        o: btm:Pseudonym
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(authorityType)]
+            - [grel:valueParameter2, "Pseudonym"]
       - p: schema:givenName
         o: $(given_name)
         condition:
