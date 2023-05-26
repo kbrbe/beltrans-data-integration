@@ -14,6 +14,8 @@ SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-author
 SCRIPT_EXTRACT_SEPARATED_COL="../data-sources/kbr/extract-and-normalize-separated-strings.py"
 SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
+MODULE_COMPLETE_SEQUENCE_NUMBERS="tools.csv.complete_sequence_numbers"
+
 SCRIPT_FIND_ORIGINALS="find-originals.py"
 
 SCRIPT_CONVERT_BB="../data-sources/master-data/convert-thesaurus.py"
@@ -340,6 +342,9 @@ SUFFIX_KBR_LA_PERSONS_FR_NAT="fr-translations-linked-authorities-nationalities.c
 SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NAMES="fr-translations-linked-authorities-names.csv"
 SUFFIX_KBR_LA_PERSONS_NL_NAMES="nl-translations-linked-authorities-names.csv"
+SUFFIX_KBR_LA_PERSONS_FR_NAMES_COMPLETE="fr-translations-linked-authorities-names-complete.csv"
+SUFFIX_KBR_LA_PERSONS_NL_NAMES_COMPLETE="nl-translations-linked-authorities-names-complete.csv"
+
 SUFFIX_KBR_LA_PERSONS_NL_IDENTIFIERS="nl-translations-linked-authorities-identifiers-persons.csv"
 SUFFIX_KBR_LA_PERSONS_FR_IDENTIFIERS="fr-translations-linked-authorities-identifiers-persons.csv"
 SUFFIX_KBR_LA_ORGS_NL_IDENTIFIERS="nl-translations-linked-authorities-identifiers-orgs.csv"
@@ -348,6 +353,7 @@ SUFFIX_KBR_LA_ORGS_FR_IDENTIFIERS="fr-translations-linked-authorities-identifier
 SUFFIX_KBR_BELGIANS_CSV="kbr-belgians.csv"
 SUFFIX_KBR_BELGIANS_NATIONALITIES="kbr-belgians-nationalities.csv"
 SUFFIX_KBR_BELGIANS_NAMES="kbr-belgians-names.csv"
+SUFFIX_KBR_BELGIANS_NAMES_COMPLETE="kbr-belgians-names-complete.csv"
 SUFFIX_KBR_BELGIANS_IDENTIFIERS="kbr-belgians-identifiers.csv"
 
 
@@ -1248,16 +1254,16 @@ function extractNationalityFromBnFViaISNI {
 
   # Extract BnF contributor data via BnF identifier
   echo "EXTRACTION - Extract BnF contributor data via BnF identifier"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i "$INPUT_BNF_PERSON_AUTHORS"  -o "$bnfContributorData" -f "$bnfIdentifiers"
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i "$INPUT_BNF_PERSON_AUTHORS"  -o "$bnfContributorData" -f "$bnfIdentifiers"
 
   echo "EXTRACTION - Extract links between BnF contributors and ISNI"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfIdentifiers
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfIdentifiers
 
   echo "EXTRACTION - Extract links between BnF contributors and VIAF"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfIdentifiers
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfIdentifiers
 
   echo "EXTRACTION - Extract links between BnF contributors and Wikidata"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfIdentifiers
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfIdentifiers
 
   # We could query nationality which is used to immediately enrich integrated persons,
   # but we can also get all data of the newly found contributors to increase the overlap with other sources
@@ -1723,9 +1729,12 @@ function extractKBRLinkedAuthorities {
 
   kbrFRPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAMES"
   kbrNLPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAMES"
+  kbrFRPersonsNamesComplete="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAMES_COMPLETE"
+  kbrNLPersonsNamesComplete="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAMES_COMPLETE"
 
   kbrBelgianPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
   kbrBelgianPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NAMES"
+  kbrBelgianPersonsNamesComplete="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NAMES_COMPLETE"
   kbrBelgianPersonsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_IDENTIFIERS"
 
   source py-integration-env/bin/activate
@@ -1745,6 +1754,15 @@ function extractKBRLinkedAuthorities {
   echo "Extract authorities KBR-Belgians - Persons ..."
   # these Belgians might have multiple nationalities, thus it is still important to get the nationality information
   python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrBelgianPersons -o $kbrBelgianPersonsCSV -n $kbrBelgianPersonsNationalities --names-csv $kbrBelgianPersonsNames --identifier-csv $kbrBelgianPersonsISNIs
+
+  echo "Complete author names sequence numbers - FR-NL"
+  python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS -i $kbrNLPersonsNames -o $kbrNLPersonsNamesComplete --identifier-column "authorityID" --sequence-number-column "sequence_number"
+
+  echo "Complete author names sequence numbers - NL-FR"
+  python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS -i $kbrFRPersonsNames -o $kbrFRPersonsNamesComplete --identifier-column "authorityID" --sequence-number-column "sequence_number"
+
+  echo "Complete author names sequence numbers - KBR-Belgians"
+  python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS -i $kbrBelgianPersonsNames -o $kbrBelgianPersonsNamesComplete --identifier-column "authorityID" --sequence-number-column "sequence_number"
 
   echo "Copy publisher location information ..."
   cp "$INPUT_KBR_LA_PLACES_VLG" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
@@ -1978,9 +1996,9 @@ function mapKBRLinkedAuthorities {
   kbrBelgiansNat="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
   kbrBelgiansISNI="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_IDENTIFIERS"
 
-  local kbrFRPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAMES"
-  local kbrNLPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAMES"
-  local kbrBelgianPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NAMES"
+  local kbrFRPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAMES_COMPLETE"
+  local kbrNLPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAMES_COMPLETE"
+  local kbrBelgianPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NAMES_COMPLETE"
  
 
   # output
