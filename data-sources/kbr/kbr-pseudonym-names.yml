@@ -28,12 +28,17 @@ mappings:
   #
   pseudonymOrNameLink:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates links between KBR person authorities and alternate name entities or pseudonym entities."
+    description: "This mapping creates links between KBR person authorities and alternate name entities or pseudonym entities of field 400 (linkedIdentifier field empty, otherwise its from a 500 field)."
     sources:
       - access: *sourceKBRNames
         referenceFormulation: csv
         delimiter: ','
     s: btid:authority_$(authorityID)
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, $(linkedIdentifier)]
+        - [grel:valueParameter2, ""]
     po:
       - p: btm:hasNameVariant
         o: btid:authority_$(authorityID)_$(sequence_number)~iri
@@ -55,9 +60,9 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  pseudonyms:
+  pseudonymEntities:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates pseudonym entities for KBR authorities where we only have limited pseudonym information in the MARC field 400."
+    description: "This mapping creates pseudonym entities for KBR authorities where we only have limited pseudonym information in the MARC field 400. Only if a concatenation of the type field + linkedIdentifier still is 'Pseudonym', otherwise it is a record from MARC field 500"
     sources:
       - access: *sourceKBRNames
         referenceFormulation: csv
@@ -66,7 +71,7 @@ mappings:
     condition:
       function: idlab-fn:equal
       parameters:
-        - [grel:valueParameter, $(authorityType)]
+        - [grel:valueParameter, "$(authorityType)$(linkedIdentifier)"]
         - [grel:valueParameter2, "Pseudonym"]
     po:
       - [a, schema:Person]
@@ -93,7 +98,7 @@ mappings:
   #
   nameVariants:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates btm:NameVariant entities for KBR authorities where we only have limited name information in the MARC field 400."
+    description: "This mapping creates btm:NameVariant entities for KBR authorities where we only have limited name information in the MARC field 400. Only if a concatentation of the type field + linkedIdentifier still is 'Person', otherwise it is a possible record from MARC field 500"
     sources:
       - access: *sourceKBRNames
         referenceFormulation: csv
@@ -102,7 +107,7 @@ mappings:
     condition:
       function: idlab-fn:equal
       parameters:
-        - [grel:valueParameter, $(authorityType)]
+        - [grel:valueParameter, "$(authorityType)$(linkedIdentifier)"]
         - [grel:valueParameter2, "Person"]
     po:
       - [a, btm:NameVariant]
@@ -123,4 +128,22 @@ mappings:
           parameters:
             - [grel:valueParameter, $(family_name)]
             - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  pseudonymLink:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links between two KBR authority records linked via a pseudonym relationship in a MARC 500 field."
+    sources:
+      - access: *sourceKBRNames
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:authority_$(authorityID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(linkedIdentifier)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [btm:hasPseudonym, btid:authority_$(linkedIdentifier)~iri]
 

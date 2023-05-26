@@ -34,6 +34,27 @@ def isPseudonym(value, sep=','):
 
 
 # -----------------------------------------------------------------------------
+def extractAndWritePseudonymLinks(authorityID, elem, writer, stats):
+
+  
+  authorityInfo = utils.getElementValue(elem.findall('./marc:subfield[@code="c"]', ALL_NS), sep=',')
+  linkedIdentifier = utils.getElementValue(elem.find('./marc:subfield[@code="*"]', ALL_NS))
+
+  # In field 500 are also just 'related persons'
+  # We are only interested in fields indicating a pseudonym
+  if isPseudonym(authorityInfo):
+    writer.writerow({'authorityID': authorityID,
+                     'authorityType': 'Pseudonym',
+                     'name': '',
+                     'family_name': '',
+                     'given_name': '',
+                     'language': '',
+                     'sequence_number': '',
+                     'linkedIdentifier': linkedIdentifier})
+
+
+
+# -----------------------------------------------------------------------------
 def extractAndWriteAlternativeNames(authorityID, elem, writer, stats):
 
   
@@ -51,7 +72,8 @@ def extractAndWriteAlternativeNames(authorityID, elem, writer, stats):
                    'family_name': familyName,
                    'given_name': givenName,
                    'language': nameLanguage,
-                   'sequence_number': nameSequenceNumber})
+                   'sequence_number': nameSequenceNumber,
+                   'linkedIdentifier': ''})
 
 
 
@@ -79,6 +101,10 @@ def addAuthorityFieldsToCSV(elem, writer, natWriter, nameWriter, identifierWrite
     for alternativeName in alternativeNames:
       extractAndWriteAlternativeNames(authorityID, alternativeName, nameWriter, stats)
  
+  pseudonymLinks = elem.findall('./marc:datafield[@tag="500"]', ALL_NS)
+  if pseudonymLinks:
+    for link in pseudonymLinks:
+      extractAndWritePseudonymLinks(authorityID, link, nameWriter, stats)
 
   authorityType = 'Pseudonym' if isPseudonym(authorityInfo) else 'Person'
   
@@ -173,7 +199,7 @@ def main():
     identifierWriter = csv.DictWriter(identifierFile, fieldnames=['authorityID', 'type', 'identifier'], delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     identifierWriter.writeheader()
 
-    namesWriter = csv.DictWriter(namesFile, fieldnames=['authorityID', 'authorityType', 'name', 'family_name', 'given_name', 'language', 'sequence_number'],
+    namesWriter = csv.DictWriter(namesFile, fieldnames=['authorityID', 'authorityType', 'name', 'family_name', 'given_name', 'language', 'sequence_number', 'linkedIdentifier'],
                                  delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
     namesWriter.writeheader()

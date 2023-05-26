@@ -39,10 +39,10 @@ def main():
     lastSequenceNumber = 0
     for row in inputReader:
       rowID = row[options.identifier_column]
-      sequenceNumber = row[options.sequence_number_column]
+      sequenceNumber = int(row[options.sequence_number_column]) if row[options.sequence_number_column] != '' else 0
 
       if sequenceNumber:
-        lastSequenceNumber = sequenceNumber
+        lastSequenceNumber = sequenceNumber if sequenceNumber != '' else 0
       else:
         if rowID == lastRowID:
           lastSequenceNumber += 1
