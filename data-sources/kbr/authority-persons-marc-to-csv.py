@@ -34,16 +34,18 @@ def isPseudonym(value, sep=','):
 
 
 # -----------------------------------------------------------------------------
-def extractAndWritePseudonymLinks(authorityID, elem, writer, stats):
+def extractAndWritePseudonymLinks(authorityID, authorityName, elem, writer, stats):
 
   
   authorityInfo = utils.getElementValue(elem.findall('./marc:subfield[@code="c"]', ALL_NS), sep=',')
+  namePerson = utils.getElementValue(elem.find('./marc:subfield[@code="a"]', ALL_NS))
   linkedIdentifier = utils.getElementValue(elem.find('./marc:subfield[@code="*"]', ALL_NS))
 
   # In field 500 are also just 'related persons'
   # We are only interested in fields indicating a pseudonym
   if isPseudonym(authorityInfo):
     writer.writerow({'authorityID': authorityID,
+                     'authorityName': authorityName,
                      'authorityType': 'Pseudonym',
                      'name': '',
                      'family_name': '',
@@ -55,7 +57,7 @@ def extractAndWritePseudonymLinks(authorityID, elem, writer, stats):
 
 
 # -----------------------------------------------------------------------------
-def extractAndWriteAlternativeNames(authorityID, elem, writer, stats):
+def extractAndWriteAlternativeNames(authorityID, authorityName, elem, writer, stats):
 
   
   authorityInfo = utils.getElementValue(elem.findall('./marc:subfield[@code="c"]', ALL_NS), sep=',')
@@ -67,6 +69,7 @@ def extractAndWriteAlternativeNames(authorityID, elem, writer, stats):
   (familyName, givenName) = utils.extractNameComponents(namePerson)
 
   writer.writerow({'authorityID': authorityID,
+                   'authorityName': authorityName,
                    'authorityType': authorityType,
                    'name': namePerson,
                    'family_name': familyName,
@@ -99,12 +102,12 @@ def addAuthorityFieldsToCSV(elem, writer, natWriter, nameWriter, identifierWrite
   alternativeNames = elem.findall('./marc:datafield[@tag="400"]', ALL_NS)
   if alternativeNames:
     for alternativeName in alternativeNames:
-      extractAndWriteAlternativeNames(authorityID, alternativeName, nameWriter, stats)
+      extractAndWriteAlternativeNames(authorityID, namePerson, alternativeName, nameWriter, stats)
  
   pseudonymLinks = elem.findall('./marc:datafield[@tag="500"]', ALL_NS)
   if pseudonymLinks:
     for link in pseudonymLinks:
-      extractAndWritePseudonymLinks(authorityID, link, nameWriter, stats)
+      extractAndWritePseudonymLinks(authorityID, namePerson, link, nameWriter, stats)
 
   authorityType = 'Pseudonym' if isPseudonym(authorityInfo) else 'Person'
   
@@ -199,7 +202,7 @@ def main():
     identifierWriter = csv.DictWriter(identifierFile, fieldnames=['authorityID', 'type', 'identifier'], delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     identifierWriter.writeheader()
 
-    namesWriter = csv.DictWriter(namesFile, fieldnames=['authorityID', 'authorityType', 'name', 'family_name', 'given_name', 'language', 'sequence_number', 'linkedIdentifier'],
+    namesWriter = csv.DictWriter(namesFile, fieldnames=['authorityID', 'authorityName', 'authorityType', 'name', 'family_name', 'given_name', 'language', 'sequence_number', 'linkedIdentifier'],
                                  delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
     namesWriter.writeheader()
