@@ -31,7 +31,6 @@ WHERE {
 
   graph <http://beltrans-manifestations> { ?manifestation dcterms:identifier ?manifestationID . } 
 
-#  OPTIONAL { 
       graph <http://beltrans-manifestations> { ?manifestation schema:author|marcrel:ill|marcrel:sce|marcrel:pbd ?contributor . }
       graph <http://beltrans-contributors> { ?contributor a schema:Person . }
       OPTIONAL { graph <http://beltrans-contributors> { ?contributor dcterms:identifier ?contributorID . } }
@@ -43,7 +42,6 @@ WHERE {
           graph <http://master-data> { ?contributorNationality mads:contributoritativeLabel ?contributorNationalityLabel . }
           FILTER(lang(?contributorNationalityLabel) = 'en')
       }
-#  }
 
 
   OPTIONAL { graph <http://beltrans-contributors> {
@@ -105,9 +103,6 @@ WHERE {
 
 
 
-  #FILTER NOT EXISTS {
-  #    graph <http://beltrans-contributors> { ?contributor schema:nationality ?contributorNationality . }
-  #}
   OPTIONAL {
       graph <http://beltrans-contributors> { ?contributor schema:nationality ?contributorNationality . } 
   }
