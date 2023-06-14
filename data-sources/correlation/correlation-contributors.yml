@@ -70,6 +70,22 @@ mappings:
           parameters:
             - [grel:valueParameter, $(gender)]
             - [grel:valueParameter2, "Male"]
+      - p: schema:birthDate
+        o: $(birthDate)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(birthDate)]
+            - [grel:valueParameter2, ""]
+      - p: schema:deathDate
+        o: $(deathDate)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(deathDate)]
+            - [grel:valueParameter2, ""]
+
+
 
 
 

@@ -7,6 +7,36 @@ from stdnum import isbn
 from stdnum import exceptions
 
 # -----------------------------------------------------------------------------
+def getListOfIdentifiers(authorityID, rawString, identifierName, stats):
+  """This function extracts and formats identifiers.
+
+  >>> getListOfIdentifiers('1', '0000000000000001', 'ISNI', {})
+  ['0000000000000001']
+  >>> getListOfIdentifiers('1', '0000000000000001;0000 0000 0000 0002', 'ISNI', {})
+  ['0000000000000001','0000000000000002']
+  >>> getListOfIdentifiers('1', '1234', 'VIAF', {})
+  ['1234']
+  """
+
+  extractedIdentifiers = []
+  if ';' in rawString:
+    stats[f'more-than-one-{identifierName}'] += 1
+    identifiers = rawString.split(';')
+    for i in identifiers:
+      if i != '':
+        identifier = extractIdentifier(authorityID, f'{identifierName} {i}', pattern=identifierName)
+        if identifier != '':
+          extractedIdentifiers.append(identifier)
+  else:
+    if rawString != '':
+      identifier = extractIdentifier(authorityID, f'{identifierName} {rawString}', pattern=identifierName)
+      if identifier != '':
+        extractedIdentifiers.append(identifier)
+
+  return extractedIdentifiers
+ 
+
+# -----------------------------------------------------------------------------
 def parseYear(year, patterns):
   """"This function returns a string representing a year based on the input and a list of possible patterns.
 
@@ -244,6 +274,8 @@ def extractIdentifier(rowID, value, pattern):
   ''
   >>> extractIdentifier('1', "ISNI 0000 0001 2138 0055\\n", 'ISNI')
   '0000000121380055'
+  >>> extractIdentifier('1', "ISNI \\n0000 0004 4150 6067", 'ISNI')
+  '0000000441506067'
   """
 
   identifier = ''
@@ -255,6 +287,7 @@ def extractIdentifier(rowID, value, pattern):
       # remove the prefix (e.g. VIAF or ISNI) and replace spaces (e.g. '0000 0000 1234')
       tmp = value.replace(pattern, '')
       #identifier = value.replace(pattern, '').replace(' ', '')
+      tmp = tmp.strip()
       identifier = tmp.replace(' ', '')
 
       if(pattern == 'ISNI' and len(identifier) == 32):

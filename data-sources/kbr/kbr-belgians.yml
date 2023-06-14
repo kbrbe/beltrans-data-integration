@@ -75,21 +75,6 @@ mappings:
           parameters:
             - [grel:valueParameter, $(death_date)]
             - [grel:valueParameter2, ""]
-      - p: bf:identifiedBy
-        o: btid:identifier_isni_$(authorityID)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(isni_id)]
-            - [grel:valueParameter2, ""]
-      - p: bf:identifiedBy
-        o: btid:identifier_viaf_$(authorityID)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(viaf_id)]
-            - [grel:string_sub, ""]
-
 
   # ---------------------------------------------------------------------------
   #
@@ -107,45 +92,3 @@ mappings:
       - [foaf:primaryTopic, btid:authority_$(authorityID)~iri]
 
 
-  # ---------------------------------------------------------------------------
-  #
-  authorsISNI:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
-    sources:
-#      - access: "kbr/belgian-authors-enriched.csv"
-      - access: *sourceKBRBelgians
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:identifier_isni_$(authorityID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(isni_id)]
-        - [grel:valueParameter2, ""]
-    po:
-      - [a, bf:Isni]
-      - [rdfs:label, "ISNI"]
-      - [rdf:value, $(isni_id)]
-
-
-  # ---------------------------------------------------------------------------
-  #
-  authorsVIAF:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
-    sources:
-#      - access: "kbr/belgian-authors-enriched.csv"
-      - access: *sourceKBRBelgians
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:identifier_viaf_$(authorityID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(viaf_id)]
-        - [grel:valueParamter2, ""]
-    po:
-      - [a, bf:Identifier]
-      - [rdfs:label, "VIAF"]
-      - [rdf:value, $(viaf_id)]

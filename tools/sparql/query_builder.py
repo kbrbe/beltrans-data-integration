@@ -1613,8 +1613,8 @@ class ContributorSingleUpdateQuery(ContributorQuery):
     def _getCorrelationListFilter(self, targetGraph, localURIVariable, targetURIVariable):
 
           pattern = Template("""
-          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:used ?${localURIVariable} . } }
-          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:generated ?${targetURIVariable} . } }
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:used ${localURIVariable} . } }
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:generated ${targetURIVariable} . } }
           FILTER( !bound(?activity) ) 
         """)
           return pattern.substitute(targetGraph=targetGraph, localURIVariable=localURIVariable, targetURIVariable=targetURIVariable)

@@ -14,6 +14,8 @@ SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-author
 SCRIPT_EXTRACT_SEPARATED_COL="../data-sources/kbr/extract-and-normalize-separated-strings.py"
 SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
+MODULE_COMPLETE_SEQUENCE_NUMBERS="tools.csv.complete_sequence_numbers"
+
 SCRIPT_FIND_ORIGINALS="find-originals.py"
 
 SCRIPT_CONVERT_BB="../data-sources/master-data/convert-thesaurus.py"
@@ -70,8 +72,8 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 # KBR - translations
 #INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-17_4745records.xml"
 #INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-17_13126records.xml"
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-05-05.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-05-05.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-05-30.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-05-30.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -79,10 +81,10 @@ INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230505_NL-FR_APEP.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230505_NL-FR_AORG.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230505_FR-NL_APEP.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230505_FR-NL_AORG.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230530_NL-FR_APEP.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230530_NL-FR_AORG.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230530_FR-NL_APEP.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230530_FR-NL_AORG.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
@@ -91,7 +93,7 @@ INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-05-05_38013records.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-05-30_38033records.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -138,7 +140,7 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION="../data-sources/correlation/2023-02-03_Correlation-list_import_sven.csv"
+INPUT_CORRELATION="../data-sources/correlation/2023-05-30_Person-contributors_correlation-list.csv"
 
 
 # #############################################################################
@@ -335,11 +337,24 @@ SUFFIX_KBR_LA_PERSONS_NL_NORM="nl-translations-linked-authorities-persons-norm.c
 SUFFIX_KBR_LA_ORGS_NL_NORM="nl-translations-linked-authorities-orgs-norm.csv"
 SUFFIX_KBR_LA_PERSONS_FR_NORM="fr-translations-linked-authorities-persons-norm.csv"
 SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
+
 SUFFIX_KBR_LA_PERSONS_FR_NAT="fr-translations-linked-authorities-nationalities.csv"
 SUFFIX_KBR_LA_PERSONS_NL_NAT="nl-translations-linked-authorities-nationalities.csv"
+SUFFIX_KBR_LA_PERSONS_FR_NAMES="fr-translations-linked-authorities-names.csv"
+SUFFIX_KBR_LA_PERSONS_NL_NAMES="nl-translations-linked-authorities-names.csv"
+SUFFIX_KBR_LA_PERSONS_FR_NAMES_COMPLETE="fr-translations-linked-authorities-names-complete.csv"
+SUFFIX_KBR_LA_PERSONS_NL_NAMES_COMPLETE="nl-translations-linked-authorities-names-complete.csv"
+
+SUFFIX_KBR_LA_PERSONS_NL_IDENTIFIERS="nl-translations-linked-authorities-identifiers-persons.csv"
+SUFFIX_KBR_LA_PERSONS_FR_IDENTIFIERS="fr-translations-linked-authorities-identifiers-persons.csv"
+SUFFIX_KBR_LA_ORGS_NL_IDENTIFIERS="nl-translations-linked-authorities-identifiers-orgs.csv"
+SUFFIX_KBR_LA_ORGS_FR_IDENTIFIERS="fr-translations-linked-authorities-identifiers-orgs.csv"
 
 SUFFIX_KBR_BELGIANS_CSV="kbr-belgians.csv"
 SUFFIX_KBR_BELGIANS_NATIONALITIES="kbr-belgians-nationalities.csv"
+SUFFIX_KBR_BELGIANS_NAMES="kbr-belgians-names.csv"
+SUFFIX_KBR_BELGIANS_NAMES_COMPLETE="kbr-belgians-names-complete.csv"
+SUFFIX_KBR_BELGIANS_IDENTIFIERS="kbr-belgians-identifiers.csv"
 
 
 # DATA SOURCE - KBR ORIGINALS MATCHING
@@ -506,6 +521,10 @@ SUFFIX_KBR_PERSONS_IDENTIFIERS_NL_FR_LD="nl-fr_persons-identifiers.ttl"
 SUFFIX_KBR_ORGS_IDENTIFIERS_FR_NL_LD="fr-nl_orgs-identifiers.ttl"
 SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD="nl-fr_orgs-identifiers.ttl"
 SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD="belgians-identifiers.ttl"
+
+SUFFIX_KBR_PERSONS_NAMES_FR_NL_LD="fr-nl_persons-names.ttl"
+SUFFIX_KBR_PERSONS_NAMES_NL_FR_LD="nl-fr_persons-names.ttl"
+SUFFIX_KBR_PERSONS_NAMES_BELGIANS_LD="belgians-names.ttl"
 
 SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL_LD="fr-nl_orgs-multiple-matches.ttl"
 SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR_LD="nl-fr_orgs-multiple-matches.ttl"
@@ -788,8 +807,11 @@ function integrate {
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
-  echo "Add local data to integrated contributors from a correlation list"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_CORRELATION_DATA"
+  # Disabled on 2023-06-06
+  # Otherwise the clean correlation list input gets enriched with non-curated data
+  #
+  #echo "Add local data to integrated contributors from a correlation list"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_CORRELATION_DATA"
 
 }
 
@@ -1235,16 +1257,16 @@ function extractNationalityFromBnFViaISNI {
 
   # Extract BnF contributor data via BnF identifier
   echo "EXTRACTION - Extract BnF contributor data via BnF identifier"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i "$INPUT_BNF_PERSON_AUTHORS"  -o "$bnfContributorData" -f "$bnfIdentifiers"
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i "$INPUT_BNF_PERSON_AUTHORS"  -o "$bnfContributorData" -f "$bnfIdentifiers"
 
   echo "EXTRACTION - Extract links between BnF contributors and ISNI"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfIdentifiers
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_ISNI -o $bnfContributorIsniData -f $bnfIdentifiers
 
   echo "EXTRACTION - Extract links between BnF contributors and VIAF"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfIdentifiers
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_VIAF -o $bnfContributorVIAFData -f $bnfIdentifiers
 
   echo "EXTRACTION - Extract links between BnF contributors and Wikidata"
-  time python $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfIdentifiers
+  time python -m $MODULE_FILTER_RDF_XML_SUBJECTS -i $INPUT_BNF_CONT_WIKIDATA -o $bnfContributorWikidataData -f $bnfIdentifiers
 
   # We could query nationality which is used to immediately enrich integrated persons,
   # but we can also get all data of the newly found contributors to increase the overlap with other sources
@@ -1703,25 +1725,47 @@ function extractKBRLinkedAuthorities {
   kbrNLPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
   kbrFRPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
 
+  kbrNLPersonsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_IDENTIFIERS"
+  kbrFRPersonsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_IDENTIFIERS"
+  kbrFROrgsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_IDENTIFIERS"
+  kbrNLOrgsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_IDENTIFIERS"
+
+  kbrFRPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAMES"
+  kbrNLPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAMES"
+  kbrFRPersonsNamesComplete="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAMES_COMPLETE"
+  kbrNLPersonsNamesComplete="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAMES_COMPLETE"
+
   kbrBelgianPersonsNationalities="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
+  kbrBelgianPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NAMES"
+  kbrBelgianPersonsNamesComplete="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NAMES_COMPLETE"
+  kbrBelgianPersonsISNIs="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_IDENTIFIERS"
 
   source py-integration-env/bin/activate
 
   echo "Extract authorities NL-FR - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCSV -n $kbrNLPersonsNationalities
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrNLPersons -o $kbrNLPersonsCSV -n $kbrNLPersonsNationalities --names-csv $kbrNLPersonsNames --identifier-csv $kbrNLPersonsISNIs
 
   echo "Extract authorities NL-FR - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrNLOrgs -o $kbrNLOrgsCSV
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrNLOrgs -o $kbrNLOrgsCSV --identifier-csv $kbrNLOrgsISNIs
 
   echo "Extract authorities FR-NL - Persons ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrFRPersons -o $kbrFRPersonsCSV -n $kbrFRPersonsNationalities
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrFRPersons -o $kbrFRPersonsCSV -n $kbrFRPersonsNationalities --names-csv $kbrFRPersonsNames --identifier-csv $kbrFRPersonsISNIs
 
   echo "Extract authorities FR-NL - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrFROrgs -o $kbrFROrgsCSV
+  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrFROrgs -o $kbrFROrgsCSV --identifier-csv $kbrFROrgsISNIs
 
   echo "Extract authorities KBR-Belgians - Persons ..."
   # these Belgians might have multiple nationalities, thus it is still important to get the nationality information
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrBelgianPersons -o $kbrBelgianPersonsCSV -n $kbrBelgianPersonsNationalities
+  python $SCRIPT_EXTRACT_AGENTS_PERSONS -i $kbrBelgianPersons -o $kbrBelgianPersonsCSV -n $kbrBelgianPersonsNationalities --names-csv $kbrBelgianPersonsNames --identifier-csv $kbrBelgianPersonsISNIs
+
+  echo "Complete author names sequence numbers - FR-NL"
+  python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS -i $kbrNLPersonsNames -o $kbrNLPersonsNamesComplete --identifier-column "authorityID" --sequence-number-column "sequence_number"
+
+  echo "Complete author names sequence numbers - NL-FR"
+  python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS -i $kbrFRPersonsNames -o $kbrFRPersonsNamesComplete --identifier-column "authorityID" --sequence-number-column "sequence_number"
+
+  echo "Complete author names sequence numbers - KBR-Belgians"
+  python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS -i $kbrBelgianPersonsNames -o $kbrBelgianPersonsNamesComplete --identifier-column "authorityID" --sequence-number-column "sequence_number"
 
   echo "Copy publisher location information ..."
   cp "$INPUT_KBR_LA_PLACES_VLG" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
@@ -1943,11 +1987,22 @@ function mapKBRLinkedAuthorities {
   kbrPersonsNatFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAT"
   kbrPersonsNatNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAT"
 
+  kbrPersonsISNINLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_IDENTIFIERS"
+  kbrPersonsISNIFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_IDENTIFIERS"
+  kbrOrgsISNIFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_IDENTIFIERS"
+  kbrOrgsISNINL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_IDENTIFIERS"
+
   kbrOrgsFRNL="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_FR_CLEANED"
   kbrOrgsNLFR="$integrationName/kbr/agents/$SUFFIX_KBR_LA_ORGS_NL_CLEANED"
 
   kbrBelgians="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_CSV"
   kbrBelgiansNat="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NATIONALITIES"
+  kbrBelgiansISNI="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_IDENTIFIERS"
+
+  local kbrFRPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_FR_NAMES_COMPLETE"
+  local kbrNLPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PERSONS_NL_NAMES_COMPLETE"
+  local kbrBelgianPersonsNames="$integrationName/kbr/agents/$SUFFIX_KBR_BELGIANS_NAMES_COMPLETE"
+ 
 
   # output
   kbrPersonsTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_FR_NL_LD"
@@ -1962,6 +2017,10 @@ function mapKBRLinkedAuthorities {
   kbrOrgsIdentifiersTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_ORGS_IDENTIFIERS_NL_FR_LD"
   kbrBelgiansIdentifiersTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_BELGIANS_IDENTIFIERS_LD"
 
+  kbrPersonsNamesTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NAMES_FR_NL_LD"
+  kbrPersonsNamesTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NAMES_NL_FR_LD"
+  kbrBelgianPersonsNamesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NAMES_BELGIANS_LD"
+
   kbrOrgMatchesNLFR="$integrationName/$dataSourceName/kbr/agents/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR"
   kbrOrgMatchesFRNL="$integrationName/$dataSourceName/kbr/agents/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL"
   kbrOrgMatchesTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL_LD"
@@ -1973,6 +2032,10 @@ function mapKBRLinkedAuthorities {
   mapKBRPersons "$kbrPersonsNLFR" "$kbrPersonsNatNLFR" "$kbrPersonsTurtleNLFR"
   mapKBRPersons "$kbrBelgians" "$kbrBelgiansNat" "$kbrBelgiansTurtle"
 
+  mapKBRNames "$kbrFRPersonsNames" "$kbrPersonsNamesTurtleFRNL"
+  mapKBRNames "$kbrNLPersonsNames" "$kbrPersonsNamesTurtleNLFR"
+  mapKBRNames "$kbrBelgianPersonsNames" "$kbrBelgianPersonsNamesTurtle"
+
   mapKBROrgs "$kbrOrgsFRNL" "$kbrOrgsTurtleFRNL"
   mapKBROrgs "$kbrOrgsNLFR" "$kbrOrgsTurtleNLFR"
 
@@ -1981,13 +2044,13 @@ function mapKBRLinkedAuthorities {
 
   mapKBRPlaces "$integrationName" "$kbrPlacesTurtle"
 
-  mapKBRLinkedIdentifiers "$kbrPersonsFRNL" "$kbrPersonsIdentifiersTurtleFRNL"
-  mapKBRLinkedIdentifiers "$kbrPersonsNLFR" "$kbrPersonsIdentifiersTurtleNLFR"
+  mapKBRLinkedIdentifiers "$kbrPersonsISNIFRNL" "$kbrPersonsIdentifiersTurtleFRNL"
+  mapKBRLinkedIdentifiers "$kbrPersonsISNINLFR" "$kbrPersonsIdentifiersTurtleNLFR"
 
-  mapKBRLinkedIdentifiers "$kbrOrgsFRNL" "$kbrOrgsIdentifiersTurtleFRNL"
-  mapKBRLinkedIdentifiers "$kbrOrgsNLFR" "$kbrOrgsIdentifiersTurtleNLFR"
+  mapKBRLinkedIdentifiers "$kbrOrgsISNIFR" "$kbrOrgsIdentifiersTurtleFRNL"
+  mapKBRLinkedIdentifiers "$kbrOrgsISNINL" "$kbrOrgsIdentifiersTurtleNLFR"
 
-  mapKBRLinkedIdentifiers "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
+  mapKBRLinkedIdentifiers "$kbrBelgiansISNI" "$kbrBelgiansIdentifiersTurtle"
 
 }
 
@@ -2024,6 +2087,17 @@ function mapKBROrgMatches {
 
   echo "Map KBR Orgs possible matches - $sourceFile"
   . map.sh ../data-sources/kbr/kbr-org-matches.yml $outputTurtle
+}
+
+# -----------------------------------------------------------------------------
+function mapKBRNames {
+  local sourceFile=$1
+  local outputTurtle=$2
+
+  export RML_SOURCE_KBR_NAMES="$sourceFile"
+
+  echo "Map KBR Names - $sourceFile"
+  . map.sh ../data-sources/kbr/kbr-pseudonym-names.yml $outputTurtle
 }
 
 # -----------------------------------------------------------------------------
@@ -2219,7 +2293,8 @@ function loadKBROriginals {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  # uncommented because of we delete the original graph, we also delete partial original information from the regular KBR export
+  # uncommented because if we delete the original graph, we also delete partial original information from the regular KBR export
+  # i.e. the schema:translationOf links to dummy source entities that encode the language of the original
   #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
 
   # only load book information, no translation-specific triples
@@ -2332,6 +2407,10 @@ function loadKBRLinkedAuthorities {
   local kbrOrgMatchesTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_FR_NL_LD"
   local kbrOrgMatchesTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_NL_FR_LD"
 
+  local kbrPersonsNamesTurtleFRNL="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NAMES_FR_NL_LD"
+  local kbrPersonsNamesTurtleNLFR="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NAMES_NL_FR_LD"
+  local kbrBelgianPersonsNamesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PERSONS_NAMES_BELGIANS_LD"
+
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   # upload newly identified authorities to the linked authorities named graph
@@ -2339,7 +2418,8 @@ function loadKBRLinkedAuthorities {
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
     "$kbrPersonsFRNL" "$kbrPersonsNLFR" "$kbrOrgsFRNL" "$kbrOrgsNLFR" "$kbrPlaces" \
     "$kbrPersonsIdentifiersTurtleFRNL" "$kbrPersonsIdentifiersTurtleNLFR" "$kbrOrgsIdentifiersTurtleFRNL" \
-    "$kbrOrgsIdentifiersTurtleNLFR" "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle"
+    "$kbrOrgsIdentifiersTurtleNLFR" "$kbrBelgians" "$kbrBelgiansIdentifiersTurtle" \
+    "$kbrPersonsNamesTurtleFRNL" "$kbrPersonsNamesTurtleNLFR" "$kbrBelgianPersonsNamesTurtle"
 
   echo "Load possible KBR publisher matches ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES \

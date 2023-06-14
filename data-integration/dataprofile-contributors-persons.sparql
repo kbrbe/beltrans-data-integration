@@ -18,6 +18,12 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
 SELECT DISTINCT
   ?contributorID
   (group_concat(distinct ?contributorLabel;SEPARATOR=';') AS ?name)
+  #(group_concat(distinct ?contributorType;SEPARATOR=';') as ?type)
+  (group_concat(distinct ?nameVariantNameID;SEPARATOR=';') as ?names)
+  (group_concat(distinct ?pseudonymNameID;SEPARATOR=';') as ?textPseudonymOf)
+  (group_concat(distinct ?otherIdentityNameID;SEPARATOR=';') as ?textRealNameOf)
+  (group_concat(distinct ?pseudonymIdentifier;SEPARATOR=';') as ?pseudonymOf)
+  (group_concat(distinct ?otherIdentityIdentifier;SEPARATOR=';') as ?realNameOf)
   (group_concat(distinct ?nationalityLabel;SEPARATOR=';') AS ?nationalities)
   (group_concat(distinct ?genderLabel;SEPARATOR=';') AS ?gender)
   (group_concat(distinct ?kbrBirthDate;SEPARATOR=';') AS ?birthDateKBR)
@@ -110,8 +116,64 @@ WHERE {
               dcterms:identifier ?kbrID .
     }
 
+
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrURI schema:birthDate ?kbrBirthDate . } }
     OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrURI schema:deathDate ?kbrDeathDate . } }
+
+    # get other name variants of this record
+    #
+    OPTIONAL {
+      graph <http://kbr-linked-authorities> { 
+        ?kbrURI btm:hasNameVariant ?nameVariantURI .
+
+        ?nameVariantURI rdfs:label ?nameVariantLabel ;
+                        dcterms:identifier ?nameVariantIdentifier .
+      }
+      BIND( COALESCE(?nameVariantIdentifier, "") AS ?nameVariantIDString)
+      BIND( CONCAT( COALESCE(?nameVariantLabel, "missing name"),
+                    IF(str(?nameVariantIDString) = "", "",
+                       CONCAT(" (", str(?nameVariantIDString), ")")) )
+            AS ?nameVariantNameID
+          )
+    }
+
+    # get pseudonyms of this record
+    #
+    OPTIONAL {
+      graph <http://kbr-linked-authorities> { 
+        ?kbrURI btm:hasPseudonym ?pseudonymURI .
+
+        ?pseudonymURI rdfs:label ?pseudonymLabel ;
+                      dcterms:identifier ?pseudonymIdentifier .
+      }
+      BIND( COALESCE(?pseudonymIdentifier, "") AS ?pseudonymIDString)
+      BIND( CONCAT( COALESCE(?pseudonymLabel, "missing name"),
+                    IF(str(?pseudonymIDString) = "", "",
+                       CONCAT(" (", str(?pseudonymIDString), ")")) )
+            AS ?pseudonymNameID
+          )
+
+    }
+
+    # if this is a pseudonym, get also other pseudonyms or the real identity
+    #
+    OPTIONAL {
+      graph <http://kbr-linked-authorities> { 
+        ?kbrURI btm:isPseudonymOf ?otherIdentityURI .
+
+        ?otherIdentityURI rdfs:label ?otherIdentityLabel ;
+                          dcterms:identifier ?otherIdentityIdentifier .
+      }
+      BIND( COALESCE(?otherIdentityIdentifier, "") AS ?otherIdentityIDString)
+      BIND( CONCAT( COALESCE(?otherIdentityLabel, "missing name"),
+                    IF(str(?otherIdentityIDString) = "", "",
+                       CONCAT(" (", str(?otherIdentityIDString), ")")) )
+            AS ?otherIdentityNameID
+          )
+
+    }
+
+
   }
 
   # SOURCE DATA: BnF

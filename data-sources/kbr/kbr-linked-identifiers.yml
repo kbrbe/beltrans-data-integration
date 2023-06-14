@@ -24,10 +24,59 @@ variables:
 
 mappings:
 
+  # ---------------------------------------------------------------------------
+  #
+  personsISNI:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links from person authorities to ISNI identifiers entities."
+    sources:
+      - access: *sourceKBRLinkedAuthorities
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:authority_$(authorityID)
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, $(type)]
+        - [grel:valueParameter2, "isni"]
+    po:
+      - [bf:identifiedBy, btid:identifier_isni_$(authorityID)~iri]
 
   # ---------------------------------------------------------------------------
   #
-  authorsISNI:
+  personsVIAF:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links from person authorities to VIAF identifiers entities."
+    sources:
+      - access: *sourceKBRLinkedAuthorities
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:authority_$(authorityID)
+    condition:
+      function: idlab-fn:equal
+      parameters:
+        - [grel:valueParameter, $(type)]
+        - [grel:valueParameter2, "viaf"]
+    po:
+      - [bf:identifiedBy, btid:identifier_viaf_$(authorityID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  personsKBR:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links from person authorities to KBR identifiers entities."
+    sources:
+      - access: *sourceKBRLinkedAuthorities
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:authority_$(authorityID)
+    po:
+      - [bf:identifiedBy, btid:identifier_kbr_$(authorityID)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  isniEntities:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for ISNI identifiers according to BIBFRAME by using the Isni subclass of Identifier."
     sources:
@@ -36,19 +85,19 @@ mappings:
         delimiter: ','
     s: btid:identifier_isni_$(authorityID)
     condition:
-      function: idlab-fn:notEqual
+      function: idlab-fn:equal
       parameters:
-        - [grel:valueParameter, $(isni_id)]
-        - [grel:valueParameter2, ""]
+        - [grel:valueParameter, $(type)]
+        - [grel:valueParameter2, "isni"]
     po:
       - [a, bf:Isni]
       - [rdfs:label, "ISNI"]
-      - [rdf:value, $(isni_id)]
+      - [rdf:value, $(identifier)]
 
 
   # ---------------------------------------------------------------------------
   #
-  authorsVIAF:
+  viafEntities:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for VIAF identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated VIAF subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'VIAF' identifiers."
     sources:
@@ -57,18 +106,18 @@ mappings:
         delimiter: ','
     s: btid:identifier_viaf_$(authorityID)
     condition:
-      function: idlab-fn:notEqual
+      function: idlab-fn:equal
       parameters:
-        - [grel:valueParameter, $(viaf_id)]
-        - [grel:valueParameter2, ""]
+        - [grel:valueParameter, $(type)]
+        - [grel:valueParameter2, "viaf"]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "VIAF"]
-      - [rdf:value, $(viaf_id)]
+      - [rdf:value, $(identifier)]
 
   # ---------------------------------------------------------------------------
   #
-  authorsKBR:
+  kbrEntities:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates entities for KBR identifiers according to BIBFRAME. Because BIBFRAME does not offer a dedicated KBR subclass for Identifier, we follow the BIBFRAME recommendation and use the super class Identifier and specify in a label that it is about 'KBR' identifiers."
     sources:
@@ -77,10 +126,6 @@ mappings:
         delimiter: ','
     s: btid:identifier_kbr_$(authorityID)
     condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(authorityID)]
-        - [grel:valueParameter2, ""]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "KBR"]
