@@ -5,6 +5,69 @@ import pandas as pd
 import os
 
 # -----------------------------------------------------------------------------
+def getBnFIdentifierWithControlCharacter(identifier):
+  """This function computes the BnF control character based on documentation from BnF.
+
+  It correctly works for the two following real life examples
+  >>> getBnFIdentifierWithControlCharacter('cb13741679')
+  'cb13741679s'
+  >>> getBnFIdentifierWithControlCharacter('cb11896963')
+  'cb11896963c'
+
+  Also return the correct control character if the 'cb' prefix is missing
+  >>> getBnFIdentifierWithControlCharacter('11896963')
+  'cb11896963c'
+
+  Return the same identifier if there is already a valid control character
+  >>> getBnFIdentifierWithControlCharacter('cb11896963c')
+  'cb11896963c'
+
+  Return a corrected identifier if the given control character is wrong
+  >>> getBnFIdentifierWithControlCharacter('cb11896963d')
+  'cb11896963c'
+
+  Throw an error if the identifier is too short
+  >>> getBnFIdentifierWithControlCharacter('cb118969c')
+  Traceback (most recent call last):
+      ...
+  Exception: Invalid BnF identifier, too short: cb118969c
+
+  Throw an error if the identifier is too long
+  >>> getBnFIdentifierWithControlCharacter('cb118969631c')
+  Traceback (most recent call last):
+      ...
+  Exception: Invalid BnF identifier, too long: cb118969631c
+  """
+
+  correspondenceTable = ['0','1','2','3','4','5','6','7','8',
+                         '9','b','c','d','f','g','h','j','k',
+                         'm','n','p','q','r','s','t','v','w',
+                         'x','z']
+
+  # make sure the identifier starts with 'cb'
+  identifier = f'cb{identifier}' if not identifier.startswith('cb') else identifier
+
+  if len(identifier) == 11:
+    # perfect length, so there seems to be already a control character
+    # don't trust it, to be sure compute the control character again
+    return getBnFIdentifierWithControlCharacter(identifier[0:10])
+  elif len(identifier) > 11:
+    # this identifier is too long for being a BnF identifier
+    raise Exception(f'Invalid BnF identifier, too long: {identifier}')
+  elif len(identifier) < 10:
+    # this identifier is too short for being a BnF identifier
+    raise Exception(f'Invalid BnF identifier, too short: {identifier}')
+
+  values = []
+  position = 1
+  for digit in identifier:
+    digitBase10Value = correspondenceTable.index(digit)
+    values.append(digitBase10Value * position)
+    position += 1
+  sumMod29 = sum(values)%29
+  return identifier + str(correspondenceTable[sumMod29])
+
+# -----------------------------------------------------------------------------
 def addToMismatchLog(mismatchLog, dateType, roleType, contributorURI, s, value):
   """This function logs mismatching dates in the given data structure.
 
