@@ -57,7 +57,7 @@ def countISNIs(isniString, delimiter=';', validateISNI=False):
     return len(isniList)
 
 # -----------------------------------------------------------------------------
-def initializeCounters(countReader, identifiers, isniColumnName):
+def initializeCounters(countReader, identifiers, isniColumnName, nationalityColumnName=None):
   """This function counts statistics from the given arra of dicts (or DictReader).
 
   >>> rows = [{'kbrIDs':'', 'isniIDs':'001','ntaIDs':''},
@@ -81,6 +81,7 @@ def initializeCounters(countReader, identifiers, isniColumnName):
       'numberFoundISNIs': 0
     }
   
+
   identifierColumns = identifiers.keys()
   for row in countReader:
 
