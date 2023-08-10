@@ -18,6 +18,7 @@ def checkArguments():
                     help='column name of the CSV in which it is checked for missing contributor overlap')
   parser.add_option('--csv-delimiter', action='store', default=',', help='Delimiter of the input CSV, default is a comma')
   parser.add_option('--column-value-delimiter', action='store', default=';', help='Delimiter used within a column to separate different names we want to compare')
+  parser.add_option('--new-column-value-delimiter', action='store', default=';', help='The new delimiter that will be used to separate different names')
 
   (options, args) = parser.parse_args()
 
@@ -29,12 +30,12 @@ def checkArguments():
   return options, args
    
 # -----------------------------------------------------------------------------
-def main(inputFile, outputFile, outputColumns, columnName, csvDelimiter, columnValueDelimiter):
+def main(inputFile, outputFile, outputColumns, columnName, csvDelimiter, columnValueDelimiter, replacedColumnValueDelimiter):
   """This script reads a CSV files and checks if parts of the value in a given column occur more than once in the column.
      For example "Sven Lieber (abc, def); Lieber, Sven (abc)" where the first name but also the last name occur twice."""
 
   with open(inputFile, 'r') as inFile, \
-       open(outputFile, 'w') as outFile:
+       open(outputFile, 'w', newline='') as outFile:
 
     inputReader = csv.DictReader(inFile, delimiter=csvDelimiter)
 
@@ -62,6 +63,7 @@ def main(inputFile, outputFile, outputColumns, columnName, csvDelimiter, columnV
           numberFound += 1
           # adding all wanted columns to the output
           outputRow = {key: row[key] for key in wantedColumns}
+          outputRow[columnName] = replacedColumnValueDelimiter.join(values)
           outputWriter.writerow(outputRow)
       numberRows += 1
 
@@ -69,5 +71,5 @@ def main(inputFile, outputFile, outputColumns, columnName, csvDelimiter, columnV
 
 if __name__ == '__main__':
   (options, args) = checkArguments()
-  main(options.input, options.output, options.output_column, options.column, options.csv_delimiter, options.column_value_delimiter)
+  main(options.input, options.output, options.output_column, options.column, options.csv_delimiter, options.column_value_delimiter, options.new_column_value_delimiter)
 
