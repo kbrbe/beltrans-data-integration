@@ -18,6 +18,9 @@ yarrrml-parser
 2022-*
 corpus-versions/
 
+# no results of matching processes
+matching-results/
+
 # not the geonames dump
 geonames/
 

@@ -1,0 +1,16 @@
+prefix countries: <http://id.loc.gov/vocabulary/countries/>
+prefix mads: <http://www.loc.gov/mads/rdf/v1#>
+
+SELECT ?countryCode ?countryNameEN
+FROM  <http://master-data>
+WHERE {
+
+  <http://id.loc.gov/vocabulary/countries> mads:hasTopMemberOfMADSScheme ?country .
+  ?country a mads:Authority ;
+           mads:authoritativeLabel ?countryNameEN .
+
+  BIND(strafter(str(?country), "countries/") AS ?countryCode)
+  FILTER(lang(?countryNameEN)='en')
+ 
+}
+ORDER BY ASC(?countryNameEN)

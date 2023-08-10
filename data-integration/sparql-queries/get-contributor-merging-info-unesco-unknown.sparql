@@ -1,0 +1,46 @@
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+PREFIX btid: <http://kbr.be/id/data/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+prefix btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+
+SELECT 
+?contributorUnescoID
+?contributorUnescoIDLong
+?contributorName 
+(GROUP_CONCAT(DISTINCT ?manifestationTitle;SEPARATOR=";") AS ?titles)
+WHERE {
+  
+  #
+  # It should be Unesco contributors
+  #
+  graph <http://unesco> { 
+    ?manifestation schema:name ?manifestationTitle ;
+                   schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?unescoContributor .
+  }
+        
+  {
+  SELECT ?unescoContributor ?contributorUnescoID ?contributorUnescoIDLong ?contributorBELTRANSID ?contributorName
+  WHERE {
+    #   
+    # We are only interested in person contributors that do have an Unesco identifier
+    #   
+    graph <http://unesco-linked-authorities> {
+      ?unescoContributor rdfs:label ?contributorName ;
+                         dcterms:identifier ?contributorUnescoID ;
+                         bf:identifiedBy ?unescoContributorLongIDEntity .
+
+      ?unescoContributorLongIDEntity a bf:Identifier ;
+                                     rdfs:label "UnescoLong" ;
+                                     rdf:value ?contributorUnescoIDLong .
+    }   
+
+    # no filter via linked BELTRANS records needed, because these authorities were never integrated and linked
+    FILTER NOT EXISTS { ?unescoContributor rdf:type ?type . }
+  }
+  }
+        
+}
+GROUP BY ?contributorUnescoID ?contributorUnescoIDLong ?contributorName
+

@@ -1,0 +1,4 @@
+"id","description","isni","kbr-id","bnf-id","nta-id","unesco-id"
+"new1","ISNI and Unesco ID added to an existing record","001","kbr1","","nta1","unesco1"
+"new2","second KBR id removed","","kbr3","bnf3","",""
+"new3","A record with a corrected ISNI","00correctX","kbr4","","",""

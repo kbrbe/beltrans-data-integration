@@ -1,0 +1,50 @@
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+PREFIX btid: <http://kbr.be/id/data/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+prefix btm: <http://kbr.be/ns/beltrans/model#>
+
+SELECT 
+?contributorID
+?contributorName 
+(GROUP_CONCAT(DISTINCT ?alternateName;SEPARATOR=";") AS ?alternateNames)
+(GROUP_CONCAT(DISTINCT ?manifestationTitle;SEPARATOR=";") AS ?titles)
+WHERE {
+  
+  #
+  # It should be contributors to the BELTRANS corpus
+  # The schema:name title is already a combination of main title and subtitle separated with " : " 
+  # If needed they can be retrieved separately via the property paths bf:title/bf:mainTitle and bf:title/bf:subtitle
+  #
+  graph <http://beltrans-manifestations> { 
+    ?manifestation schema:isPartOf btid:beltransCorpus ;
+                   schema:name ?manifestationTitle ;
+                   schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?contributor .
+  }
+
+  graph <http://beltrans-contributors> { 
+    ?contributor a schema:Person ;
+                 rdfs:label ?contributorName ;
+                 dcterms:identifier ?contributorID .
+  }
+        
+  #
+  # We are only interested in contributors that do not yet have an Unesco identifier
+  #
+  FILTER NOT EXISTS {
+    graph <http://beltrans-contributors> { ?contributor schema:sameAs ?unescoURI . }
+    graph <http://unesco-linked-authorities> { ?unescoURI a schema:Person . }
+  }
+        
+  #
+  # optionally get KBR alternate names and pseudonyms
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?contributor schema:sameAs ?kbrURI . }
+    graph <http://kbr-linked-authorities> {
+      ?kbrURI (btm:hasNameVariant|btm:hasPseudonym)/rdfs:label ?alternateName .
+    }
+  }
+}
+GROUP BY ?contributorID ?contributorName
+

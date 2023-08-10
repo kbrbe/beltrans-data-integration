@@ -3,6 +3,8 @@ import re
 import lxml.etree as ET
 import requests
 import time
+import pandas as pd
+from io import StringIO
 
 # -----------------------------------------------------------------------------
 def addTestData(target, loadConfig):
@@ -62,6 +64,14 @@ def query(target, queryString, outputWriter):
     outputWriter.write(res.content)
 
 # ------------------------------------------------------------
+def queryToDataframe(target, queryFilename, indexCol):
+  # using get such that we do not have to authenticate
+  #res = requests.get(target, data=queryString, headers={'Accept': 'text/csv', 'Content-Type': 'application/sparql-query'})
+  res = sparqlSelectToString(target, queryFilename, "text/csv", httpMethod='get')
+  csvWrapper = StringIO(res)
+  return pd.read_csv(csvWrapper, index_col=indexCol)
+
+# ------------------------------------------------------------
 def readSPARQLQuery(filename):
     """Read a SPARQL query from file and return the content as a string."""
     content = ""
@@ -87,7 +97,7 @@ def deleteNamedGraph(url, namedGraph, auth=None):
 
 
 # -----------------------------------------------------------------------------
-def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
+def sparqlSelectToString(url, queryFilename, acceptFormat, auth=None, httpMethod='post'):
 
   if not os.path.isfile(queryFilename):
     print(f'"{queryFilename}" is not a file!')
@@ -97,16 +107,17 @@ def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
     r = None
     try:
       start = time.time()
-      r = requests.post(url, data=query.read(), headers={'Content-Type': 'application/sparql-query', 'Accept': acceptFormat}, auth=auth)
+      if httpMethod == 'post':
+        r = requests.post(url, data=query.read(), headers={'Content-Type': 'application/sparql-query', 'Accept': acceptFormat}, auth=auth)
+      elif httpMethod == 'get':
+        r = requests.get(url, data=query.read(), headers={'Content-Type': 'application/sparql-query', 'Accept': acceptFormat}, auth=auth)
+      else:
+        raise Exception(f'Supported HTTP methods are "post" and "get", but "{httpMethod}" was given')
       end = time.time()
       r.raise_for_status()
 
       queryTime = time.strftime('%H:%M:%S', time.gmtime(end - start))
-      response = r.content.decode('utf-8')
-
-      with open(outputFilename, 'w', encoding='utf-8') as outputFile:
-        numberChars = outputFile.write(response)
-        print(f'successfully queried in time {queryTime} and wrote {numberChars} characters to file {outputFilename}!')
+      return r.content.decode('utf-8')
 
     except requests.HTTPError as he:
       statusCode = he.response.status_code
@@ -115,6 +126,16 @@ def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
     except Exception as e:
       print(f'Error while querying {url} with {queryFilename} and acceptFormat {acceptFormat}')
       print(e)
+
+
+
+# -----------------------------------------------------------------------------
+def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
+
+  response = sparqlSelectToString(url, queryFilename, acceptFormat, auth=auth)
+  with open(outputFilename, 'w', encoding='utf-8') as outputFile:
+    numberChars = outputFile.write(response)
+    print(f'successfully queried in time {queryTime} and wrote {numberChars} characters to file {outputFilename}!')
 
 
 # -----------------------------------------------------------------------------

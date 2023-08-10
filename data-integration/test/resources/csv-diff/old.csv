@@ -1,0 +1,5 @@
+"id","description","isni","kbr-id","bnf-id","nta-id","unesco-id"
+"old1","A record with only KBR and NTA ID","","kbr1","","nta1",""
+"old2","A record with only Unesco ID","","","","","unesco1"
+"old3","A record with several KBR IDs for a single bnf ID","","kbr3;kbr4","bnf3","",""
+"old4","A record with a wrong ISNI","00wrongX","kbr4","","",""

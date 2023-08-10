@@ -26,6 +26,37 @@ variables:
 
 mappings:
 
+  # ---------------------------------------------------------------------------
+  #
+  authorities:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates identifier related relations for linked authorities (persons or organizations)."
+    sources:
+      - access: *sourceCont
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:unesco_authority_u$(contributorIDShort)
+    po:
+      - [dcterms:identifier, u$(contributorIDShort)]
+      - [bf:identifiedBy, btid:identifier_unesco_u$(contributorIDShort)~iri]
+      - [bf:identifiedBy, btid:identifier_unesco_long_u$(contributorID)~iri]
+      - p: rdfs:label
+        o: "$(name), $(firstname)"
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(firstname)]
+            - [grel:valueParameter2, ""]
+      - p: rdfs:label
+        o: "$(name)"
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(firstname)]
+            - [grel:valueParameter2, ""]
+
+
+
 
   # ---------------------------------------------------------------------------
   #
@@ -44,8 +75,6 @@ mappings:
         - [grel:valueParameter2, "person"]
     po:
       - [a, schema:Person]
-      - [dcterms:identifier, u$(contributorIDShort)]
-      - [rdfs:label, "$(name), $(firstname)"]
       - p: schema:familyName
         o: $(name)
         condition:
@@ -60,8 +89,6 @@ mappings:
           parameters:
             - [grel:valueParameter, $(firstname)]
             - [grel:valueParameter2, ""]
-      - [bf:identifiedBy, btid:identifier_unesco_u$(contributorIDShort)~iri]
-      - [bf:identifiedBy, btid:identifier_unesco_long_u$(contributorID)~iri]
 
 
   # ---------------------------------------------------------------------------
@@ -113,8 +140,6 @@ mappings:
         - [grel:valueParameter2, "org"]
     po:
       - [a, schema:Organization]
-      - [dcterms:identifier, u$(contributorIDShort)]
-      - [rdfs:label, $(name)]
       - p: schema:name
         o: $(name)
         condition:
@@ -122,7 +147,5 @@ mappings:
           parameters:
             - [grel:valueParameter, $(name)]
             - [grel:valueParameter2, ""]
-      - [bf:identifiedBy, btid:identifier_unesco_u$(contributorIDShort)~iri]
-      - [bf:identifiedBy, btid:identifier_unesco_long_u$(contributorID)~iri]
 
 
