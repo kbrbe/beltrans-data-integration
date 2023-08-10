@@ -141,6 +141,7 @@ INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
 INPUT_CORRELATION="../data-sources/correlation/2023-06-28_person-contributors-correlation-list-processed.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-08-10_translations-correlation-list.csv"
 
 
 # #############################################################################
@@ -482,19 +483,26 @@ SUFFIX_BNFISNI_CONT_LD="bnf-data-of-missing-nationalities.xml"
 # CORRELATIONS
 #
 SUFFIX_CORRELATION="correlation-entities"
-SUFFIX_CORRELATION_NATIONALITY="correlation-nationalities.csv"
-SUFFIX_CORRELATION_KBR="correlation-kbr.csv"
-SUFFIX_CORRELATION_BNF="correlation-bnf.csv"
-SUFFIX_CORRELATION_NTA="correlation-nta.csv"
-SUFFIX_CORRELATION_UNESCO="correlation-unesco.csv"
-SUFFIX_CORRELATION_ISNI="correlation-isni.csv"
+SUFFIX_CORRELATION_NATIONALITY="correlation-persons-nationalities.csv"
+SUFFIX_CORRELATION_KBR="correlation-persons-kbr.csv"
+SUFFIX_CORRELATION_BNF="correlation-persons-bnf.csv"
+SUFFIX_CORRELATION_NTA="correlation-persons-nta.csv"
+SUFFIX_CORRELATION_UNESCO="correlation-persons-unesco.csv"
+SUFFIX_CORRELATION_ISNI="correlation-persons-isni.csv"
 
-SUFFIX_CORRELATION_UNESCO_LONG="correlation-unesco-long.csv"
-SUFFIX_CORRELATION_VIAF="correlation-viaf.csv"
-SUFFIX_CORRELATION_WIKIDATA="correlation-wikidata.csv"
-SUFFIX_CORRELATION_PSEUDONYM="correlation-pseudonym.csv"
-SUFFIX_CORRELATION_REAL_NAME="correlation-real-name.csv"
+SUFFIX_CORRELATION_UNESCO_LONG="correlation-persons-unesco-long.csv"
+SUFFIX_CORRELATION_VIAF="correlation-persons-viaf.csv"
+SUFFIX_CORRELATION_WIKIDATA="correlation-persons-wikidata.csv"
+SUFFIX_CORRELATION_PSEUDONYM="correlation-persons-pseudonym.csv"
+SUFFIX_CORRELATION_REAL_NAME="correlation-persons-real-name.csv"
 
+SUFFIX_CORRELATION_TRL="correlation-translation-entities"
+SUFFIX_CORRELATION_TRL_ISBN10="correlation-trl-isbn10.csv"
+SUFFIX_CORRELATION_TRL_ISBN13="correlation-trl-isbn13.csv"
+SUFFIX_CORRELATION_TRL_KBR="correlation-trl-kbr-id.csv"
+SUFFIX_CORRELATION_TRL_BNF="correlation-trl-bnf-id.csv"
+SUFFIX_CORRELATION_TRL_KB="correlation-trl-kb-id.csv"
+SUFFIX_CORRELATION_TRL_UNESCO="correlation-trl-unesco-id.csv"
 
 #
 # LINKED DATA - KBR TRANSLATIONS
@@ -583,7 +591,9 @@ SUFFIX_WIKIDATA_LD="from-manually-enriched-wikidata.ttl"
 #
 # LINKED DATA - CORRELATION
 #
-SUFFIX_CORRELATION_LD="correlation-entities.ttl"
+SUFFIX_CORRELATION_LD="correlation-person-entities.ttl"
+
+SUFFIX_CORRELATION_TRL_LD="correlation-translation-entities.ttl"
 
 # -----------------------------------------------------------------------------
 function extract {
@@ -636,6 +646,9 @@ function extract {
   elif [ "$dataSource" = "person-correlation" ];
   then
     extractContributorCorrelationList "$integrationFolderName"
+  elif [ "$dataSource" = "translation-correlation" ];
+  then
+    extractTranslationCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
@@ -646,6 +659,8 @@ function extract {
     extractWikidata $integrationFolderName
     extractNationalityFromBnFViaISNI $integrationFolderName
     extractUnesco $integrationFolderName
+    extractContributorCorrelationList "$integrationFolderName"
+    extractTranslationCorrelationList "$integrationFolderName"
   fi
   
 }
@@ -688,6 +703,9 @@ function transform {
   elif [ "$dataSource" = "person-correlation" ];
   then 
     transformContributorCorrelationList "$integrationFolderName"
+  elif [ "$dataSource" = "translation-correlation" ];
+  then
+    transformTranslationCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
@@ -698,6 +716,7 @@ function transform {
     transformWikidata $integrationFolderName
     transformNationalityFromBnFViaISNI $integrationFolderName
     transformUnesco $integrationFolderName
+    transformContributorCorrelationList "$integrationFolderName"
   fi
   
 }
@@ -740,6 +759,9 @@ function load {
   elif [ "$dataSource" = "person-correlation" ];
   then
     loadContributorCorrelationList "$integrationFolderName"
+  elif [ "$dataSource" = "translation-correlation" ];
+  then
+    loadTranslationCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
@@ -749,6 +771,7 @@ function load {
     loadWikidata $integrationFolderName
     loadNationalityFromBnFViaISNI $integrationFolderName
     loadUnesco $integrationFolderName
+    loadContributorCorrelationList "$integrationFolderName"
   fi
 
 }
@@ -789,11 +812,24 @@ function integrate {
   echo "Create schema:name properties based on BIBFRAME titles/subtitles for records which do not yet have schema:name"
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
 
-  echo "Create BELTRANS contributors based on correlation lists"
+  #
+  # CREATE CORRELATION LIST ENTRIES BEFORE THE AUTOMATIC INTEGRATION
+  #
+  # Contributors
+  #
+  echo "Create BELTRANS contributors based on correlation list"
   extractContributorCorrelationList "$integrationName"
   transformContributorCorrelationList "$integrationName"
   loadContributorCorrelationList "$integrationName"
 
+  # Translations
+  #
+  echo "Create BELTRANS translations based on correlation list"
+  extractTranslationCorrelationList "$integrationName"
+
+  #
+  # AUTOMATIC INTEGRATION
+  # 
   echo "Automatically integrate manifestations ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
     --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
@@ -2216,7 +2252,7 @@ function extractContributorCorrelationList {
   local correlationListPseudonymOfIDs="$integrationName/correlation/$SUFFIX_CORRELATION_PSEUDONYM"
   local correlationListRealNameOfIDs="$integrationName/correlation/$SUFFIX_CORRELATION_REAL_NAME"
 
-  echo "Extract 1:n relationships of different correlation list columns"
+  echo "Extract 1:n relationships of different persons correlation list columns"
   extractSeparatedColumn $correlationList $correlationListNationalities "contributorID" "nationalityCountryCodes" "id" "nationality"
   extractSeparatedColumn $correlationList $correlationListKBRIDs "contributorID" "kbrIDs" "id" "KBR"
   extractSeparatedColumn $correlationList $correlationListBnFIDs "contributorID" "bnfIDs" "id" "BnF"
@@ -2226,6 +2262,33 @@ function extractContributorCorrelationList {
   extractSeparatedColumn $correlationList $correlationListUnescoIDs "contributorID" "unescoIDs" "id" "unesco"
   extractSeparatedColumn $correlationList $correlationListUnescoLongIDs "contributorID" "unescoIDsLong" "id" "unescoLong"
   extractSeparatedColumn $correlationList $correlationListISNIIDs "contributorID" "isniIDs" "id" "ISNI"
+}
+
+# -----------------------------------------------------------------------------
+function extractTranslationCorrelationList {
+  local integrationName=$1
+
+  mkdir -p "$integrationName/correlation"
+
+  local correlationList="$INPUT_CORRELATION_TRANSLATIONS"
+  local correlationListISBN10="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_ISBN10"
+  local correlationListISBN13="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_ISBN13"
+
+  local correlationListKBRIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KBR"
+  local correlationListBNFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_BNF"
+  local correlationListKBIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KB"
+  local correlationListUNESCOIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
+
+  local correlationListKBRSOURCEIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
+  
+  echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
+  extractSeparatedColumn $correlationList $correlationListISBN10 "targetIdentifier" "targetISBN10" "id" "isbn10"
+  extractSeparatedColumn $correlationList $correlationListISBN13 "targetIdentifier" "targetISBN13" "id" "isbn13"
+  extractSeparatedColumn $correlationList $correlationListKBRIDs "targetIdentifier" "targetKBRIdentifier" "id" "KBR"
+  extractSeparatedColumn $correlationList $correlationListBNFIDs "targetIdentifier" "targetKBRIdentifier" "id" "BnF"
+  extractSeparatedColumn $correlationList $correlationListKBIDs "targetIdentifier" "targetKBRIdentifier" "id" "KB"
+  extractSeparatedColumn $correlationList $correlationListUNESCOIDs "targetIdentifier" "targetKBRIdentifier" "id" "unesco"
+
 }
 
 # -----------------------------------------------------------------------------
@@ -2261,11 +2324,42 @@ function transformContributorCorrelationList {
   export RML_SOURCE_CORRELATION_VIAF="$correlationListVIAFIDs"
   export RML_SOURCE_CORRELATION_WIKIDATA="$correlationListWikidataIDs"
 
-  echo "Map manual correlation data"
+  echo "Map persons correlation data"
   . map.sh ../data-sources/correlation/correlation-contributors.yml $correlationTurtle
 
 }
 
+# -----------------------------------------------------------------------------
+function transformTranslationCorrelationList {
+  local integrationName=$1
+
+  mkdir -p "$integrationName/correlation/rdf"
+  
+  local correlationList="$INPUT_CORRELATION_TRANSLATIONS"
+  local correlationListISBN10="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_ISBN10"
+  local correlationListISBN13="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_ISBN13"
+
+  local correlationListKBRIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KBR"
+  local correlationListBNFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_BNF"
+  local correlationListKBIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KB"
+  local correlationListUNESCOIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
+
+  local correlationListKBRSOURCEIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
+
+  local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_TRL_LD"
+
+  export RML_SOURCE_CORRELATION_TRL="$correlationList"
+  export RML_SOURCE_CORRELATION_TRL_ISBN10="$correlationListISBN10"
+  export RML_SOURCE_CORRELATION_TRL_ISBN13="$correlationListISBN13"
+  export RML_SOURCE_CORRELATION_TRL_KBR="$correlationListKBRIDs"
+  export RML_SOURCE_CORRELATION_TRL_BNF="$correlationListBNFIDs"
+  export RML_SOURCE_CORRELATION_TRL_KB="$correlationListKBIDs"
+  export RML_SOURCE_CORRELATION_TRL_UNESCO="$correlationListUNESCOIDs"
+ 
+  echo "Map translations correlation data"
+  . map.sh ../data-sources/correlation/correlation-translations.yml $correlationTurtle
+
+}
 
 # -----------------------------------------------------------------------------
 function loadContributorCorrelationList {
@@ -2277,11 +2371,26 @@ function loadContributorCorrelationList {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
   local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_LD"
 
-  echo "Load correlation list"
+  echo "Load persons correlation list"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
     "$correlationTurtle"
 }
   
+# -----------------------------------------------------------------------------
+function loadTranslationCorrelationList {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+  local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_TRL_LD"
+
+  echo "Load translations correlation list"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    "$correlationTurtle"
+}
+ 
 
 # -----------------------------------------------------------------------------
 function loadKBR {
