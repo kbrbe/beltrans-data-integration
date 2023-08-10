@@ -34,6 +34,10 @@ variables:
   sourceContUnesco: &sourceContUnesco ${RML_SOURCE_CORRELATION_UNESCO}
   sourceContISNI: &sourceContISNI ${RML_SOURCE_CORRELATION_ISNI}
 
+  sourceContUnescoLong: &sourceContUnescoLong ${RML_SOURCE_CORRELATION_UNESCO_LONG}
+  sourceContVIAF: &sourceContVIAF ${RML_SOURCE_CORRELATION_VIAF}
+  sourceContWikidata: &sourceContWikidata ${RML_SOURCE_CORRELATION_WIKIDATA}
+
 
 mappings:
 
@@ -44,17 +48,17 @@ mappings:
       - access: *sourceCont
         referenceFormulation: csv
         delimiter: ','
-    s: btid:$(id)
+    s: btid:$(contributorID)
     po:
       - [a, schema:Person]
-      - [dcterms:identifier, $(id)]
+      - [dcterms:identifier, $(contributorID)]
       - [rdfs:comment, "Created from correlation list"]
       - p: rdfs:label
-        o: $(name KBR)
+        o: $(name)
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(name KBR)]
+            - [grel:valueParameter, $(name)]
             - [grel:valueParameter2, ""] 
       - p: schema:gender
         o: schema:Female~iri
@@ -97,28 +101,8 @@ mappings:
         referenceFormulation: csv
         delimiter: ','
     s: btid:$(id)
-    po:
-      - p: schema:nationality
-        o: countries:be~iri
-        condition:
-          function: idlab-fn:equal
-          parameters:
-            - [grel:valueParameter, $(nationality)]
-            - [grel:valueParameter2, "Belgium"] 
-      - p: schema:nationality
-        o: countries:ne~iri
-        condition:
-          function: idlab-fn:equal
-          parameters:
-            - [grel:valueParameter, $(nationality)]
-            - [grel:valueParameter2, "Netherlands"] 
-      - p: schema:nationality
-        o: countries:fr~iri
-        condition:
-          function: idlab-fn:equal
-          parameters:
-            - [grel:valueParameter, $(nationality)]
-            - [grel:valueParameter2, "France"] 
+    po: 
+      - [schema:nationality, countries:$(nationality)~iri]
 
   # ---------------------------------------------------------------------------
   #
@@ -205,19 +189,37 @@ mappings:
     s: btid:$(id)
     po:
       - p: bf:identifiedBy
-        o: btid:unesco_$(Unesco)~iri
+        o: btid:unesco_$(unesco)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(Unesco)]
+            - [grel:valueParameter, $(unesco)]
             - [grel:valueParameter2, ""]
       - p: schema:sameAs
-        o: btid:unesco_authority_$(Unesco)~iri
+        o: btid:unesco_authority_$(unesco)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(Unesco)]
+            - [grel:valueParameter, $(unesco)]
             - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  unescoLongLink:
+    sources:
+      - access: *sourceContUnescoLong
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - p: bf:identifiedBy
+        o: btid:unesco_$(unescoLong)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(unescoLong)]
+            - [grel:valueParameter2, ""]
+
 
   # ---------------------------------------------------------------------------
   #
@@ -242,6 +244,43 @@ mappings:
           parameters:
             - [grel:valueParameter, $(ISNI)]
             - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  viafLink:
+    sources:
+      - access: *sourceContVIAF
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - p: bf:identifiedBy
+        o: btid:viaf_$(VIAF)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(VIAF)]
+            - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  wikidataLink:
+    sources:
+      - access: *sourceContWikidata
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - p: bf:identifiedBy
+        o: btid:wikidata_$(wikidata)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(wikidata)]
+            - [grel:valueParameter2, ""]
+
+
+
 
 
   # ---------------------------------------------------------------------------
@@ -305,16 +344,34 @@ mappings:
       - access: *sourceContUnesco
         referenceFormulation: csv
         delimiter: ','
-    s: btid:unesco_$(Unesco)
+    s: btid:unesco_$(unesco)
     condition:
       function: idlab-fn:notEqual
       parameters:
-        - [grel:valueParameter, $(Unesco)]
+        - [grel:valueParameter, $(unesco)]
         - [grel:valueParameter2, ""]
     po:
       - [a, bf:Identifier]
       - [rdfs:label, "Unesco"]
-      - [rdf:value, $(Unesco)]
+      - [rdf:value, $(unesco)]
+
+  # ---------------------------------------------------------------------------
+  #
+  unescoLongEntity:
+    sources:
+      - access: *sourceContUnescoLong
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:unesco_long_$(unescoLong)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(unescoLong)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "UnescoLong"]
+      - [rdf:value, $(unescoLong)]
 
 
 
@@ -337,6 +394,43 @@ mappings:
       - [rdf:value, $(ISNI)]
 
 
+  # ---------------------------------------------------------------------------
+  #
+  VIAFEntity:
+    sources:
+      - access: *sourceContVIAF
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:viaf_$(VIAF)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(VIAF)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "VIAF"]
+      - [rdf:value, $(VIAF)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  wikidataEntity:
+    sources:
+      - access: *sourceContWikidata
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:wikidata_$(wikidata)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(wikidata)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "Wikidata"]
+      - [rdf:value, $(wikidata)]
+
 
   # ---------------------------------------------------------------------------
   #
@@ -345,47 +439,68 @@ mappings:
       - access: *sourceCont
         referenceFormulation: csv
         delimiter: ','
-    s: btid:correlation_$(id)
+    s: btid:correlation_$(contributorID)
     po:
       - [a, btm:CorrelationActivity]
       - [rdfs:label, "Curation of correlation"]
-      - [prov:generated, btid:$(id)~iri]
-      - p: prov:used
-        o: btid:authority_$(KBR)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(KBR)]
-            - [grel:valueParameter2, ""]
-      - p: prov:used
-        o: bnf:$(BnF)#about~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(BnF)]
-            - [grel:valueParameter2, ""]
-      - p: prov:used
-        o: nta:$(NTA)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(NTA)]
-            - [grel:valueParameter2, ""]
-      - p: prov:used
-        o: btid:unesco_authority_$(Unesco)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(Unesco)]
-            - [grel:valueParameter2, ""]
-      - p: prov:used
-        o: isni:authority_$(ISNI)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(ISNI)]
-            - [grel:valueParameter2, ""]
+      - [prov:generated, btid:$(contributorID)~iri]
 
 
+  # ---------------------------------------------------------------------------
+  #
+  CorrelationAnnotationUsedKBR:
+    sources:
+      - access: *sourceContKBR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:correlation_$(id)
+    po:
+      - [prov:used, btid:authority_$(KBR)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  CorrelationAnnotationUsedBnF:
+    sources:
+      - access: *sourceContBnF
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:correlation_$(id)
+    po:
+      - [prov:used, bnf:$(BnF)#about~iri]
+ 
+  # ---------------------------------------------------------------------------
+  #
+  CorrelationAnnotationUsedNTA:
+    sources:
+      - access: *sourceContNTA
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:correlation_$(id)
+    po:
+      - [prov:used, nta:$(NTA)~iri]
+ 
+  # ---------------------------------------------------------------------------
+  #
+  CorrelationAnnotationUsedUnesco:
+    sources:
+      - access: *sourceContUnesco
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:correlation_$(id)
+    po:
+      - [prov:used, btid:unesco_authority_$(unesco)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  CorrelationAnnotationUsedISNI:
+    sources:
+      - access: *sourceContISNI
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:correlation_$(id)
+    po:
+      - [prov:used, isni:authority_$(ISNI)~iri]
+ 
+ 
 
 

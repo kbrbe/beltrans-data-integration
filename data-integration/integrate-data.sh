@@ -72,8 +72,8 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 # KBR - translations
 #INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-17_4745records.xml"
 #INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-17_13126records.xml"
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-05-30.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-05-30.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-06-30.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-06-30.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -81,10 +81,10 @@ INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230530_NL-FR_APEP.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230530_NL-FR_AORG.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230530_FR-NL_APEP.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230530_FR-NL_AORG.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230630_NL-FR_APEP.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230630_NL-FR_AORG.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230630_FR-NL_APEP.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230630_FR-NL_AORG.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
@@ -93,7 +93,7 @@ INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-05-30_38033records.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-06-30.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -140,7 +140,7 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION="../data-sources/correlation/2023-05-30_Person-contributors_correlation-list.csv"
+INPUT_CORRELATION="../data-sources/correlation/2023-06-28_person-contributors-correlation-list-processed.csv"
 
 
 # #############################################################################
@@ -489,6 +489,12 @@ SUFFIX_CORRELATION_NTA="correlation-nta.csv"
 SUFFIX_CORRELATION_UNESCO="correlation-unesco.csv"
 SUFFIX_CORRELATION_ISNI="correlation-isni.csv"
 
+SUFFIX_CORRELATION_UNESCO_LONG="correlation-unesco-long.csv"
+SUFFIX_CORRELATION_VIAF="correlation-viaf.csv"
+SUFFIX_CORRELATION_WIKIDATA="correlation-wikidata.csv"
+SUFFIX_CORRELATION_PSEUDONYM="correlation-pseudonym.csv"
+SUFFIX_CORRELATION_REAL_NAME="correlation-real-name.csv"
+
 
 #
 # LINKED DATA - KBR TRANSLATIONS
@@ -627,6 +633,9 @@ function extract {
   elif [ "$dataSource" = "unesco" ];
   then
     extractUnesco $integrationFolderName
+  elif [ "$dataSource" = "person-correlation" ];
+  then
+    extractContributorCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
@@ -676,6 +685,9 @@ function transform {
   elif [ "$dataSource" = "unesco" ];
   then
     transformUnesco $integrationFolderName
+  elif [ "$dataSource" = "person-correlation" ];
+  then 
+    transformContributorCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
@@ -725,6 +737,9 @@ function load {
   elif [ "$dataSource" = "unesco" ];
   then
     loadUnesco $integrationFolderName
+  elif [ "$dataSource" = "person-correlation" ];
+  then
+    loadContributorCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
@@ -777,7 +792,7 @@ function integrate {
   echo "Create BELTRANS contributors based on correlation lists"
   extractContributorCorrelationList "$integrationName"
   transformContributorCorrelationList "$integrationName"
-  loadContributorCorrelationList "$integrationName" "$integrationNamespace"
+  loadContributorCorrelationList "$integrationName"
 
   echo "Automatically integrate manifestations ..."
   python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
@@ -1399,6 +1414,9 @@ function extractUnesco {
   echo "EXTRACTION - extract unique contributors"
   time python -m $MODULE_GROUP_BY -i $unescoContributions -o $unescoUniqueContributors \
     --id-column "contributorIDShort" -c "contributorID" -c "name" -c "firstname" -c "type" -c "place" -s "contributorType"
+
+  echo "EXTRACTION - replace extracted contributor CSV with manual curated one"
+  cp "../data-sources/unesco/2023-07-04_unesco-unique-contributors.csv" $unescoUniqueContributors
 
 }
 
@@ -2192,13 +2210,22 @@ function extractContributorCorrelationList {
   local correlationListUnescoIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO"
   local correlationListISNIIDs="$integrationName/correlation/$SUFFIX_CORRELATION_ISNI"
 
+  local correlationListUnescoLongIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO_LONG"
+  local correlationListVIAFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_VIAF"
+  local correlationListWikidataIDs="$integrationName/correlation/$SUFFIX_CORRELATION_WIKIDATA"
+  local correlationListPseudonymOfIDs="$integrationName/correlation/$SUFFIX_CORRELATION_PSEUDONYM"
+  local correlationListRealNameOfIDs="$integrationName/correlation/$SUFFIX_CORRELATION_REAL_NAME"
+
   echo "Extract 1:n relationships of different correlation list columns"
-  extractSeparatedColumn $correlationList $correlationListNationalities "id" "nationality" "id" "nationality"
-  extractSeparatedColumn $correlationList $correlationListKBRIDs "id" "KBR" "id" "KBR"
-  extractSeparatedColumn $correlationList $correlationListBnFIDs "id" "BnF" "id" "BnF"
-  extractSeparatedColumn $correlationList $correlationListNTAIDs "id" "NTA" "id" "NTA"
-  extractSeparatedColumn $correlationList $correlationListUnescoIDs "id" "Unesco" "id" "Unesco"
-  extractSeparatedColumn $correlationList $correlationListISNIIDs "id" "ISNI" "id" "ISNI"
+  extractSeparatedColumn $correlationList $correlationListNationalities "contributorID" "nationalityCountryCodes" "id" "nationality"
+  extractSeparatedColumn $correlationList $correlationListKBRIDs "contributorID" "kbrIDs" "id" "KBR"
+  extractSeparatedColumn $correlationList $correlationListBnFIDs "contributorID" "bnfIDs" "id" "BnF"
+  extractSeparatedColumn $correlationList $correlationListNTAIDs "contributorID" "ntaIDs" "id" "NTA"
+  extractSeparatedColumn $correlationList $correlationListVIAFIDs "contributorID" "viafIDs" "id" "VIAF"
+  extractSeparatedColumn $correlationList $correlationListWikidataIDs "contributorID" "wikidataIDs" "id" "wikidata"
+  extractSeparatedColumn $correlationList $correlationListUnescoIDs "contributorID" "unescoIDs" "id" "unesco"
+  extractSeparatedColumn $correlationList $correlationListUnescoLongIDs "contributorID" "unescoIDsLong" "id" "unescoLong"
+  extractSeparatedColumn $correlationList $correlationListISNIIDs "contributorID" "isniIDs" "id" "ISNI"
 }
 
 # -----------------------------------------------------------------------------
@@ -2215,6 +2242,10 @@ function transformContributorCorrelationList {
   local correlationListUnescoIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO"
   local correlationListISNIIDs="$integrationName/correlation/$SUFFIX_CORRELATION_ISNI"
 
+  local correlationListUnescoLongIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO_LONG"
+  local correlationListVIAFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_VIAF"
+  local correlationListWikidataIDs="$integrationName/correlation/$SUFFIX_CORRELATION_WIKIDATA"
+
   local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_LD"
 
 
@@ -2226,6 +2257,10 @@ function transformContributorCorrelationList {
   export RML_SOURCE_CORRELATION_UNESCO="$correlationListUnescoIDs"
   export RML_SOURCE_CORRELATION_ISNI="$correlationListISNIIDs"
 
+  export RML_SOURCE_CORRELATION_UNESCO_LONG="$correlationListUnescoLongIDs"
+  export RML_SOURCE_CORRELATION_VIAF="$correlationListVIAFIDs"
+  export RML_SOURCE_CORRELATION_WIKIDATA="$correlationListWikidataIDs"
+
   echo "Map manual correlation data"
   . map.sh ../data-sources/correlation/correlation-contributors.yml $correlationTurtle
 
@@ -2235,7 +2270,6 @@ function transformContributorCorrelationList {
 # -----------------------------------------------------------------------------
 function loadContributorCorrelationList {
   local integrationName=$1
-  local integrationNamespace=$2
 
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
