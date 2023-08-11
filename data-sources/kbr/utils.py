@@ -201,13 +201,22 @@ def getElementValue(elem, sep=';'):
   >>> obj2 = Test()
   >>> getElementValue([obj1,obj2])
   'hello;hello'
+
+  In case one of the list values is empty
+  >>> class WithContent: text = 'hello'
+  >>> class WithoutContent: text = None
+  >>> obj1 = WithContent()
+  >>> obj2 = WithoutContent()
+  >>> getElementValue([obj1,obj2])
+  'hello'
   """
   if elem is not None:
     if isinstance(elem, list):
       valueList = list()
       for e in elem:
         if hasattr(e, 'text'):
-          valueList.append(e.text)
+          if e.text is not None:
+            valueList.append(e.text)
       return ';'.join(valueList)
     else:
       if hasattr(elem, 'text'):
