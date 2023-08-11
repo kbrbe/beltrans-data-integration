@@ -168,7 +168,7 @@ def generateManifestationsUpdateQuery(sourceName, sourceGraph, targetGraph, orig
 
   qb = ManifestationSingleUpdateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
                                 entitySourceClass='schema:CreativeWork',
-                                originalsGraph=originalsGraph, identifiersToAdd=identifiersToAdd)
+                                originalsGraph=originalsGraph, identifiersToAdd=identifiersToAdd, correlationListFilter=True)
   return qb.getQueryString()
 
 # -----------------------------------------------------------------------------
