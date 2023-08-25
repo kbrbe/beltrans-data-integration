@@ -2,6 +2,7 @@
 SOURCE_FOLDER="data-integration-sparql"
 MAPPING_MANIFESTATIONS="manifestations.yml"
 MAPPING_MANIFESTATIONS_BNF="manifestations-bnf.yml"
+MAPPING_MANIFESTATIONS_CORRELATION="manifestations-correlation.yml"
 MAPPING_ORIGINALS="originals.yml"
 MAPPING_CONTRIBUTORS="contributors.yml"
 MAPPING_CONTRIBUTORS_BNF="contributors-bnf.yml"
@@ -26,6 +27,10 @@ export RML_TEST_SOURCE_PUBLICATIONS=$SOURCE_FOLDER"/kb-manifestations.csv"
 . map.sh $SOURCE_FOLDER"/"$MAPPING_ORIGINALS $SOURCE_FOLDER"/kb-originals.ttl"
 . map.sh $SOURCE_FOLDER"/"$MAPPING_ISBN $SOURCE_FOLDER"/kb-isbns.ttl"
 
+# build correlation list manifestation data
+export RML_TEST_SOURCE_PUBLICATIONS=$SOURCE_FOLDER"/correlation-list-manifestations.csv"
+. map.sh $SOURCE_FOLDER"/"$MAPPING_MANIFESTATIONS_CORRELATION $SOURCE_FOLDER"/correlation-list-manifestations.ttl"
+. map.sh $SOURCE_FOLDER"/"$MAPPING_ISBN $SOURCE_FOLDER"/correlation-list-isbns.ttl"
 
 # build KBR contributor data
 export RML_TEST_SOURCE_CONTRIBUTORS=$SOURCE_FOLDER"/kbr-contributors.csv"
