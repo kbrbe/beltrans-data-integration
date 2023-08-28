@@ -23,6 +23,7 @@ prefixes:
   marcrel: "http://id.loc.gov/vocabulary/relators/"
   bnf: "http://data.bnf.fr/ark:/12148/"
   nta: "http://data.bibliotheken.nl/id/thes/"
+  nbt: "http://data.bibliotheken.nl/id/nbt/"
   isni: "http://kbr.be/isni/"
 
 variables:
@@ -149,7 +150,7 @@ mappings:
             - [grel:valueParameter, $(KBR)]
             - [grel:valueParameter2, ""]
       - p: schema:sameAs
-        o: btid:authority_$(KBR)~iri
+        o: btid:manifestation_$(KBR)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
@@ -192,14 +193,14 @@ mappings:
     s: btid:$(id)
     po:
       - p: bf:identifiedBy
-        o: btid:nta_$(KB)~iri
+        o: btid:kb_$(KB)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
             - [grel:valueParameter, $(KB)]
             - [grel:valueParameter2, ""]
       - p: schema:sameAs
-        o: nta:$(KB)~iri
+        o: nbt:$(KB)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
@@ -224,7 +225,7 @@ mappings:
             - [grel:valueParameter, $(unesco)]
             - [grel:valueParameter2, ""]
       - p: schema:sameAs
-        o: btid:unesco_authority_$(unesco)~iri
+        o: btid:manifestation_unesco_$(unesco)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
@@ -309,7 +310,7 @@ mappings:
       - access: *sourceContKB
         referenceFormulation: csv
         delimiter: ','
-    s: btid:nta_$(KB)
+    s: btid:kb_$(KB)
     condition:
       function: idlab-fn:notEqual
       parameters:
@@ -401,7 +402,7 @@ mappings:
         delimiter: ','
     s: btid:correlation_$(id)
     po:
-      - [prov:used, btid:authority_$(KBR)~iri]
+      - [prov:used, btid:manifestation_$(KBR)~iri]
 
   # ---------------------------------------------------------------------------
   #
@@ -423,7 +424,7 @@ mappings:
         delimiter: ','
     s: btid:correlation_$(id)
     po:
-      - [prov:used, nta:$(KB)~iri]
+      - [prov:used, nbt:$(KB)~iri]
  
   # ---------------------------------------------------------------------------
   #
@@ -434,6 +435,6 @@ mappings:
         delimiter: ','
     s: btid:correlation_$(id)
     po:
-      - [prov:used, btid:unesco_authority_$(unesco)~iri]
+      - [prov:used, btid:manifestation_unesco_$(unesco)~iri]
 
 

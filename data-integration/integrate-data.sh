@@ -2285,12 +2285,13 @@ function extractTranslationCorrelationList {
   local correlationListKBRSOURCEIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
   
   echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
+  cp $correlationList "$integrationName/correlation/"
   extractSeparatedColumn $correlationList $correlationListISBN10 "targetIdentifier" "targetISBN10" "id" "isbn10"
   extractSeparatedColumn $correlationList $correlationListISBN13 "targetIdentifier" "targetISBN13" "id" "isbn13"
   extractSeparatedColumn $correlationList $correlationListKBRIDs "targetIdentifier" "targetKBRIdentifier" "id" "KBR"
-  extractSeparatedColumn $correlationList $correlationListBNFIDs "targetIdentifier" "targetKBRIdentifier" "id" "BnF"
-  extractSeparatedColumn $correlationList $correlationListKBIDs "targetIdentifier" "targetKBRIdentifier" "id" "KB"
-  extractSeparatedColumn $correlationList $correlationListUNESCOIDs "targetIdentifier" "targetKBRIdentifier" "id" "unesco"
+  extractSeparatedColumn $correlationList $correlationListBNFIDs "targetIdentifier" "targetBnFIdentifier" "id" "BnF"
+  extractSeparatedColumn $correlationList $correlationListKBIDs "targetIdentifier" "targetKBIdentifier" "id" "KB"
+  extractSeparatedColumn $correlationList $correlationListUNESCOIDs "targetIdentifier" "targetUnescoIdentifier" "id" "unesco"
 
 }
 
