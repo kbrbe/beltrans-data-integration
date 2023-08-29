@@ -329,23 +329,13 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  collectionLinksNL:
+  collectionLinks:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates links between creative works and their collections (in case they are part of one or more collections)."
     sources:
       - access: *sourceCollectionLinksNL
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:manifestation_$(KBRID)
-    po:
-      - [schema:isPartOf, btid:collection_$(collectionID)~iri]
-
-  # ---------------------------------------------------------------------------
-  #
-  collectionLinksFR:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates links between creative works and their collections (in case they are part of one or more collections)."
-    sources:
       - access: *sourceCollectionLinksFR
         referenceFormulation: csv
         delimiter: ',' 
@@ -355,26 +345,13 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  collectionInfoNL:
+  collectionInfo:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates collections (solely based on linking information, thus not all metadata of the collection is available in the source)."
     sources:
       - access: *sourceCollectionLinksNL
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:collection_$(collectionID)
-    po:
-      - [a, schema:CreativeWorkSeries]
-      - [dcterms:identifier, $(collectionID)]
-      - [schema:name, $(collection-name)]
-
-
-  # ---------------------------------------------------------------------------
-  #
-  collectionInfoFR:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates collections (solely based on linking information, thus not all metadata of the collection is available in the source)."
-    sources:
       - access: *sourceCollectionLinksFR
         referenceFormulation: csv
         delimiter: ',' 
@@ -383,4 +360,5 @@ mappings:
       - [a, schema:CreativeWorkSeries]
       - [dcterms:identifier, $(collectionID)]
       - [schema:name, $(collection-name)]
+
 
