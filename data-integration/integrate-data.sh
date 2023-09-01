@@ -14,6 +14,8 @@ SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-author
 SCRIPT_EXTRACT_SEPARATED_COL="../data-sources/kbr/extract-and-normalize-separated-strings.py"
 SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
+SCRIPT_GET_KBR_RECORDS="../data-sources/kbr/get-kbr-records.py"
+
 MODULE_COMPLETE_SEQUENCE_NUMBERS="tools.csv.complete_sequence_numbers"
 
 SCRIPT_FIND_ORIGINALS="find-originals.py"
@@ -503,6 +505,7 @@ SUFFIX_CORRELATION_TRL_KBR="correlation-trl-kbr-id.csv"
 SUFFIX_CORRELATION_TRL_BNF="correlation-trl-bnf-id.csv"
 SUFFIX_CORRELATION_TRL_KB="correlation-trl-kb-id.csv"
 SUFFIX_CORRELATION_TRL_UNESCO="correlation-trl-unesco-id.csv"
+SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML="correlation-original-kbr.xml"
 
 #
 # LINKED DATA - KBR TRANSLATIONS
@@ -2283,6 +2286,7 @@ function extractTranslationCorrelationList {
   local correlationListUNESCOIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
 
   local correlationListKBRSOURCEIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
+  local correlationListKBROriginalXML="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML"
   
   echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
   cp $correlationList "$integrationName/correlation/"
@@ -2292,6 +2296,9 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListBNFIDs "targetIdentifier" "targetBnFIdentifier" "id" "BnF"
   extractSeparatedColumn $correlationList $correlationListKBIDs "targetIdentifier" "targetKBIdentifier" "id" "KB"
   extractSeparatedColumn $correlationList $correlationListUNESCOIDs "targetIdentifier" "targetUnescoIdentifier" "id" "unesco"
+
+  echo "Fetch and extract KBR originals"
+  getKBRRecords $correlationList "sourceKBRIdentifier" $correlationListKBROriginalXML 
 
 }
 
@@ -2888,6 +2895,18 @@ function checkFile {
     echo "File '$1' does not exist"
     exit 1
   fi
+}
+
+# -----------------------------------------------------------------------------
+function getKBRRecords {
+  local inputFile=$1
+  local idColumn=$2
+  local outputFile=$3
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  python $SCRIPT_GET_KBR_RECORDS -i "$inputFile" -o "$outputFile" --identifier-column "$idColumn" -b "150" -u "$ENV_KBR_API_Z3950"
 }
 
 # -----------------------------------------------------------------------------

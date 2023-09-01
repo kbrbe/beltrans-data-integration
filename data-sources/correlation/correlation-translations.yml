@@ -34,6 +34,8 @@ variables:
   sourceContUnesco: &sourceContUnesco ${RML_SOURCE_CORRELATION_TRL_UNESCO}
   sourceContISBN10: &sourceContISBN10 ${RML_SOURCE_CORRELATION_TRL_ISBN10}
   sourceContISBN13: &sourceContISBN13 ${RML_SOURCE_CORRELATION_TRL_ISBN13}
+  sourceContSourceLang: &sourceContSourceLang ${RML_SOURCE_CORRELATION_TRL_SOURCE_LANG}
+  sourceContTargetLang: &sourceContTargetLang ${RML_SOURCE_CORRELATION_TRL_TARGET_LANG}
 
 
 mappings:
@@ -52,6 +54,7 @@ mappings:
       - [rdfs:comment, "Created from correlation list"]
       - [rdfs:label, "BELTRANS manifestation $(targetIdentifier)"]
       - [bf:title, btid:title_$(targetIdentifier)~iri]
+
 
   # ---------------------------------------------------------------------------
   #
