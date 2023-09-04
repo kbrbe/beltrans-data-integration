@@ -117,6 +117,7 @@ def sparqlSelectToString(url, queryFilename, acceptFormat, auth=None, httpMethod
       r.raise_for_status()
 
       queryTime = time.strftime('%H:%M:%S', time.gmtime(end - start))
+      print(f'successfully queried in time {queryTime}')
       return r.content.decode('utf-8')
 
     except requests.HTTPError as he:
@@ -135,7 +136,7 @@ def sparqlSelect(url, queryFilename, outputFilename, acceptFormat, auth=None):
   response = sparqlSelectToString(url, queryFilename, acceptFormat, auth=auth)
   with open(outputFilename, 'w', encoding='utf-8') as outputFile:
     numberChars = outputFile.write(response)
-    print(f'successfully queried in time {queryTime} and wrote {numberChars} characters to file {outputFilename}!')
+    print(f'successfully wrote {numberChars} characters to file {outputFilename}!')
 
 
 # -----------------------------------------------------------------------------
