@@ -24,7 +24,8 @@ def main(inputFilename, outputFilename, idColumnName, keyColumnName, delimiter):
     descriptiveKeys = {}
 
     # Populate the two data structures above with values from the input file
-    readElements(inputReader, elementIDs, descriptiveKeys)
+    # A sorted list of element identifiers is returned based on the given elementIDs set
+    elementIDs = readElements(inputReader, elementIDs, descriptiveKeys, idColumnName, keyColumnName)
 
     # compute a N:N distance matrix
     distanceMatrix = computeDistanceMatrix(elementIDs, descriptiveKeys)
@@ -33,7 +34,8 @@ def main(inputFilename, outputFilename, idColumnName, keyColumnName, delimiter):
     clusterLabels = performClustering(distanceMatrix)
 
     # write cluster assignment to the output file
-    outputWriter = csv.DictWriter(fOut, fieldnames=['elementID', 'clusterID'])
+    outputWriter = csv.DictWriter(outFile, fieldnames=['elementID', 'clusterID'])
+    outputWriter.writeheader()
 
     for elementIndex, clusterID in enumerate(clusterLabels):
       outputWriter.writerow({'elementID': elementIDs[elementIndex], 'clusterID': clusterID})
@@ -41,7 +43,7 @@ def main(inputFilename, outputFilename, idColumnName, keyColumnName, delimiter):
     print("finished")
 
 # -----------------------------------------------------------------------------
-def readElements(inputReader, elementIDs, descriptiveKeys):
+def readElements(inputReader, elementIDs, descriptiveKeys, idColumnName, keyColumnName):
 
   for row in inputReader:
     eID = row[idColumnName]
@@ -54,12 +56,13 @@ def readElements(inputReader, elementIDs, descriptiveKeys):
       else:
         descriptiveKeys[eID] = set([key])
 
-  elementIDs = sorted(elementIDs)
+  return sorted(elementIDs)
 
 
 # -----------------------------------------------------------------------------
 def computeDistanceMatrix(elementIDs, descriptiveKeys):
   """Compute distance matrix based on common descriptive keys"""
+
   distanceMatrix = np.zeros((len(elementIDs), len(elementIDs)))
   for i, element1 in enumerate(elementIDs):
       for j, element2 in enumerate(elementIDs):
@@ -78,7 +81,7 @@ def performClustering(distanceMatrix):
 
   # get a list where each index corresponds to an element in elementIDs
   # e.g. [0,2,0,1] the first element is in cluster 0, the second in cluster 2, the third in cluster 0 and the 4th in cluster 1
-  return model.fit_predict(distance_matrix)
+  return model.fit_predict(distanceMatrix)
 
 
 # -----------------------------------------------------------------------------
