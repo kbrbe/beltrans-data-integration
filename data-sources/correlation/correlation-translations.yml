@@ -37,7 +37,6 @@ variables:
   sourceContSourceLang: &sourceContSourceLang ${RML_SOURCE_CORRELATION_TRL_SOURCE_LANG}
   sourceContTargetLang: &sourceContTargetLang ${RML_SOURCE_CORRELATION_TRL_TARGET_LANG}
 
-
 mappings:
 
   # ---------------------------------------------------------------------------
@@ -54,6 +53,85 @@ mappings:
       - [rdfs:comment, "Created from correlation list"]
       - [rdfs:label, "BELTRANS manifestation $(targetIdentifier)"]
       - [bf:title, btid:title_$(targetIdentifier)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  sourceLanguages:
+    sources:
+      - access: *sourceContSourceLang
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - p: btm:sourceLanguage
+        o: http://id.loc.gov/vocabulary/languages/fre~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sourceLanguage)]
+            - [grel:valueParameter2, "French"]
+      - p: btm:sourceLanguage
+        o: http://id.loc.gov/vocabulary/languages/dut~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sourceLanguage)]
+            - [grel:valueParameter2, "Dutch"]
+      - p: btm:sourceLanguage
+        o: http://id.loc.gov/vocabulary/languages/eng~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sourceLanguage)]
+            - [grel:valueParameter2, "English"]
+      - p: btm:sourceLanguage
+        o: http://id.loc.gov/vocabulary/languages/ger~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sourceLanguage)]
+            - [grel:valueParameter2, "German"]
+
+  # ---------------------------------------------------------------------------
+  #
+  targetLanguages:
+    sources:
+      - access: *sourceContTargetLang
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - p: schema:inLanguage
+        o: http://id.loc.gov/vocabulary/languages/fre~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(targetLanguage)]
+            - [grel:valueParameter2, "French"]
+      - p: schema:inLanguage
+        o: http://id.loc.gov/vocabulary/languages/dut~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(targetLanguage)]
+            - [grel:valueParameter2, "Dutch"]
+      - p: schema:inLanguage
+        o: http://id.loc.gov/vocabulary/languages/eng~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(targetLanguage)]
+            - [grel:valueParameter2, "English"]
+      - p: schema:inLanguage
+        o: http://id.loc.gov/vocabulary/languages/ger~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(targetLanguage)]
+            - [grel:valueParameter2, "German"]
+
+
+
 
 
   # ---------------------------------------------------------------------------

@@ -143,7 +143,7 @@ INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
 INPUT_CORRELATION="../data-sources/correlation/2023-08-10_person-contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-08-10_translations-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-09-04_translations-correlation-list.csv"
 
 
 # #############################################################################
@@ -506,6 +506,8 @@ SUFFIX_CORRELATION_TRL_BNF="correlation-trl-bnf-id.csv"
 SUFFIX_CORRELATION_TRL_KB="correlation-trl-kb-id.csv"
 SUFFIX_CORRELATION_TRL_UNESCO="correlation-trl-unesco-id.csv"
 SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML="correlation-original-kbr.xml"
+SUFFIX_CORRELATION_TRL_SOURCE_LANG="correlation-trl-source-lang.csv"
+SUFFIX_CORRELATION_TRL_TARGET_LANG="correlation-trl-target-lang.csv"
 
 #
 # LINKED DATA - KBR TRANSLATIONS
@@ -2285,6 +2287,9 @@ function extractTranslationCorrelationList {
   local correlationListKBIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KB"
   local correlationListUNESCOIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
 
+  local correlationListSourceLanguage="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
+  local correlationListTargetLanguage="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
+
   local correlationListKBRSOURCEIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
   local correlationListKBROriginalXML="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML"
   
@@ -2296,6 +2301,8 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListBNFIDs "targetIdentifier" "targetBnFIdentifier" "id" "BnF"
   extractSeparatedColumn $correlationList $correlationListKBIDs "targetIdentifier" "targetKBIdentifier" "id" "KB"
   extractSeparatedColumn $correlationList $correlationListUNESCOIDs "targetIdentifier" "targetUnescoIdentifier" "id" "unesco"
+  extractSeparatedColumn $correlationList $correlationListSourceLanguage "targetIdentifier" "sourceLanguage" "id" "sourceLanguage"
+  extractSeparatedColumn $correlationList $correlationListTargetLanguage "targetIdentifier" "targetLanguage" "id" "targetLanguage"
 
   echo "Fetch and extract KBR originals"
   getKBRRecords $correlationList "sourceKBRIdentifier" $correlationListKBROriginalXML 
@@ -2355,6 +2362,9 @@ function transformTranslationCorrelationList {
   local correlationListKBIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KB"
   local correlationListUNESCOIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
 
+  local correlationListSourceLanguage="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
+  local correlationListTargetLanguage="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
+
   local correlationListKBRSOURCEIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
 
   local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_TRL_LD"
@@ -2366,6 +2376,8 @@ function transformTranslationCorrelationList {
   export RML_SOURCE_CORRELATION_TRL_BNF="$correlationListBNFIDs"
   export RML_SOURCE_CORRELATION_TRL_KB="$correlationListKBIDs"
   export RML_SOURCE_CORRELATION_TRL_UNESCO="$correlationListUNESCOIDs"
+  export RML_SOURCE_CORRELATION_TRL_SOURCE_LANG="$correlationListSourceLanguage"
+  export RML_SOURCE_CORRELATION_TRL_TARGET_LANG="$correlationListTargetLanguage"
  
   echo "Map translations correlation data"
   . map.sh ../data-sources/correlation/correlation-translations.yml $correlationTurtle
