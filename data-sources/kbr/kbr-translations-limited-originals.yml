@@ -27,8 +27,6 @@ variables:
   sourceContFR: &sourceContFR ${RML_SOURCE_CONT_FR}
   sourceWorksNL: &sourceWorksNL ${RML_SOURCE_WORKS_NL}
   sourceContNL: &sourceContNL ${RML_SOURCE_CONT_NL}
-  sourceCollectionLinksNL: &sourceCollectionLinksNL ${RML_SOURCE_COLLECTION_LINKS_NL}
-  sourceCollectionLinksFR: &sourceCollectionLinksFR ${RML_SOURCE_COLLECTION_LINKS_FR}
 
 mappings:
 
