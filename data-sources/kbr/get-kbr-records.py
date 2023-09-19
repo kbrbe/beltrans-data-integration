@@ -51,7 +51,7 @@ def main():
 
   with open(options.output_file, 'wb') as outFile:
 
-    outFile.write(b'<collection>')
+    outFile.write(b'<collection xmlns="http://www.loc.gov/MARC21/slim">')
 
     # send API requests for batches of KBR identifiers
     # there is a limit with respect to the maximum length of the URL
