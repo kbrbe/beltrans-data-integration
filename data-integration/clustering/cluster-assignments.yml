@@ -53,5 +53,6 @@ mappings:
     s: btid:cluster_$(clusterID)
     po:
       - [a, fabio:Work]
+      - [dcterms:identifier, $(clusterID)]
       - [fabio:hasManifestation, $(elementID)~iri]
 
