@@ -7,7 +7,9 @@ import csv
 import argparse
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
+from concurrent.futures import ThreadPoolExecutor
 from tools import utils
+import time
 
 # -----------------------------------------------------------------------------
 def main(inputFilename, outputFilename, idColumnName, keyColumnName, delimiter):
@@ -28,10 +30,11 @@ def main(inputFilename, outputFilename, idColumnName, keyColumnName, delimiter):
     elementIDs = readElements(inputReader, elementIDs, descriptiveKeys, idColumnName, keyColumnName)
 
     # compute a N:N distance matrix
-    distanceMatrix = computeDistanceMatrix(elementIDs, descriptiveKeys)
+    distanceMatrix = computeDistanceMatrixParallel(elementIDs, descriptiveKeys)
 
     # Perform hierarchical clustering
     clusterLabels = performClustering(distanceMatrix)
+    exit(1)
 
     # write cluster assignment to the output file
     outputWriter = csv.DictWriter(outFile, fieldnames=['elementID', 'clusterID'])
@@ -63,7 +66,8 @@ def readElements(inputReader, elementIDs, descriptiveKeys, idColumnName, keyColu
 def computeDistanceMatrix(elementIDs, descriptiveKeys):
   """Compute distance matrix based on common descriptive keys"""
 
-  distanceMatrix = np.zeros((len(elementIDs), len(elementIDs)))
+  start_time = time.time()
+  distanceMatrix = np.zeros((len(elementIDs), len(elementIDs)), dtype=np.float16)
   for i, element1 in enumerate(elementIDs):
       for j, element2 in enumerate(elementIDs):
           commonKeys = descriptiveKeys[element1].intersection(descriptiveKeys[element2])
@@ -71,17 +75,59 @@ def computeDistanceMatrix(elementIDs, descriptiveKeys):
           # Negative distance for common keys
           distanceMatrix[i, j] = -len(commonKeys)
 
+  end_time = time.time()
+  diffTime = time.strftime('%H:%M:%S', time.gmtime(end_time - start_time))
+  print(f'distanceMatrix computed in {diffTime}')
   return distanceMatrix
+
+# -----------------------------------------------------------------------------
+def computeDistanceMatrixParallel(elementIDs, descriptiveKeys):
+    start_time = time.time()
+    # Create a distance matrix initialized with zeros
+    num_elements = len(elementIDs)
+    distanceMatrix = np.zeros((num_elements, num_elements))
+
+    # Use ThreadPoolExecutor for parallel processing
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        # Compute distances in parallel
+        futures = []
+        for i in range(num_elements):
+            for j in range(i, num_elements):
+                element1 = elementIDs[i]
+                element2 = elementIDs[j]
+                common_keys = -len(descriptiveKeys[element1].intersection(descriptiveKeys[element2]))
+                futures.append(common_keys)
+
+        # Fill in the distance matrix using the results
+        idx = 0
+        for i in range(num_elements):
+            for j in range(i, num_elements):
+                distanceMatrix[i, j] = futures[idx]
+                distanceMatrix[j, i] = distanceMatrix[i, j]  # Distance matrix is symmetric
+                idx += 1
+
+    end_time = time.time()
+    diffTime = time.strftime('%H:%M:%S', time.gmtime(end_time - start_time))
+    print(f'distanceMatrix computed in {diffTime}')
+
+    return distanceMatrix
+
 
 
 # -----------------------------------------------------------------------------
 def performClustering(distanceMatrix):
 
+  start_time = time.time()
   model = AgglomerativeClustering(n_clusters=None, affinity='precomputed', linkage='single', distance_threshold=0)
 
   # get a list where each index corresponds to an element in elementIDs
   # e.g. [0,2,0,1] the first element is in cluster 0, the second in cluster 2, the third in cluster 0 and the 4th in cluster 1
-  return model.fit_predict(distanceMatrix)
+  clusterLabels = model.fit_predict(distanceMatrix)
+  end_time = time.time()
+  diffTime = time.strftime('%H:%M:%S', time.gmtime(end_time - start_time))
+  print(f'clustering performed in {diffTime}')
+
+  return clusterLabels
 
 
 # -----------------------------------------------------------------------------

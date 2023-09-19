@@ -23,10 +23,8 @@ prefixes:
   marcrel: "http://id.loc.gov/vocabulary/relators/"
 
 variables:
-  sourceWorksFR: &sourceWorksFR ${RML_SOURCE_WORKS_FR}
-  sourceContFR: &sourceContFR ${RML_SOURCE_CONT_FR}
-  sourceWorksNL: &sourceWorksNL ${RML_SOURCE_WORKS_NL}
-  sourceContNL: &sourceContNL ${RML_SOURCE_CONT_NL}
+  sourceWorks: &sourceWorks ${RML_SOURCE_WORKS}
+  sourceCont: &sourceCont ${RML_SOURCE_CONT}
 
 mappings:
 
@@ -36,12 +34,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates creative works, currently on the LRM level of manifestations."
     sources:
-      - access: *sourceWorksFR
+      - access: *sourceWorks
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:manifestation_$(KBRID)
     po:
       - p: schema:translationOfWork
@@ -65,12 +60,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity."
     sources:
-      - access: *sourceWorksFR
+      - access: *sourceWorks
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:translationActivity_$(KBRID)
     condition:
       function: idlab-fn:notEqual
@@ -90,12 +82,9 @@ mappings:
   creationActivity:
     creator: <https://sven-lieber.org/profile#me>
     sources:
-      - access: *sourceWorksFR
+      - access: *sourceWorks
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:translationActivity_$(KBRID)
     condition:
       function: idlab-fn:notEqual
@@ -114,12 +103,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a W3C PROV activity related to a single translation specifying who contributed in which role, e.g. author, publisher. In the future we may distinguish a dedicated 'translation' and 'publication' activity. The mapping is only executed if there is no source identifier, thus it will link to a created dummy of the source with prefix _source_."
     sources:
-      - access: *sourceWorksFR
+      - access: *sourceWorks
         referenceFormulation: csv
         delimiter: ','
-      - access: *sourceWorksNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:translationActivity_$(KBRID)
     condition:
       function: idlab-fn:equal
@@ -140,14 +126,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates qualified associations between contributors and the creation activity of a translated work (according to W3C PROV)."
     sources:
-#      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
-      - access: *sourceContFR
+      - access: *sourceCont
         referenceFormulation: csv
         delimiter: ','
-#      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
-      - access: *sourceContNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)
     po:
       - [a, prov:Association]
@@ -183,14 +164,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates links between translation activities and qualified associations."
     sources:
-#      - access: "kbr/translations/2021-11-24_FR-NL_contributors.csv"
-      - access: *sourceContFR
+      - access: *sourceCont
         referenceFormulation: csv
         delimiter: ','
-#      - access: "kbr/translations/2021-11-24_NL-FR_contributors.csv"
-      - access: *sourceContNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:translationActivity_$(KBRID)
     po:
       - [prov:qualifiedAssociation, btid:contribution_$(contributorID)_$(KBRID)_$(contributorRole)~iri]

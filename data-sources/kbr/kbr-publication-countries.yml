@@ -20,8 +20,7 @@ prefixes:
   up: "http://users.ugent.be/~tdenies/up/"
 
 variables:
-  pubCountriesFR: &pubCountriesFR ${RML_SOURCE_KBR_PUB_COUNTRIES_FR}
-  pubCountriesNL: &pubCountriesNL ${RML_SOURCE_KBR_PUB_COUNTRIES_NL}
+  pubCountries: &pubCountries ${RML_SOURCE_KBR_PUB_COUNTRIES}
 
 mappings:
 
@@ -31,12 +30,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates associations between manifestations and publication countries (workaround because of bug https://github.com/RMLio/yarrrml-parser/issues/146)."
     sources:
-      - access: *pubCountriesFR
+      - access: *pubCountries
         referenceFormulation: csv
         delimiter: ','
-      - access: *pubCountriesNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:manifestation_$(KBRID)
     po:
       - [schema:countryOfOrigin, $(pubCountryURI)~iri]

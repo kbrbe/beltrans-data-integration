@@ -20,8 +20,7 @@ prefixes:
   up: "http://users.ugent.be/~tdenies/up/"
 
 variables:
-  bbFR: &bbFR ${RML_SOURCE_KBR_BB_FR}
-  bbNL: &bbNL ${RML_SOURCE_KBR_BB_NL}
+  bb: &bb ${RML_SOURCE_KBR_BB}
 
 mappings:
 
@@ -31,12 +30,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates associations between manifestations and Belgian Bibliography (BB) entries."
     sources:
-      - access: *bbFR
+      - access: *bb
         referenceFormulation: csv
         delimiter: ','
-      - access: *bbNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:manifestation_$(KBRID)
     po:
       - [schema:about, $(bbURI)~iri]

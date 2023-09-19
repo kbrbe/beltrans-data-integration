@@ -164,6 +164,18 @@ class Query(ABC):
 
         return pattern.substitute(sourceGraph=sourceGraph, localURIVariable=localURIVariable, targetURIVariable=targetURIVariable, targetGraph=targetGraph)
 
+    # ---------------------------------------------------------------------------
+    @classmethod
+    def _getCorrelationListFilter(self, targetGraph, localURIVariable, targetURIVariable):
+
+          pattern = Template("""
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:used ${localURIVariable} . } }
+          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:generated ${targetURIVariable} . } }
+          FILTER( !bound(?activity) ) 
+        """)
+          return pattern.substitute(targetGraph=targetGraph, localURIVariable=localURIVariable, targetURIVariable=targetURIVariable)
+
+
 
 
     @classmethod
@@ -891,7 +903,7 @@ class ManifestationSingleUpdateQuery(ManifestationQuery):
 
     # -----------------------------------------------------------------------------
     def __init__(self, source, sourceGraph: str, targetGraph: str, originalsGraph: str,
-                 entitySourceClass, identifiersToAdd: list):
+                 entitySourceClass, identifiersToAdd: list, correlationListFilter=False):
         """
 
         Parameters
@@ -910,6 +922,9 @@ class ManifestationSingleUpdateQuery(ManifestationQuery):
         identifiersToAdd : list
             A list of (property, name) tuples specifying the name of identifiers and the property with which
             it can be extracted from the source, e.g. [('bibo:isbn10', 'ISBN10')]
+        correlationListFilter : boolean
+            A boolean flag indicating if a matching should only be performed if the target was not generated based on a correlation list,
+            the default is False
         """
         self.source = source
         self.sourceGraph = sourceGraph
@@ -917,6 +932,7 @@ class ManifestationSingleUpdateQuery(ManifestationQuery):
         self.originalsGraph = originalsGraph
         self.entitySourceClass = entitySourceClass
         self.identifiersToAdd = identifiersToAdd
+        self.correlationListFilter = correlationListFilter
 
 
     # ---------------------------------------------------------------------------
@@ -1007,6 +1023,10 @@ class ManifestationSingleUpdateQuery(ManifestationQuery):
                                                         ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
                                                         ManifestationQuery.VAR_MANIFESTATION_URI,
                                                         self.targetGraph)
+
+        if self.correlationListFilter:
+            query += Query._getCorrelationListFilter(self.targetGraph, ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI, ManifestationQuery.VAR_MANIFESTATION_URI)
+
         # Optionally fetch other identifiers
         for identifierProperty, identifierName in self.identifiersToAdd:
 
@@ -1589,7 +1609,7 @@ class ContributorSingleUpdateQuery(ContributorQuery):
         #query += self._getGenericIdentifierQuadPattern(self.sourceGraph, self.targetGraph, self.correlationListFilter)
         query += Query._getGenericIdentifierQuadPattern(self.sourceGraph, ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI, ContributorQuery.VAR_CONTRIBUTOR_URI, self.targetGraph)
         if self.correlationListFilter:
-            query += self._getCorrelationListFilter(self.targetGraph, ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI, ContributorQuery.VAR_CONTRIBUTOR_URI)
+            query += Query._getCorrelationListFilter(self.targetGraph, ContributorQuery.VAR_CONTRIBUTOR_LOCAL_URI, ContributorQuery.VAR_CONTRIBUTOR_URI)
         query += self._getSourceNationalityQuadPattern(self.sourceGraph, self.nationalityProperty, optional=True)
         query += self._getSourceGenderQuadPattern(self.sourceGraph, self.genderProperty, optional=True)
 
@@ -1608,16 +1628,6 @@ class ContributorSingleUpdateQuery(ContributorQuery):
     
     """)
         return pattern.substitute(sourceGraph=sourceGraph, personClass=personClass, organizationClass=organizationClass)
-
-    # ---------------------------------------------------------------------------
-    def _getCorrelationListFilter(self, targetGraph, localURIVariable, targetURIVariable):
-
-          pattern = Template("""
-          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:used ${localURIVariable} . } }
-          OPTIONAL { graph <$targetGraph> { ?activity a btm:CorrelationActivity ; prov:generated ${targetURIVariable} . } }
-          FILTER( !bound(?activity) ) 
-        """)
-          return pattern.substitute(targetGraph=targetGraph, localURIVariable=localURIVariable, targetURIVariable=targetURIVariable)
 
     # ---------------------------------------------------------------------------
     def _getGenericIdentifierQuadPattern(self, sourceGraph, targetGraph, correlationListFilter=False):

@@ -21,10 +21,8 @@ prefixes:
   up: "http://users.ugent.be/~tdenies/up/"
 
 variables:
-  ISBN10FR: &ISBN10FR ${RML_SOURCE_KBR_ISBN10_FR}
-  ISBN10NL: &ISBN10NL ${RML_SOURCE_KBR_ISBN10_NL}
-  ISBN13FR: &ISBN13FR ${RML_SOURCE_KBR_ISBN13_FR}
-  ISBN13NL: &ISBN13NL ${RML_SOURCE_KBR_ISBN13_NL}
+  ISBN10: &ISBN10 ${RML_SOURCE_KBR_ISBN10}
+  ISBN13: &ISBN13 ${RML_SOURCE_KBR_ISBN13}
 
 mappings:
 
@@ -34,12 +32,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates associations between manifestations and their ISBN10 (workaround because of bug https://github.com/RMLio/yarrrml-parser/issues/146)."
     sources:
-      - access: *ISBN10FR
+      - access: *ISBN10
         referenceFormulation: csv
         delimiter: ','
-      - access: *ISBN10NL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:manifestation_$(KBRID)
     po:
       - [bibo:isbn10, $(isbn10)]
@@ -50,12 +45,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates associations between manifestations and their ISBN13 (workaround because of bug https://github.com/RMLio/yarrrml-parser/issues/146)."
     sources:
-      - access: *ISBN13FR
+      - access: *ISBN13
         referenceFormulation: csv
         delimiter: ','
-      - access: *ISBN13NL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:manifestation_$(KBRID)
     po:
       - [bibo:isbn13, $(isbn13)]
@@ -66,12 +58,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates associations between manifestations and their ISBN13 using the BIBFRAME ontology."
     sources:
-      - access: *ISBN13FR
+      - access: *ISBN13
         referenceFormulation: csv
         delimiter: ','
-      - access: *ISBN13NL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:manifestation_$(KBRID)
     po:
       - [bf:identifiedBy, btid:isbn13_$(KBRID)_$(isbn13)~iri]
@@ -82,12 +71,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates associations between manifestations and their ISBN10 using the BIBFRAME ontology."
     sources:
-      - access: *ISBN10FR
+      - access: *ISBN10
         referenceFormulation: csv
         delimiter: ','
-      - access: *ISBN10NL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:manifestation_$(KBRID)
     po:
       - [bf:identifiedBy, btid:isbn10_$(KBRID)_$(isbn10)~iri]
@@ -100,12 +86,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a BIBFRAME ontology Identifier for a KBR ISBN-10 identifier."
     sources:
-      - access: *ISBN10FR
+      - access: *ISBN10
         referenceFormulation: csv
         delimiter: ','
-      - access: *ISBN10NL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:isbn10_$(KBRID)_$(isbn10)
     po:
       - [a, bf:Identifier]
@@ -119,12 +102,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates a BIBFRAME ontology Identifier for a KBR ISBN-13 identifier."
     sources:
-      - access: *ISBN13FR
+      - access: *ISBN13
         referenceFormulation: csv
         delimiter: ','
-      - access: *ISBN13NL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:isbn13_$(KBRID)_$(isbn13)
     po:
       - [a, bf:Identifier]

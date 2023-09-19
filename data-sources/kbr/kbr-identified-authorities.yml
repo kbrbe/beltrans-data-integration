@@ -20,8 +20,7 @@ prefixes:
   schema: "http://schema.org/"
 
 variables:
-  sourceKBRIdentifiedOrgsNL: &sourceKBRIdentifiedOrgsNL ${RML_SOURCE_KBR_CONT_NL_IDENTIFIED}
-  sourceKBRIdentifiedOrgsFR: &sourceKBRIdentifiedOrgsFR ${RML_SOURCE_KBR_CONT_FR_IDENTIFIED}
+  sourceKBRIdentifiedOrgs: &sourceKBRIdentifiedOrgs ${RML_SOURCE_KBR_CONT_IDENTIFIED}
 
 mappings:
 
@@ -31,10 +30,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates organizational authority records from previously identified authorities in text strings."
     sources:
-      - access: *sourceKBRIdentifiedOrgsNL
-        referenceFormulation: csv
-        delimiter: ','
-      - access: *sourceKBRIdentifiedOrgsFR
+      - access: *sourceKBRIdentifiedOrgs
         referenceFormulation: csv
         delimiter: ','
     s: btid:authority_$(contributorID)
@@ -52,10 +48,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates descriptions of authorities represented as schema WebPage."
     sources:
-      - access: *sourceKBRIdentifiedOrgsNL
-        referenceFormulation: csv
-        delimiter: ','
-      - access: *sourceKBRIdentifiedOrgsFR
+      - access: *sourceKBRIdentifiedOrgs
         referenceFormulation: csv
         delimiter: ','
     s: btabout:authority_$(contributorID)
@@ -69,10 +62,7 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates provenance describing how these records were identified (important to query for them when there are also other authority records not identified like this)."
     sources:
-      - access: *sourceKBRIdentifiedOrgsNL
-        referenceFormulation: csv
-        delimiter: ','
-      - access: *sourceKBRIdentifiedOrgsFR
+      - access: *sourceKBRIdentifiedOrgs
         referenceFormulation: csv
         delimiter: ','
     s: btid:authority_prov_$(contributorID)
