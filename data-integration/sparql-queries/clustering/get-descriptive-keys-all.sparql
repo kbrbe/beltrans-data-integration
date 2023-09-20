@@ -1,0 +1,69 @@
+prefix schema: <http://schema.org/>
+prefix btid: <http://kbr.be/id/data/>
+prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+prefix marcrel: <http://id.loc.gov/vocabulary/relators/>
+prefix btm: <http://kbr.be/ns/beltrans/model#>
+
+SELECT ?m ?title ?keyPart2
+WHERE {
+  
+  graph <http://beltrans-manifestations> {
+    ?m a schema:CreativeWork ;
+       schema:name ?title .
+  }
+      
+  {
+    
+    #
+    # ALTERNATIVE 1: Authorized contributor name
+    #
+    {
+      graph <http://beltrans-manifestations> { ?m schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?contributor . }
+
+      graph <http://beltrans-contributors> { 
+        ?contributor a ?contributorType ;
+                     rdfs:label ?keyPart2 .
+      }
+      FILTER( ?contributorType IN (schema:Person, schema:Organization) )
+    }
+    
+    UNION
+    
+    #
+    # ALTERNATIVE 2: Alternative contributor name
+    #
+    {
+      graph <http://beltrans-manifestations> { ?m schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?contributor . }
+            
+      graph <http://beltrans-contributors> { 
+        ?contributor a schema:Person ;
+                     schema:sameAs ?kbrContributor .
+      }
+      
+      graph <http://kbr-syracuse> {
+        ?kbrContributor a schema:Person ;
+                        btm:hasNameVariant|btm:hasPseudonym|btm:isPseudonymOf ?nameVariant .
+        
+        ?nameVariant rdfs:label ?keyPart2 .
+      }
+    }
+
+    UNION
+
+    #
+    # ALTERNATIVE 3: ISBN identifier
+    #
+    {   
+      graph <http://beltrans-manifestations> { 
+        ?m bf:identifiedBy ?isbnEntity .
+
+        ?isbnEntity a bf:Identifier ;
+                    rdfs:label ?identifierLabel ;
+                    rdf:value ?keyPart2 .
+      }
+      FILTER( strstarts(?identifierLabel, "ISBN") )
+    }   
+  }
+
+}
+
