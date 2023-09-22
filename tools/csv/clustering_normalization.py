@@ -30,9 +30,9 @@ def main(inputFilename, outputFilename, idColumnName, valueSeparator, columnName
       for col in columnNames:
         value = row[col]
         if value != '':
-          # do not treat ISBN identifiers like text, do not apply normalization rules
-          valueNormalized = utils_string.getNormalizedString(value) if not col.startswith('ISBN') or not col.startswith('isbn') else value
-          keyElements.append(valueNormalized) 
+          valueNormalized = utils_string.getNormalizedString(value)
+          valueFiltered = utils_string.subtitleStopwordRemoval(valueNormalized)
+          keyElements.append(valueFiltered) 
         else:
           print(f'This should not happen, empty value for column "{col}" in row "{elementID}"')
 

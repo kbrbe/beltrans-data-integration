@@ -1,16 +1,17 @@
 prefix schema: <http://schema.org/>
 prefix btid: <http://kbr.be/id/data/>
+prefix bibo: <http://purl.org/ontology/bibo/>
 prefix bf: <http://id.loc.gov/ontologies/bibframe/>
 prefix marcrel: <http://id.loc.gov/vocabulary/relators/>
 prefix btm: <http://kbr.be/ns/beltrans/model#>
 
-SELECT ?m ?title ?keyPart2
+SELECT ?m ?keyPart1 ?keyPart2
 WHERE {
   
   graph <http://beltrans-manifestations> {
     ?m a schema:CreativeWork ;
        schema:isPartOf btid:beltransCorpus ;
-       schema:name ?title .
+       schema:name|bibo:isbn10|bibo:isbn13 ?keyPart1 .
   }
       
   {
@@ -49,21 +50,6 @@ WHERE {
       }
     }
 
-    UNION
-
-    #
-    # ALTERNATIVE 3: ISBN identifier
-    #
-    {   
-      graph <http://beltrans-manifestations> { 
-        ?m bf:identifiedBy ?isbnEntity .
-
-        ?isbnEntity a bf:Identifier ;
-                    rdfs:label ?identifierLabel ;
-                    rdf:value ?keyPart2 .
-      }
-      FILTER( strstarts(?identifierLabel, "ISBN") )
-    }   
   }
 
 }
