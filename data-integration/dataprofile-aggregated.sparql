@@ -5,6 +5,7 @@ prefix dc: <http://purl.org/dc/elements/1.1/>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix schema: <http://schema.org/>
 prefix bibo: <http://purl.org/ontology/bibo/>
+prefix fabio: <http://purl.org/spar/fabio/> 
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX btm: <http://kbr.be/ns/beltrans/model#>
 PREFIX btid: <http://kbr.be/id/data/> 
@@ -19,6 +20,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
   SELECT DISTINCT 
     (?manifestationID AS ?targetIdentifier)
+    (group_concat(distinct ?clusterID;SEPARATOR=';') AS ?workClusterIdentifier)
     (group_concat(distinct ?sourceLangLabel;SEPARATOR=';') AS ?sourceLanguage)
     (group_concat(distinct ?targetLangLabel;SEPARATOR=';') AS ?targetLanguage)
     (group_concat(distinct ?isbn10;SEPARATOR=';') AS ?targetISBN10) 
@@ -93,7 +95,15 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
     graph <http://beltrans-manifestations> { 
       ?manifestation a schema:CreativeWork ;
+                     schema:isPartOf btid:beltransCorpus ;
                      dcterms:identifier ?manifestationID .
+    }
+
+    OPTIONAL {
+      graph <http://beltrans-works> { 
+        ?cluster fabio:hasManifestation ?manifestation ;
+                 dcterms:identifier ?clusterID .
+      }
     }
 
     OPTIONAL {
@@ -533,4 +543,3 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 }
 GROUP BY ?manifestationID
-HAVING(CONTAINS(str(?authorNationalities), "Belgium") || CONTAINS(str(?illustratorNationalities), "Belgium") || CONTAINS(str(?scenaristNationalities), "Belgium") || CONTAINS(str(?publishingDirectorNationalities), "Belgium"))

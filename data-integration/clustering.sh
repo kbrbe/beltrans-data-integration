@@ -28,7 +28,7 @@ python -m tools.csv.clustering_normalization \
   -i $FILE_KEY_COMPONENTS \
   -o $CLUSTER_INPUT \
   --id-column "m" \
-  --column "title" \
+  --column "keyPart1" \
   --column "keyPart2"
 
 # perform the clustering
