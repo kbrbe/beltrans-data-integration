@@ -1076,7 +1076,8 @@ function extractKBROriginals {
   # create the folders to place the extracted translations and agents
   mkdir -p $integrationName/$dataSourceName/book-data-and-contributions/fr-nl
   mkdir -p $integrationName/$dataSourceName/book-data-and-contributions/nl-fr
-  mkdir -p $integrationName/$dataSourceName/agents
+  mkdir -p $integrationName/$dataSourceName/agents/fr-nl
+  mkdir -p $integrationName/$dataSourceName/agents/nl-fr
 
   echo "EXTRACTION - Extract and clean KBR originals translations data"
   extractKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$INPUT_KBR_TRL_ORIG_FR_NL" "fr-nl"
@@ -2474,7 +2475,8 @@ function loadKBR {
   loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "nl-fr"
 
   # load translation specific RDF
-  loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph"
+  loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "fr-nl"
+  loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "nl-fr"
 
   loadKBRLimitedOriginalInfo "$integrationName" "$dataSourceName" "$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL"
 
@@ -2522,11 +2524,12 @@ function loadKBRTranslationsAndContributions {
   local integrationName=$1
   local dataSourceName=$2
   local translationsNamedGraph=$3
+  local language=$4
 
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  local kbrTranslations="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_LD"
+  local kbrTranslations="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_TRL_LD"
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load KBR translations and contributions ..."
