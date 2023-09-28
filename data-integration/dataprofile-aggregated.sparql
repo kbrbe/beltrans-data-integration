@@ -48,11 +48,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
     (group_concat(distinct ?unescoManifestationID;SEPARATOR=';') AS ?targetUnescoIdentifier)
 
+    (group_concat(distinct ?sourceTitle;SEPARATOR=';') AS ?sourceTitle)
     (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceKBRIdentifier)
-    (group_concat(distinct ?kbrSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleKBR)
-    (group_concat(distinct ?kbSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleKB)
-    (group_concat(distinct ?bnfSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleBnF)
-    (group_concat(distinct ?unescoSourceManifestationTitle;SEPARATOR=';') AS ?sourceTitleUnesco)
     (group_concat(distinct ?kbrSourceManifestationISBN10;SEPARATOR=';') AS ?sourceISBN10)
     (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceISBN13)
 
@@ -126,6 +123,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
     OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation bibo:isbn10 ?isbn10 . } }
     OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation bibo:isbn13 ?isbn13 . } }
+
 
     # TARGET LANGUAGE
     #
@@ -540,6 +538,10 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     }
 
 
+    # Show a single source title https://github.com/kbrbe/beltrans-data-integration/issues/195
+    BIND(
+      COALESCE(?kbrSourceManifestationTitle, ?bnfSourceManifestationTitle, ?kbSourceManifestationTitle, ?unescoSourceManifestationTitle, "")
+    AS ?sourceTitle)
 
 }
 GROUP BY ?manifestationID
