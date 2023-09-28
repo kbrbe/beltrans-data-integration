@@ -16,6 +16,27 @@ def normalizeDelimiters(value, delimiter=';'):
 
 
 # -----------------------------------------------------------------------------
+def subtitleStopwordRemoval(s):
+  """This function removes words from the stopword list from the given string
+
+  >>> normalizedTitle = getNormalizedString('Mijn boek : roman')
+  >>> subtitleStopwordRemoval(normalizedTitle)
+  'mijn boek'
+
+  >>> normalizedTitle = getNormalizedString('Mijn boek : [roman]')
+  >>> subtitleStopwordRemoval(normalizedTitle)
+  'mijn boek'
+
+  """
+  stopwords = ['roman', '[roman]','verhalen', 'poemes', '[poemes]']
+
+  filteredString = s
+  for sw in stopwords:
+    if s.endswith(sw):
+      filteredString = filteredString.replace(sw, '')
+  return filteredString.strip()
+
+# -----------------------------------------------------------------------------
 def getNormalizedString(s):
   """This function returns a normalized copy of the given string.
 
@@ -24,7 +45,7 @@ def getNormalizedString(s):
   >>> getNormalizedString("judaïsme, islam, christianisme, ET sectes apparentées")
   'judaisme islam christianisme et sectes apparentees'
   >>> getNormalizedString("chamanisme, de l’Antiquité…)")
-  'chamanisme de lantiquite...)'
+  'chamanisme de lantiquite)'
 
   >>> getNormalizedString("Abe Ce De ?")
   'abe ce de'
@@ -33,17 +54,34 @@ def getNormalizedString(s):
   >>> getNormalizedString("Abe Ce De :")
   'abe ce de'
 
+  >>> getNormalizedString("les soins palliatifs : éthique et témoignage")
+  'les soins palliatifs ethique et temoignage'
+
+  >>> getNormalizedString("978-2-87386-027-1")
+  '978-2-87386-027-1'
+
   >>> getNormalizedString("A. W. Bruna & zoon")
   'a. w. bruna & zoon'
   >>> getNormalizedString("A.W. Bruna & Zoon")
   'a.w. bruna & zoon'
 
   """
-  noComma = s.replace(',', '')
-  noQuestionMark = noComma.replace('?', '')
-  noExclamationMark = noQuestionMark.replace('!', '')
-  noColon = noExclamationMark.replace(':', '')
-  return ud.normalize('NFKD', noColon).encode('ASCII', 'ignore').lower().strip().decode("utf-8")
+  charReplacements = {
+    ',': '',
+    '?': '',
+    '!': '',
+    ':': '',
+    ';': ''
+  }
+
+  # by the way: only after asci normalization the UTF character for ... becomes ...
+  asciiNormalized = ud.normalize('NFKD', s).encode('ASCII', 'ignore').lower().strip().decode("utf-8")
+
+  normalized = ''.join([charReplacements.get(char, char) for char in asciiNormalized])
+  noDots = normalized.replace('...', '')
+  # remove double whitespaces using trick from stackoverflow.com/questions/8270092/remove-all-whitespace-in-a-string
+  return " ".join(noDots.split())
+  
 
 
 # -----------------------------------------------------------------------------

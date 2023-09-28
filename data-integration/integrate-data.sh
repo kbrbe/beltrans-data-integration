@@ -185,6 +185,7 @@ TRIPLE_STORE_GRAPH_KBCODE="http://kbcode"
 TRIPLE_STORE_GRAPH_UNESCO="http://unesco"
 TRIPLE_STORE_GRAPH_UNESCO_ORIG="http://unesco-originals"
 TRIPLE_STORE_GRAPH_UNESCO_LA="http://unesco-linked-authorities"
+TRIPLE_STORE_GRAPH_WORKS="http://beltrans-works"
 
 TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES="http://kbr-publisher-matches"
 
@@ -766,8 +767,6 @@ function load {
   fi
 
 }
-
-
 # -----------------------------------------------------------------------------
 function integrate {
   local integrationName=$1
@@ -844,6 +843,9 @@ function integrate {
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" \
     "$LINK_QUERY_CONT_AUTHORS" "$LINK_QUERY_CONT_TRANSLATORS" "$LINK_QUERY_CONT_ILLUSTRATORS" \
     "$LINK_QUERY_CONT_SCENARISTS" "$LINK_QUERY_CONT_PUBLISHING_DIRECTORS" "$LINK_QUERY_CONT_PUBLISHERS"
+
+  echo "Perform Clustering ..."
+  clustering "$integrationName"
 
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
@@ -956,6 +958,77 @@ function postprocess {
   time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "KBCode" -o $excelData
 
 }
+
+# -----------------------------------------------------------------------------
+function clustering {
+  local integrationName=$1
+
+  local outputDir="$integrationName/integration/clustering"
+  local fileKeyComponents="$outputDir/key-components.csv"
+  
+  clusterInput="$outputDir/descriptive-keys.csv"
+  clusters="$outputDir/found-clusters.csv"
+  clustersTurtle="$outputDir/found-clusters.ttl"
+
+  #keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys.sparql"
+  keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys-all.sparql"
+   
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  mkdir -p "$outputDir"
+
+  # get components of the descriptive keys
+  #
+  echo "CLUSTERING - Get components of the descriptive keys"
+  python -m tools.sparql.query_data \
+    -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
+    -q $keyComponentsSPARQLQuery \
+    -o $fileKeyComponents
+
+  # normalize key components and create descriptive keys
+  # 
+  echo "CLUSTERING - Normalize key components and create descriptive keys"
+  python -m tools.csv.clustering_normalization \
+    -i $fileKeyComponents \
+    -o $clusterInput \
+    --id-column "m" \
+    --column "keyPart1" \
+    --column "keyPart2"
+
+  # perform the clustering
+  #
+  echo "CLUSTERING - Perform the clustering"
+  python -m tools.csv.clustering \
+    -i $clusterInput \
+    -o $clusters \
+    --id-column "elementID" \
+    --key-column "descriptiveKey"
+
+  # create RDF representing the cluster assignments
+  #
+  echo "CLUSTERING - Create RDF"
+  export RML_SOURCE_CLUSTERS=$clusters
+  . map.sh clustering/cluster-assignments.yml $clustersTurtle
+
+  # upload RDF to enable advanced querying of cluster information
+  #
+  echo "CLUSTERING - Delete existing cluster assignments"
+  python -m tools.sparql.delete_named_graph \
+    -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
+    --named-graph "$TRIPLE_STORE_GRAPH_WORKS"
+
+  echo "CLUSTERING - Upload new data"
+  python -m tools.sparql.upload_data \
+    -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
+    --content-type "text/turtle" \
+    --named-graph "$TRIPLE_STORE_GRAPH_WORKS" \
+    $clustersTurtle
+
+}
+
+
 
 # -----------------------------------------------------------------------------
 function folderHasToExist {
@@ -3187,10 +3260,15 @@ else
   elif [ "$1" = "i" ];
   then
     integrate $3
+
   elif [ "$1" = "tl" ];
   then
     transform $2 $3
     load $2 $3
+
+  elif [ "$1" = "c" ];
+  then
+    clustering $3
 
   else
     echo "uknown command, please use different combinations of extract (e) transform (t) load (l) query (q) and postprocess (p): 'etl', 'etlq', 'etlqp', 'e', 'et', 't', 'l', 'tl', 'q' etc"

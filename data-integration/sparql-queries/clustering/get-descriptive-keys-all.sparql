@@ -1,7 +1,7 @@
 prefix schema: <http://schema.org/>
 prefix btid: <http://kbr.be/id/data/>
-prefix bibo: <http://purl.org/ontology/bibo/>
 prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+prefix bibo: <http://purl.org/ontology/bibo/>
 prefix marcrel: <http://id.loc.gov/vocabulary/relators/>
 prefix btm: <http://kbr.be/ns/beltrans/model#>
 
@@ -10,7 +10,6 @@ WHERE {
   
   graph <http://beltrans-manifestations> {
     ?m a schema:CreativeWork ;
-       schema:isPartOf btid:beltransCorpus ;
        schema:name|bibo:isbn10|bibo:isbn13 ?keyPart1 .
   }
       
@@ -49,7 +48,7 @@ WHERE {
         ?nameVariant rdfs:label ?keyPart2 .
       }
     }
-
+  
   }
 
 }
