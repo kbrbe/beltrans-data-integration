@@ -1,0 +1,18 @@
+prefix schema: <http://schema.org/>
+prefix fabio: <http://purl.org/spar/fabio/>
+
+SELECT DISTINCT ?cluster (count(?m) as ?count) (SAMPLE(?title) AS ?title) (SAMPLE(?originalTitle) as ?original)
+WHERE {
+  graph <http://beltrans-works> { ?m fabio:manifestationOf ?cluster .} 
+        
+  graph <http://beltrans-manifestations> { ?m schema:name ?title }
+  
+  OPTIONAL {
+    graph <http://beltrans-manifestations> { ?m schema:sameAs ?local . }
+  
+    ?local schema:translationOfWork/schema:name ?originalTitle .
+    
+  }
+}
+GROUP BY ?cluster
+ORDER BY DESC(?count)
