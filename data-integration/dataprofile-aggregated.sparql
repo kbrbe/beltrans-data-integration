@@ -64,10 +64,10 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierKB)
     (group_concat(distinct ?unescoPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierUnesco)
 
-    (group_concat(distinct ?kbrDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
-    (group_concat(distinct ?bnfDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
-    (group_concat(distinct ?kbDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationKB)
-    (group_concat(distinct ?unescoDatePublished;SEPARATOR=';') AS ?targetYearOfPublicationUnesco)
+    (group_concat(distinct ?kbrDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
+    (group_concat(distinct ?bnfDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
+    (group_concat(distinct ?kbDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationKB)
+    (group_concat(distinct ?unescoDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationUnesco)
 
     (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKBR)
     (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationBnF)
@@ -102,6 +102,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
                  dcterms:identifier ?clusterID .
       }
     }
+
+    OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation schema:datePublished ?manifestationYearOfPublication . } }
 
     OPTIONAL {
       graph <http://beltrans-manifestations> {
@@ -542,6 +544,13 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     BIND(
       COALESCE(?kbrSourceManifestationTitle, ?bnfSourceManifestationTitle, ?kbSourceManifestationTitle, ?unescoSourceManifestationTitle, "")
     AS ?sourceTitle)
+
+    # If there is a manually curated date of publication (schema:datePublished on the integrated record)
+    # then use that date for all the local dates. Like this, the postprocessing script will not find contradicting dates
+    BIND( COALESCE(?manifestationYearOfPublication, ?kbrDatePublished, "") AS ?kbrDatePublishedInclCurated)
+    BIND( COALESCE(?manifestationYearOfPublication, ?bnfDatePublished, "") AS ?bnfDatePublishedInclCurated)
+    BIND( COALESCE(?manifestationYearOfPublication, ?kbDatePublished, "") AS ?kbDatePublishedInclCurated)
+    BIND( COALESCE(?manifestationYearOfPublication, ?unescoDatePublished, "") AS ?unescoDatePublishedInclCurated)
 
 }
 GROUP BY ?manifestationID
