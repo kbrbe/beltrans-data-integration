@@ -24,9 +24,7 @@ prefixes:
 
 variables:
   sourceWorksFR: &sourceWorksFR ${RML_SOURCE_WORKS_FR}
-  sourceContFR: &sourceContFR ${RML_SOURCE_CONT_FR}
   sourceWorksNL: &sourceWorksNL ${RML_SOURCE_WORKS_NL}
-  sourceContNL: &sourceContNL ${RML_SOURCE_CONT_NL}
 
 mappings:
 

@@ -23,15 +23,10 @@ prefixes:
   marcrel: "http://id.loc.gov/vocabulary/relators/"
 
 variables:
-  titleMatchesNLFR: &titleMatchesNLFR ${RML_SOURCE_TITLE_MATCHES_NL_FR}
-  titleDuplicatesMatchesNLFR: &titlesDuplicatesMatchesNLFR ${RML_SOURCE_TITLE_DUPLICATES_MATCHES_NL_FR}
-  similarityMatchesNLFR: &similarityMatchesNLFR ${RML_SOURCE_SIMILARITY_MATCHES_NL_FR}
-  similarityDuplicatesMatchesNLFR: &similarityDuplicatesMatchesNLFR ${RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_NL_FR}
-
-  titleMatchesFRNL: &titleMatchesFRNL ${RML_SOURCE_TITLE_MATCHES_FR_NL}
-  titleDuplicatesMatchesFRNL: &titlesDuplicatesMatchesFRNL ${RML_SOURCE_TITLE_DUPLICATES_MATCHES_FR_NL}
-  similarityMatchesFRNL: &similarityMatchesFRNL ${RML_SOURCE_SIMILARITY_MATCHES_FR_NL}
-  similarityDuplicatesMatchesFRNL: &similarityDuplicatesMatchesFRNL ${RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_FR_NL}
+  titleMatches: &titleMatches ${RML_SOURCE_TITLE_MATCHES}
+  titleDuplicatesMatches: &titlesDuplicatesMatches ${RML_SOURCE_TITLE_DUPLICATES_MATCHES}
+  similarityMatches: &similarityMatches ${RML_SOURCE_SIMILARITY_MATCHES}
+  similarityDuplicatesMatches: &similarityDuplicatesMatches ${RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES}
 
 mappings:
 
@@ -41,16 +36,10 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates direct schema:translationOfWork links from the translation to the original."
     sources:
-      - access: *titleMatchesNLFR
+      - access: *titleMatches
         referenceFormulation: csv
         delimiter: ','
-      - access: *titleMatchesFRNL
-        referenceFormulation: csv
-        delimiter: ',' 
-      - access: *similarityMatchesNLFR
-        referenceFormulation: csv
-        delimiter: ',' 
-      - access: *similarityMatchesFRNL
+      - access: *similarityMatches
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:manifestation_$(KBRID)
@@ -63,16 +52,10 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates direct schema:workTranslation links from the original to the translation."
     sources:
-      - access: *titleMatchesNLFR
+      - access: *titleMatches
         referenceFormulation: csv
         delimiter: ','
-      - access: *titleMatchesFRNL
-        referenceFormulation: csv
-        delimiter: ',' 
-      - access: *similarityMatchesNLFR
-        referenceFormulation: csv
-        delimiter: ',' 
-      - access: *similarityMatchesFRNL
+      - access: *similarityMatches
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:manifestation_$(candidatesIDs)
@@ -87,12 +70,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping adds certainty provenance to a W3C PROV activity related to a single translation, indicating provenance about the similarity score used to detect the original. Only if the original was found based on similarity."
     sources:
-      - access: *titleMatchesNLFR
+      - access: *titleMatches
         referenceFormulation: csv
         delimiter: ','
-      - access: *titleMatchesFRNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:translationActivity_$(KBRID)
     po:
       - [a, prov:Activity]
@@ -107,12 +87,9 @@ mappings:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping adds certainty provenance to a W3C PROV activity related to a single translation, indicating provenance about the similarity score used to detect the original. Only if the original was found based on similarity."
     sources:
-      - access: *similarityMatchesNLFR
+      - access: *similarityMatches
         referenceFormulation: csv
         delimiter: ','
-      - access: *similarityMatchesFRNL
-        referenceFormulation: csv
-        delimiter: ',' 
     s: btid:translationActivity_$(KBRID)
     po:
       - [a, prov:Activity]

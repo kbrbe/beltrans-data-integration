@@ -34,7 +34,6 @@ variables:
   sourceContUnesco: &sourceContUnesco ${RML_SOURCE_CORRELATION_UNESCO}
   sourceContISNI: &sourceContISNI ${RML_SOURCE_CORRELATION_ISNI}
 
-  sourceContUnescoLong: &sourceContUnescoLong ${RML_SOURCE_CORRELATION_UNESCO_LONG}
   sourceContVIAF: &sourceContVIAF ${RML_SOURCE_CORRELATION_VIAF}
   sourceContWikidata: &sourceContWikidata ${RML_SOURCE_CORRELATION_WIKIDATA}
 
@@ -205,20 +204,20 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  unescoLongLink:
-    sources:
-      - access: *sourceContUnescoLong
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:$(id)
-    po:
-      - p: bf:identifiedBy
-        o: btid:unesco_$(unescoLong)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(unescoLong)]
-            - [grel:valueParameter2, ""]
+  #unescoLongLink:
+  #  sources:
+  #    - access: *sourceContUnescoLong
+  #      referenceFormulation: csv
+  #      delimiter: ','
+  #  s: btid:$(id)
+  #  po:
+  #    - p: bf:identifiedBy
+  #      o: btid:unesco_$(unescoLong)~iri
+  #      condition:
+  #        function: idlab-fn:notEqual
+  #        parameters:
+  #          - [grel:valueParameter, $(unescoLong)]
+  #          - [grel:valueParameter2, ""]
 
 
   # ---------------------------------------------------------------------------
@@ -357,21 +356,21 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  unescoLongEntity:
-    sources:
-      - access: *sourceContUnescoLong
-        referenceFormulation: csv
-        delimiter: ','
-    s: btid:unesco_long_$(unescoLong)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(unescoLong)]
-        - [grel:valueParameter2, ""]
-    po:
-      - [a, bf:Identifier]
-      - [rdfs:label, "UnescoLong"]
-      - [rdf:value, $(unescoLong)]
+  #unescoLongEntity:
+  #  sources:
+  #    - access: *sourceContUnescoLong
+  #      referenceFormulation: csv
+  #      delimiter: ','
+  #  s: btid:unesco_long_$(unescoLong)
+  #  condition:
+  #    function: idlab-fn:notEqual
+  #    parameters:
+  #      - [grel:valueParameter, $(unescoLong)]
+  #      - [grel:valueParameter2, ""]
+  #  po:
+  #    - [a, bf:Identifier]
+  #    - [rdfs:label, "UnescoLong"]
+  #    - [rdf:value, $(unescoLong)]
 
 
 
