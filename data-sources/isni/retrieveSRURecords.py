@@ -2,8 +2,10 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import date
+import statistics
 import logging
 import time
+from tqdm import tqdm
 import xml.etree.ElementTree as ET
 import urllib
 from io import BytesIO
@@ -41,6 +43,14 @@ def writeResponseRecords(xmlContent, outFile):
       elem.clear()
 
   return counter
+
+# -----------------------------------------------------------------------------
+def getTimeString(timeValue):
+  return time.strftime('%H:%M:%S', time.gmtime(timeValue))
+
+# -----------------------------------------------------------------------------
+def getDiffTimeString(startTime, endTime):
+  return time.strftime('%H:%M:%S', time.gmtime(endTime - startTime))
 
 # -----------------------------------------------------------------------------
 def main():
@@ -91,7 +101,7 @@ def main():
   logger.addHandler(logFilehandler)
 
   consoleHandler = logging.StreamHandler()
-  consoleHandler.setLevel(logging.INFO)
+  consoleHandler.setLevel(logging.ERROR)
   consoleHandler.setFormatter(logFormatter)
   logger.addHandler(consoleHandler)
   #logging.basicConfig(filename=loggingFilename, level=logging.INFO)
@@ -107,15 +117,30 @@ def main():
   # There are currently 60452 records for the search term pica.noi="BE" and the number of max records per request is 1000
   # We decided to loop from 1 to 61000 in steps of 500 to make several requests
   #
-  for i in range(1, maxRecords, numberRecords):
+  requestTimes = []
+  iteration=1
+  progress = tqdm(range(1, maxRecords, numberRecords))
+  for i in progress:
 
     logger.info(f'Iteration {counter}: requesting {numberRecords} from startRecord {i} (up until {maxRecords})')
     payload['startRecord'] = i
 
     try: 
       payloadStr = urllib.parse.urlencode(payload, safe=',+*\\')
+      startTimeRequest = time.time()
       r = requests.get(url, params=payloadStr)
-      logger.info(f'requesting URL {r.url}')
+      endTimeRequest = time.time()
+      logger.info(f'requested URL {r.url}')
+
+      diffTimeRequest = getDiffTimeString(startTimeRequest, endTimeRequest)
+      requestTimes.append(endTimeRequest - startTimeRequest)
+      minTime = getTimeString(min(requestTimes))
+      maxTime = getTimeString(max(requestTimes))
+      medianTime = getTimeString(statistics.median(requestTimes))
+      averageTime = getTimeString(statistics.mean(requestTimes))
+      progress.set_description(f'Last request {diffTimeRequest} (min: {minTime} / max: {maxTime} / average: {averageTime} / median: {medianTime}')
+      logger.info(f'Request time for batch {iteration} was {endTimeRequest-startTimeRequest} ({diffTimeRequest})')
+  
       r.raise_for_status()
     except requests.exceptions.Timeout:
       logging.error(f'There was a timeout in iteration {counter}')
@@ -158,6 +183,10 @@ def main():
         logger.info(r.content)
       counter += 1
       logger.info(f'Wrote {numRecordsWritten} result records to the output file {outputFilename}, now sleep {secondsBetweenAPIRequests} seconds')
+
+    progress.set_description(f'Last request {diffTimeRequest} (min: {minTime} / max: {maxTime} / average: {averageTime} / median: {medianTime} Wrote {numRecordsWritten} records in batch {iteration}')
+
+    iteration += 1
     time.sleep(secondsBetweenAPIRequests)
 
 
