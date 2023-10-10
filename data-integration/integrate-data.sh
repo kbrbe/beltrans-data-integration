@@ -74,8 +74,8 @@ KBR_CSV_HEADER_CONVERSION="../data-sources/kbr/author-headers.csv"
 # KBR - translations
 #INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2022-02-17_4745records.xml"
 #INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2022-02-17_13126records.xml"
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-08-10.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-08-10.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-10-06.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-10-06.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -83,10 +83,10 @@ INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230810_NL-FR_APEP.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230810_NL-FR_AORG.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230810_FR-NL_APEP.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20230810_FR-NL_AORG.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20231006_NL-FR_APEP.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20231006_NL-FR_AORG.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20231006_FR-NL_APEP.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20231006_FR-NL_AORG.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
@@ -95,7 +95,7 @@ INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-belg_2023-08-10.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-10-06.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -142,8 +142,8 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION="../data-sources/correlation/2023-08-10_person-contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-09-04_translations-correlation-list.csv"
+INPUT_CORRELATION="../data-sources/correlation/2023-10-06_person-contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-10-06_translations_correlation-list.csv"
 
 
 # #############################################################################
@@ -254,6 +254,10 @@ DATA_PROFILE_PUBS_PER_LOC_QUERY_FILE="translations-per-location.sparql"
 DATA_PROFILE_PUBS_PER_COUNTRY_QUERY_FILE="translations-per-country.sparql"
 DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
+
+POSTPROCESS_SPARQL_QUERY_TRL="sparql-queries/integrated-data-postprocessing.sparql"
+
+SUFFIX_DATA_PROFILE_POSTPROCESS_TRL="postprocessing-input.csv"
 
 SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-persons-all-info.csv"
 SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE_SORTED="contributors-persons-all-info-sorted.csv"
@@ -859,6 +863,15 @@ function integrate {
   #echo "Add local data to integrated contributors from a correlation list"
   #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_CORRELATION_DATA"
 
+  #postprocessInputFileTranslations="$integrationName/csv/$SUFFIX_DATA_PROFILE_POSTPROCESS_TRL"
+  #echo "Perform automatic integration postprocessing (not the postprocessing of the query results"
+  #python -m tools.sparql.query_data \
+  #  -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
+  #  -q $POSTPROCESS_SPARQL_QUERY_TRL \
+  #  -o $postprocessInputFileTranslations
+
+
+
 }
 
 # -----------------------------------------------------------------------------
@@ -1405,25 +1418,26 @@ function extractOriginalLinksKBR {
   local translationsSourceName=$3
   local originalsSourceName=$4
 
-  mkdir -p $integrationName/$dataSourceName
+  mkdir -p "$integrationName/$dataSourceName/fr-nl"
+  mkdir -p "$integrationName/$dataSourceName/nl-fr"
 
   local similarityThreshold="0.9"
 
-  local kbrOriginalsNLFR="$integrationName/$originalsSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_NL_WORKS"
-  local kbrTranslationsNLFR="$integrationName/$translationsSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_NL_WORKS"
-  local titleMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
-  local titleDuplicatesMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
-  local similarityMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
-  local similarityDuplicatesMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
-  local similarityMultipleMatchesNLFR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR"
+  local kbrOriginalsNLFR="$integrationName/$originalsSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
+  local kbrTranslationsNLFR="$integrationName/$translationsSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
+  local titleMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
+  local titleDuplicatesMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
+  local similarityMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
+  local similarityDuplicatesMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
+  local similarityMultipleMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR"
 
-  local kbrOriginalsFRNL="$integrationName/$originalsSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_FR_WORKS"
-  local kbrTranslationsFRNL="$integrationName/$translationsSourceName/book-data-and-contributions/$SUFFIX_KBR_TRL_FR_WORKS"
-  local titleMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
-  local titleDuplicatesMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
-  local similarityMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
-  local similarityDuplicatesMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
-  local similarityMultipleMatchesFRNL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_FR_NL"
+  local kbrOriginalsFRNL="$integrationName/$originalsSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
+  local kbrTranslationsFRNL="$integrationName/$translationsSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
+  local titleMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
+  local titleDuplicatesMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
+  local similarityMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
+  local similarityDuplicatesMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
+  local similarityMultipleMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_FR_NL"
 
   source ./py-integration-env/bin/activate
 
@@ -1571,7 +1585,8 @@ function transformKBROriginals {
   mkdir -p $integrationName/$dataSourceName/rdf/nl-fr
 
   echo "TRANSFORMATION - Map KBR translation data to RDF"
-  mapKBRBookInformationAndContributions $integrationName "$dataSourceName"
+  mapKBRBookInformationAndContributions $integrationName "$dataSourceName" "fr-nl"
+  mapKBRBookInformationAndContributions $integrationName "$dataSourceName" "nl-fr"
 
 }
 
@@ -1581,26 +1596,32 @@ function transformOriginalLinksKBR {
   local dataSourceName=$2
 
   # create the folder to place the transformed data
-  mkdir -p $integrationName/$dataSourceName/rdf 
+  mkdir -p "$integrationName/$dataSourceName/rdf/fr-nl"
+  mkdir -p "$integrationName/$dataSourceName/rdf/nl-fr"
 
-  originalLinksTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
+  originalLinksTurtleFRNL="$integrationName/$dataSourceName/rdf/fr-nl/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
+  originalLinksTurtleNLFR="$integrationName/$dataSourceName/rdf/nl-fr/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
 
   # map the translations
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_TITLE_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
-  export RML_SOURCE_TITLE_DUPLICATES_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
-  export RML_SOURCE_SIMILARITY_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
-  export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_NL_FR="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
-
-  export RML_SOURCE_TITLE_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
-  export RML_SOURCE_TITLE_DUPLICATES_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
-  export RML_SOURCE_SIMILARITY_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
-  export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES_FR_NL="$integrationName/$dataSourceName/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
+  export RML_SOURCE_TITLE_MATCHES="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
+  export RML_SOURCE_TITLE_DUPLICATES_MATCHES="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
+  export RML_SOURCE_SIMILARITY_MATCHES="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
+  export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
 
   # 2) execute the mapping
-  echo "Map KBR original linking ..."
-  . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtle
+  echo "Map KBR original linking NL-FR ..."
+  . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleFRNL
+
+  export RML_SOURCE_TITLE_MATCHES="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
+  export RML_SOURCE_TITLE_DUPLICATES_MATCHES="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
+  export RML_SOURCE_SIMILARITY_MATCHES="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
+  export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
+
+  # 2) execute the mapping
+  echo "Map KBR original linking FR-NL ..."
+  . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleNLFR
 
 
 }
@@ -2290,7 +2311,7 @@ function extractContributorCorrelationList {
   extractSeparatedColumn $correlationList $correlationListVIAFIDs "contributorID" "viafIDs" "id" "VIAF"
   extractSeparatedColumn $correlationList $correlationListWikidataIDs "contributorID" "wikidataIDs" "id" "wikidata"
   extractSeparatedColumn $correlationList $correlationListUnescoIDs "contributorID" "unescoIDs" "id" "unesco"
-  extractSeparatedColumn $correlationList $correlationListUnescoLongIDs "contributorID" "unescoIDsLong" "id" "unescoLong"
+  #extractSeparatedColumn $correlationList $correlationListUnescoLongIDs "contributorID" "unescoIDsLong" "id" "unescoLong"
   extractSeparatedColumn $correlationList $correlationListISNIIDs "contributorID" "isniIDs" "id" "ISNI"
 }
 
@@ -2349,7 +2370,7 @@ function transformContributorCorrelationList {
   local correlationListUnescoIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO"
   local correlationListISNIIDs="$integrationName/correlation/$SUFFIX_CORRELATION_ISNI"
 
-  local correlationListUnescoLongIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO_LONG"
+  #local correlationListUnescoLongIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO_LONG"
   local correlationListVIAFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_VIAF"
   local correlationListWikidataIDs="$integrationName/correlation/$SUFFIX_CORRELATION_WIKIDATA"
 
@@ -2364,7 +2385,7 @@ function transformContributorCorrelationList {
   export RML_SOURCE_CORRELATION_UNESCO="$correlationListUnescoIDs"
   export RML_SOURCE_CORRELATION_ISNI="$correlationListISNIIDs"
 
-  export RML_SOURCE_CORRELATION_UNESCO_LONG="$correlationListUnescoLongIDs"
+  #export RML_SOURCE_CORRELATION_UNESCO_LONG="$correlationListUnescoLongIDs"
   export RML_SOURCE_CORRELATION_VIAF="$correlationListVIAFIDs"
   export RML_SOURCE_CORRELATION_WIKIDATA="$correlationListWikidataIDs"
 
@@ -2475,8 +2496,8 @@ function loadKBR {
   loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "nl-fr"
 
   # load translation specific RDF
-  loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "fr-nl"
-  loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "nl-fr"
+  loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "fr-nl"
+  loadKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "nl-fr"
 
   loadKBRLimitedOriginalInfo "$integrationName" "$dataSourceName" "$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL"
 
@@ -2500,7 +2521,8 @@ function loadKBROriginals {
   #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
 
   # only load book information, no translation-specific triples
-  loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph"
+  loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "fr-nl"
+  loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "nl-fr"
 }
 
 # -----------------------------------------------------------------------------
@@ -2512,11 +2534,12 @@ function loadOriginalLinksKBR {
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
-  local kbrOriginalLinksTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
+  local kbrOriginalLinksTurtleFRNL="$integrationName/$dataSourceName/rdf/fr-nl/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
+  local kbrOriginalLinksTurtleNLFR="$integrationName/$dataSourceName/rdf/nl-fr/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
 
   echo "Load KBR links to identified originals ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
-    "$kbrOriginalLinksTurtle"
+    "$kbrOriginalLinksTurtleFRNL" "$kbrOriginalLinksTurtleNLFR"
 }
 
 # -----------------------------------------------------------------------------
