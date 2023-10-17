@@ -17,6 +17,7 @@ prefixes:
   ex: "http://example.org/ns#"
   countries: "http://id.loc.gov/vocabulary/countries/"
   schema: "http://schema.org/"
+  marcrel: "http://id.loc.gov/vocabulary/relators/"
 
 variables:
   marcRoles: &marcRoles ${RML_SOURCE_MASTER_MARC_ROLES}
@@ -29,7 +30,7 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  marcRoles:
+  marcRolesPROV:
     creator: <https://sven-lieber.org/profile#me>
     description: "This mapping creates RDF resources for MARC roles such that we can refer to it and do not have to rely on text. Currently with English labels, but labels in other languages may be added."
     sources:
@@ -40,6 +41,20 @@ mappings:
     po:
       - [a, prov:Role]
       - [rdfs:label, $(title), en~lang]
+
+  # ---------------------------------------------------------------------------
+  #
+  marcRoles:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates RDF resources for MARC roles such that we can refer to it and do not have to rely on text. Currently with English labels, but labels in other languages may be added."
+    sources:
+      - access: *marcRoles
+        referenceFormulation: csv
+        delimiter: ','
+    s: marcrel:$(code)
+    po:
+      - [rdfs:label, $(title), en~lang]
+
 
 
   # ---------------------------------------------------------------------------
