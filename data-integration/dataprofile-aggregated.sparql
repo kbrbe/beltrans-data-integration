@@ -542,7 +542,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
     # Show a single source title https://github.com/kbrbe/beltrans-data-integration/issues/195
     BIND(
-      COALESCE(?kbrSourceManifestationTitle, ?bnfSourceManifestationTitle, ?kbSourceManifestationTitle, ?unescoSourceManifestationTitle, "")
+      COALESCE(?kbrSourceManifestationTitle, ?bnfSourceManifestationTitle, ?unescoSourceManifestationTitle, ?kbSourceManifestationTitle, "")
     AS ?sourceTitle)
 
     # If there is a manually curated date of publication (schema:datePublished on the integrated record)
