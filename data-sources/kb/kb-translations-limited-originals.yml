@@ -39,7 +39,7 @@ mappings:
       - access: *sourceTRLFRNL
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:manifestation_source_$(manifestationID)
+    s: btid:manifestation_source_p$(manifestationID)
     condition:
       function: idlab-fn:notEqual
       parameters:
@@ -48,6 +48,7 @@ mappings:
     po:
       - [a, schema:CreativeWork]
       - [a, schema:Book]
+      - [dcterms:identifier, "source_p$(manifestationID)"]
       - [schema:name, $(sourceTitle)]
 
 
@@ -61,7 +62,7 @@ mappings:
       - access: *sourceTRLNLFR
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:manifestation_source_$(manifestationID)
+    s: btid:manifestation_source_p$(manifestationID)
     condition:
       function: idlab-fn:notEqual
       parameters:
@@ -80,7 +81,7 @@ mappings:
       - access: *sourceTRLFRNL
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:manifestation_source_$(manifestationID)
+    s: btid:manifestation_source_p$(manifestationID)
     condition:
       function: idlab-fn:notEqual
       parameters:
