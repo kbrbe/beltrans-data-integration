@@ -1,0 +1,159 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+INSERT {
+
+  graph <http://beltrans-manifestations> { ?manifestation schema:translationOfWork ?originalManifestationURI . }
+  graph <http://beltrans-originals> {
+    ?originalManifestationURI a schema:CreativeWork ;
+                              dcterms:identifier ?originalManifestationID ;
+                              schema:name ?originalTitle ;
+                              schema:inLanguage ?originalLanguage ;
+                              schema:workTranslation ?manifestation ;
+                              bf:identifiedBy ?originalManifestationKBRIdentifier ;
+                              bf:identifiedBy ?originalManifestationBnFIdentifier ;
+                              bf:identifiedBy ?originalManifestationKBIdentifier ;
+                              bf:identifiedBy ?originalManifestationUnescoIdentifier ;
+                              bf:identifiedBy ?originalManifestationISBN10Identifier ;
+                              bf:identifiedBy ?originalManifestationISBN13Identifier ;
+                              schema:sameAs ?kbrOriginal ;
+                              schema:sameAs ?bnfOriginal ;
+                              schema:sameAs ?kbOriginal ;
+                              schema:sameAs ?unescoOriginal .
+
+    ?originalManifestationKBRIdentifier a bf:Identifier ;
+                                        rdfs:label "KBR" ;
+                                        rdf:value ?kbrOriginal .
+
+    ?originalManifestationBnFIdentifier a bf:Identifier ;
+                                        rdfs:label "BnF" ;
+                                        rdf:value ?bnfOriginal .
+
+    ?originalManifestationKBIdentifier a bf:Identifier ;
+                                        rdfs:label "KB" ;
+                                        rdf:value ?kbOriginal .
+
+    ?originalManifestationUnescoIdentifier a bf:Identifier ;
+                                           rdfs:label "Unesco" ;
+                                           rdf:value ?unescoOriginal .
+ 
+   ?originalManifestationISBN10Identifier a bf:Identifier ;
+                                          rdfs:label "ISBN-10" ;
+                                          rdf:label ?kbrOriginalISBN10 .
+
+   ?originalManifestationISBN13Identifier a bf:Identifier ;
+                                          rdfs:label "ISBN-13" ;
+                                          rdf:label ?kbrOriginalISBN13 .
+ 
+  }
+
+}
+WHERE {
+
+  graph <http://beltrans-manifestations> {
+    ?manifestation a schema:CreativeWork ;
+                   dcterms:identifier ?manifestationID . 
+  }
+
+  OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation btm:sourceLanguage ?originalLanguage } }
+  
+  OPTIONAL {
+    graph <http://beltrans-manifestations> { ?manifestation schema:sameAs ?kbrURI . }
+    graph <http://kbr-syracuse> { 
+      ?kbrURI a schema:CreativeWork ;
+              schema:translationOfWork ?kbrOriginal .
+    }
+    graph <http://kbr-originals> { 
+      ?kbrOriginal a schema:CreativeWork ;
+                   dcterms:identifier ?kbrOriginalID .
+    }
+    
+    
+    OPTIONAL { graph <http://kbr-originals> { ?kbrOriginal schema:name ?kbrOriginalTitle . } }
+    OPTIONAL { graph <http://kbr-originals> { ?kbrOriginal bibo:isbn10 ?kbrOriginalISBN10 . } }
+    OPTIONAL { graph <http://kbr-originals> { ?kbrOriginal bibo:isbn13 ?kbrOriginalISBN13 . } }
+    
+  }
+  
+  OPTIONAL {
+    graph <http://beltrans-manifestations> { ?manifestation schema:sameAs ?bnfURI . }
+    graph <http://bnf-publications> { 
+      ?bnfURI a schema:CreativeWork ;
+              schema:translationOfWork ?bnfOriginal .
+    }
+    graph <http://bnf-originals> { 
+      ?bnfOriginal a schema:CreativeWork ;
+                   dcterms:identifier ?bnfOriginalID .
+    }
+    
+    
+    OPTIONAL { graph <http://bnf-originals> { ?bnfOriginal schema:name ?bnfOriginalTitle . } }
+    OPTIONAL { graph <http://bnf-originals> { ?bnfOriginal bibo:isbn10 ?bnfOriginalISBN10 . } }
+    OPTIONAL { graph <http://bnf-originals> { ?bnfOriginal bibo:isbn13 ?bnfOriginalISBN13 . } }
+    
+  }
+  
+  OPTIONAL {
+    graph <http://beltrans-manifestations> { ?manifestation schema:sameAs ?kbURI . }
+    graph <http://kb-publications> { 
+      ?kbURI a schema:CreativeWork ;
+             schema:translationOfWork ?kbOriginal .
+    }
+    graph <http://kb-originals> { 
+      ?kbOriginal a schema:CreativeWork ;
+                  dcterms:identifier ?kbOriginalID .
+    }
+    
+    
+    OPTIONAL { graph <http://kb-originals> { ?kbOriginal schema:name ?kbOriginalTitle . } }
+    OPTIONAL { graph <http://kb-originals> { ?kbOriginal bibo:isbn10 ?kbOriginalISBN10 . } }
+    OPTIONAL { graph <http://kb-originals> { ?kbOriginal bibo:isbn13 ?kbOriginalISBN13 . } }
+    
+  }
+  
+  OPTIONAL {
+    graph <http://beltrans-manifestations> { ?manifestation schema:sameAs ?unescoURI . }
+    graph <http://unesco> { 
+      ?unescoURI a schema:CreativeWork ;
+                 schema:translationOfWork ?unescoOriginal .
+    }
+    graph <http://unesco-originals> { 
+      ?unescoOriginal a schema:CreativeWork ;
+                      dcterms:identifier ?unescoOriginalID .
+    }
+    
+    
+    OPTIONAL { graph <http://unesco-originals> { ?unescoOriginal schema:name ?unescoOriginalTitle . } }
+    OPTIONAL { graph <http://unesco-originals> { ?unescoOriginal bibo:isbn10 ?unescoOriginalISBN10 . } }
+    OPTIONAL { graph <http://unesco-originals> { ?unescoOriginal bibo:isbn13 ?unescoOriginalISBN13 . } }
+    
+  }
+
+  BIND( IRI( CONCAT( "http://kbr.be/id/data/original_", ?manifestationID ) ) as ?originalManifestationURI)
+  BIND( CONCAT( "original_", ?manifestationID ) as ?originalManifestationID)
+
+  BIND( (IRI( CONCAT("http://kbr.be/id/data/identifier_kbr_", ?kbrOriginalID))) AS ?originalManifestationKBRIdentifier)
+  BIND( (IRI( CONCAT("http://kbr.be/id/data/identifier_bnf_", ?bnfOriginalID))) AS ?originalManifestationBnFIdentifier)
+  BIND( (IRI( CONCAT("http://kbr.be/id/data/identifier_kb_", ?kbOriginalID))) AS ?originalManifestationKBIdentifier)
+  BIND( (IRI( CONCAT("http://kbr.be/id/data/identifier_unesco_", ?unescoOriginalID))) AS ?originalManifestationUnescoIdentifier)
+  BIND( (IRI( CONCAT("http://kbr.be/id/data/identifier_isbn10_", ?kbrOriginalISBN10))) AS ?originalManifestationISBN10Identifier)
+  BIND( (IRI( CONCAT("http://kbr.be/id/data/identifier_isbn13_", ?kbrOriginalISBN13))) AS ?originalManifestationISBN13Identifier)
+  
+  BIND( COALESCE(?kbrOriginalTitle, ?bnfOriginalTitle, ?unescoOriginalTitle, ?kbOriginalTitle, "") AS ?originalTitle)
+  
+}
