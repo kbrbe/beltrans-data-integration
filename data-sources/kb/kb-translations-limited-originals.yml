@@ -20,10 +20,13 @@ prefixes:
   lang: "http://id.loc.gov/vocabulary/languages/"
   schema: "http://schema.org/"
   up: "http://users.ugent.be/~tdenies/up/"
+  nbt: "http://data.bibliotheken.nl/id/nbt/"
 
 variables:
   sourceTRLFRNL: &sourceTRLFRNL ${RML_SOURCE_KB_TRL_FR_NL}
   sourceTRLNLFR: &sourceTRLNLFR ${RML_SOURCE_KB_TRL_NL_FR}
+  originalsFRNL: &originalsFRNL ${RML_SOURCE_KB_TRL_FR_NL_ORIG}
+  originalsNLFR: &originalsNLFR ${RML_SOURCE_KB_TRL_NL_FR_ORIG}
 
 mappings:
 
@@ -31,7 +34,7 @@ mappings:
   #
   manifestationsSources:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping adds the language to the Dutch source of a creative work, currently on the LRM level of manifestations."
+    description: "This mapping creates a minimal record of an original."
     sources:
       - access: *sourceTRLNLFR
         referenceFormulation: csv
@@ -40,18 +43,34 @@ mappings:
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:manifestation_source_p$(manifestationID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(sourceTitle)]
-        - [grel:valueParameter2, ""] 
     po:
       - [a, schema:CreativeWork]
       - [a, schema:Book]
       - [dcterms:identifier, "source_p$(manifestationID)"]
+      - [schema:workTranslation, nbt:p$(manifestationID)~iri]
+      - p: rdfs:comment
+        o: $(sourceTitle)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(sourceTitle)]
+            - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsSourcesTitle:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping adds the title of an original."
+    sources:
+      - access: *originalsNLFR
+        referenceFormulation: csv
+        delimiter: ',' 
+      - access: *originalsFRNL
+        referenceFormulation: csv
+        delimiter: ',' 
+    s: btid:manifestation_source_p$(manifestationID)
+    po:
       - [schema:name, $(sourceTitle)]
-
-
 
   # ---------------------------------------------------------------------------
   #
@@ -63,11 +82,6 @@ mappings:
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:manifestation_source_p$(manifestationID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(sourceTitle)]
-        - [grel:valueParameter2, ""] 
     po:
       - [schema:inLanguage, lang:dut~iri]
 
@@ -82,11 +96,6 @@ mappings:
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:manifestation_source_p$(manifestationID)
-    condition:
-      function: idlab-fn:notEqual
-      parameters:
-        - [grel:valueParameter, $(sourceTitle)]
-        - [grel:valueParameter2, ""] 
     po:
       - [schema:inLanguage, lang:fre~iri]
 

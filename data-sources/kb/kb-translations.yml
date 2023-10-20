@@ -56,13 +56,7 @@ mappings:
       - [a, schema:Book]
       - [dcterms:identifier, "p$(manifestationID)"]
       - [bf:identifiedBy, btid:kbid_p$(manifestationID)~iri]
-      - p: schema:translationOfWork
-        o: btid:manifestation_source_p$(manifestationID)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(sourceTitle)]
-            - [grel:valueParameter2, ""]
+      - [schema:translationOfWork, btid:manifestation_source_p$(manifestationID)~iri]
       - [schema:name, $(title) ]
       - p: rdfs:comment
         o: $(responsibilityStatement)

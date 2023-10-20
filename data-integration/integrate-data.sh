@@ -50,6 +50,7 @@ SCRIPT_UNION_IDS="../data-sources/bnf/union.py"
 SCRIPT_PARSE_UNESCO_HTML="../data-sources/unesco/parse-content.py"
 MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS="tools.csv.count_unique_values"
 MODULE_GROUP_BY="tools.csv.group_by"
+MODULE_EXTRACT_STRING_FROM_COLUMN="tools.csv.extract_string_from_column"
 
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
@@ -386,6 +387,8 @@ SUFFIX_KB_AUT_ORGS_FR_NL="kb-authors-orgs-fr-nl.csv"
 SUFFIX_KB_AUT_ORGS_NL_FR="kb-authors-orgs-nl-fr.csv"
 SUFFIX_KB_TRL_PBL_NAMES_FR_NL="kb-publisher-names-fr-nl"
 SUFFIX_KB_TRL_PBL_NAMES_NL_FR="kb-publisher-names-nl-fr"
+SUFFIX_KB_TRL_FR_NL_ORIG="kb-original-titles-fr-nl.csv"
+SUFFIX_KB_TRL_NL_FR_ORIG="kb-original-titles-nl-fr.csv"
 
 SUFFIX_KB_PBL_IDENTIFIERS_FR_NL="kb-publishers-identifiers-fr-nl"
 SUFFIX_KB_PBL_IDENTIFIERS_NL_FR="kb-publishers-identifiers-nl-fr"
@@ -1111,6 +1114,7 @@ function extractKB {
   # create the folders to place the extracted translations and agents
   mkdir -p $integrationName/kb/translations
   mkdir -p $integrationName/kb/agents
+  mkdir -p $integrationName/kb/rdf
 
   #printf "\nUsed input (KB translations and contributors)\n* $kbrDutchTranslations\n* $kbrFrenchTranslations" >> "$integrationName/kb/README.md"
 
@@ -1127,6 +1131,9 @@ function extractKB {
   kbAuthorsPersonsNLFR="$integrationName/kb/agents/$SUFFIX_KB_AUT_PERSONS_NL_FR"
   kbAuthorsOrgsFRNL="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_FR_NL"
   kbAuthorsOrgsNLFR="$integrationName/kb/agents/$SUFFIX_KB_AUT_ORGS_NL_FR"
+
+  kbOriginalTitlesFRNL="$integrationName/kb/translations/$SUFFIX_KB_TRL_FR_NL_ORIG"
+  kbOriginalTitlesNLFR="$integrationName/kb/translations/$SUFFIX_KB_TRL_NL_FR_ORIG"
 
   kbCodeAssignmentsFRNL="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_FR_NL"
   kbCodeAssignmentsNLFR="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_NL_FR"
@@ -1188,6 +1195,12 @@ function extractKB {
 
   echo "EXTRACTION - Extract KBCode classifications NL-FR"
   queryData "$KB_SPARQL_ENDPOINT" "$GET_KB_KBCODE_NL_FR_QUERY_FILE" "$kbCodeAssignmentsNLFR"
+
+  echo "EXTRACTION - Extract KB original title from original title statement - FR-NL"
+  python -m $MODULE_EXTRACT_STRING_FROM_COLUMN -i "$kbTranslationsFRNL" --id-column "manifestationID" --column "sourceTitle" -s ". -" -p "before" -o $kbOriginalTitlesFRNL
+
+  echo "EXTRACTION - Extract KB original title from original title statement - NL-FR"
+  python -m $MODULE_EXTRACT_STRING_FROM_COLUMN -i "$kbTranslationsNLFR" --id-column "manifestationID" --column "sourceTitle" -s ". -" -p "before" -o $kbOriginalTitlesNLFR
 
   echo "EXTRACTION - Extract publisher names from publications NL-FR"
   python -m $MODULE_EXTRACT_COLUMNS -i "$kbTranslationsNLFR" -o "$kbTranslationsPublishersNLFR" -c "publisherName"
@@ -1657,6 +1670,9 @@ function transformKB {
 
   export RML_SOURCE_KB_TRL_KBCODE_FR_NL="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_FR_NL"
   export RML_SOURCE_KB_TRL_KBCODE_NL_FR="$integrationName/kb/translations/$SUFFIX_KB_KBCODE_NL_FR"
+
+  export RML_SOURCE_KB_TRL_FR_NL_ORIG="$integrationName/kb/translations/$SUFFIX_KB_TRL_FR_NL_ORIG"
+  export RML_SOURCE_KB_TRL_NL_FR_ORIG="$integrationName/kb/translations/$SUFFIX_KB_TRL_NL_FR_ORIG"
 
   # 2) execute the mapping
   echo "TRANSFORMATION - Map KB translations ..."
