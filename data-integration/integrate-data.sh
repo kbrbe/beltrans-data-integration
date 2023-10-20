@@ -222,6 +222,7 @@ CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 CREATE_QUERY_BNF_GENDER="sparql-queries/create-bnf-contributors-gender.sparql"
 CREATE_QUERY_BNF_ISBN10_BIBFRAME="sparql-queries/create-bnf-isbn10.sparql"
 CREATE_QUERY_BNF_ISBN13_BIBFRAME="sparql-queries/create-bnf-isbn13.sparql"
+CREATE_QUERY_BNF_ORIGINALS="sparql-queries/create-bnf-originals.sparql"
 
 CREATE_QUERY_KB_TRL_PBL="sparql-queries/link-kb-translations-to-publishers.sparql"
 CREATE_QUERY_KB_PBL_IDENTIFIERS="sparql-queries/create-kb-org-identifier.sparql"
@@ -2739,6 +2740,9 @@ function loadBnF {
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL"
 
+  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_BNF_TRL_ORIG>"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_BNF_TRL_ORIG"
+
   local bnfTranslationsFRNL="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_FR_NL_LD"
   local bnfTranslationsNLFR="$integrationName/bnf/rdf/$SUFFIX_BNF_TRL_NL_FR_LD"
   local bnfContributorData="$integrationName/bnf/rdf/$SUFFIX_BNF_CONT_LD"
@@ -2846,7 +2850,7 @@ function loadBnF {
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" \
     "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA" "$CREATE_QUERY_BNF_GENDER" \
-    "$CREATE_QUERY_BNF_ISBN10_BIBFRAME" "$CREATE_QUERY_BNF_ISBN13_BIBFRAME"
+    "$CREATE_QUERY_BNF_ISBN10_BIBFRAME" "$CREATE_QUERY_BNF_ISBN13_BIBFRAME" "$CREATE_QUERY_BNF_ORIGINALS"
 
 }
 
