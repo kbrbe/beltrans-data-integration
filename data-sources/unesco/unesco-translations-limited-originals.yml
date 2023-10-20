@@ -64,6 +64,7 @@ mappings:
     po:
       - [a, schema:CreativeWork]
       - [a, schema:Book]
+      - [dcterms:identifier, "source_$(id)"]
       - p: schema:inLanguage
         o: lang:fre~iri
         condition:
