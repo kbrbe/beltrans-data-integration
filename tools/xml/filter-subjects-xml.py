@@ -7,6 +7,7 @@ import os
 import json
 import itertools
 import csv
+from tools import utils
 from optparse import OptionParser
 from tqdm import tqdm
 
@@ -29,8 +30,9 @@ NS_RDAA = "http://rdaregistry.info/Elements/a/"
 NS_RDAU = "http://rdaregistry.info/Elements/u/"
 NS_BNF_ROLES = "http://data.bnf.fr/vocabulary/roles/"
 NS_BIO = "http://vocab.org/bio/0.1/"
+NS_MARCSLIM = "http://www.loc.gov/MARC21/slim"
 
-ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1, 'rdagroup2elements': NS_RDAGROUP2, 'marcrel': NS_MARCREL, 'skos': NS_SKOS, 'bnf-onto': NS_BNF, 'bnfroles': NS_BNF_ROLES, 'rdau': NS_RDAU, 'rdaa': NS_RDAA, 'bio': NS_BIO}
+ALL_NS = {'rdf': NS_RDF, 'rdfs': NS_RDFS, 'schema': NS_SCHEMA, 'madsrdf': NS_MADSRDF, 'dcterms': NS_DCTERMS, 'isni': NS_ISNI, 'owl': NS_OWL, 'xsd': NS_XSD, 'foaf': NS_FOAF, 'void': NS_VOID, 'rdagroup1elements': NS_RDAGROUP1, 'rdagroup2elements': NS_RDAGROUP2, 'marcrel': NS_MARCREL, 'skos': NS_SKOS, 'bnf-onto': NS_BNF, 'bnfroles': NS_BNF_ROLES, 'rdau': NS_RDAU, 'rdaa': NS_RDAA, 'bio': NS_BIO, 'marc': NS_MARCSLIM}
 
 
 RDF_ABOUT = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about'
@@ -38,7 +40,21 @@ RDF_RESOURCE = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource'
 
 
 # -----------------------------------------------------------------------------
-def processFile(xmlFilename, relevantTranslations, filteredRecordIDs, outFile, stats, subjectPrefix, subjectTerm):
+def getFilterID(elem, inputFormat):
+
+  subject = None
+  if inputFormat == 'MARCXML':
+    subject = utils.getElementValue(elem.find('./marc:controlfield', ALL_NS))
+  elif inputFormat == 'RDF/XML':
+    subject = elem.attrib[RDF_ABOUT]
+  else:
+    print(f'This should not happen, function to handle inputFormat "{inputFormat}" not implemented')
+    exit(1)
+
+  return subject
+
+# -----------------------------------------------------------------------------
+def processFile(xmlFilename, relevantTranslations, filteredRecordIDs, outFile, stats, subjectPrefix, subjectTerm, inputFormat):
 
   #
   # read ISNI RDF records from input RDF/XML
@@ -51,7 +67,7 @@ def processFile(xmlFilename, relevantTranslations, filteredRecordIDs, outFile, s
     if  event == 'end' and elem.tag == ET.QName(ALL_NS[subjectPrefix], subjectTerm):
 
       stats['numberRecords'] += 1
-      subject = elem.attrib[RDF_ABOUT]
+      subject = getFilterID(elem, inputFormat)
       #
       # add record to output if it fits the filter criteria
       #
@@ -105,6 +121,7 @@ def main():
   parser.add_option('-o', '--output-file', action='store', help='The name of the file in which the filtered RDF/XML should be stored')
   parser.add_option('-f', '--filter-file', action='append', help='The name of a CSV file which contains relevant subject identifiers in one column, used to filter the input. If several files are provided a subject of the input needs to exist in all of the filter files (AND condition)')
   parser.add_option('--subject-tag', action='store', default='rdf:Description', help='The tag name used for a subject, could be for example RDF:Description or schema:Organization, default is rdf:Description')
+  parser.add_option('--input-format', action='store', default='RDF/XML', help='The format of the input XML, possible values are MARCXML or RDF/XML, for backwards compatibility of this script, the default is RDF/XML')
   (options, args) = parser.parse_args()
 
   #
@@ -125,6 +142,7 @@ def main():
 
   relevantTranslations = readLookupIdentifiers(options.filter_file)
 
+  inputFormat = options.input_format
   filteredRecordIDs = set()
   processedRecords = 0
   numberXMLFiles = 0
@@ -138,7 +156,7 @@ def main():
 
     if os.path.isfile(options.input) and options.input.endswith('.xml'):
       numberXMLFiles += 1
-      processFile(options.input, relevantTranslations, filteredRecordIDs, outFile, stats, subjectPrefix, subjectTerm)
+      processFile(options.input, relevantTranslations, filteredRecordIDs, outFile, stats, subjectPrefix, subjectTerm, inputFormat)
     elif os.path.isdir(options.input):
       inputFiles = os.listdir(options.input)
       numberFiles = len(inputFiles)
@@ -146,7 +164,7 @@ def main():
       for inputFile in tqdm(inputFiles):
         if inputFile.endswith('.xml'):
           numberXMLFiles += 1
-          processFile(os.path.join(options.input, inputFile), relevantTranslations, filteredRecordIDs, outFile, stats, subjectPrefix, subjectTerm)
+          processFile(os.path.join(options.input, inputFile), relevantTranslations, filteredRecordIDs, outFile, stats, subjectPrefix, subjectTerm, inputFormat)
     else:
       print(f'Error: the input {options.input} is not a folder nor a file!')
 
