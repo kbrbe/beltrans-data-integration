@@ -83,6 +83,9 @@ INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR
 
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
+INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-20_APEP.xml"
+INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
+
 # KBR - linked authorities
 INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20231006_NL-FR_APEP.xml"
 INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_20231006_NL-FR_AORG.xml"
@@ -1079,6 +1082,12 @@ function extractKBR {
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
   extractKBRLinkedAuthorities "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "$INPUT_KBR_LA_ORG_NL" "$INPUT_KBR_LA_PERSON_FR" "$INPUT_KBR_LA_ORG_FR" "$INPUT_KBR_BELGIANS"
 
+  #echo "EXTRACTION - Extract and clean KBR linked originals data"
+  #extractKBRLinkedOriginals
+
+  #echo "EXTRACTION - Extract and clean KBR linked originals linked authorities data"
+  #extractKBRLinkedOriginalsAuthorities
+
 }
 
 # -----------------------------------------------------------------------------
@@ -1101,6 +1110,39 @@ function extractKBROriginals {
   extractKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$INPUT_KBR_TRL_ORIG_NL_FR" "nl-fr"
 
   # there is no linked authorities export
+  # todo: create a list of authority identifiers 
+  #kbrTranslationsCSVContDedupFRNL="$integrationName/$dataSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_CONT_DEDUP"
+  #kbrTranslationsCSVContDedupNLFR="$integrationName/$dataSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_CONT_DEDUP"
+  #kbrContributorIdentifiersFRNL="$integrationName/$dataSourceName/agents/"
+  #kbrContributorIdentifiersNLFR="$integrationName/$dataSourceName/agents/"
+
+  #echo "EXTRACT - Contributor identifiers from KBR Originals - FR-NL"
+  #python -m $MODULE_EXTRACT_COLUMNS -i $kbrTranslationsCSVContDedupFRNL -o "$kbrContributorIdentifiersFRNL" -c "contributorID"
+
+  #echo "EXTRACT - Contributor identifiers from KBR Originals - NL-FR"
+  #python -m $MODULE_EXTRACT_COLUMNS -i $kbrTranslationsCSVContDedupNLFR -o "$kbrContributorIdentifiersNLFR" -c "contributorID"
+
+  # todo: use filter-xml-subjects.py to extract the XML
+  #echo "EXTRACT - KBR Originals linked authorities - persons"
+  #python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+  #  -i $INPUT_KBR_APEP \
+  #  -f $kbrTranslationsCSVContDedupFRNL \
+  #  -f $kbrTranslationsCSVContDedupNLFR \
+  #  -o $kbrOriginalsLinkedAuthoritiesAPEP \
+  #  --subject-tag "marc:record" \
+  #  --input-format
+
+  #echo "EXTRACT - KBR Originals linked authorities - organisations"
+  #python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+  #  -i $INPUT_KBR_AORG \
+  #  -f $kbrTranslationsCSVContDedupFRNL \
+  #  -f $kbrTranslationsCSVContDedupNLFR \
+  #  -o $kbrOriginalsLinkedAuthoritiesAORG \
+  #  --subject-tag "marc:record" \
+  #  --input-format
+
+
+
 }
 
 # -----------------------------------------------------------------------------
