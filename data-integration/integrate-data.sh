@@ -233,12 +233,7 @@ ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
 
 CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
 
-LINK_QUERY_CONT_AUTHORS="integration_queries/link-beltrans-manifestations-authors.sparql"
-LINK_QUERY_CONT_TRANSLATORS="integration_queries/link-beltrans-manifestations-translators.sparql"
-LINK_QUERY_CONT_ILLUSTRATORS="integration_queries/link-beltrans-manifestations-illustrators.sparql"
-LINK_QUERY_CONT_SCENARISTS="integration_queries/link-beltrans-manifestations-scenarists.sparql"
-LINK_QUERY_CONT_PUBLISHING_DIRECTORS="integration_queries/link-beltrans-manifestations-publishing-directors.sparql"
-LINK_QUERY_CONT_PUBLISHERS="integration_queries/link-beltrans-manifestations-publishers.sparql"
+LINK_QUERY_CONTRIBUTORS="integration_queries/link-beltrans-manifestations-contributors.sparql"
 
 DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
 DATA_PROFILE_QUERY_FILE_CONT_PERSONS="dataprofile-contributors-persons.sparql"
@@ -842,11 +837,8 @@ function integrate {
 #  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
 #    --create-queries "2023-05-04_config-integration-contributors-create.csv" --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
 
-  echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists and publishing directors) ..."
-
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" \
-    "$LINK_QUERY_CONT_AUTHORS" "$LINK_QUERY_CONT_TRANSLATORS" "$LINK_QUERY_CONT_ILLUSTRATORS" \
-    "$LINK_QUERY_CONT_SCENARISTS" "$LINK_QUERY_CONT_PUBLISHING_DIRECTORS" "$LINK_QUERY_CONT_PUBLISHERS"
+  echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists, publishing directors, and publishers) ..."
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
 
   echo "Perform Clustering ..."
   clustering "$integrationName"
