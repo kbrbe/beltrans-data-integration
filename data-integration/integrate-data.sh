@@ -220,8 +220,7 @@ CREATE_QUERY_BNF_ISNI="sparql-queries/create-bnf-isni.sparql"
 CREATE_QUERY_BNF_VIAF="sparql-queries/create-bnf-viaf.sparql"
 CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 CREATE_QUERY_BNF_GENDER="sparql-queries/create-bnf-contributors-gender.sparql"
-CREATE_QUERY_BNF_ISBN10_BIBFRAME="sparql-queries/create-bnf-isbn10.sparql"
-CREATE_QUERY_BNF_ISBN13_BIBFRAME="sparql-queries/create-bnf-isbn13.sparql"
+CREATE_QUERY_BNF_MANIFESTATIONS_BIBFRAME="sparql-queries/create-bnf-bibframe-identifiers.sparql"
 
 CREATE_QUERY_KB_TRL_PBL="sparql-queries/link-kb-translations-to-publishers.sparql"
 CREATE_QUERY_KB_PBL_IDENTIFIERS="sparql-queries/create-kb-org-identifier.sparql"
@@ -1102,6 +1101,7 @@ function extractKB {
   # create the folders to place the extracted translations and agents
   mkdir -p $integrationName/kb/translations
   mkdir -p $integrationName/kb/agents
+  mkdir -p $integrationName/kb/rdf
 
   #printf "\nUsed input (KB translations and contributors)\n* $kbrDutchTranslations\n* $kbrFrenchTranslations" >> "$integrationName/kb/README.md"
 
@@ -2838,7 +2838,7 @@ function loadBnF {
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" \
     "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA" "$CREATE_QUERY_BNF_GENDER" \
-    "$CREATE_QUERY_BNF_ISBN10_BIBFRAME" "$CREATE_QUERY_BNF_ISBN13_BIBFRAME"
+    "$CREATE_QUERY_BNF_MANIFESTATIONS_BIBFRAME"
 
 }
 
