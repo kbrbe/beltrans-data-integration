@@ -8,7 +8,7 @@ import re
 import requests
 import utils_sparql
 from tools.sparql.query_builder import ContributorUpdateQuery, \
-  OrganizationContributorCreateQuery, PersonContributorCreateQuery, ManifestationCreateQuery, ManifestationUpdateQuery
+  OrganizationContributorCreateQuery, PersonContributorCreateQuery, ManifestationCreateQueryIdentifiers, ManifestationUpdateQuery
 from optparse import OptionParser
 from dotenv import load_dotenv
 import time
@@ -60,8 +60,9 @@ def generateCreateQueryManifestations(sourceName, sourceGraph, targetGraph, orig
   entityTargetClass = 'schema:CreativeWork'
   titleProperty = 'schema:name'
 
-  qb = ManifestationCreateQuery(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
+  qb = ManifestationCreateQueryIdentifiers(source=sourceName, sourceGraph=sourceGraph, targetGraph=targetGraph,
                                 originalsGraph=originalsGraph, entitySourceClass=entitySourceClass,
+                                identifiersToAdd=['ISBN-10','ISBN-13','KBR','BnF','KB','Unesco'],
                                 entityTargetClass=entityTargetClass, titleProperty=titleProperty)
 
   return qb.getQueryString()

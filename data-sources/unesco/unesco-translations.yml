@@ -43,6 +43,7 @@ mappings:
       - [a, schema:CreativeWork]
       - [a, schema:Book]
       - [dcterms:identifier, $(id)]
+      - [bf:identifiedby, btid:identifier_unesco_$(id)~iri]
       - [schema:name, $(sn_target_title)]
       - [schema:translationOfWork, btid:manifestation_unesco_source_$(id)~iri]
       - p: rdagroup1elements:publishersName
@@ -88,6 +89,22 @@ mappings:
             - [grel:valueParameter, $(sn_target_lang)]
             - [grel:valueParameter2, "Dutch"] 
 
+
+  # ---------------------------------------------------------------------------
+  #
+  manifestationsIdentifier:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates an Unesco identifier entity according to the BIBFRAME ontology."
+    sources:
+      - access: *sourceWorks
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:identifier_unesco_$(id)
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "Unesco"]
+      - [rdf:value, $(id)]
+ 
 
   # ---------------------------------------------------------------------------
   #

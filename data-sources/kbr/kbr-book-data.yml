@@ -43,6 +43,7 @@ mappings:
       - [a, schema:CreativeWork]
       - [dcterms:identifier, $(KBRID)]
       - [bf:title, btid:manifestation_title_$(KBRID)~iri]
+      - [bf:identifiedBy, btid:kbr_identifier_$(KBRID)~iri]
       - p: rdf:type
         o: btm:MultiLingualManifestation~iri
         condition:
@@ -253,7 +254,21 @@ mappings:
             - [grel:valueParameter, $(subtitle)]
             - [grel:valueParameter2, ""] 
 
-
+  # ---------------------------------------------------------------------------
+  #
+  manifestationKBRIdentifier:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates instances of bf:Identifier for the KBR records."
+    sources:
+      - access: *sourceWorks
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:kbr_identifier_$(KBRID)
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "KBR"]
+      - [rdf:value, $(KBRID)]
+ 
 
 
 
