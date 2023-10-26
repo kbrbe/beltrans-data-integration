@@ -376,6 +376,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation schema:author ?author . }
+      graph <http://beltrans-contributors> { ?author dcterms:identifier ?authorIdentifier . }
+
       OPTIONAL { graph <http://beltrans-contributors> { ?author rdfs:label ?authorLabel . } }
       OPTIONAL {
         graph <http://beltrans-contributors> { ?author schema:nationality|schema:location/schema:addressCountry ?authorNationality . } 
@@ -383,19 +385,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         FILTER (lang(?authorNationalityLabel) = 'en')
       }
 
-      BIND(CONCAT( COALESCE(?authorLabel, "missing name"), " (", ?authorIdentifiers, ")") as ?authorNameID)
-      # This subquery retrieves the local identifiers of the author
-      {
-        SELECT DISTINCT ?manifestation ?author (group_concat(distinct ?authorIdentifier;SEPARATOR=',') as ?authorIdentifiers)
-        WHERE { 
-          graph <http://beltrans-manifestations> {
-            ?manifestation schema:name ?title ;
-                           schema:author ?author .
-          }    
-          ?author schema:sameAs/dcterms:identifier ?authorIdentifier . 
-        }
-        group by ?manifestation ?author
-      }
+      BIND(CONCAT( COALESCE(?authorLabel, "missing name"), " (", ?authorIdentifier, ")") as ?authorNameID)
     }
 
     # #########################################################################
@@ -404,6 +394,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation schema:translator ?translator . }
+      graph <http://beltrans-contributors> { ?translator dcterms:identifier ?translatorIdentifier . }
+
       OPTIONAL { graph <http://beltrans-contributors> { ?translator rdfs:label ?translatorLabel . } }
       OPTIONAL {
         graph <http://beltrans-contributors> { ?translator schema:nationality|schema:location/schema:addressCountry ?translatorNationality . } 
@@ -411,19 +403,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         FILTER (lang(?translatorNationalityLabel) = 'en')
       }
 
-      BIND(CONCAT( COALESCE(?translatorLabel, "missing name"), " (", ?translatorIdentifiers, ")") as ?translatorNameID)
-      # This subquery retrieves the local identifiers of the translator
-      {
-        SELECT DISTINCT ?manifestation ?translator (group_concat(distinct ?translatorIdentifier;SEPARATOR=',') as ?translatorIdentifiers)
-        WHERE { 
-          graph <http://beltrans-manifestations> {
-            ?manifestation schema:name ?title ;
-                           schema:translator ?translator .
-          }    
-          ?translator schema:sameAs/dcterms:identifier ?translatorIdentifier . 
-        }
-        group by ?manifestation ?translator
-      }
+      BIND(CONCAT( COALESCE(?translatorLabel, "missing name"), " (", ?translatorIdentifier, ")") as ?translatorNameID)
     }
 
 
@@ -433,6 +413,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation marcrel:ill ?illustrator . }
+      graph <http://beltrans-contributors> { ?illustrator dcterms:identifier ?illustratorIdentifier . }
+
       OPTIONAL {
         graph <http://beltrans-contributors> { ?illustrator schema:nationality|schema:location/schema:addressCountry ?illustratorNationality . } 
         graph <http://master-data> { ?illustratorNationality mads:authoritativeLabel ?illustratorNationalityLabel . }
@@ -440,19 +422,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
       OPTIONAL { graph <http://beltrans-contributors> { ?illustrator rdfs:label ?illustratorLabel . } }
 
-      BIND(CONCAT( COALESCE(?illustratorLabel, "missing name"), " (", ?illustratorIdentifiers, ")") as ?illustratorNameID)
-      # This subquery retrieves the local identifiers of the author
-      {
-        SELECT DISTINCT ?manifestation ?illustrator (group_concat(distinct ?illustratorIdentifier;SEPARATOR=',') as ?illustratorIdentifiers)
-        WHERE { 
-          graph <http://beltrans-manifestations> {
-            ?manifestation schema:name ?title ;
-                           marcrel:ill ?illustrator .
-          }    
-          ?illustrator schema:sameAs/dcterms:identifier ?illustratorIdentifier . 
-        }
-        group by ?manifestation ?illustrator
-      }
+      BIND(CONCAT( COALESCE(?illustratorLabel, "missing name"), " (", ?illustratorIdentifier, ")") as ?illustratorNameID)
     }
 
     # #########################################################################
@@ -461,6 +431,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation marcrel:sce ?scenarist . }
+      graph <http://beltrans-contributors> { ?scenarist dcterms:identifier ?scenaristIdentifier . }
+
       OPTIONAL {
         graph <http://beltrans-contributors> { ?scenarist schema:nationality|schema:location/schema:addressCountry ?scenaristNationality . } 
         graph <http://master-data> { ?scenaristNationality mads:authoritativeLabel ?scenaristNationalityLabel . }
@@ -468,19 +440,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
       OPTIONAL { graph <http://beltrans-contributors> { ?scenarist rdfs:label ?scenaristLabel . } }
 
-      BIND(CONCAT( COALESCE(?scenaristLabel, "missing name"), " (", ?scenaristIdentifiers, ")") as ?scenaristNameID)
-      # This subquery retrieves the local identifiers of the author
-      {
-        SELECT DISTINCT ?manifestation ?scenarist (group_concat(distinct ?scenaristIdentifier;SEPARATOR=',') as ?scenaristIdentifiers)
-        WHERE { 
-          graph <http://beltrans-manifestations> {
-            ?manifestation schema:name ?title ;
-                           marcrel:sce ?scenarist .
-          }    
-          ?scenarist schema:sameAs/dcterms:identifier ?scenaristIdentifier . 
-        }
-        group by ?manifestation ?scenarist
-      }
+      BIND(CONCAT( COALESCE(?scenaristLabel, "missing name"), " (", ?scenaristIdentifier, ")") as ?scenaristNameID)
     }
 
     # #########################################################################
@@ -489,6 +449,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation marcrel:pbd ?publishingDirector . }
+      graph <http://beltrans-contributors> { ?publishingDirector dcterms:identifier ?publishingDirectorIdentifier . }
+
       OPTIONAL {
         graph <http://beltrans-contributors> { ?publishingDirector schema:nationality|schema:location/schema:addressCountry ?publishingDirectorNationality . } 
         graph <http://master-data> { ?publishingDirectorNationality mads:authoritativeLabel ?publishingDirectorNationalityLabel . }
@@ -496,19 +458,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
       OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector rdfs:label ?publishingDirectorLabel . } }
 
-      BIND(CONCAT( COALESCE(?publishingDirectorLabel, "missing name"), " (", ?publishingDirectorIdentifiers, ")") as ?publishingDirectorNameID)
-      # This subquery retrieves the local identifiers of the author
-      {
-        SELECT DISTINCT ?manifestation ?publishingDirector (group_concat(distinct ?publishingDirectorIdentifier;SEPARATOR=',') as ?publishingDirectorIdentifiers)
-        WHERE { 
-          graph <http://beltrans-manifestations> {
-            ?manifestation schema:name ?title ;
-                           marcrel:pbd ?publishingDirector .
-          }    
-          ?publishingDirector schema:sameAs/dcterms:identifier ?publishingDirectorIdentifier . 
-        }
-        group by ?manifestation ?publishingDirector
-      }
+      BIND(CONCAT( COALESCE(?publishingDirectorLabel, "missing name"), " (", ?publishingDirectorIdentifier, ")") as ?publishingDirectorNameID)
     }
 
     # #########################################################################
@@ -517,6 +467,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     #
     OPTIONAL {
       graph <http://beltrans-manifestations> { ?manifestation schema:publisher ?publisher . }
+      graph <http://beltrans-contributors> { ?publisher dcterms:identifier ?publisherIdentifier . }
+
       OPTIONAL {
         graph <http://beltrans-contributors> { ?publisher schema:nationality|schema:location/schema:addressCountry ?publisherNationality . } 
         graph <http://master-data> { ?publisherNationality mads:authoritativeLabel ?publisherNationalityLabel . }
@@ -524,19 +476,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
       OPTIONAL { graph <http://beltrans-contributors> { ?publisher rdfs:label ?publisherLabel . } }
 
-      BIND(CONCAT( COALESCE(?publisherLabel, "missing name"), " (", ?publisherIdentifiers, ")") as ?publisherNameID)
-      # This subquery retrieves the local identifiers of the author
-      {
-        SELECT DISTINCT ?manifestation ?publisher (group_concat(distinct ?publisherIdentifier;SEPARATOR=',') as ?publisherIdentifiers)
-        WHERE { 
-          graph <http://beltrans-manifestations> {
-            ?manifestation schema:name ?title ;
-                           schema:publisher ?publisher .
-          }    
-          ?publisher schema:sameAs/dcterms:identifier ?publisherIdentifier . 
-        }
-        group by ?manifestation ?publisher
-      }
+      BIND(CONCAT( COALESCE(?publisherLabel, "missing name"), " (", ?publisherIdentifier, ")") as ?publisherNameID)
     }
 
 
