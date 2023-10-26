@@ -198,7 +198,7 @@ def getLinkIdentifierTuple(identifierName):
   elif identifierName == 'ISBN-13':
     return ('bibo:isbn13', identifierName)
   else:
-    return ''
+    return ('', identifierName)
 
 # -----------------------------------------------------------------------------
 def getUpdateQueryString(queryType, sourceName, sourceGraph, targetGraph, originalsGraph,
