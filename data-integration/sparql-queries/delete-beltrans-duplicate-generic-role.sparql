@@ -1,0 +1,14 @@
+PREFIX schema: <http://schema.org/>
+PREFIX btid: <http://kbr.be/id/data/> 
+
+DELETE {
+  graph <http://beltrans-manifestations> { ?manifestation schema:author ?detailedRoleContributor . }
+}
+WHERE {
+ 
+  graph <http://beltrans-manifestations> {
+    ?manifestation marcrel:ill|marcrel:sce|marcrel:pbd ?detailedRoleContributor .
+    
+    ?manifestation schema:author ?detailedRoleContributor .
+  }
+}

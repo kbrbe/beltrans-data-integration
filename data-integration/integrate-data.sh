@@ -212,6 +212,8 @@ DELETE_QUERY_BNF_ISBN10_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn10-without
 DELETE_QUERY_BNF_ISBN13_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn13-without-hyphen.sparql"
 DELETE_QUERY_DUPLICATE_MANIFESTATIONS="sparql-queries/delete-duplicate-manifestations.sparql"
 
+DELETE_QUERY_BELTRANS_DUPLICATE_ROLE="sparql-queries/delete-beltrans-duplicate-generic-role.sparql"
+
 TRANSFORM_QUERY_BNF_TRL_NL_FR="sparql-queries/transform-bnf-data-nl-fr.sparql"
 TRANSFORM_QUERY_BNF_TRL_FR_NL="sparql-queries/transform-bnf-data-fr-nl.sparql"
 CREATE_QUERY_BNF_IDENTIFIER_CONT="sparql-queries/create-bnf-contributors-identifier.sparql"
@@ -838,6 +840,9 @@ function integrate {
 
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists, publishing directors, and publishers) ..."
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
+
+  echo "Delete duplicate more generic schema:author role if we have a more specific role"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
 
   echo "Perform Clustering ..."
   clustering "$integrationName"
