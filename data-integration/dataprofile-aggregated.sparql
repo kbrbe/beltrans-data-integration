@@ -41,7 +41,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?illustratorNameID;SEPARATOR=';') AS ?illustratorIdentifiers)
     (group_concat(distinct ?scenaristNameID;SEPARATOR=';') AS ?scenaristIdentifiers)
     (group_concat(distinct ?publishingDirectorNameID;SEPARATOR=';') AS ?publishingDirectorIdentifiers)
-    (group_concat(distinct ?publisherNameID;SEPARATOR=';') AS ?publisherIdentifiers)
+    (group_concat(distinct ?publisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifiers)
 
     (group_concat(distinct ?kbrManifestationID;SEPARATOR=';') AS ?targetKBRIdentifier)
     (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetBnFIdentifier)
@@ -52,6 +52,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceKBRIdentifier)
     (group_concat(distinct ?kbrSourceManifestationISBN10;SEPARATOR=';') AS ?sourceISBN10)
     (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceISBN13)
+    ("" AS ?sourcePublisherIdentifiers)
 
     (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetKBREdition)
     (group_concat(distinct ?bnfTargetManifestationEdition;SEPARATOR=';') AS ?targetBnFEdition)

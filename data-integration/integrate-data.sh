@@ -259,7 +259,9 @@ SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-persons-all-info.cs
 SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE_SORTED="contributors-persons-all-info-sorted.csv"
 SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE="contributors-persons.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_PERSONS="all-persons.csv"
+SUFFIX_DATA_PROFILE_CONT_ALL_ORGS="all-orgs.csv"
 SUFFIX_DATA_PROFILE_CONT_ORGS_FILE="contributors-orgs.csv"
+SUFFIX_DATA_PROFILE_CONT_ORGS_FILE_PROCESSED="contributors-orgs-processed.csv"
 SUFFIX_DATA_PROFILE_FILE_KBR="integrated-data-kbr-not-filtered.csv"
 SUFFIX_DATA_PROFILE_FILE_BNF="integrated-data-bnf-not-filtered.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE="integrated-data-contributors-belgian-not-filtered.csv"
@@ -923,7 +925,9 @@ function postprocess {
   tmp1="$integrationName/csv/kbr-enriched-not-yet-bnf-and-kb.csv"
   tmp2="$integrationName/csv/kbr-and-bnf-enriched-not-yet-kb.csv"
 
-  contributorsOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
+  contributorsOrgsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
+  contributorsOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE_PROCESSED"
+  allOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_ORGS"
 
   kbCodeHierarchy="$integrationName/csv/$SUFFIX_DATA_PROFILE_KBCODE"
 
@@ -952,11 +956,17 @@ function postprocess {
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $contributorsPersonsAllData -o $contributorsPersonsAllDataSorted \
        -c "nationalities" -c "gender"
 
-  echo "Postprocess contributor data ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $contributorsPersons
+  echo "Postprocess contributor data - persons ..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $contributorsPersons -t "persons"
 
-  echo "Postprocess contributor data (keep non-contributors)..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $allPersons --keep-non-contributors
+  echo "Postprocess contributor data - orgs ..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedDataEnriched -o $contributorsOrgs -t "orgs"
+
+  echo "Postprocess contributor data -persons (keep non-contributors)..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $allPersons --keep-non-contributors -t "persons"
+
+  echo "Postprocess contributor data - orgs (keep non-contributors)..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedDataEnriched -o $allOrgs --keep-non-contributors -t "orgs"
 
   echo "Sort certain columns in the manifestation CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataEnriched -o $integratedDataEnrichedSorted \
@@ -964,7 +974,7 @@ function postprocess {
 
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "KBCode" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
 
 }
 
