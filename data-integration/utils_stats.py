@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import os
+import re
 
 # -----------------------------------------------------------------------------
 def countRowsWithValueForColumn(df, column):
@@ -261,6 +262,56 @@ def getContributorName(nameIDString):
   """
   contributorName = nameIDString.split('(')[0] if '(' in nameIDString else nameIDString
   return contributorName.strip()
+
+# -----------------------------------------------------------------------------
+def getContributorID(nameIDString):
+  """
+  >>> getContributorID('Lieber, Sven (123)')
+  '123'
+  >>> getContributorID('Lieber, Sven ')
+  ''
+  """
+  if '(' in nameIDString:
+    contributorIDs = re.findall(r'\((.*)\)', nameIDString)
+    if len(contributorIDs) > 0:
+      contributorID = contributorIDs[0]
+    else:
+      contributorID = ''
+  else:
+    contributorID = ''
+  return contributorID.strip()
+
+
+
+# -----------------------------------------------------------------------------
+def countContributionBasedOnIdentifier(value, counter, valueDelimiter=';'):
+  """This function counts contributors.
+  >>> counter = {}
+  >>> countContributionBasedOnIdentifier('Lieber, Sven (123)', counter)
+  >>> counter['123']
+  1
+  >>> countContributionBasedOnIdentifier('Sven Lieber (456)', counter)
+  >>> counter['456']
+  1
+  >>> countContributionBasedOnIdentifier('Lieber, Sven (123)', counter)
+  >>> counter['123']
+  2
+  >>> countContributionBasedOnIdentifier('"_$C(128)_"y!"_$C(138,139"', counter)
+  >>> counter['128']
+  1
+  """
+  if value != '':
+    contributors = value.split(valueDelimiter) if valueDelimiter in value else [value]
+    alreadyProcessed = set()
+    for c in contributors:
+      contributorName = getContributorID(c)
+      if contributorName not in alreadyProcessed:
+        alreadyProcessed.add(contributorName)
+        if contributorName in counter:
+          counter[contributorName] = counter[contributorName] + 1
+        else:
+          counter[contributorName] = 1
+
 
 # -----------------------------------------------------------------------------
 def countContribution(value, counter, valueDelimiter=';'):

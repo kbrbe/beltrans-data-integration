@@ -216,6 +216,8 @@ DELETE_QUERY_BNF_ISBN10_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn10-without
 DELETE_QUERY_BNF_ISBN13_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn13-without-hyphen.sparql"
 DELETE_QUERY_DUPLICATE_MANIFESTATIONS="sparql-queries/delete-duplicate-manifestations.sparql"
 
+DELETE_QUERY_BELTRANS_DUPLICATE_ROLE="sparql-queries/delete-beltrans-duplicate-generic-role.sparql"
+
 TRANSFORM_QUERY_BNF_TRL_NL_FR="sparql-queries/transform-bnf-data-nl-fr.sparql"
 TRANSFORM_QUERY_BNF_TRL_FR_NL="sparql-queries/transform-bnf-data-fr-nl.sparql"
 CREATE_QUERY_BNF_IDENTIFIER_CONT="sparql-queries/create-bnf-contributors-identifier.sparql"
@@ -224,9 +226,8 @@ CREATE_QUERY_BNF_ISNI="sparql-queries/create-bnf-isni.sparql"
 CREATE_QUERY_BNF_VIAF="sparql-queries/create-bnf-viaf.sparql"
 CREATE_QUERY_BNF_WIKIDATA="sparql-queries/create-bnf-wikidata.sparql"
 CREATE_QUERY_BNF_GENDER="sparql-queries/create-bnf-contributors-gender.sparql"
-CREATE_QUERY_BNF_ISBN10_BIBFRAME="sparql-queries/create-bnf-isbn10.sparql"
-CREATE_QUERY_BNF_ISBN13_BIBFRAME="sparql-queries/create-bnf-isbn13.sparql"
 CREATE_QUERY_BNF_ORIGINALS="sparql-queries/create-bnf-originals.sparql"
+CREATE_QUERY_BNF_MANIFESTATIONS_BIBFRAME="sparql-queries/create-bnf-bibframe-identifiers.sparql"
 
 CREATE_QUERY_KB_TRL_PBL="sparql-queries/link-kb-translations-to-publishers.sparql"
 CREATE_QUERY_KB_PBL_IDENTIFIERS="sparql-queries/create-kb-org-identifier.sparql"
@@ -238,12 +239,7 @@ ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
 
 CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
 
-LINK_QUERY_CONT_AUTHORS="integration_queries/link-beltrans-manifestations-authors.sparql"
-LINK_QUERY_CONT_TRANSLATORS="integration_queries/link-beltrans-manifestations-translators.sparql"
-LINK_QUERY_CONT_ILLUSTRATORS="integration_queries/link-beltrans-manifestations-illustrators.sparql"
-LINK_QUERY_CONT_SCENARISTS="integration_queries/link-beltrans-manifestations-scenarists.sparql"
-LINK_QUERY_CONT_PUBLISHING_DIRECTORS="integration_queries/link-beltrans-manifestations-publishing-directors.sparql"
-LINK_QUERY_CONT_PUBLISHERS="integration_queries/link-beltrans-manifestations-publishers.sparql"
+LINK_QUERY_CONTRIBUTORS="integration_queries/link-beltrans-manifestations-contributors.sparql"
 
 DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
 DATA_PROFILE_QUERY_FILE_CONT_PERSONS="dataprofile-contributors-persons.sparql"
@@ -268,7 +264,9 @@ SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-persons-all-info.cs
 SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE_SORTED="contributors-persons-all-info-sorted.csv"
 SUFFIX_DATA_PROFILE_CONT_PERSONS_FILE="contributors-persons.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_PERSONS="all-persons.csv"
+SUFFIX_DATA_PROFILE_CONT_ALL_ORGS="all-orgs.csv"
 SUFFIX_DATA_PROFILE_CONT_ORGS_FILE="contributors-orgs.csv"
+SUFFIX_DATA_PROFILE_CONT_ORGS_FILE_PROCESSED="contributors-orgs-processed.csv"
 SUFFIX_DATA_PROFILE_FILE_KBR="integrated-data-kbr-not-filtered.csv"
 SUFFIX_DATA_PROFILE_FILE_BNF="integrated-data-bnf-not-filtered.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE="integrated-data-contributors-belgian-not-filtered.csv"
@@ -849,11 +847,11 @@ function integrate {
 #  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
 #    --create-queries "2023-05-04_config-integration-contributors-create.csv" --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
 
-  echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists and publishing directors) ..."
+  echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists, publishing directors, and publishers) ..."
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
 
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" \
-    "$LINK_QUERY_CONT_AUTHORS" "$LINK_QUERY_CONT_TRANSLATORS" "$LINK_QUERY_CONT_ILLUSTRATORS" \
-    "$LINK_QUERY_CONT_SCENARISTS" "$LINK_QUERY_CONT_PUBLISHING_DIRECTORS" "$LINK_QUERY_CONT_PUBLISHERS"
+  echo "Delete duplicate more generic schema:author role if we have a more specific role"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
 
   echo "Perform Clustering ..."
   clustering "$integrationName"
@@ -934,7 +932,9 @@ function postprocess {
   tmp1="$integrationName/csv/kbr-enriched-not-yet-bnf-and-kb.csv"
   tmp2="$integrationName/csv/kbr-and-bnf-enriched-not-yet-kb.csv"
 
-  contributorsOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
+  contributorsOrgsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
+  contributorsOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE_PROCESSED"
+  allOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_ORGS"
 
   kbCodeHierarchy="$integrationName/csv/$SUFFIX_DATA_PROFILE_KBCODE"
 
@@ -963,11 +963,17 @@ function postprocess {
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $contributorsPersonsAllData -o $contributorsPersonsAllDataSorted \
        -c "nationalities" -c "gender"
 
-  echo "Postprocess contributor data ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $contributorsPersons
+  echo "Postprocess contributor data - persons ..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $contributorsPersons -t "persons"
 
-  echo "Postprocess contributor data (keep non-contributors)..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $allPersons --keep-non-contributors
+  echo "Postprocess contributor data - orgs ..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedDataEnriched -o $contributorsOrgs -t "orgs"
+
+  echo "Postprocess contributor data -persons (keep non-contributors)..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $allPersons --keep-non-contributors -t "persons"
+
+  echo "Postprocess contributor data - orgs (keep non-contributors)..."
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedDataEnriched -o $allOrgs --keep-non-contributors -t "orgs"
 
   echo "Sort certain columns in the manifestation CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataEnriched -o $integratedDataEnrichedSorted \
@@ -975,7 +981,7 @@ function postprocess {
 
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "KBCode" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
 
 }
 
@@ -2908,7 +2914,7 @@ function loadBnF {
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" \
     "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA" "$CREATE_QUERY_BNF_GENDER" \
-    "$CREATE_QUERY_BNF_ISBN10_BIBFRAME" "$CREATE_QUERY_BNF_ISBN13_BIBFRAME" "$CREATE_QUERY_BNF_ORIGINALS"
+    "$CREATE_QUERY_BNF_MANIFESTATIONS_BIBFRAME" "$CREATE_QUERY_BNF_ORIGINALS"
 
 }
 

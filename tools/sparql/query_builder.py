@@ -211,6 +211,50 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         return provenanceString + "\n\n" + Query._getPrefixList() + "\n\n" + self._buildQuery()
 
 # ---------------------------------------------------------------------------
+class DeadLinkQuery(Query):
+
+    # ---------------------------------------------------------------------------
+    def __init__(self, sourceGraph, targetGraph, entityTargetType, entitySourceType, identifierName):
+        self.sourceGraph = sourceGraph
+        self.targetGraph = targetGraph
+        self.entityTargetType = entityTargetType
+        self.entitySourceType = entitySourceType
+        self.identifierName = identifierName
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        pattern = Template("""
+
+    SELECT ?targetIdentifier ("$identifierName" AS ?localIdentifierName) ?localIdentifier
+    WHERE {
+      graph <$targetGraph> { 
+        ?manifestation a $entityTargetType ;
+                       dcterms:identifier ?targetIdentifier ;
+                       bf:identifiedBy ?identifierEntity .
+        
+        ?identifierEntity a bf:Identifier ;
+                          rdfs:label "$identifierName" ;
+                          rdf:value ?localIdentifier .
+      } 
+      
+      OPTIONAL { 
+        graph <$targetGraph> { ?manifestation schema:sameAs ?localURI . } 
+        graph <$sourceGraph> { ?localURI a $entitySourceType . } 
+      }
+
+      FILTER(!bound(?localURI))
+
+    }
+
+
+        """)
+
+        return pattern.substitute(sourceGraph=self.sourceGraph, targetGraph=self.targetGraph,
+                                  entityTargetType=self.entityTargetType, entitySourceType=self.entitySourceType,
+                                  identifierName=self.identifierName)
+
+# ---------------------------------------------------------------------------
 class DuplicateIdentifierQuery(Query):
 
     # ---------------------------------------------------------------------------
@@ -542,6 +586,8 @@ class ManifestationCreateQueryIdentifiers(ManifestationQuery):
         self.entityTargetClass = entityTargetClass
         self.titleProperty = titleProperty
 
+        print(f'Constructor received identifiersToAdd: {identifiersToAdd}')
+
     # ---------------------------------------------------------------------------
     def _getFilterSourceQuadPattern(self):
 #        pattern = Template("""
@@ -838,12 +884,26 @@ class ManifestationUpdateQuery(ManifestationQuery):
 
         # Insert other identifiers which are optionally fetched
         for identifierProperty, identifierName in self.identifiersToAdd:
-            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_URI,
+
+            if identifierProperty != '':
+                query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_URI,
                                                    identifierProperty,
                                                    Query.getIdentifierVarName(identifierName),
                                                    graph=self.targetGraph,
                                                    optional=False,
                                                    newline=True)
+            else:
+                query += self._getINSERTIdentifiedByTriplePattern(identifierName)
+
+        # definition of identifiers, e.g. ?viafEntityURI a bf:Identifier
+        for identifierProperty, identifierName in self.identifiersToAdd:
+
+            if identifierProperty != '':
+                query += Query._getINSERTIdentifierDeclarationTriplePattern(identifierName, self.source)
+
+
+
+
 
         query += "} \n"  # end of INSERT block
 
@@ -873,12 +933,16 @@ class ManifestationUpdateQuery(ManifestationQuery):
 
         # Optionally fetch other identifiers
         for identifierProperty, identifierName in self.identifiersToAdd:
-            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
-                                                   identifierProperty,
-                                                   Query.getIdentifierVarName(identifierName),
-                                                   graph=self.sourceGraph,
-                                                   optional=True,
-                                                   newline=True)
+
+            if identifierProperty != '':
+                query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                                       identifierProperty,
+                                                       Query.getIdentifierVarName(identifierName),
+                                                       graph=self.sourceGraph,
+                                                       optional=True,
+                                                       newline=True)
+            else:
+                query += self._getIdentifierQuadPattern(identifierName, self.sourceGraph, optional=True)
 
         if self.source == 'BnF' or self.source == 'bnf':
             pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar btm:sourceLanguage $sourceLangVar . } }
@@ -974,13 +1038,16 @@ class ManifestationSingleUpdateQuery(ManifestationQuery):
         # they are taken based on the first element of the tuple ('bibo:isbn10', 'ISBN-10')
         for identifierProperty, identifierName in self.identifiersToAdd:
 
-            # create a direct property based on the first tuple element
-            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_URI,
-                                                   identifierProperty,
-                                                   self.getIdentifierVarName(identifierName),
-                                                   graph=self.targetGraph,
-                                                   optional=False,
-                                                   newline=True)
+            if identifierProperty != '':
+                # create a direct property based on the first tuple element
+                query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_URI,
+                                                       identifierProperty,
+                                                       self.getIdentifierVarName(identifierName),
+                                                       graph=self.targetGraph,
+                                                       optional=False,
+                                                       newline=True)
+            else:
+                query += self._getINSERTIdentifiedByTriplePattern(identifierName)
 
             # create a triple pattern according to the BIBFRAME ontology
             # thus based on the name (second part of the tuple)
@@ -1030,17 +1097,21 @@ class ManifestationSingleUpdateQuery(ManifestationQuery):
         # Optionally fetch other identifiers
         for identifierProperty, identifierName in self.identifiersToAdd:
 
-            query += Query._getIdentifierStringPatternBIBFRAME(identifierName,
-                                                               subjectURIVariable=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
-                                                               graph=self.sourceGraph,
-                                                               optional=True)
+            if identifierProperty != '':
+                query += Query._getIdentifierStringPatternBIBFRAME(identifierName,
+                                                                   subjectURIVariable=ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                                                   graph=self.sourceGraph,
+                                                                   optional=True)
 
-            query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
-                                                   identifierProperty,
-                                                   self.getIdentifierVarName(identifierName),
-                                                   graph=self.sourceGraph,
-                                                   optional=True,
-                                                   newline=True)
+                query += Query._getSimpleTriplePattern(ManifestationQuery.VAR_MANIFESTATION_LOCAL_URI,
+                                                       identifierProperty,
+                                                       self.getIdentifierVarName(identifierName),
+                                                       graph=self.sourceGraph,
+                                                       optional=True,
+                                                       newline=True)
+
+            else:
+                query += self._getIdentifierQuadPattern(identifierName, self.sourceGraph, optional=True)
 
         if self.source == 'BnF' or self.source == 'bnf':
             pattern = Template("""OPTIONAL { graph <$sourceGraph> { $localURIVar btm:sourceLanguage $sourceLangVar . } }
