@@ -162,6 +162,8 @@ INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-10-06_translati
 
 TRIPLE_STORE_GRAPH_INT_TRL="http://beltrans-manifestations"
 TRIPLE_STORE_GRAPH_INT_CONT="http://beltrans-contributors"
+TRIPLE_STORE_GRAPH_WORKS="http://beltrans-works"
+TRIPLE_STORE_GRAPH_INT_ORIG="http://beltrans-originals"
 
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
@@ -197,7 +199,7 @@ TRIPLE_STORE_GRAPH_KBCODE="http://kbcode"
 TRIPLE_STORE_GRAPH_UNESCO="http://unesco"
 TRIPLE_STORE_GRAPH_UNESCO_ORIG="http://unesco-originals"
 TRIPLE_STORE_GRAPH_UNESCO_LA="http://unesco-linked-authorities"
-TRIPLE_STORE_GRAPH_WORKS="http://beltrans-works"
+
 
 TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES="http://kbr-publisher-matches"
 
@@ -240,6 +242,8 @@ CREATE_QUERY_BNF_MANIFESTATIONS_BIBFRAME="sparql-queries/create-bnf-bibframe-ide
 CREATE_QUERY_KB_TRL_PBL="sparql-queries/link-kb-translations-to-publishers.sparql"
 CREATE_QUERY_KB_PBL_IDENTIFIERS="sparql-queries/create-kb-org-identifier.sparql"
 
+CREATE_QUERY_BELTRANS_ORIGINALS="sparql-queries/create-beltrans-originals.sparql"
+
 CREATE_QUERY_BIBFRAME_TITLES="sparql-queries/create-bibframe-titles.sparql"
 CREATE_QUERY_SCHEMA_TITLES="sparql-queries/derive-single-title-from-bibframe-titles.sparql"
 
@@ -248,6 +252,7 @@ ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
 CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
 
 LINK_QUERY_CONTRIBUTORS="integration_queries/link-beltrans-manifestations-contributors.sparql"
+LINK_QUERY_CONTRIBUTORS_ORIG="integration_queries/link-beltrans-original-manifestations-contributors.sparql"
 
 DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
 DATA_PROFILE_QUERY_FILE_CONT_PERSONS="dataprofile-contributors-persons.sparql"
@@ -362,7 +367,7 @@ SUFFIX_KBR_TITLE_MATCHES_NL_FR="title-matches_nl-fr.csv"
 SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR="title-duplicates-matches_nl-fr.csv"
 SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR="similarity-matches_nl-fr.csv"
 SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR="similarity-duplicates-matches_nl-fr.csv"
-SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES="similarity-multiple-matches.csv"
+SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR="similarity-multiple-matches.csv"
 
 SUFFIX_KBR_TITLE_MATCHES_FR_NL="title-matches_fr-nl.csv"
 SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL="title-duplicates-matches_fr-nl.csv"
@@ -503,6 +508,7 @@ SUFFIX_CORRELATION_TRL_BNF="correlation-trl-bnf-id.csv"
 SUFFIX_CORRELATION_TRL_KB="correlation-trl-kb-id.csv"
 SUFFIX_CORRELATION_TRL_UNESCO="correlation-trl-unesco-id.csv"
 SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML="correlation-original-kbr.xml"
+SUFFIX_CORRELATION_TRL_KBR_TRL_XML="correlation-translation-kbr.xml"
 SUFFIX_CORRELATION_TRL_SOURCE_LANG="correlation-trl-source-lang.csv"
 SUFFIX_CORRELATION_TRL_TARGET_LANG="correlation-trl-target-lang.csv"
 
@@ -791,19 +797,21 @@ function integrate {
 
   # first delete content of the named graph in case it already exists
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_TRL>"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
+  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
 
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_CONT>"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
+  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
+
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_ORIG"
 
   echo "Create title/subtitles according to the BIBFRAME ontology for records which do not yet have those"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
   #
   # schema:name properties have to exist as they are required in the triple pattern for the data integration
   #
   echo "Create schema:name properties based on BIBFRAME titles/subtitles for records which do not yet have schema:name"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
 
   #
   # CREATE CORRELATION LIST ENTRIES BEFORE THE AUTOMATIC INTEGRATION
@@ -811,9 +819,9 @@ function integrate {
   # Contributors
   #
   echo "Create BELTRANS contributors based on correlation list"
-  extractContributorCorrelationList "$integrationName"
-  transformContributorCorrelationList "$integrationName"
-  loadContributorCorrelationList "$integrationName"
+  #extractContributorCorrelationList "$integrationName"
+  #transformContributorCorrelationList "$integrationName"
+  #loadContributorCorrelationList "$integrationName"
 
   # Translations
   #
@@ -826,12 +834,12 @@ function integrate {
   # AUTOMATIC INTEGRATION
   # 
   echo "Automatically integrate manifestations ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
-    --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
+  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  #  --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
 
   echo "Automatically integrate contributors ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
-    --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
+  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  #  --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
 
   # 2023-05-04 perform updates which did not finish due to a network interruption
 #  python interlink_updates.py -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
@@ -842,10 +850,16 @@ function integrate {
 #    --create-queries "2023-05-04_config-integration-contributors-create.csv" --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
 
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists, publishing directors, and publishers) ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
 
   echo "Delete duplicate more generic schema:author role if we have a more specific role"
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
+
+  echo "Create BELTRANS original manifestation records"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BELTRANS_ORIGINALS"
+
+  echo "Establish links between integrated originals and contributors ..."
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS_ORIG"
 
   echo "Perform Clustering ..."
   clustering "$integrationName"
@@ -1950,7 +1964,7 @@ function extractKBROrgs {
   local language=$3
 
   kbrOrgsCSV="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
-  kbrOrgsISNIs="$integrationName/kbr/agents/fr-nl/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  kbrOrgsISNIs="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
 
   source py-integration-env/bin/activate
 
@@ -2374,6 +2388,33 @@ function extractContributorCorrelationList {
   extractSeparatedColumn $correlationList $correlationListUnescoIDs "contributorID" "unescoIDs" "id" "unesco"
   #extractSeparatedColumn $correlationList $correlationListUnescoLongIDs "contributorID" "unescoIDsLong" "id" "unescoLong"
   extractSeparatedColumn $correlationList $correlationListISNIIDs "contributorID" "isniIDs" "id" "ISNI"
+
+  echo ""
+  echo "EXTRACTION - Fetch, extract and clean KBR contributor correlation list contributors"
+  mkdir -p "$integrationName/correlation/contributors/kbr/agents/mixed-lang"
+  kbrOriginalsFetchedPersonsXML="$integrationName/correlation/contributors/kbr/fetched-apep.xml"
+  kbrOriginalsFetchedOrgsXML="$integrationName/correlation/contributors/kbr/fetched-aorg.xml"
+
+  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+    -i $INPUT_KBR_APEP \
+    -f $correlationListKBRIDs \
+    -o $kbrOriginalsFetchedPersonsXML \
+    --filter-column-index "1" \
+    --subject-tag "marc:record" \
+    --input-format "MARCXML"
+
+ python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+    -i $INPUT_KBR_AORG \
+    -f $correlationListKBRIDs \
+    -o $kbrOriginalsFetchedOrgsXML \
+    --filter-column-index "1" \
+    --subject-tag "marc:record" \
+    --input-format "MARCXML"
+
+
+  extractKBRPersons "$integrationName/correlation/contributors" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/contributors" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+
 }
 
 # -----------------------------------------------------------------------------
@@ -2395,7 +2436,6 @@ function extractTranslationCorrelationList {
   local correlationListTargetLanguage="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
   local correlationListKBRSOURCEIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
-  local correlationListKBROriginalXML="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML"
   
   echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
   cp $correlationList "$integrationName/correlation/"
@@ -2408,13 +2448,84 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListSourceLanguage "targetIdentifier" "sourceLanguage" "id" "sourceLanguage"
   extractSeparatedColumn $correlationList $correlationListTargetLanguage "targetIdentifier" "targetLanguage" "id" "targetLanguage"
 
+  echo ""
+  echo "Fetch and extract KBR translations"
+  mkdir -p "$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang"
+  mkdir -p "$integrationName/correlation/translations/kbr/agents/mixed-lang"
+  local correlationListKBRTranslationXML="$integrationName/correlation/translations/kbr/$SUFFIX_CORRELATION_TRL_KBR_TRL_XML"
+  getKBRRecords $correlationList "targetKBRIdentifier" $correlationListKBRTranslationXML 
+
+  extractKBRTranslationsAndContributions "$integrationName/correlation/translations" "kbr" "$correlationListKBRTranslationXML" "mixed-lang"
+
+  echo ""
+  echo "EXTRACTION - Extract and clean KBR translations linked authorities data"
+  kbrTranslationsFetchedPersonsXML="$integrationName/correlation/translations/kbr/agents/fetched-apep.xml"
+  kbrTranslationsFetchedOrgsXML="$integrationName/correlation/translations/kbr/agents/fetched-aorg.xml"
+  kbrTranslationsContributorIDList="$integrationName/correlation/translations/kbr/agents/contributor-identifiers.csv"
+
+  # This CSV file will be created by the extractKBRTranslationsAndContributions function above
+  kbrTranslationsCSVContDedup="$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
+
+  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrTranslationsContributorIDList" -c "contributorID" "$kbrTranslationsCSVContDedup"
+
+  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+    -i $INPUT_KBR_APEP \
+    -f $kbrTranslationsCSVContDedup \
+    -o $kbrTranslationsFetchedPersonsXML \
+    --subject-tag "marc:record" \
+    --input-format "MARCXML"
+
+ python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+    -i $INPUT_KBR_AORG \
+    -f $kbrTranslationsContributorIDList \
+    -o $kbrTranslationsFetchedOrgsXML \
+    --subject-tag "marc:record" \
+    --input-format "MARCXML"
+
+
+  extractKBRPersons "$integrationName/correlation/translations" "$kbrTranslationsFetchedPersonsXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/translations" "$kbrTranslationsFetchedOrgsXML" "mixed-lang"
+
+
+  echo ""
   echo "Fetch and extract KBR originals"
+  mkdir -p "$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang"
+  mkdir -p "$integrationName/correlation/originals/kbr/agents/mixed-lang"
+  local correlationListKBROriginalXML="$integrationName/correlation/originals/kbr/$SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML"
   getKBRRecords $correlationList "sourceKBRIdentifier" $correlationListKBROriginalXML 
 
-  mkdir -p $integrationName/correlation/originals/book-data-and-contributions/mixed-lang
-  mkdir -p $integrationName/correlation/originals/agents/mixed-lang
-  extractKBRTranslationsAndContributions "$integrationName/correlation" "/originals" "$correlationListKBROriginalXML" "mixed-lang"
+  extractKBRTranslationsAndContributions "$integrationName/correlation/originals" "kbr" "$correlationListKBROriginalXML" "mixed-lang"
 
+
+  echo ""
+  echo "EXTRACTION - Extract and clean KBR translations linked authorities data"
+  kbrOriginalsFetchedPersonsXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-apep.xml"
+  kbrOriginalsFetchedOrgsXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-aorg.xml"
+  kbrOriginalsContributorIDList="$integrationName/correlation/originals/kbr/agents/mixed-lang/contributor-identifiers.csv"
+
+  # This CSV file will be created by the extractKBRTranslationsAndContributions function above
+  kbrOriginalsCSVContDedup="$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
+
+  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrTranslationsContributorIDList" -c "contributorID" "$kbrTranslationsCSVContDedup"
+
+  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+    -i $INPUT_KBR_APEP \
+    -f $kbrTranslationsCSVContDedup \
+    -o $kbrOriginalsFetchedPersonsXML \
+    --subject-tag "marc:record" \
+    --input-format "MARCXML"
+
+ python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+    -i $INPUT_KBR_AORG \
+    -f $kbrTranslationsContributorIDList \
+    -o $kbrOriginalsFetchedOrgsXML \
+    --subject-tag "marc:record" \
+    --input-format "MARCXML"
+
+
+  extractKBRPersons "$integrationName/correlation/originals" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/originals" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+ 
 }
 
 # -----------------------------------------------------------------------------
@@ -2453,6 +2564,10 @@ function transformContributorCorrelationList {
   echo "Map persons correlation data"
   . map.sh ../data-sources/correlation/correlation-contributors.yml $correlationTurtle
 
+  echo "Map fetched KBR contributor data"
+  mapKBRLinkedPersonAuthorities "$integrationName/correlation" "kbr-contributors"
+  mapKBRLinkedOrgAuthorities "$integrationName/correlation" "kbr-contributors"
+
 }
 
 # -----------------------------------------------------------------------------
@@ -2490,6 +2605,10 @@ function transformTranslationCorrelationList {
   echo "Map translations correlation data"
   . map.sh ../data-sources/correlation/correlation-translations.yml $correlationTurtle
 
+  echo "Map extracted data about KBR translations from correlation list"
+  mkdir -p "$integrationName/correlation/translations/rdf/mixed-lang"
+  mapKBRBookInformationAndContributions $integrationName/correlation "translations" "mixed-lang"
+
   echo "Map extracted data about originals"
   mkdir -p "$integrationName/correlation/originals/rdf/mixed-lang"
   mapKBRBookInformationAndContributions $integrationName/correlation "originals" "mixed-lang"
@@ -2509,6 +2628,13 @@ function loadContributorCorrelationList {
   echo "Load persons correlation list"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
     "$correlationTurtle"
+
+  echo "Load fetched correlation KBR person contributors"
+  loadKBRLinkedPersonAuthorities "$integrationName" "correlation/kbr" "kbr-contributors" "$linkedAuthoritiesNamedGraph"
+
+  echo "Load fetched correlation KBR org contributors"
+  loadKBRLinkedOrgAuthorities "$integrationName" "correlation/kbr" "kbr-contributors" "$linkedAuthoritiesNamedGraph"
+
 }
   
 # -----------------------------------------------------------------------------
@@ -2526,8 +2652,12 @@ function loadTranslationCorrelationList {
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
     "$correlationTurtle"
 
+  echo "Load extracted data about correlation list KBR translations"
+  loadKBRBookInformationAndContributions "$integrationName/correlation" "translations" "$TRIPLE_STORE_GRAPH_KBR_TRL" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
+
   echo "Load extracted data about originals"
-  loadKBRBookInformationAndContributions "$integrationName/correlation" "originals" "$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL" "$TRIPLE_STORE_GRAPH_KBR_ORIG_LA" "mixed-lang"
+  loadKBRBookInformationAndContributions "$integrationName/correlation" "originals" "$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
+
 }
  
 
