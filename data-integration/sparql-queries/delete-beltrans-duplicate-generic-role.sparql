@@ -1,5 +1,6 @@
 PREFIX schema: <http://schema.org/>
 PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
 
 DELETE {
   graph <http://beltrans-manifestations> { ?manifestation schema:author ?detailedRoleContributor . }
