@@ -164,7 +164,17 @@ TRIPLE_STORE_GRAPH_INT_TRL="http://beltrans-manifestations"
 TRIPLE_STORE_GRAPH_INT_CONT="http://beltrans-contributors"
 
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
+TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
+TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
+
+# Named graphs for KBR original data that is fetched based on translations
 TRIPLE_STORE_GRAPH_KBR_ORIG_TRL="http://kbr-originals"
+TRIPLE_STORE_GRAPH_KBR_ORIG_LA="http://kbr-originals-linked-authorities"
+
+# Named graphs for possibly outdated KBR data used for comparisons
+TRIPLE_STORE_GRAPH_KBR_ORIG_MATCH_TRL="http://kbr-originals-matching"
+TRIPLE_STORE_GRAPH_KBR_ORIG_MATCH_LA="http://kbr-originals-matching-linked-authorities"
+
 TRIPLE_STORE_GRAPH_BNF_TRL="http://bnf-publications"
 TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL="http://bnf-fr-nl"
 TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR="http://bnf-nl-fr"
@@ -176,9 +186,7 @@ TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA="http://bnf-contributors-wikidata"
 TRIPLE_STORE_GRAPH_BNF_TRL_ORIG="http://bnf-originals"
 TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS="http://bnf-trl-rameau-links"
 TRIPLE_STORE_GRAPH_RAMEAU="http://rameau"
-TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
-TRIPLE_STORE_GRAPH_KBR_ORIG_LA="http://kbr-originals-linked-authorities"
-TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
+
 TRIPLE_STORE_GRAPH_KB_TRL="http://kb-publications"
 TRIPLE_STORE_GRAPH_KB_TRL_ORIG="http://kb-originals"
 TRIPLE_STORE_GRAPH_KB_LA="http://kb-linked-authorities"
@@ -2573,15 +2581,18 @@ function loadKBROriginals {
 
   local dataSourceName="kbr-originals"
 
-  local translationsNamedGraph="$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL"
-  local linkedAuthoritiesNamedGraph="$TRIPLE_STORE_GRAPH_KBR_ORIG_LA"
+  local translationsNamedGraph="$TRIPLE_STORE_GRAPH_KBR_ORIG_MATCH_TRL"
+  local linkedAuthoritiesNamedGraph="$TRIPLE_STORE_GRAPH_KBR_ORIG_MATCH_LA"
 
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  # uncommented because if we delete the original graph, we also delete partial original information from the regular KBR export
+  # 2023-10-31: activated it again, because now we use a separate named graph for these special dumps
+  #
+  # before 2023-10-31: uncommented because if we delete the original graph, we also delete partial original information from the regular KBR export
   # i.e. the schema:translationOf links to dummy source entities that encode the language of the original
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$translationsNamedGraph"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$linkedAuthoritiesNamedGraph"
 
   # only load book information, no translation-specific triples
   loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "fr-nl"
