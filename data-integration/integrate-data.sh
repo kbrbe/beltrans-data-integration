@@ -2555,10 +2555,14 @@ function loadKBR {
 
   loadKBRLimitedOriginalInfo "$integrationName" "$dataSourceName" "$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL"
 
-  loadKBRLinkedAuthorities "$integrationName" "$dataSourceName" "fr-nl" "$linkedAuthoritiesNamedGraph"
-  loadKBRLinkedAuthorities "$integrationName" "$dataSourceName" "nl-fr" "$linkedAuthoritiesNamedGraph"
-  loadKBRLinkedAuthorities "$integrationName" "$dataSourceName" "belgians" "$linkedAuthoritiesNamedGraph"
-  loadKBRLinkedAuthorities "$integrationName" "$dataSourceName" "linked-originals" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "fr-nl" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "nl-fr" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "belgians" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "linked-originals" "$linkedAuthoritiesNamedGraph"
+
+  loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "fr-nl" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "nl-fr" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "linked-originals" "$linkedAuthoritiesNamedGraph"
 
   loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
 }
@@ -2663,6 +2667,7 @@ function loadKBRLimitedOriginalInfo {
   local kbrLimitedOriginalsTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_LIMITED_ORIG_LD"
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
+  echo ""
   echo "Load KBR (limited) original information ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$originalsNamedGraph" \
     "$kbrLimitedOriginalsTurtle"
@@ -2687,6 +2692,7 @@ function loadKBRLinkedPersonAuthorities {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   # upload newly identified authorities to the linked authorities named graph
+  echo ""
   echo "Load person authorities - $language ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
     "$kbrPersons" "$kbrPersonsIdentifiersTurtle" "$kbrPersonsNamesTurtle"
@@ -2702,19 +2708,21 @@ function loadKBRLinkedOrgAuthorities {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  local kbrOrgs="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_ORGS_LD"
+  local kbrOrgs="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_ORGS_LD"
   local kbrOrgsIdentifiersTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_ORGS_IDENTIFIERS_LD"
   local kbrOrgMatchesTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_LD"
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   # upload newly identified authorities to the linked authorities named graph
+  echo ""
   echo "Load org authorities - $language ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
     "$kbrOrgs" "$kbrOrgMatchesTurtle"
 
   if [ -f "$kbrOrgsIdentifiersTurtle" ];
   then
+    echo ""
     echo "Load org authorities identifiers - $language ..."
     python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrOrgsIdentifiersTurtle"
   fi
