@@ -84,7 +84,7 @@ def processFile(xmlFilename, relevantTranslations, filteredRecordIDs, outFile, s
 
 
 # -----------------------------------------------------------------------------
-def readLookupIdentifiers(filenames):
+def readLookupIdentifiers(filenames, columnIndex):
 
   #
   # read relevant identifiers and store them for lookup
@@ -97,7 +97,7 @@ def readLookupIdentifiers(filenames):
     with open(filterFile, 'r') as fIn:
       reader = csv.reader(fIn, delimiter=',')
       for row in reader:
-        identifier = row[0]
+        identifier = row[columnIndex]
         currentLookupSet.add(identifier)
         filterFileCounter += 1
       numFilterIdentifiers = len(currentLookupSet)
@@ -120,6 +120,7 @@ def main():
   parser.add_option('-i', '--input', action='store', help='The input file or folder containing RDF/XML files which should be filtered')
   parser.add_option('-o', '--output-file', action='store', help='The name of the file in which the filtered RDF/XML should be stored')
   parser.add_option('-f', '--filter-file', action='append', help='The name of a CSV file which contains relevant subject identifiers in one column, used to filter the input. If several files are provided a subject of the input needs to exist in all of the filter files (AND condition)')
+  parser.add_option('--filter-column-index', action='store', type='int', default=0, help='The column index used to extract lookup values from the filter file')
   parser.add_option('--subject-tag', action='store', default='rdf:Description', help='The tag name used for a subject, could be for example RDF:Description or schema:Organization, default is rdf:Description')
   parser.add_option('--input-format', action='store', default='RDF/XML', help='The format of the input XML, possible values are MARCXML or RDF/XML, for backwards compatibility of this script, the default is RDF/XML')
   (options, args) = parser.parse_args()
@@ -140,7 +141,7 @@ def main():
   for (prefix, uri) in ALL_NS.items():
     ET.register_namespace(prefix, uri)
 
-  relevantTranslations = readLookupIdentifiers(options.filter_file)
+  relevantTranslations = readLookupIdentifiers(options.filter_file, options.filter_column_index)
 
   inputFormat = options.input_format
   filteredRecordIDs = set()
