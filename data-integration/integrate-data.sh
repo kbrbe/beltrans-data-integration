@@ -2103,6 +2103,7 @@ function mapKBRBookInformationAndContributions {
   export RML_SOURCE_COLLECTION_LINKS="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_COL_LINKS"
 
   # 2) execute the mapping
+  echo ""
   echo "Map KBR book information and contributions - $language ..."
   . map.sh ../data-sources/kbr/kbr-book-data.yml $kbrBookDataTurtle
 
@@ -2113,6 +2114,7 @@ function mapKBRBookInformationAndContributions {
   export RML_SOURCE_KBR_CONT_IDENTIFIED="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_NEWAUT"
 
   # 2) execute the mapping
+  echo ""
   echo "Map KBR newly identified contributors - $language ..."
   . map.sh ../data-sources/kbr/kbr-identified-authorities.yml $kbrBookDataIdentifiedAuthorities
 
@@ -2122,6 +2124,7 @@ function mapKBRBookInformationAndContributions {
   export RML_SOURCE_KBR_BB="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_BB"
   
   # 2) execute the mapping
+  echo ""
   echo "Map KBR BB assignments - $language ..."
   . map.sh ../data-sources/kbr/kbr-belgian-bibliography.yml $kbrBookDataBBTurtle
 
@@ -2131,6 +2134,7 @@ function mapKBRBookInformationAndContributions {
   export RML_SOURCE_KBR_PUB_COUNTRIES="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_PUB_COUNTRY"
 
   # 2) execute the mapping
+  echo ""
   echo "Map KBR publication countries relationships - $language ..."
   . map.sh ../data-sources/kbr/kbr-publication-countries.yml $kbrBookDataPubCountriesTurtle
 
@@ -2140,6 +2144,7 @@ function mapKBRBookInformationAndContributions {
   export RML_SOURCE_KBR_PUB_PLACES="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_PUB_PLACE"
 
   # 2) execute the mapping
+  echo ""
   echo "Map KBR publication places relationships - $language ..."
   . map.sh ../data-sources/kbr/kbr-publication-places.yml $kbrBookDataPubPlacesTurtle
 
@@ -2151,6 +2156,7 @@ function mapKBRBookInformationAndContributions {
   export RML_SOURCE_KBR_ISBN13="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_ISBN13"
 
   # 2) execute the mapping
+  echo ""
   echo "Map KBR ISBN10/ISBN13 relationships ..."
   . map.sh ../data-sources/kbr/kbr-isbn.yml $kbrBookDataISBNTurtle
   
@@ -2234,6 +2240,7 @@ function mapKBRPersons {
   export RML_SOURCE_KBR_PERSONS="$sourceFile"
   export RML_SOURCE_KBR_PERSONS_NAT="$sourceFileNat"
 
+  echo ""
   echo "Map KBR Persons - $sourceFile"
   . map.sh ../data-sources/kbr/kbr-persons.yml $outputTurtle
 }
@@ -2245,7 +2252,7 @@ function mapKBROrgs {
 
   export RML_SOURCE_KBR_LINKED_AUTHORITIES_ORGS="$sourceFile"
 
-  
+  echo "" 
   echo "Map KBR Orgs - $sourceFile"
   . map.sh ../data-sources/kbr/kbr-linked-authorities-orgs.yml $outputTurtle
 
@@ -2269,6 +2276,7 @@ function mapKBRNames {
 
   export RML_SOURCE_KBR_NAMES="$sourceFile"
 
+  echo ""
   echo "Map KBR Names - $sourceFile"
   . map.sh ../data-sources/kbr/kbr-pseudonym-names.yml $outputTurtle
 }
@@ -2282,9 +2290,11 @@ function mapKBRLinkedIdentifiers {
 
   if [ -f "$sourceFile" ];
   then
+    echo ""
     echo "Map KBR linked identifiers  - $sourceFile"
     . map.sh ../data-sources/kbr/kbr-linked-identifiers.yml $outputTurtle
   else
+    echo ""
     echo "No KBR linked identifiers to map! - $sourceFile"
   fi
 
@@ -2466,15 +2476,18 @@ function extractTranslationCorrelationList {
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrTranslationsCSVContDedup="$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
+  # create a CSV with the single contributorID column
   python -m $MODULE_EXTRACT_COLUMNS -o "$kbrTranslationsContributorIDList" -c "contributorID" "$kbrTranslationsCSVContDedup"
 
+  # no filter-column-index needed, because filter file only contains a single contributorID column
   python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
     -i $INPUT_KBR_APEP \
-    -f $kbrTranslationsCSVContDedup \
+    -f $kbrTranslationsContributorIDList \
     -o $kbrTranslationsFetchedPersonsXML \
     --subject-tag "marc:record" \
     --input-format "MARCXML"
 
+ # no filter-column-index needed, because filter file only contains a single contributorID column
  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
     -i $INPUT_KBR_AORG \
     -f $kbrTranslationsContributorIDList \
@@ -2506,16 +2519,19 @@ function extractTranslationCorrelationList {
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrOriginalsCSVContDedup="$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
+  # create a CSV with the single contributorID column
   python -m $MODULE_EXTRACT_COLUMNS -o "$kbrTranslationsContributorIDList" -c "contributorID" "$kbrTranslationsCSVContDedup"
 
+  # no filter-column-index needed, because filter file only contains a single contributorID column
   python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
     -i $INPUT_KBR_APEP \
-    -f $kbrTranslationsCSVContDedup \
+    -f $kbrTranslationsContributorIDList \
     -o $kbrOriginalsFetchedPersonsXML \
     --subject-tag "marc:record" \
     --input-format "MARCXML"
 
- python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+  # no filter-column-index needed, because filter file only contains a single contributorID column
+  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
     -i $INPUT_KBR_AORG \
     -f $kbrTranslationsContributorIDList \
     -o $kbrOriginalsFetchedOrgsXML \
@@ -2602,16 +2618,27 @@ function transformTranslationCorrelationList {
   export RML_SOURCE_CORRELATION_TRL_SOURCE_LANG="$correlationListSourceLanguage"
   export RML_SOURCE_CORRELATION_TRL_TARGET_LANG="$correlationListTargetLanguage"
  
+  echo ""
   echo "Map translations correlation data"
   . map.sh ../data-sources/correlation/correlation-translations.yml $correlationTurtle
 
+  echo ""
   echo "Map extracted data about KBR translations from correlation list"
-  mkdir -p "$integrationName/correlation/translations/rdf/mixed-lang"
-  mapKBRBookInformationAndContributions $integrationName/correlation "translations" "mixed-lang"
+  mkdir -p "$integrationName/correlation/translations/kbr/rdf/mixed-lang"
+  mapKBRBookInformationAndContributions "$integrationName/correlation" "translations/kbr" "mixed-lang"
 
+  # those two functions already append the subfolder "kbr"
+  mapKBRLinkedPersonAuthorities "$integrationName/correlation/translations" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$integrationName/correlation/translations" "mixed-lang"
+
+  echo ""
   echo "Map extracted data about originals"
-  mkdir -p "$integrationName/correlation/originals/rdf/mixed-lang"
-  mapKBRBookInformationAndContributions $integrationName/correlation "originals" "mixed-lang"
+  mkdir -p "$integrationName/correlation/originals/kbr/rdf/mixed-lang"
+  mapKBRBookInformationAndContributions "$integrationName/correlation" "originals/kbr" "mixed-lang"
+
+  # those two functions already append the subfolder "kbr"
+  mapKBRLinkedPersonAuthorities "$integrationName/correlation/originals" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$integrationName/correlation/originals" "mixed-lang"
 
 }
 
