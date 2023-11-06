@@ -2680,10 +2680,16 @@ function loadTranslationCorrelationList {
     "$correlationTurtle"
 
   echo "Load extracted data about correlation list KBR translations"
-  loadKBRBookInformationAndContributions "$integrationName/correlation" "translations" "$TRIPLE_STORE_GRAPH_KBR_TRL" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
+  loadKBRBookInformationAndContributions "$integrationName/correlation" "translations/kbr" "$TRIPLE_STORE_GRAPH_KBR_TRL" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
+
+  loadKBRLinkedPersonAuthorities "$integrationName/correlation" "translations/kbr" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
+  loadKBRLinkedOrgAuthorities "$integrationName/correlation" "translations/kbr" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
 
   echo "Load extracted data about originals"
-  loadKBRBookInformationAndContributions "$integrationName/correlation" "originals" "$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
+  loadKBRBookInformationAndContributions "$integrationName/correlation" "originals/kbr" "$TRIPLE_STORE_GRAPH_KBR_ORIG_TRL" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
+
+  loadKBRLinkedPersonAuthorities "$integrationName/correlation" "originals/kbr" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
+  loadKBRLinkedOrgAuthorities "$integrationName/correlation" "originals/kbr" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
 
 }
  
