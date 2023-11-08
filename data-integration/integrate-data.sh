@@ -146,8 +146,9 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION="../data-sources/correlation/2023-10-06_person-contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-10-06_translations_correlation-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-11-08_person-contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2023-11-08_org-contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-11-08_translations_correlation-list.csv"
 
 
 # #############################################################################
@@ -592,7 +593,7 @@ SUFFIX_WIKIDATA_LD="from-manually-enriched-wikidata.ttl"
 #
 # LINKED DATA - CORRELATION
 #
-SUFFIX_CORRELATION_LD="correlation-person-entities.ttl"
+SUFFIX_CORRELATION_LD="correlation-contributor-entities.ttl"
 
 SUFFIX_CORRELATION_TRL_LD="correlation-translation-entities.ttl"
 
@@ -644,9 +645,16 @@ function extract {
   elif [ "$dataSource" = "unesco" ];
   then
     extractUnesco $integrationFolderName
+  elif [ "$dataSource" = "contributor-correlation" ];
+  then
+    extractContributorPersonCorrelationList "$integrationFolderName"
+    extractContributorOrgCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "person-correlation" ];
   then
-    extractContributorCorrelationList "$integrationFolderName"
+    extractContributorPersonCorrelationList "$integrationFolderName"
+  elif [ "$dataSource" = "org-correlation" ];
+  then
+    extractContributorOrgCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "translation-correlation" ];
   then
     extractTranslationCorrelationList "$integrationFolderName"
@@ -701,9 +709,16 @@ function transform {
   elif [ "$dataSource" = "unesco" ];
   then
     transformUnesco $integrationFolderName
+  elif [ "$dataSource" = "contributor-correlation" ];
+  then 
+    transformContributorPersonCorrelationList "$integrationFolderName"
+    transformContributorOrgCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "person-correlation" ];
   then 
-    transformContributorCorrelationList "$integrationFolderName"
+    transformContributorPersonCorrelationList "$integrationFolderName"
+  elif [ "$dataSource" = "org-correlation" ];
+  then 
+    transformContributorOrgCorrelationList "$integrationFolderName"
   elif [ "$dataSource" = "translation-correlation" ];
   then
     transformTranslationCorrelationList "$integrationFolderName"
@@ -818,10 +833,17 @@ function integrate {
   #
   # Contributors
   #
-  echo "Create BELTRANS contributors based on correlation list"
-  extractContributorCorrelationList "$integrationName"
-  transformContributorCorrelationList "$integrationName"
-  loadContributorCorrelationList "$integrationName"
+  echo ""
+  echo "Create BELTRANS person contributors based on correlation list"
+  extractContributorPersonCorrelationList "$integrationName"
+  transformContributorPersonCorrelationList "$integrationName"
+  loadContributorPersonCorrelationList "$integrationName"
+
+  echo ""
+  echo "Create BELTRANS org contributors based on correlation list"
+  extractContributorOrgCorrelationList "$integrationName"
+  transformContributorOrgCorrelationList "$integrationName"
+  loadContributorOrgCorrelationList "$integrationName"
 
   # Translations
   #
@@ -2375,27 +2397,28 @@ function transformUnesco {
 }
 
 # -----------------------------------------------------------------------------
-function extractContributorCorrelationList {
+function extractContributorPersonCorrelationList {
   local integrationName=$1
 
-  mkdir -p "$integrationName/correlation"
+  folderName="$integrationName/correlation/contributor-persons"
+  mkdir -p "$folderName"
 
-  local correlationList="$INPUT_CORRELATION"
-  local correlationListNationalities="$integrationName/correlation/$SUFFIX_CORRELATION_NATIONALITY"
-  local correlationListKBRIDs="$integrationName/correlation/$SUFFIX_CORRELATION_KBR"
-  local correlationListBnFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_BNF"
-  local correlationListNTAIDs="$integrationName/correlation/$SUFFIX_CORRELATION_NTA"
-  local correlationListUnescoIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO"
-  local correlationListISNIIDs="$integrationName/correlation/$SUFFIX_CORRELATION_ISNI"
+  local correlationList="$INPUT_CORRELATION_PERSON"
+  local correlationListNationalities="$folderName/$SUFFIX_CORRELATION_NATIONALITY"
+  local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_KBR"
+  local correlationListBnFIDs="$folderName/$SUFFIX_CORRELATION_BNF"
+  local correlationListNTAIDs="$folderName/$SUFFIX_CORRELATION_NTA"
+  local correlationListUnescoIDs="$folderName/$SUFFIX_CORRELATION_UNESCO"
+  local correlationListISNIIDs="$folderName/$SUFFIX_CORRELATION_ISNI"
 
-  local correlationListUnescoLongIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO_LONG"
-  local correlationListVIAFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_VIAF"
-  local correlationListWikidataIDs="$integrationName/correlation/$SUFFIX_CORRELATION_WIKIDATA"
-  local correlationListPseudonymOfIDs="$integrationName/correlation/$SUFFIX_CORRELATION_PSEUDONYM"
-  local correlationListRealNameOfIDs="$integrationName/correlation/$SUFFIX_CORRELATION_REAL_NAME"
+  local correlationListUnescoLongIDs="$folderName/$SUFFIX_CORRELATION_UNESCO_LONG"
+  local correlationListVIAFIDs="$folderName/$SUFFIX_CORRELATION_VIAF"
+  local correlationListWikidataIDs="$folderName/$SUFFIX_CORRELATION_WIKIDATA"
+  local correlationListPseudonymOfIDs="$folderName/$SUFFIX_CORRELATION_PSEUDONYM"
+  local correlationListRealNameOfIDs="$folderName/$SUFFIX_CORRELATION_REAL_NAME"
 
   echo "Extract 1:n relationships of different persons correlation list columns from '$correlationList'"
-  cp $correlationList "$integrationName/correlation/"
+  cp $correlationList $folderName
   extractSeparatedColumn $correlationList $correlationListNationalities "contributorID" "nationalityCountryCodes" "id" "nationality"
   extractSeparatedColumn $correlationList $correlationListKBRIDs "contributorID" "kbrIDs" "id" "KBR"
   extractSeparatedColumn $correlationList $correlationListBnFIDs "contributorID" "bnfIDs" "id" "BnF"
@@ -2403,14 +2426,13 @@ function extractContributorCorrelationList {
   extractSeparatedColumn $correlationList $correlationListVIAFIDs "contributorID" "viafIDs" "id" "VIAF"
   extractSeparatedColumn $correlationList $correlationListWikidataIDs "contributorID" "wikidataIDs" "id" "wikidata"
   extractSeparatedColumn $correlationList $correlationListUnescoIDs "contributorID" "unescoIDs" "id" "unesco"
-  #extractSeparatedColumn $correlationList $correlationListUnescoLongIDs "contributorID" "unescoIDsLong" "id" "unescoLong"
   extractSeparatedColumn $correlationList $correlationListISNIIDs "contributorID" "isniIDs" "id" "ISNI"
 
   echo ""
-  echo "EXTRACTION - Fetch, extract and clean KBR contributor correlation list contributors"
-  mkdir -p "$integrationName/correlation/contributors/kbr/agents/mixed-lang"
-  kbrOriginalsFetchedPersonsXML="$integrationName/correlation/contributors/kbr/fetched-apep.xml"
-  kbrOriginalsFetchedOrgsXML="$integrationName/correlation/contributors/kbr/fetched-aorg.xml"
+  echo "EXTRACTION - Fetch, extract and clean KBR contributor person correlation list"
+  # the extractKBRPersons function will add the subfolder kbr/agents/$language (=mixed-lang)
+  mkdir -p "$folderName/kbr/agents/mixed-lang"
+  kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
   python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
     -i $INPUT_KBR_APEP \
@@ -2420,7 +2442,42 @@ function extractContributorCorrelationList {
     --subject-tag "marc:record" \
     --input-format "MARCXML"
 
- python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+  extractKBRPersons "$folderName" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
+}
+
+# -----------------------------------------------------------------------------
+function extractContributorOrgCorrelationList {
+  local integrationName=$1
+
+  folderName="$integrationName/correlation/contributor-orgs"
+  mkdir -p "$folderName"
+
+  local correlationList="$INPUT_CORRELATION_ORG"
+  local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_KBR"
+  local correlationListBnFIDs="$folderName/$SUFFIX_CORRELATION_BNF"
+  local correlationListNTAIDs="$folderName/$SUFFIX_CORRELATION_NTA"
+  local correlationListUnescoIDs="$folderName/$SUFFIX_CORRELATION_UNESCO"
+  local correlationListISNIIDs="$folderName/$SUFFIX_CORRELATION_ISNI"
+  local correlationListVIAFIDs="$folderName/$SUFFIX_CORRELATION_VIAF"
+  local correlationListWikidataIDs="$folderName/$SUFFIX_CORRELATION_WIKIDATA"
+
+  echo "Extract 1:n relationships of different persons correlation list columns from '$correlationList'"
+  cp $correlationList $folderName
+  extractSeparatedColumn $correlationList $correlationListKBRIDs "contributorID" "kbrIDs" "id" "KBR"
+  extractSeparatedColumn $correlationList $correlationListBnFIDs "contributorID" "bnfIDs" "id" "BnF"
+  extractSeparatedColumn $correlationList $correlationListNTAIDs "contributorID" "ntaIDs" "id" "NTA"
+  extractSeparatedColumn $correlationList $correlationListVIAFIDs "contributorID" "viafIDs" "id" "VIAF"
+  extractSeparatedColumn $correlationList $correlationListWikidataIDs "contributorID" "wikidataIDs" "id" "wikidata"
+  extractSeparatedColumn $correlationList $correlationListUnescoIDs "contributorID" "unescoIDs" "id" "unesco"
+  extractSeparatedColumn $correlationList $correlationListISNIIDs "contributorID" "isniIDs" "id" "ISNI"
+
+  echo ""
+  echo "EXTRACTION - Fetch, extract and clean KBR contributor organization correlation list"
+  # the extractKBROrgs function will add the subfolder kbr/agents/$language (=mixed-lang)
+  mkdir -p "$folderName/kbr/agents/mixed-lang"
+  kbrOriginalsFetchedOrgsXML="$folderName/kbr/fetched-aorg.xml"
+
+  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
     -i $INPUT_KBR_AORG \
     -f $correlationListKBRIDs \
     -o $kbrOriginalsFetchedOrgsXML \
@@ -2428,9 +2485,7 @@ function extractContributorCorrelationList {
     --subject-tag "marc:record" \
     --input-format "MARCXML"
 
-
-  extractKBRPersons "$integrationName/correlation/contributors" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/contributors" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+  extractKBROrgs "$folderName" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
 
 }
 
@@ -2438,21 +2493,22 @@ function extractContributorCorrelationList {
 function extractTranslationCorrelationList {
   local integrationName=$1
 
-  mkdir -p "$integrationName/correlation"
+  local folderName="$integrationName/correlation/translations"
+  mkdir -p "$folderName"
 
   local correlationList="$INPUT_CORRELATION_TRANSLATIONS"
-  local correlationListISBN10="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_ISBN10"
-  local correlationListISBN13="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_ISBN13"
+  local correlationListISBN10="$folderName/$SUFFIX_CORRELATION_TRL_ISBN10"
+  local correlationListISBN13="$folderName/$SUFFIX_CORRELATION_TRL_ISBN13"
 
-  local correlationListKBRIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KBR"
-  local correlationListBNFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_BNF"
-  local correlationListKBIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KB"
-  local correlationListUNESCOIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
+  local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_TRL_KBR"
+  local correlationListBNFIDs="$folderName/$SUFFIX_CORRELATION_TRL_BNF"
+  local correlationListKBIDs="$folderName/$SUFFIX_CORRELATION_TRL_KB"
+  local correlationListUNESCOIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
 
-  local correlationListSourceLanguage="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
-  local correlationListTargetLanguage="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
+  local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
+  local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
-  local correlationListKBRSOURCEIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
+  local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
   
   echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
   cp $correlationList "$integrationName/correlation/"
@@ -2551,25 +2607,28 @@ function extractTranslationCorrelationList {
  
 }
 
+
+
 # -----------------------------------------------------------------------------
-function transformContributorCorrelationList {
+function transformContributorPersonCorrelationList {
   local integrationName=$1
 
-  mkdir -p "$integrationName/correlation/rdf"
+  folderName="$integrationName/correlation/contributor-persons"
+  mkdir -p "$folderName/rdf"
 
-  local correlationList="$INPUT_CORRELATION"
-  local correlationListNationalities="$integrationName/correlation/$SUFFIX_CORRELATION_NATIONALITY"
-  local correlationListKBRIDs="$integrationName/correlation/$SUFFIX_CORRELATION_KBR"
-  local correlationListBnFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_BNF"
-  local correlationListNTAIDs="$integrationName/correlation/$SUFFIX_CORRELATION_NTA"
-  local correlationListUnescoIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO"
-  local correlationListISNIIDs="$integrationName/correlation/$SUFFIX_CORRELATION_ISNI"
+  local correlationList="$INPUT_CORRELATION_PERSON"
+  local correlationListNationalities="$folderName/$SUFFIX_CORRELATION_NATIONALITY"
+  local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_KBR"
+  local correlationListBnFIDs="$folderName/$SUFFIX_CORRELATION_BNF"
+  local correlationListNTAIDs="$folderName/$SUFFIX_CORRELATION_NTA"
+  local correlationListUnescoIDs="$folderName/$SUFFIX_CORRELATION_UNESCO"
+  local correlationListISNIIDs="$folderName/$SUFFIX_CORRELATION_ISNI"
 
-  #local correlationListUnescoLongIDs="$integrationName/correlation/$SUFFIX_CORRELATION_UNESCO_LONG"
-  local correlationListVIAFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_VIAF"
-  local correlationListWikidataIDs="$integrationName/correlation/$SUFFIX_CORRELATION_WIKIDATA"
+  #local correlationListUnescoLongIDs="$folderName/$SUFFIX_CORRELATION_UNESCO_LONG"
+  local correlationListVIAFIDs="$folderName/$SUFFIX_CORRELATION_VIAF"
+  local correlationListWikidataIDs="$folderName/$SUFFIX_CORRELATION_WIKIDATA"
 
-  local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_LD"
+  local correlationTurtle="$folderName/rdf/$SUFFIX_CORRELATION_LD"
 
 
   export RML_SOURCE_CORRELATION_CONTRIBUTORS="$correlationList"
@@ -2580,43 +2639,86 @@ function transformContributorCorrelationList {
   export RML_SOURCE_CORRELATION_UNESCO="$correlationListUnescoIDs"
   export RML_SOURCE_CORRELATION_ISNI="$correlationListISNIIDs"
 
-  #export RML_SOURCE_CORRELATION_UNESCO_LONG="$correlationListUnescoLongIDs"
   export RML_SOURCE_CORRELATION_VIAF="$correlationListVIAFIDs"
   export RML_SOURCE_CORRELATION_WIKIDATA="$correlationListWikidataIDs"
 
   echo ""
   echo "Map persons correlation data"
-  . map.sh ../data-sources/correlation/correlation-contributors.yml $correlationTurtle
+  . map.sh ../data-sources/correlation/correlation-contributors-persons.yml $correlationTurtle
 
   echo ""
-  echo "Map fetched KBR contributor data"
-  mkdir -p "$integrationName/correlation/contributors/kbr/rdf/mixed-lang"
-  mapKBRLinkedPersonAuthorities "$integrationName/correlation/contributors" "mixed-lang"
-  mapKBRLinkedOrgAuthorities "$integrationName/correlation/contributors" "mixed-lang"
+  echo "Map fetched KBR contributor data - persons"
+  mkdir -p "$folderName/kbr/rdf/mixed-lang"
+  mapKBRLinkedPersonAuthorities "$folderName" "mixed-lang"
 
 }
+
+
+# -----------------------------------------------------------------------------
+function transformContributorOrgCorrelationList {
+  local integrationName=$1
+
+  folderName="$integrationName/correlation/contributor-orgs"
+  mkdir -p "$folderName/rdf"
+
+  local correlationList="$INPUT_CORRELATION_ORG"
+  local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_KBR"
+  local correlationListBnFIDs="$folderName/$SUFFIX_CORRELATION_BNF"
+  local correlationListNTAIDs="$folderName/$SUFFIX_CORRELATION_NTA"
+  local correlationListUnescoIDs="$folderName/$SUFFIX_CORRELATION_UNESCO"
+  local correlationListISNIIDs="$folderName/$SUFFIX_CORRELATION_ISNI"
+
+  local correlationListVIAFIDs="$folderName/$SUFFIX_CORRELATION_VIAF"
+  local correlationListWikidataIDs="$folderName/$SUFFIX_CORRELATION_WIKIDATA"
+
+  local correlationTurtle="$folderName/rdf/$SUFFIX_CORRELATION_LD"
+
+
+  export RML_SOURCE_CORRELATION_CONTRIBUTORS="$correlationList"
+  export RML_SOURCE_CORRELATION_KBR="$correlationListKBRIDs"
+  export RML_SOURCE_CORRELATION_BNF="$correlationListBnFIDs"
+  export RML_SOURCE_CORRELATION_NTA="$correlationListNTAIDs"
+  export RML_SOURCE_CORRELATION_UNESCO="$correlationListUnescoIDs"
+  export RML_SOURCE_CORRELATION_ISNI="$correlationListISNIIDs"
+
+  export RML_SOURCE_CORRELATION_VIAF="$correlationListVIAFIDs"
+  export RML_SOURCE_CORRELATION_WIKIDATA="$correlationListWikidataIDs"
+
+  echo ""
+  echo "Map orgs correlation data"
+  . map.sh ../data-sources/correlation/correlation-contributors-orgs.yml $correlationTurtle
+
+  echo ""
+  echo "Map fetched KBR contributor data - orgs"
+  mkdir -p "$folderName/kbr/rdf/mixed-lang"
+  mapKBRLinkedOrgAuthorities "$folderName" "mixed-lang"
+
+}
+
+
 
 # -----------------------------------------------------------------------------
 function transformTranslationCorrelationList {
   local integrationName=$1
 
-  mkdir -p "$integrationName/correlation/rdf"
+  folderName="$integrationName/correlation/translations"
+  mkdir -p "$integrationName/correlation/translations/rdf"
   
   local correlationList="$INPUT_CORRELATION_TRANSLATIONS"
-  local correlationListISBN10="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_ISBN10"
-  local correlationListISBN13="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_ISBN13"
+  local correlationListISBN10="$folderName/$SUFFIX_CORRELATION_TRL_ISBN10"
+  local correlationListISBN13="$folderName/$SUFFIX_CORRELATION_TRL_ISBN13"
 
-  local correlationListKBRIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KBR"
-  local correlationListBNFIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_BNF"
-  local correlationListKBIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_KB"
-  local correlationListUNESCOIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
+  local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_TRL_KBR"
+  local correlationListBNFIDs="$folderName/$SUFFIX_CORRELATION_TRL_BNF"
+  local correlationListKBIDs="$folderName/$SUFFIX_CORRELATION_TRL_KB"
+  local correlationListUNESCOIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
 
-  local correlationListSourceLanguage="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
-  local correlationListTargetLanguage="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
+  local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
+  local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
-  local correlationListKBRSOURCEIDs="$integrationName/correlation/$SUFFIX_CORRELATION_TRL_UNESCO"
+  local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
 
-  local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_TRL_LD"
+  local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
 
   export RML_SOURCE_CORRELATION_TRL="$correlationList"
   export RML_SOURCE_CORRELATION_TRL_ISBN10="$correlationListISBN10"
@@ -2653,14 +2755,14 @@ function transformTranslationCorrelationList {
 }
 
 # -----------------------------------------------------------------------------
-function loadContributorCorrelationList {
+function loadContributorPersonCorrelationList {
   local integrationName=$1
 
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
-  local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_LD"
+  local correlationTurtle="$integrationName/correlation/contributor-persons/rdf/$SUFFIX_CORRELATION_LD"
 
   echo ""
   echo "Load persons correlation list"
@@ -2669,11 +2771,28 @@ function loadContributorCorrelationList {
 
   echo ""
   echo "Load fetched correlation KBR person contributors"
-  loadKBRLinkedPersonAuthorities "$integrationName" "correlation/contributors/kbr" "mixed-lang" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedPersonAuthorities "$integrationName" "correlation/contributor-persons/kbr" "mixed-lang" "$linkedAuthoritiesNamedGraph"
+
+}
+
+# -----------------------------------------------------------------------------
+function loadContributorOrgCorrelationList {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+  local correlationTurtle="$integrationName/correlation/contributor-orgs/rdf/$SUFFIX_CORRELATION_LD"
+
+  echo ""
+  echo "Load org correlation list"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    "$correlationTurtle"
 
   echo ""
   echo "Load fetched correlation KBR org contributors"
-  loadKBRLinkedOrgAuthorities "$integrationName" "correlation/contributors/kbr" "mixed-lang" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedOrgAuthorities "$integrationName" "correlation/contributor-orgs/kbr" "mixed-lang" "$linkedAuthoritiesNamedGraph"
 
 }
   
@@ -2685,7 +2804,7 @@ function loadTranslationCorrelationList {
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
-  local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_TRL_LD"
+  local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
   local originalsTurtle="$integrationName/correlation/originals/rdf/mixed-lang"
 
   echo "Load translations correlation list"
