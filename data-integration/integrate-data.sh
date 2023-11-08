@@ -170,7 +170,7 @@ TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
 
 # Named graphs for KBR original data that is fetched based on translations
-TRIPLE_STORE_GRAPH_KBR_ORIG_TRL="http://kbr-originals"
+TRIPLE_STORE_GRAPH_KBR_TRL_ORIG="http://kbr-originals"
 TRIPLE_STORE_GRAPH_KBR_ORIG_LA="http://kbr-originals-linked-authorities"
 
 # Named graphs for possibly outdated KBR data used for comparisons
@@ -797,21 +797,21 @@ function integrate {
 
   # first delete content of the named graph in case it already exists
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_TRL>"
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
 
   echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_CONT>"
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
 
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_ORIG"
 
   echo "Create title/subtitles according to the BIBFRAME ontology for records which do not yet have those"
-  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
   #
   # schema:name properties have to exist as they are required in the triple pattern for the data integration
   #
   echo "Create schema:name properties based on BIBFRAME titles/subtitles for records which do not yet have schema:name"
-  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
 
   #
   # CREATE CORRELATION LIST ENTRIES BEFORE THE AUTOMATIC INTEGRATION
@@ -819,9 +819,9 @@ function integrate {
   # Contributors
   #
   echo "Create BELTRANS contributors based on correlation list"
-  #extractContributorCorrelationList "$integrationName"
-  #transformContributorCorrelationList "$integrationName"
-  #loadContributorCorrelationList "$integrationName"
+  extractContributorCorrelationList "$integrationName"
+  transformContributorCorrelationList "$integrationName"
+  loadContributorCorrelationList "$integrationName"
 
   # Translations
   #
@@ -834,12 +834,12 @@ function integrate {
   # AUTOMATIC INTEGRATION
   # 
   echo "Automatically integrate manifestations ..."
-  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
-  #  --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
+  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+    --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
 
   echo "Automatically integrate contributors ..."
-  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
-  #  --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
+  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
 
   # 2023-05-04 perform updates which did not finish due to a network interruption
 #  python interlink_updates.py -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
@@ -850,7 +850,7 @@ function integrate {
 #    --create-queries "2023-05-04_config-integration-contributors-create.csv" --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
 
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists, publishing directors, and publishers) ..."
-  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
 
   echo "Delete duplicate more generic schema:author role if we have a more specific role"
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
@@ -2265,8 +2265,15 @@ function mapKBROrgMatches {
  
   export RML_SOURCE_KBR_MULTIPLE_ORG_MATCHES="$sourceFile"
 
-  echo "Map KBR Orgs possible matches - $sourceFile"
-  . map.sh ../data-sources/kbr/kbr-org-matches.yml $outputTurtle
+  if [ -f "$sourceFile" ];
+  then
+    echo ""
+    echo "Map KBR Orgs possible matches - $sourceFile"
+    . map.sh ../data-sources/kbr/kbr-org-matches.yml $outputTurtle
+  else
+    echo ""
+    echo "No KBR Orgs possible matches to map! - $sourceFile"
+  fi
 }
 
 # -----------------------------------------------------------------------------
@@ -2577,12 +2584,15 @@ function transformContributorCorrelationList {
   export RML_SOURCE_CORRELATION_VIAF="$correlationListVIAFIDs"
   export RML_SOURCE_CORRELATION_WIKIDATA="$correlationListWikidataIDs"
 
+  echo ""
   echo "Map persons correlation data"
   . map.sh ../data-sources/correlation/correlation-contributors.yml $correlationTurtle
 
+  echo ""
   echo "Map fetched KBR contributor data"
-  mapKBRLinkedPersonAuthorities "$integrationName/correlation" "kbr-contributors"
-  mapKBRLinkedOrgAuthorities "$integrationName/correlation" "kbr-contributors"
+  mkdir -p "$integrationName/correlation/contributors/kbr/rdf/mixed-lang"
+  mapKBRLinkedPersonAuthorities "$integrationName/correlation/contributors" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$integrationName/correlation/contributors" "mixed-lang"
 
 }
 
@@ -2652,15 +2662,18 @@ function loadContributorCorrelationList {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
   local correlationTurtle="$integrationName/correlation/rdf/$SUFFIX_CORRELATION_LD"
 
+  echo ""
   echo "Load persons correlation list"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
     "$correlationTurtle"
 
+  echo ""
   echo "Load fetched correlation KBR person contributors"
-  loadKBRLinkedPersonAuthorities "$integrationName" "correlation/kbr" "kbr-contributors" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedPersonAuthorities "$integrationName" "correlation/contributors/kbr" "mixed-lang" "$linkedAuthoritiesNamedGraph"
 
+  echo ""
   echo "Load fetched correlation KBR org contributors"
-  loadKBRLinkedOrgAuthorities "$integrationName" "correlation/kbr" "kbr-contributors" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedOrgAuthorities "$integrationName" "correlation/contributors/kbr" "mixed-lang" "$linkedAuthoritiesNamedGraph"
 
 }
   
@@ -2858,10 +2871,8 @@ function loadKBRLinkedPersonAuthorities {
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   local kbrPersons="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_LD"
-
   local kbrPersonsIdentifiersTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_IDENTIFIERS_LD"
-
-  local kbrPersonsNamesTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_PERSONS_NAMES_LD"
+  local kbrPersonsNamesTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_NAMES_LD"
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
