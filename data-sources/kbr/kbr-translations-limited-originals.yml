@@ -187,6 +187,7 @@ mappings:
     po:
       - [a, schema:CreativeWork]
       - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
+      - [dcterms:identifier, "source_$(KBRID)"]
       - p: schema:name
         o: $(originalTitle)
         condition:

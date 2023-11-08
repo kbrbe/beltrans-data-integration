@@ -4,48 +4,52 @@
 #
 import csv
 from tools import utils
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 # -----------------------------------------------------------------------------
-def main():
-  """This script reads a CSV file, and extracts the given columns of rows"""
+def main(inputFilenames, outputFilename, columns, delimiter):
 
-  parser = OptionParser(usage="usage: %prog [options]")
-  parser.add_option('-i', '--input-file', action='store', help='The name of the CSV file from which data should be extracted')
-  parser.add_option('-o', '--output-file', action='store', help='The name of the CSV file in which the extrated data is stored')
-  parser.add_option('-c', '--column', action='append', help='A column which should be extracted, for several colums use this option several times')
-  parser.add_option('--distinct', action='store_true', help='If this flag is set, no double rows with the exact same values will be in the output, in case the input is ordered!')
-  parser.add_option('-d', '--delimiter', action='store', default=',', help='The optional delimiter of the input CSV, default is a comma')
-  (options, args) = parser.parse_args()
-
+  # First check if each input file contains the specified column
   #
-  # Check if we got all required arguments
-  #
-  if (not options.input_file) and (not options.output_file) and (not options.column):
-    parser.print_help()
-    exit(1)
+  for inputFilename in inputFilenames:
+    with open(inputFilename, 'r') as inFile:
+      inputReader = csv.DictReader(inFile, delimiter=delimiter)
+      utils.checkIfColumnsExist(inputReader.fieldnames, columns)
 
-  with open(options.input_file, 'r') as inFile, \
-       open(options.output_file, 'w') as outFile:
-
-    inputReader = csv.DictReader(inFile, delimiter=options.delimiter)
-
-    utils.checkIfColumnsExist(inputReader.fieldnames, options.column)
-
-    outputWriter = csv.DictWriter(outFile, fieldnames=options.column)
+  with open(outputFilename, 'w') as outFile:
+    outputWriter = csv.DictWriter(outFile, fieldnames=columns)
     outputWriter.writeheader()
 
-    lastRow = None
-    for row in inputReader:
-      emptyCol = False
-      for colName in options.column:
-        if row[colName] == '':
-          emptyCol = True
-          break
-      if not emptyCol:
-        outputRow = { key: row[key] for key in options.column }
-        if outputRow != lastRow:
-          outputWriter.writerow(outputRow)
-      lastRow = outputRow
+    for inputFilename in inputFilenames:
+      with open(inputFilename, 'r') as inFile:
 
-main()
+        inputReader = csv.DictReader(inFile, delimiter=delimiter)
+
+        lastRow = None
+        for row in inputReader:
+          emptyCol = False
+          for colName in columns:
+            if row[colName] == '':
+              emptyCol = True
+              break
+          if not emptyCol:
+            outputRow = { key: row[key] for key in columns }
+            if outputRow != lastRow:
+              outputWriter.writerow(outputRow)
+          lastRow = outputRow
+
+# -----------------------------------------------------------------------------
+def parseArguments():
+  parser = ArgumentParser()
+  parser.add_argument('input_files', nargs='+', help='The names of CSV files from which data should be extracted')
+  parser.add_argument('-o', '--output-file', required=True, action='store', help='The name of the CSV file in which the extrated data is stored')
+  parser.add_argument('-c', '--column', required=True, action='append', help='A column which should be extracted, for several colums use this option several times')
+  parser.add_argument('-d', '--delimiter', action='store', default=',', help='The optional delimiter of the input CSV, default is a comma')
+  options = parser.parse_args()
+
+  return options
+
+# -----------------------------------------------------------------------------
+if __name__ == '__main__':
+  options = parseArguments()
+  main(options.input_files, options.output_file, options.column, options.delimiter)

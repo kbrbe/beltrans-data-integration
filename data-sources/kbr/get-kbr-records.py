@@ -4,52 +4,43 @@
 #
 import csv
 from tools import utils
-from optparse import OptionParser
+from argparse import ArgumentParser
 from tools.xml.KBRZ3950APIHandler import KBRZ3950APIHandler as kbrAPI
 import lxml.etree as ET
 from tqdm import tqdm
 
 # -----------------------------------------------------------------------------
-def main():
+def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delimiter):
   """This script reads KBR identifiers from a specified column in a CSV file and requests their bibliographic KBR records from the Z3950 API."""
 
-  parser = OptionParser(usage="usage: %prog [options]")
-  parser.add_option('-i', '--input-file', action='store', help='The name of the CSV file from which data should be extracted')
-  parser.add_option('-o', '--output-file', action='store', help='The name of the CSV file in which the extrated data is stored')
-  parser.add_option('--identifier-column', action='store', help='The column with the relative identifier based on which sequence numbers should be numbered')
-  parser.add_option('-b', '--batch-size', action='store', type='int', default=200, help="The number of identifiers per request")
-  parser.add_option('-u', '--url', action='store', help='The URL of the Z3950 KBR API')
-  parser.add_option('-d', '--delimiter', action='store', default=',', help='The optional delimiter of the input CSV, default is a comma')
-  (options, args) = parser.parse_args()
-
+  # First check that all input files contain the needed column
   #
-  # Check if we got all required arguments
+  for inputFilename in inputFilenames:
+    with open(inputFilename, 'r') as inFile:
+      inputReader = csv.DictReader(inFile, delimiter=delimiter)
+      utils.checkIfColumnsExist(inputReader.fieldnames, [identifierColumn])
+  
+  # Iterate over all input files and uniquely store found KBR identifiers
   #
-  if (not options.input_file) and (not options.output_file) and (not options.identifier_column) and (not options.url):
-    parser.print_help()
-    exit(1)
+  kbrIdentifiers = set()
+  for inputFilename in inputFilenames:
+    with open(inputFilename, 'r') as inFile:
+      inputReader = csv.DictReader(inFile, delimiter=delimiter)
 
-  with open(options.input_file, 'r') as inFile:
-
-    inputReader = csv.DictReader(inFile, delimiter=options.delimiter)
-
-    utils.checkIfColumnsExist(inputReader.fieldnames, [options.identifier_column])
-
-    # store found KBR identifiers in a set (so we only store unique values)
-    #
-    kbrIdentifiers = set()
-    for row in inputReader:
-      rowID = row[options.identifier_column]
-      if rowID != '':
-        kbrIdentifiers.add(rowID)
+      # store found KBR identifiers in a set (so we only store unique values)
+      #
+      for row in inputReader:
+        rowID = row[identifierColumn]
+        if rowID != '':
+          kbrIdentifiers.add(rowID)
 
   print(f'Successfully read {len(kbrIdentifiers)} KBR identifiers from the input CSV!')
-  print(f'Starting to fetch the data in batches of {options.batch_size} ...')
+  print(f'Starting to fetch the data in batches of {batchSize} ...')
 
-  apiHandler = kbrAPI(options.url)
-  apiHandler.setBatchSize(options.batch_size)
+  apiHandler = kbrAPI(url)
+  apiHandler.setBatchSize(batchSize)
 
-  with open(options.output_file, 'wb') as outFile:
+  with open(outputFilename, 'wb') as outFile:
 
     outFile.write(b'<collection xmlns="http://www.loc.gov/MARC21/slim">')
 
@@ -58,8 +49,8 @@ def main():
     # this maximum is roughly 176 KBR identifiers per query
     #
     kbrIdentifiersList = list(kbrIdentifiers)
-    for i in tqdm(range(0, len(kbrIdentifiers), options.batch_size), position=0, desc='Batches'):
-      batch = kbrIdentifiersList[i:i+options.batch_size]
+    for i in tqdm(range(0, len(kbrIdentifiers), batchSize), position=0, desc='Batches'):
+      batch = kbrIdentifiersList[i:i+batchSize]
 
       query = 'IDNO=(' + ','.join(batch) + ')'
 
@@ -77,4 +68,21 @@ def main():
 
     outFile.write(b'</collection>')
 
-main()
+def parseArguments():
+
+  parser = ArgumentParser()
+  parser.add_argument('input', nargs='+', help='One or more filenames from which the specified identifier column is read')
+  parser.add_argument('-o', '--output-file', action='store', required=True, help='The name of the CSV file in which the extrated data is stored')
+  parser.add_argument('--identifier-column', action='store', required=True, help='The column with the relative identifier based on which sequence numbers should be numbered')
+  parser.add_argument('-b', '--batch-size', action='store', type=int, default=200, help="The number of identifiers per request")
+  parser.add_argument('-u', '--url', action='store', required=True, help='The URL of the Z3950 KBR API')
+  parser.add_argument('-d', '--delimiter', action='store', default=',', help='The optional delimiter of the input CSV, default is a comma')
+  options = parser.parse_args()
+
+  return options
+
+
+# -----------------------------------------------------------------------------
+if __name__ == '__main__':
+  options = parseArguments()
+  main(options.input, options.output_file, options.identifier_column, options.batch_size, options.url, options.delimiter)

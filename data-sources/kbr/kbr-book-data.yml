@@ -306,27 +306,28 @@ mappings:
           parameters:
             - [grel:valueParameter, $(contributorRole)]
             - [grel:valueParameter2, "aut"] 
-      - p: marcrel:ill
-        o: btid:authority_$(contributorID)~iri
-        condition:
-          function: idlab-fn:equal
-          parameters:
-            - [grel:valueParameter, $(contributorRole)]
-            - [grel:valueParameter2, "ill"] 
-      - p: marcrel:sce
-        o: btid:authority_$(contributorID)~iri
-        condition:
-          function: idlab-fn:equal
-          parameters:
-            - [grel:valueParameter, $(contributorRole)]
-            - [grel:valueParameter2, "sce"] 
-      - p: marcrel:pbd
-        o: btid:authority_$(contributorID)~iri
-        condition:
-          function: idlab-fn:equal
-          parameters:
-            - [grel:valueParameter, $(contributorRole)]
-            - [grel:valueParameter2, "pbd"] 
+      - [marcrel:$(contributorRole), btid:authority_$(contributorID)~iri ]
+#      - p: marcrel:ill
+#        o: btid:authority_$(contributorID)~iri
+#        condition:
+#          function: idlab-fn:equal
+#          parameters:
+#            - [grel:valueParameter, $(contributorRole)]
+#            - [grel:valueParameter2, "ill"] 
+#      - p: marcrel:sce
+#        o: btid:authority_$(contributorID)~iri
+#        condition:
+#          function: idlab-fn:equal
+#          parameters:
+#            - [grel:valueParameter, $(contributorRole)]
+#            - [grel:valueParameter2, "sce"] 
+#      - p: marcrel:pbd
+#        o: btid:authority_$(contributorID)~iri
+#        condition:
+#          function: idlab-fn:equal
+#          parameters:
+#            - [grel:valueParameter, $(contributorRole)]
+#            - [grel:valueParameter2, "pbd"] 
 
 
   # ---------------------------------------------------------------------------

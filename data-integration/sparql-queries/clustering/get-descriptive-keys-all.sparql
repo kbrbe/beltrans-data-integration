@@ -6,17 +6,26 @@ prefix marcrel: <http://id.loc.gov/vocabulary/relators/>
 prefix btm: <http://kbr.be/ns/beltrans/model#>
 
 SELECT ?m ?keyPart1 ?keyPart2
+FROM <http://beltrans-manifestations>
+FROM <http://beltrans-originals>
 WHERE {
   
   graph <http://beltrans-manifestations> {
     ?m a schema:CreativeWork ;
        schema:name|bibo:isbn10|bibo:isbn13 ?keyPart1 .
   }
-      
+
+  # schema:name and ISBNs are in the original graph
+  # therefore not specifying any graph and using the FROM clause
+  #
+  ?m schema:name|bibo:isbn10|bibo:isbn13|(schema:translationOfWork/schema:name)|(schema:translationOfWork/bibo:isbn10)|(schema:translationOfWork/bibo:isbn13) ?keyPart1 .
+  
+  FILTER ( ?keyPart1 != "")
+        
   {
     
     #
-    # ALTERNATIVE 1: Authorized contributor name
+    # KEY PART 2, ALTERNATIVE 1: Authorized contributor name
     #
     {
       graph <http://beltrans-manifestations> { ?m schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?contributor . }
@@ -31,7 +40,7 @@ WHERE {
     UNION
     
     #
-    # ALTERNATIVE 2: Alternative contributor name
+    # KEY PART 2, ALTERNATIVE 2: Alternative contributor name
     #
     {
       graph <http://beltrans-manifestations> { ?m schema:author|schema:translator|marcrel:ill|marcrel:sce|marcrel:pbd ?contributor . }
@@ -51,5 +60,6 @@ WHERE {
   
   }
 
+  FILTER ( ?keyPart2 != "")
 }
 

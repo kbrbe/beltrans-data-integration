@@ -48,22 +48,17 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
     (group_concat(distinct ?unescoManifestationID;SEPARATOR=';') AS ?targetUnescoIdentifier)
 
-    (group_concat(distinct ?sourceTitle;SEPARATOR=';') AS ?sourceTitle)
-    (group_concat(distinct ?kbrSourceManifestationID;SEPARATOR=';') AS ?sourceKBRIdentifier)
-    (group_concat(distinct ?kbrSourceManifestationISBN10;SEPARATOR=';') AS ?sourceISBN10)
-    (group_concat(distinct ?kbrSourceManifestationISBN13;SEPARATOR=';') AS ?sourceISBN13)
-    ("" AS ?sourcePublisherIdentifiers)
+    (group_concat(distinct ?originalTitle;SEPARATOR=';') AS ?sourceTitle)
+    (group_concat(distinct ?originalKBRID;SEPARATOR=';') AS ?sourceKBRIdentifier)
+    (group_concat(distinct ?originalISBN10;SEPARATOR=';') AS ?sourceISBN10)
+    (group_concat(distinct ?originalISBN13;SEPARATOR=';') AS ?sourceISBN13)
+    (group_concat(distinct ?originalPublisherNameID;SEPARATOR=';') AS ?sourcePublisherIdentifiers)
 
     (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetKBREdition)
     (group_concat(distinct ?bnfTargetManifestationEdition;SEPARATOR=';') AS ?targetBnFEdition)
     (group_concat(distinct ?kbTargetManifestationEdition;SEPARATOR=';') AS ?targetKBEdition)
 
     (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetBindingType)
-
-    (group_concat(distinct ?kbrPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierKBR)
-    (group_concat(distinct ?bnfPublisherName;SEPARATOR=';') AS ?targetPublisherIdentifierBnF)
-    (group_concat(distinct ?kbPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierKB)
-    (group_concat(distinct ?unescoPublisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifierUnesco)
 
     (group_concat(distinct ?kbrDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
     (group_concat(distinct ?bnfDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
@@ -97,6 +92,31 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
                      dcterms:identifier ?manifestationID .
     }
 
+    # ORIGINAL INFORMATION
+    #
+    graph <http://beltrans-manifestations> { ?manifestation schema:translationOfWork ?original . }
+    graph <http://beltrans-originals> { ?original a schema:CreativeWork . }  
+    OPTIONAL { graph <http://beltrans-originals> { ?original bibo:isbn10 ?originalISBN10 . } }
+    OPTIONAL { graph <http://beltrans-originals> { ?original bibo:isbn13 ?originalISBN13 . } }
+    OPTIONAL {
+      graph <http://beltrans-originals> { 
+        ?original bf:identifiedBy ?originalKBREntity . 
+        ?originalKBREntity a bf:Identifier ;
+                           rdfs:label "KBR" ;
+                           rdf:value ?originalKBRID .
+      } 
+    }
+    FILTER(!STRSTARTS(?originalKBRID, "source"))
+    OPTIONAL {
+      graph <http://beltrans-originals> { ?original schema:name ?originalTitle . } 
+      graph <http://beltrans-originals> { ?original schema:publisher ?originalPublisher . } 
+      graph <http://beltrans-contributors> { ?originalPublisher rdfs:label ?originalPublisherName . } 
+      graph <http://beltrans-contributors> { ?originalPublisher dcterms:identifier ?originalPublisherID . } 
+    }
+    BIND(CONCAT(?originalPublisherName, ' (', ?originalPublisherID, ')') AS ?originalPublisherNameID)
+
+    # CLUSTER INFORMATION
+    #
     OPTIONAL {
       graph <http://beltrans-works> { 
         ?cluster fabio:hasManifestation ?manifestation ;
@@ -147,7 +167,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         FILTER (lang(?sourceLangLabel) = 'en')
       }
     }
- 
+    
+
     # #########################################################################
     #
     # DATA OF THIS MANIFESTATION WE HAVE FROM KBR
@@ -163,16 +184,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:locationCreated ?kbrLocationCreated . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation rdfs:comment ?kbrResponsibilityStatement . }}
-      OPTIONAL {
-        graph <http://kbr-syracuse> { ?kbrManifestation schema:publisher ?kbrPublisher . }
-        OPTIONAL {
-          graph <http://kbr-linked-authorities> {
-            ?kbrPublisher skos:prefLabel ?kbrPublisherName ;
-                          dcterms:identifier ?kbrPublisherID .
-          }
-        }
-        BIND(CONCAT(?kbrPublisherName, ' (', ?kbrPublisherID, ')') AS ?kbrPublisherNameID)
-      }
    
 
       # COLLECTION INFORMATION
@@ -213,27 +224,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         }
       }
 
-      #
-      # SOURCE INFORMATION
-      #
-      OPTIONAL {
-        graph <http://kbr-syracuse> { ?kbrManifestation schema:translationOfWork ?kbrManifestationSource . }
-
-        # there might be a title (from a 246 text field or linked 765 work)
-        OPTIONAL { graph <http://kbr-originals> { ?kbrManifestationSource schema:name ?kbrSourceManifestationTitle . } }
-
-        #
-        # In case it is not a dummy source entry just with the language, there is an identifier
-        #
-        OPTIONAL {
-          graph <http://kbr-originals> { ?kbrManifestationSource dcterms:identifier ?kbrSourceManifestationID . }
-
-          # Optionally there is also an ISBN for the source
-          OPTIONAL { graph <http://kbr-originals> { ?kbrManifestationSource bibo:isbn10 ?kbrSourceManifestationISBN10 . } }
-          OPTIONAL { graph <http://kbr-originals> { ?kbrManifestationSource bibo:isbn13 ?kbrSourceManifestationISBN13 . } }
-        }
-      }
-
     } # end optional KBR
 
     # #########################################################################
@@ -252,41 +242,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:locationCreated ?bnfLocationCreated . }}
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation rdfs:comment ?bnfResponsibilityStatement . }}
 
-      #
-      # SOURCE INFORMATION
-      #
-      OPTIONAL { 
-        graph <http://bnf-publications> { ?bnfManifestation schema:translationOfWork ?bnfOriginal . }
-        graph <http://bnf-originals> { ?bnfOriginal schema:name ?bnfSourceManifestationTitle . } 
-      }
-
-      OPTIONAL {
-        graph <http://bnf-trl-rameau-links> { ?bnfManifestation dcterms:subject ?genre . }
-        graph <http://rameau> { ?genre skos:prefLabel ?bnfTargetManifestationRameauLabel . }
-      }
-
-      #
-      # PUBLISHER INFORMATION
-      #
-      OPTIONAL {
-        graph <http://bnf-publications> { ?bnfManifestation rdagroup1elements:publishersName ?bnfPublisherName . }
-
-#        OPTIONAL { 
-#          graph <http://bnf-publications> { ?bnfManifestation schema:publisher ?bnfPublisher . } 
-#          BIND(CONCAT(?bnfPublisherName, ' (', STRBEFORE(STRAFTER(str(?bnfPublisher), "12148/"), "#"), ')') as ?bnfPublisherNameID)
-
-          # within this optional publisher, check optional attributes from the linked authorities dataset
-#          OPTIONAL {   
-#            graph <http://bnf-contributors> { ?bnfPublisher foaf:name ?bnfPublisherResourceName . }
-#            graph <http://bnf-contributors> { ?bnfPublisher rdagroup2elements:placeAssociatedWithTheCorporateBody ?bnfPublisherCountry . }
-            # within this optional country check optionally for an English label in the master data
-#            OPTIONAL {
-#              graph <http://master-data> { ?bnfPublisherCountry mads:authoritativeLabel ?bnfPublisherCountryLabel . }
-#              FILTER (lang(?bnfPublisherCountryLabel) = 'en')
-#            }  
-#          }
-#        }
-      }
     }
 
     # #########################################################################
@@ -305,30 +260,10 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:locationCreated ?kbLocationCreated . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdfs:comment ?kbResponsibilityStatement . }}
 
-      OPTIONAL {
-        graph <http://kb-publications> { ?kbManifestation rdagroup1elements:publishersName ?kbPublisherName . }
-
-        OPTIONAL {
-          graph <http://kb-publishers> {
-            ?kbPublisher schema:name|schema:alternateName ?kbPublisherName ;
-                         dcterms:identifier ?kbPublisherID . 
-         }
-        }
-        BIND(COALESCE(?kbPublisherID, "") AS ?kbPublisherIDString)
-        BIND(CONCAT( COALESCE(?kbPublisherName, "missing name"), IF(str(?kbPublisherIDString) = "", "", CONCAT(" (", str(?kbPublisherIDString), ")"))) AS ?kbPublisherNameID)
-      }
 
       OPTIONAL {
         graph <http://kb-publications> { ?kbManifestation schema:about ?genre . }
         graph <http://kbcode> { ?genre rdfs:label ?kbTargetManifestationKBCodeLabel. }
-      }
-
-      #
-      # SOURCE INFORMATION
-      #
-      OPTIONAL { 
-        graph <http://kb-publications> { ?kbManifestation schema:translationOfWork ?kbOriginal . }
-        graph <http://kb-originals> { ?kbOriginal schema:name ?kbSourceManifestationTitle . } 
       }
 
     } # end optional KB
@@ -347,24 +282,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:datePublished ?unescoDatePublished . }}
       OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:locationCreated ?unescoLocationCreated . }}
       OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:countryOfOrigin ?unescoCountryOfOriginLabel . }}
-      OPTIONAL {
-        graph <http://unesco> { ?unescoManifestation schema:publisher ?unescoPublisher . }
-        OPTIONAL {
-          graph <http://unesco-linked-authorities> {
-            ?unescoPublisher schema:name ?unescoPublisherName ;
-                             dcterms:identifier ?unescoPublisherID .
-          }
-        }
-        BIND(CONCAT(?unescoPublisherName, ' (', ?unescoPublisherID, ')') AS ?unescoPublisherNameID)
-      }
-
-      #
-      # SOURCE INFORMATION
-      #
-      OPTIONAL { 
-        graph <http://unesco> { ?unescoManifestation schema:translationOfWork ?unescoOriginal . }
-        graph <http://unesco-originals> { ?unescoOriginal schema:name ?unescoSourceManifestationTitle . } 
-      }
 
     } # end optional UNESCO
 
@@ -407,8 +324,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       BIND(CONCAT( COALESCE(?translatorLabel, "missing name"), " (", ?translatorIdentifier, ")") as ?translatorNameID)
     }
 
-
-    # #########################################################################
+        # #########################################################################
     #
     # ILLUSTRATOR
     #
@@ -480,11 +396,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       BIND(CONCAT( COALESCE(?publisherLabel, "missing name"), " (", ?publisherIdentifier, ")") as ?publisherNameID)
     }
 
-
-    # Show a single source title https://github.com/kbrbe/beltrans-data-integration/issues/195
-    BIND(
-      COALESCE(?kbrSourceManifestationTitle, ?bnfSourceManifestationTitle, ?kbSourceManifestationTitle, ?unescoSourceManifestationTitle, "")
-    AS ?sourceTitle)
 
     # If there is a manually curated date of publication (schema:datePublished on the integrated record)
     # then use that date for all the local dates. Like this, the postprocessing script will not find contradicting dates

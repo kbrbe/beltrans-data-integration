@@ -55,14 +55,8 @@ mappings:
       - [a, schema:CreativeWork]
       - [a, schema:Book]
       - [dcterms:identifier, "p$(manifestationID)"]
-      - [bf:identifiedBy, btid:kbid_$(manifestationID)~iri]
-      - p: schema:translationOfWork
-        o: btid:manifestation_source_$(manifestationID)~iri
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(sourceTitle)]
-            - [grel:valueParameter2, ""]
+      - [bf:identifiedBy, btid:kbid_p$(manifestationID)~iri]
+      - [schema:translationOfWork, btid:manifestation_source_p$(manifestationID)~iri]
       - [schema:name, $(title) ]
       - p: rdfs:comment
         o: $(responsibilityStatement)
@@ -107,14 +101,14 @@ mappings:
             - [grel:valueParameter, $(isbn13)]
             - [grel:valueParameter2, ""] 
       - p: bf:identifiedBy
-        o: btid:isbn10_$(manifestationID)_$(isbn10)~iri
+        o: btid:isbn10_p$(manifestationID)_$(isbn10)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
             - [grel:valueParameter, $(isbn10)]
             - [grel:valueParameter2, ""] 
       - p: bf:identifiedBy
-        o: btid:isbn13_$(manifestationID)_$(isbn13)~iri
+        o: btid:isbn13_p$(manifestationID)_$(isbn13)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
@@ -147,7 +141,7 @@ mappings:
       - access: *sourceTRLNLFR
         referenceFormulation: csv
         delimiter: ','
-    s: btid:isbn10_$(manifestationID)_$(isbn10)
+    s: btid:isbn10_p$(manifestationID)_$(isbn10)
     condition:
       function: idlab-fn:notEqual
       parameters:
@@ -170,7 +164,7 @@ mappings:
       - access: *sourceTRLNLFR
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:isbn13_$(manifestationID)_$(isbn13)
+    s: btid:isbn13_p$(manifestationID)_$(isbn13)
     condition:
       function: idlab-fn:notEqual
       parameters:
@@ -193,7 +187,7 @@ mappings:
       - access: *sourceTRLNLFR
         referenceFormulation: csv
         delimiter: ',' 
-    s: btid:kbid_$(manifestationID)
+    s: btid:kbid_p$(manifestationID)
     condition:
       function: idlab-fn:notEqual
       parameters:
