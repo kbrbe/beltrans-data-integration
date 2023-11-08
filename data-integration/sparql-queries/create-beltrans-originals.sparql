@@ -24,6 +24,8 @@ INSERT {
                               dcterms:identifier ?originalManifestationID ;
                               schema:name ?originalTitle ;
                               schema:inLanguage ?originalLanguage ;
+                              bibo:isbn10 ?kbrOriginalISBN10 ;
+                              bibo:isbn13 ?kbrOriginalISBN13 ;
                               schema:workTranslation ?manifestation ;
                               bf:identifiedBy ?originalManifestationKBRIdentifier ;
                               bf:identifiedBy ?originalManifestationBnFIdentifier ;
@@ -38,19 +40,19 @@ INSERT {
 
     ?originalManifestationKBRIdentifier a bf:Identifier ;
                                         rdfs:label "KBR" ;
-                                        rdf:value ?kbrOriginal .
+                                        rdf:value ?kbrOriginalID .
 
     ?originalManifestationBnFIdentifier a bf:Identifier ;
                                         rdfs:label "BnF" ;
-                                        rdf:value ?bnfOriginal .
+                                        rdf:value ?bnfOriginalID .
 
     ?originalManifestationKBIdentifier a bf:Identifier ;
                                         rdfs:label "KB" ;
-                                        rdf:value ?kbOriginal .
+                                        rdf:value ?kbOriginalID .
 
     ?originalManifestationUnescoIdentifier a bf:Identifier ;
                                            rdfs:label "Unesco" ;
-                                           rdf:value ?unescoOriginal .
+                                           rdf:value ?unescoOriginalID .
  
    ?originalManifestationISBN10Identifier a bf:Identifier ;
                                           rdfs:label "ISBN-10" ;
@@ -154,6 +156,6 @@ WHERE {
   BIND( (IRI( CONCAT("http://kbr.be/id/data/identifier_isbn10_", ?kbrOriginalISBN10))) AS ?originalManifestationISBN10Identifier)
   BIND( (IRI( CONCAT("http://kbr.be/id/data/identifier_isbn13_", ?kbrOriginalISBN13))) AS ?originalManifestationISBN13Identifier)
   
-  BIND( COALESCE(?kbrOriginalTitle, ?bnfOriginalTitle, ?unescoOriginalTitle, ?kbOriginalTitle, "") AS ?originalTitle)
+  BIND( COALESCE(?kbrOriginalTitle, ?bnfOriginalTitle, ?unescoOriginalTitle, ?kbOriginalTitle) AS ?originalTitle)
   
 }
