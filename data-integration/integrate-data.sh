@@ -149,6 +149,7 @@ INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-
 INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-11-08_person-contributors-correlation-list.csv"
 INPUT_CORRELATION_ORG="../data-sources/correlation/2023-11-08_org-contributors-correlation-list.csv"
 INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-11-08_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-11-08_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -165,6 +166,7 @@ TRIPLE_STORE_GRAPH_INT_TRL="http://beltrans-manifestations"
 TRIPLE_STORE_GRAPH_INT_CONT="http://beltrans-contributors"
 TRIPLE_STORE_GRAPH_WORKS="http://beltrans-works"
 TRIPLE_STORE_GRAPH_INT_ORIG="http://beltrans-originals"
+TRIPLE_STORE_GRAPH_INT_REMOVAL="http://beltrans-removal"
 
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
@@ -658,6 +660,9 @@ function extract {
   elif [ "$dataSource" = "translation-correlation" ];
   then
     extractTranslationCorrelationList "$integrationFolderName"
+  elif [ "$dataSource" = "translation-removal" ];
+  then
+    extractTranslationRemovalList "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
@@ -722,6 +727,9 @@ function transform {
   elif [ "$dataSource" = "translation-correlation" ];
   then
     transformTranslationCorrelationList "$integrationFolderName"
+  elif [ "$dataSource" = "translation-removal" ];
+  then
+    transformTranslationRemovalList "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
@@ -778,6 +786,9 @@ function load {
   elif [ "$dataSource" = "translation-correlation" ];
   then
     loadTranslationCorrelationList "$integrationFolderName"
+  elif [ "$dataSource" = "translation-removal" ];
+  then
+    loadTranslationRemovalList "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
@@ -811,13 +822,13 @@ function integrate {
   source ./py-integration-env/bin/activate
 
   # first delete content of the named graph in case it already exists
-  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_TRL>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
 
-  echo "Delete existing content in namespace <$TRIPLE_STORE_GRAPH_INT_CONT>"
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
 
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_ORIG"
+
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_REMOVAL"
 
   echo "Create title/subtitles according to the BIBFRAME ontology for records which do not yet have those"
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
@@ -847,10 +858,21 @@ function integrate {
 
   # Translations
   #
+  echo ""
   echo "Create BELTRANS translations based on correlation list"
   extractTranslationCorrelationList "$integrationName"
   transformTranslationCorrelationList "$integrationName"
   loadTranslationCorrelationList "$integrationName"
+
+  # Translations removal
+  #
+  echo ""
+  echo "Create BELTRANS removal list based on correlation list"
+  extractTranslationRemovalList "$integrationName"
+  transformTranslationRemovalList "$integrationName"
+  loadTranslationRemovalList "$integrationName"
+
+
 
   #
   # AUTOMATIC INTEGRATION
@@ -2511,7 +2533,7 @@ function extractTranslationCorrelationList {
   local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
   
   echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
-  cp $correlationList "$integrationName/correlation/"
+  cp $correlationList "$folderName"
   extractSeparatedColumn $correlationList $correlationListISBN10 "targetIdentifier" "targetISBN10" "id" "isbn10"
   extractSeparatedColumn $correlationList $correlationListISBN13 "targetIdentifier" "targetISBN13" "id" "isbn13"
   extractSeparatedColumn $correlationList $correlationListKBRIDs "targetIdentifier" "targetKBRIdentifier" "id" "KBR"
@@ -2606,6 +2628,41 @@ function extractTranslationCorrelationList {
   extractKBROrgs "$integrationName/correlation/originals" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
  
 }
+
+# -----------------------------------------------------------------------------
+function extractTranslationRemovalList {
+  local integrationName=$1
+
+  local folderName="$integrationName/correlation/removal"
+  mkdir -p "$folderName"
+
+  local correlationList="$INPUT_CORRELATION_REMOVAL"
+  local correlationListISBN10="$folderName/$SUFFIX_CORRELATION_TRL_ISBN10"
+  local correlationListISBN13="$folderName/$SUFFIX_CORRELATION_TRL_ISBN13"
+
+  local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_TRL_KBR"
+  local correlationListBNFIDs="$folderName/$SUFFIX_CORRELATION_TRL_BNF"
+  local correlationListKBIDs="$folderName/$SUFFIX_CORRELATION_TRL_KB"
+  local correlationListUNESCOIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
+
+  local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
+  local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
+
+  local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
+  
+  echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
+  cp $correlationList "$folderName"
+  extractSeparatedColumn $correlationList $correlationListISBN10 "targetIdentifier" "targetISBN10" "id" "isbn10"
+  extractSeparatedColumn $correlationList $correlationListISBN13 "targetIdentifier" "targetISBN13" "id" "isbn13"
+  extractSeparatedColumn $correlationList $correlationListKBRIDs "targetIdentifier" "targetKBRIdentifier" "id" "KBR"
+  extractSeparatedColumn $correlationList $correlationListBNFIDs "targetIdentifier" "targetBnFIdentifier" "id" "BnF"
+  extractSeparatedColumn $correlationList $correlationListKBIDs "targetIdentifier" "targetKBIdentifier" "id" "KB"
+  extractSeparatedColumn $correlationList $correlationListUNESCOIDs "targetIdentifier" "targetUnescoIdentifier" "id" "unesco"
+  extractSeparatedColumn $correlationList $correlationListSourceLanguage "targetIdentifier" "sourceLanguage" "id" "sourceLanguage"
+  extractSeparatedColumn $correlationList $correlationListTargetLanguage "targetIdentifier" "targetLanguage" "id" "targetLanguage"
+
+}
+
 
 
 
@@ -2755,6 +2812,47 @@ function transformTranslationCorrelationList {
 }
 
 # -----------------------------------------------------------------------------
+function transformTranslationRemovalList {
+  local integrationName=$1
+
+  folderName="$integrationName/correlation/removal"
+  mkdir -p "$integrationName/correlation/removal/rdf"
+  
+  local correlationList="$INPUT_CORRELATION_REMOVAL"
+  local correlationListISBN10="$folderName/$SUFFIX_CORRELATION_TRL_ISBN10"
+  local correlationListISBN13="$folderName/$SUFFIX_CORRELATION_TRL_ISBN13"
+
+  local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_TRL_KBR"
+  local correlationListBNFIDs="$folderName/$SUFFIX_CORRELATION_TRL_BNF"
+  local correlationListKBIDs="$folderName/$SUFFIX_CORRELATION_TRL_KB"
+  local correlationListUNESCOIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
+
+  local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
+  local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
+
+  local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
+
+  local correlationTurtle="$integrationName/correlation/removal/rdf/$SUFFIX_CORRELATION_TRL_LD"
+
+  export RML_SOURCE_CORRELATION_TRL="$correlationList"
+  export RML_SOURCE_CORRELATION_TRL_ISBN10="$correlationListISBN10"
+  export RML_SOURCE_CORRELATION_TRL_ISBN13="$correlationListISBN13"
+  export RML_SOURCE_CORRELATION_TRL_KBR="$correlationListKBRIDs"
+  export RML_SOURCE_CORRELATION_TRL_BNF="$correlationListBNFIDs"
+  export RML_SOURCE_CORRELATION_TRL_KB="$correlationListKBIDs"
+  export RML_SOURCE_CORRELATION_TRL_UNESCO="$correlationListUNESCOIDs"
+  export RML_SOURCE_CORRELATION_TRL_SOURCE_LANG="$correlationListSourceLanguage"
+  export RML_SOURCE_CORRELATION_TRL_TARGET_LANG="$correlationListTargetLanguage"
+ 
+  echo ""
+  echo "Map translations correlation data"
+  . map.sh ../data-sources/correlation/correlation-translations-removal.yml $correlationTurtle
+
+}
+
+
+
+# -----------------------------------------------------------------------------
 function loadContributorPersonCorrelationList {
   local integrationName=$1
 
@@ -2824,6 +2922,23 @@ function loadTranslationCorrelationList {
   loadKBRLinkedOrgAuthorities "$integrationName/correlation" "originals/kbr" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
 
 }
+
+# -----------------------------------------------------------------------------
+function loadTranslationRemovalList {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+  local correlationTurtle="$integrationName/correlation/removal/rdf/$SUFFIX_CORRELATION_TRL_LD"
+
+  echo "Load translations correlation removal list"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_REMOVAL" \
+    "$correlationTurtle"
+
+}
+ 
  
 
 # -----------------------------------------------------------------------------
