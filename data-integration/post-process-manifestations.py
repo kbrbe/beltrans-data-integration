@@ -14,18 +14,38 @@ def main():
 
   parser = OptionParser(usage="usage: %prog [options]")
   parser.add_option('-i', '--input-file', action='store', help='The input file containing CSV data')
+  parser.add_option('-c', '--contributions-file', action='store', help='A CSV file containing a mapping between manifestations and contributors')
   parser.add_option('-o', '--output-file', action='store', help='The file in which the postprocessed data are stored')
   (options, args) = parser.parse_args()
 
   #
   # Check if we got all required arguments
   #
-  if( (not options.input_file) or (not options.output_file) ):
+  if( (not options.input_file) or (not options.output_file) or (not options.contributions_file) ):
     parser.print_help()
     exit(1)
 
   with open(options.input_file, 'r', encoding="utf-8") as inFile, \
+       open(options.contributions_file, 'r', encoding="utf-8") as contFile, \
        open(options.output_file, 'w', encoding="utf-8") as outFile:
+
+    contReader = csv.DictReader(contFile, delimiter=',')
+
+    # Create a lookup data structure for contributions
+    contributions = {}
+    for row in contReader:
+      manifestationID = row['manifestationID']
+      role = row['contributorRole']
+      contributorNameID = row['contributorNameID']
+
+      if manifestationID in contributions:
+        if role in contributions[manifestationID]:
+          contributions[manifestationID][role].append(contributorNameID)
+        else:
+          contributions[manifestationID][role] = [contributorNameID]
+      else:
+        contributions[manifestationID] = {}
+        contributions[manifestationID][role] = [contributorNameID]
 
     inputReader = csv.DictReader(inFile, delimiter=',')
     headers = inputReader.fieldnames.copy()
@@ -44,6 +64,24 @@ def main():
     headers.insert(yearHeaderIndex, 'targetYearOfPublication')
     headers.insert(placeHeaderIndex, 'targetPlaceOfPublication')
     headers.insert(countryHeaderIndex, 'targetCountryOfPublication')
+
+    # add new columns for contributors after the targetCollectionIdentifier column
+    contributionsIndex = headers.index('targetCollectionIdentifier') + 1
+    headers.insert(contributionsIndex, 'targetPublisherIdentifiers')
+    headers.insert(contributionsIndex, 'publishingDirectorIdentifiers')
+    headers.insert(contributionsIndex, 'scenaristIdentifiers')
+    headers.insert(contributionsIndex, 'illustratorIdentifiers')
+    headers.insert(contributionsIndex, 'translatorIdentifiers')
+    headers.insert(contributionsIndex, 'authorIdentifiers')
+
+    roleMapping = {
+      'http://schema.org/author': 'authorIdentifiers',
+      'http://schema.org/translator': 'translatorIdentifiers',
+      'http://schema.org/publisher': 'targetPublisherIdentifiers',
+      'http://id.loc.gov/vocabulary/relators/ill': 'illustratorIdentifiers',
+      'http://id.loc.gov/vocabulary/relators/sce': 'scenaristIdentifiers',
+      'http://id.loc.gov/vocabulary/relators/pbd': 'publishingDirectorIdentifiers'
+    }
 
     for (y,p,c) in zip(yearHeadersToRemove, placeHeadersToRemove, countryHeadersToRemove):
       headers.remove(y)
@@ -64,6 +102,7 @@ def main():
       utils_date.selectDate(row, 'targetYearOfPublication', sources, 'targetIdentifier', mismatchLog, 'publicationYear')
       utils.mergeValues(row, 'targetPlaceOfPublication', sources)
       utils.mergeValues(row, 'targetCountryOfPublication', sources)
+      utils.addContributions(row, contributions[row['targetIdentifier']], roleMapping)
 
       outputWriter.writerow(row)
 

@@ -8,6 +8,23 @@ import pandas as pd
 
 
 # -----------------------------------------------------------------------------
+def addContributions(row, contributions, roleMapping):
+  """This function adds the given contributor values based on the given roleMapping.
+
+  >>> row0 = {'targetIdentifier': '1', 'authors': '', 'translators': ''}
+  >>> contributions0 = {'http://schema.org/author': ['John (123)', 'Jane (456)'], 'http://schema.org/translator': ['David (789)']}
+  >>> roleMapping = {'http://schema.org/author': 'authors', 'http://schema.org/translator': 'translators'}
+  >>> addContributions(row0, contributions0, roleMapping)
+  >>> row0['authors']
+  'Jane (456);John (123)'
+  >>> row0['translators']
+  'David (789)'
+  """  
+
+  for contRole, contValues in contributions.items():
+    row[roleMapping[contRole]] = ';'.join(sorted(contValues))
+
+# -----------------------------------------------------------------------------
 def addToMismatchLog(mismatchLog, dateType, roleType, contributorURI, s, value):
   """This function logs mismatching dates in the given data structure.
 

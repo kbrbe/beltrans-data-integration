@@ -1,0 +1,23 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
+
+SELECT ?manifestationID ?contributorRole ?contributorNameID 
+WHERE {
+  graph <http://beltrans-manifestations> { 
+    ?m a schema:CreativeWork ; 
+       dcterms:identifier ?manifestationID ; 
+       schema:isPartOf btid:beltransCorpus ; 
+       ?contributorRole ?contributor. 
+  }
+
+  graph <http://beltrans-contributors> { 
+    ?contributor rdfs:label ?contributorLabel ; 
+    dcterms:identifier ?contributorID . 
+  }
+  BIND(CONCAT( COALESCE(?contributorLabel, "missing name"), " (", ?contributorID, ")") as ?contributorNameID)
+
+  FILTER( ?contributorRole IN (schema:author, schema:translator, schema:publisher, marcrel:ill, marcrel:sce, marcrel:pbd) )
+}
