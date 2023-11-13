@@ -109,6 +109,14 @@ def countRowsWithMultipleValuesForColumn(df, column, delimiter=';'):
 def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
   timestamp = datetime.now()
 
+  # over the time we used different column names for the target publisher
+  targetPublisherColumns = ['publisherIdentifiers', 'targetPublisherIdentifiers']
+  targetPublisherColumnName = 'publisherIdentifiers' # default value
+  for colName in targetPublisherColumns:
+    if colName in corpus:
+      targetPublisherColumnName = colName
+      break
+  
   measurement = {
     'date': corpusDate,
     'measurementTime': timestamp,
@@ -130,6 +138,7 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withKBAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['targetKBIdentifier', 'targetUnescoIdentifier']),
     'withBBThesaurusID': countRowsWithValueForColumn(corpus, 'targetThesaurusBB'),
     'withSourceKBRIdentifier': countRowsWithValueForColumn(corpus, 'sourceKBRIdentifier'),
+    'withSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitle') if 'sourceTitle' in corpus else 0,
     'withKBRSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKBR'),
     'withKBSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKB') if 'sourceTitleKB' in corpus else 0,
     'withBnFSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleBnF') if 'sourceTitleBnF' in corpus else 0,
@@ -145,7 +154,7 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withIntegratedIllustrator': countRowsWithValueForColumn(corpus, 'illustratorIdentifiers'),
     'withIntegratedScenarist': countRowsWithValueForColumn(corpus, 'scenaristIdentifiers'),
     'withIntegratedPublishingDirector': countRowsWithValueForColumn(corpus, 'publishingDirectorIdentifiers'),
-    'withIntegratedPublisher': countRowsWithValueForColumn(corpus, 'publisherIdentifiers'),
+    'withIntegratedPublisher': countRowsWithValueForColumn(corpus, targetPublisherColumnName) if targetPublisherColumnName in corpus else 0,
     'comment': comment
   }
   return measurement
