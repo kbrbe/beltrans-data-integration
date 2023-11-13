@@ -106,9 +106,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
                            rdf:value ?originalKBRID .
       } 
     }
-    FILTER(!STRSTARTS(?originalKBRID, "source"))
+    OPTIONAL { graph <http://beltrans-originals> { ?original schema:name ?originalTitle . } }
     OPTIONAL {
-      graph <http://beltrans-originals> { ?original schema:name ?originalTitle . } 
       graph <http://beltrans-originals> { ?original schema:publisher ?originalPublisher . } 
       graph <http://beltrans-contributors> { ?originalPublisher rdfs:label ?originalPublisherName . } 
       graph <http://beltrans-contributors> { ?originalPublisher dcterms:identifier ?originalPublisherID . } 
@@ -161,7 +160,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     # SOURCE LANGUAGE
     #
     OPTIONAL {
-      graph <http://beltrans-manifestations> { ?manifestation btm:sourceLanguage ?sourceLang . } 
+      graph <http://beltrans-originals> { ?original schema:inLanguage ?sourceLang . }  
       OPTIONAL {
         graph <http://master-data> { ?sourceLang mads:authoritativeLabel ?sourceLangLabel . }
         FILTER (lang(?sourceLangLabel) = 'en')
