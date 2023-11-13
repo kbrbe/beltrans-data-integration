@@ -39,6 +39,7 @@ def main(url, namedGraph):
   else:
     auth=(user,password)
  
+  print(f'deleting named graph "{namedGraph}" ...')
   utils_sparql.deleteNamedGraph(url, namedGraph, auth=auth)
 
 if __name__ == '__main__':

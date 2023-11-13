@@ -36,13 +36,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetCollectionIdentifier)
     #(group_concat(distinct ?translationType;SEPARATOR=';') AS ?translationType)
 
-    (group_concat(distinct ?authorNameID;SEPARATOR=';') AS ?authorIdentifiers)
-    (group_concat(distinct ?translatorNameID;SEPARATOR=';') AS ?translatorIdentifiers)
-    (group_concat(distinct ?illustratorNameID;SEPARATOR=';') AS ?illustratorIdentifiers)
-    (group_concat(distinct ?scenaristNameID;SEPARATOR=';') AS ?scenaristIdentifiers)
-    (group_concat(distinct ?publishingDirectorNameID;SEPARATOR=';') AS ?publishingDirectorIdentifiers)
-    (group_concat(distinct ?publisherNameID;SEPARATOR=';') AS ?targetPublisherIdentifiers)
-
     (group_concat(distinct ?kbrManifestationID;SEPARATOR=';') AS ?targetKBRIdentifier)
     (group_concat(distinct ?bnfManifestationID;SEPARATOR=';') AS ?targetBnFIdentifier)
     (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
@@ -75,12 +68,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     ("" AS ?targetCountryOfPublicationKB)
     (group_concat(distinct ?unescoCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublicationUnesco)
 
-    (group_concat(distinct ?authorNationalityLabel;SEPARATOR=';') AS ?authorNationalities)
-    (group_concat(distinct ?illustratorNationalityLabel;SEPARATOR=';') AS ?illustratorNationalities)
-    (group_concat(distinct ?scenaristNationalityLabel;SEPARATOR=';') AS ?scenaristNationalities)
-    (group_concat(distinct ?publishingDirectorNationalityLabel;SEPARATOR=';') AS ?publishingDirectorNationalities)
-
-
     (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetKBRResponsibilityStatement)
     (group_concat(distinct ?bnfResponsibilityStatement;SEPARATOR=';') AS ?targetBnFResponsibilityStatement)
     (group_concat(distinct ?kbResponsibilityStatement;SEPARATOR=';') AS ?targetKBResponsibilityStatement)
@@ -106,9 +93,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
                            rdf:value ?originalKBRID .
       } 
     }
-    FILTER(!STRSTARTS(?originalKBRID, "source"))
+    OPTIONAL { graph <http://beltrans-originals> { ?original schema:name ?originalTitle . } }
     OPTIONAL {
-      graph <http://beltrans-originals> { ?original schema:name ?originalTitle . } 
       graph <http://beltrans-originals> { ?original schema:publisher ?originalPublisher . } 
       graph <http://beltrans-contributors> { ?originalPublisher rdfs:label ?originalPublisherName . } 
       graph <http://beltrans-contributors> { ?originalPublisher dcterms:identifier ?originalPublisherID . } 
@@ -117,31 +103,25 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
     # CLUSTER INFORMATION
     #
-    OPTIONAL {
-      graph <http://beltrans-works> { 
-        ?cluster fabio:hasManifestation ?manifestation ;
-                 dcterms:identifier ?clusterID .
-      }
+    
+    graph <http://beltrans-works> { 
+      ?cluster fabio:hasManifestation ?manifestation ;
+               dcterms:identifier ?clusterID .
     }
+    
 
     OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation schema:datePublished ?manifestationYearOfPublication . } }
 
-    OPTIONAL {
-      graph <http://beltrans-manifestations> {
-        ?manifestation bf:title ?titleEntity .
+    graph <http://beltrans-manifestations> {
+      ?manifestation bf:title ?titleEntity .
 
-        ?titleEntity a bf:Title ;
-                     bf:mainTitle ?manifestationTitle .
-      }
+      ?titleEntity a bf:Title ;
+                   bf:mainTitle ?manifestationTitle .
     }
-
     OPTIONAL {
-      graph <http://beltrans-manifestations> {
-        ?manifestation bf:title ?titleEntity .
 
-        ?titleEntity a bf:Title ;
-                     bf:subtitle ?manifestationSubtitle .
-      }
+      ?titleEntity a bf:Title ;
+                   bf:subtitle ?manifestationSubtitle .
     }
 
     OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation bibo:isbn10 ?isbn10 . } }
@@ -161,7 +141,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     # SOURCE LANGUAGE
     #
     OPTIONAL {
-      graph <http://beltrans-manifestations> { ?manifestation btm:sourceLanguage ?sourceLang . } 
+      graph <http://beltrans-originals> { ?original schema:inLanguage ?sourceLang . }  
       OPTIONAL {
         graph <http://master-data> { ?sourceLang mads:authoritativeLabel ?sourceLangLabel . }
         FILTER (lang(?sourceLangLabel) = 'en')
@@ -287,115 +267,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
         
-
-    # #########################################################################
-    #
-    # AUTHOR
-    #
-    OPTIONAL {
-      graph <http://beltrans-manifestations> { ?manifestation schema:author ?author . }
-      graph <http://beltrans-contributors> { ?author dcterms:identifier ?authorIdentifier . }
-
-      OPTIONAL { graph <http://beltrans-contributors> { ?author rdfs:label ?authorLabel . } }
-      OPTIONAL {
-        graph <http://beltrans-contributors> { ?author schema:nationality|schema:location/schema:addressCountry ?authorNationality . } 
-        graph <http://master-data> { ?authorNationality mads:authoritativeLabel ?authorNationalityLabel . }
-        FILTER (lang(?authorNationalityLabel) = 'en')
-      }
-
-      BIND(CONCAT( COALESCE(?authorLabel, "missing name"), " (", ?authorIdentifier, ")") as ?authorNameID)
-    }
-
-    # #########################################################################
-    #
-    # TRANSLATOR
-    #
-    OPTIONAL {
-      graph <http://beltrans-manifestations> { ?manifestation schema:translator ?translator . }
-      graph <http://beltrans-contributors> { ?translator dcterms:identifier ?translatorIdentifier . }
-
-      OPTIONAL { graph <http://beltrans-contributors> { ?translator rdfs:label ?translatorLabel . } }
-      OPTIONAL {
-        graph <http://beltrans-contributors> { ?translator schema:nationality|schema:location/schema:addressCountry ?translatorNationality . } 
-        graph <http://master-data> { ?translatorNationality mads:translatoritativeLabel ?translatorNationalityLabel . }
-        FILTER (lang(?translatorNationalityLabel) = 'en')
-      }
-
-      BIND(CONCAT( COALESCE(?translatorLabel, "missing name"), " (", ?translatorIdentifier, ")") as ?translatorNameID)
-    }
-
-        # #########################################################################
-    #
-    # ILLUSTRATOR
-    #
-    OPTIONAL {
-      graph <http://beltrans-manifestations> { ?manifestation marcrel:ill ?illustrator . }
-      graph <http://beltrans-contributors> { ?illustrator dcterms:identifier ?illustratorIdentifier . }
-
-      OPTIONAL {
-        graph <http://beltrans-contributors> { ?illustrator schema:nationality|schema:location/schema:addressCountry ?illustratorNationality . } 
-        graph <http://master-data> { ?illustratorNationality mads:authoritativeLabel ?illustratorNationalityLabel . }
-        FILTER (lang(?illustratorNationalityLabel) = 'en')
-      }
-      OPTIONAL { graph <http://beltrans-contributors> { ?illustrator rdfs:label ?illustratorLabel . } }
-
-      BIND(CONCAT( COALESCE(?illustratorLabel, "missing name"), " (", ?illustratorIdentifier, ")") as ?illustratorNameID)
-    }
-
-    # #########################################################################
-    #
-    # SCENARIST
-    #
-    OPTIONAL {
-      graph <http://beltrans-manifestations> { ?manifestation marcrel:sce ?scenarist . }
-      graph <http://beltrans-contributors> { ?scenarist dcterms:identifier ?scenaristIdentifier . }
-
-      OPTIONAL {
-        graph <http://beltrans-contributors> { ?scenarist schema:nationality|schema:location/schema:addressCountry ?scenaristNationality . } 
-        graph <http://master-data> { ?scenaristNationality mads:authoritativeLabel ?scenaristNationalityLabel . }
-        FILTER (lang(?scenaristNationalityLabel) = 'en')
-      }
-      OPTIONAL { graph <http://beltrans-contributors> { ?scenarist rdfs:label ?scenaristLabel . } }
-
-      BIND(CONCAT( COALESCE(?scenaristLabel, "missing name"), " (", ?scenaristIdentifier, ")") as ?scenaristNameID)
-    }
-
-    # #########################################################################
-    #
-    # PUBLISHING DIRECTOR
-    #
-    OPTIONAL {
-      graph <http://beltrans-manifestations> { ?manifestation marcrel:pbd ?publishingDirector . }
-      graph <http://beltrans-contributors> { ?publishingDirector dcterms:identifier ?publishingDirectorIdentifier . }
-
-      OPTIONAL {
-        graph <http://beltrans-contributors> { ?publishingDirector schema:nationality|schema:location/schema:addressCountry ?publishingDirectorNationality . } 
-        graph <http://master-data> { ?publishingDirectorNationality mads:authoritativeLabel ?publishingDirectorNationalityLabel . }
-        FILTER (lang(?publishingDirectorNationalityLabel) = 'en')
-      }
-      OPTIONAL { graph <http://beltrans-contributors> { ?publishingDirector rdfs:label ?publishingDirectorLabel . } }
-
-      BIND(CONCAT( COALESCE(?publishingDirectorLabel, "missing name"), " (", ?publishingDirectorIdentifier, ")") as ?publishingDirectorNameID)
-    }
-
-    # #########################################################################
-    #
-    # PUBLISHER
-    #
-    OPTIONAL {
-      graph <http://beltrans-manifestations> { ?manifestation schema:publisher ?publisher . }
-      graph <http://beltrans-contributors> { ?publisher dcterms:identifier ?publisherIdentifier . }
-
-      OPTIONAL {
-        graph <http://beltrans-contributors> { ?publisher schema:nationality|schema:location/schema:addressCountry ?publisherNationality . } 
-        graph <http://master-data> { ?publisherNationality mads:authoritativeLabel ?publisherNationalityLabel . }
-        FILTER (lang(?publisherNationalityLabel) = 'en')
-      }
-      OPTIONAL { graph <http://beltrans-contributors> { ?publisher rdfs:label ?publisherLabel . } }
-
-      BIND(CONCAT( COALESCE(?publisherLabel, "missing name"), " (", ?publisherIdentifier, ")") as ?publisherNameID)
-    }
-
 
     # If there is a manually curated date of publication (schema:datePublished on the integrated record)
     # then use that date for all the local dates. Like this, the postprocessing script will not find contradicting dates

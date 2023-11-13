@@ -1,0 +1,22 @@
+prefix schema: <http://schema.org/>
+prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+
+DELETE {
+  graph <http://beltrans-manifestations> { ?manifestation ?p ?o . }
+}
+WHERE {
+  
+  graph <http://beltrans-manifestations> { 
+    ?manifestation a schema:CreativeWork ;
+                   ?p ?o ;
+                   bf:identifiedBy/rdf:value ?identifier .
+  }
+
+  # check if there is an overlap
+  # attention: this does not properly check semantics as the type of identifier is not considered
+  # If there is an identifier collision between two types there will be a wrong match found
+  # However, so far we deal with distinct patterns:
+  #   p123 for KB, 12345 for KBR, cb123 for BnF 123-456 for Unesco and ISBN-10 + ISBN-13
+  graph <http://beltrans-removal> { ?subjectToRemove bf:identifiedBy/rdf:value ?identifier . }
+ 
+}
