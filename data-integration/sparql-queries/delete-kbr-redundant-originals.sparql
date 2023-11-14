@@ -1,0 +1,22 @@
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+DELETE {
+  graph <http://kbr-originals> { ?limitedOriginal ?p ?o . }
+  graph <http://kbr-syracuse> { ?m schema:translationOfWork ?limitedOriginal . }
+}
+WHERE {
+  graph <http://kbr-syracuse> { 
+    ?m a schema:CreativeWork ;
+       schema:translationOfWork ?limitedOriginal ;
+       schema:translationOfWork ?original . 
+  }
+        
+  graph <http://kbr-originals> { ?original a schema:CreativeWork ; dcterms:identifier ?originalIdentifier. }
+  graph <http://kbr-originals> { 
+    ?limitedOriginal a schema:CreativeWork ; 
+                     dcterms:identifier ?limitedOriginalIdentifier ; 
+                     ?p ?o . 
+  }
+  FILTER(STRSTARTS(?limitedOriginalIdentifier, "source"))
+  FILTER(!STRSTARTS(?originalIdentifier, "source"))
+}

@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 # Make the locally developed python package accessible via python -m 
 export PYTHONPATH=/home/slieber/repos/kbr/beltrans-data
@@ -223,6 +223,8 @@ GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE="sparql-queries/get-bnf-isbn13-without-
 GET_KBCODE_HIERARCHY_INFO_QUERY_FILE="sparql-queries/get-kbcode-hierarchy.sparql"
 
 GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE="sparql-queries/get-missing-nationality-isni.sparql"
+
+DELETE_QUERY_KBR_REDUNDANT_ORIGINALS="sparql-queries/delete-kbr-redundant-originals.sparql"
 
 DELETE_QUERY_BNF_ISBN="sparql-queries/delete-bnf-isbn.sparql"
 DELETE_QUERY_BNF_ISBN10_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn10-without-hyphen.sparql"
@@ -3083,6 +3085,10 @@ function loadOriginalLinksKBR {
   echo "Load fetched authorities linked to KBR originals from identified links ..."
   loadKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
+
+  echo ""
+  echo "Delete redundant limited originals (after identifying and adding link to a real original) ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_REDUNDANT_ORIGINALS"
 }
 
 # -----------------------------------------------------------------------------
