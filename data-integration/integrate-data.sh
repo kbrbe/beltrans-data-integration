@@ -1757,16 +1757,16 @@ function transformKBR {
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked person authorities data to RDF"
-  mapKBRLinkedPersonAuthorities $integrationName "fr-nl"
-  mapKBRLinkedPersonAuthorities $integrationName "nl-fr"
-  mapKBRLinkedPersonAuthorities $integrationName "belgians"
-  mapKBRLinkedPersonAuthorities $integrationName "linked-originals"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked org authorities data to RDF"
-  mapKBRLinkedOrgAuthorities $integrationName "fr-nl"
-  mapKBRLinkedOrgAuthorities $integrationName "nl-fr"
-  mapKBRLinkedOrgAuthorities $integrationName "linked-originals"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR places"
@@ -1800,6 +1800,7 @@ function transformOriginalLinksKBR {
   # create the folder to place the transformed data
   mkdir -p "$integrationName/$dataSourceName/rdf/fr-nl"
   mkdir -p "$integrationName/$dataSourceName/rdf/nl-fr"
+  mkdir -p "$integrationName/$dataSourceName/rdf/mixed-lang"
 
   originalLinksTurtleFRNL="$integrationName/$dataSourceName/rdf/fr-nl/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
   originalLinksTurtleNLFR="$integrationName/$dataSourceName/rdf/nl-fr/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
@@ -1813,6 +1814,7 @@ function transformOriginalLinksKBR {
   export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
 
   # 2) execute the mapping
+  echo ""
   echo "Map KBR original linking NL-FR ..."
   . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleFRNL
 
@@ -1822,9 +1824,19 @@ function transformOriginalLinksKBR {
   export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
 
   # 2) execute the mapping
+  echo ""
   echo "Map KBR original linking FR-NL ..."
   . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleNLFR
 
+  echo ""
+  echo "Map extracted data about fetched KBR originals"
+  mapKBRBookInformationAndContributions "$integrationName/" "$dataSourceName" "mixed-lang"
+
+  echo ""
+  echo "Map extracted data about linked authorities from fetched KBR originals"
+  # those two functions already append the subfolder "kbr"
+  mapKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "mixed-lang"
 
 }
 
@@ -2282,18 +2294,19 @@ function mapKBRTranslationLimitedOriginals {
 function mapKBRLinkedPersonAuthorities {
 
   local integrationName=$1
-  local language=$2
+  local dataSourceName=$2
+  local language=$3
 
   # input
-  local kbrPersons="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
-  local kbrPersonsNat="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
-  local kbrPersonsISNI="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
-  local kbrPersonsNames="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
+  local kbrPersons="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
+  local kbrPersonsNat="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
+  local kbrPersonsISNI="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
+  local kbrPersonsNames="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
  
   # output
-  local kbrPersonsTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_PERSONS_LD"
-  local kbrPersonsIdentifiersTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_PERSONS_IDENTIFIERS_LD"
-  local kbrPersonsNamesTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_PERSONS_NAMES_LD"
+  local kbrPersonsTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_LD"
+  local kbrPersonsIdentifiersTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_IDENTIFIERS_LD"
+  local kbrPersonsNamesTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_NAMES_LD"
 
   # 2) execute the mapping
   mapKBRPersons "$kbrPersons" "$kbrPersonsNat" "$kbrPersonsTurtle"
@@ -2306,17 +2319,18 @@ function mapKBRLinkedPersonAuthorities {
 function mapKBRLinkedOrgAuthorities {
 
   local integrationName=$1
-  local language=$2
+  local dataSourceName=$2
+  local language=$3
 
   # input
-  local kbrOrgsISNI="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
-  local kbrOrgs="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
-  local kbrOrgMatches="$integrationName/kbr/agents/$language/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES"
+  local kbrOrgsISNI="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  local kbrOrgs="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
+  local kbrOrgMatches="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES"
 
   # output
-  local kbrOrgsTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_ORGS_LD"
-  local kbrOrgMatchesTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_LD"
-  local kbrOrgsIdentifiersTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_ORGS_IDENTIFIERS_LD"
+  local kbrOrgsTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_ORGS_LD"
+  local kbrOrgMatchesTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_LD"
+  local kbrOrgsIdentifiersTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_ORGS_IDENTIFIERS_LD"
 
   # 2) execute the mapping
   mapKBROrgs "$kbrOrgs" "$kbrOrgsTurtle"
@@ -2740,7 +2754,7 @@ function transformContributorPersonCorrelationList {
   echo ""
   echo "Map fetched KBR contributor data - persons"
   mkdir -p "$folderName/kbr/rdf/mixed-lang"
-  mapKBRLinkedPersonAuthorities "$folderName" "mixed-lang"
+  mapKBRLinkedPersonAuthorities "$folderName" "kbr" "mixed-lang"
 
 }
 
@@ -2782,7 +2796,7 @@ function transformContributorOrgCorrelationList {
   echo ""
   echo "Map fetched KBR contributor data - orgs"
   mkdir -p "$folderName/kbr/rdf/mixed-lang"
-  mapKBRLinkedOrgAuthorities "$folderName" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$folderName" "kbr" "mixed-lang"
 
 }
 
@@ -2831,8 +2845,8 @@ function transformTranslationCorrelationList {
   mapKBRBookInformationAndContributions "$integrationName/correlation" "translations/kbr" "mixed-lang"
 
   # those two functions already append the subfolder "kbr"
-  mapKBRLinkedPersonAuthorities "$integrationName/correlation/translations" "mixed-lang"
-  mapKBRLinkedOrgAuthorities "$integrationName/correlation/translations" "mixed-lang"
+  mapKBRLinkedPersonAuthorities "$integrationName/correlation/translations" "kbr" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$integrationName/correlation/translations" "kbr" "mixed-lang"
 
   echo ""
   echo "Map extracted data about originals"
@@ -2840,8 +2854,8 @@ function transformTranslationCorrelationList {
   mapKBRBookInformationAndContributions "$integrationName/correlation" "originals/kbr" "mixed-lang"
 
   # those two functions already append the subfolder "kbr"
-  mapKBRLinkedPersonAuthorities "$integrationName/correlation/originals" "mixed-lang"
-  mapKBRLinkedOrgAuthorities "$integrationName/correlation/originals" "mixed-lang"
+  mapKBRLinkedPersonAuthorities "$integrationName/correlation/originals" "kbr" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$integrationName/correlation/originals" "kbr" "mixed-lang"
 
 }
 
