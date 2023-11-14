@@ -42,6 +42,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
+    (group_concat(distinct ?kbrOriginalBBLabel;SEPARATOR=';') AS ?sourceThesaurusBB)
     (group_concat(distinct ?kbTargetManifestationKBCodeLabel;SEPARATOR=';') AS ?targetThesaurusKBCode)
     (group_concat(distinct ?bnfTargetManifestationRameauLabel;SEPARATOR=';') AS ?targetThesaurusRameau)
     (group_concat(distinct ?kbrTargetManifestationCollectionNameID;SEPARATOR=';') AS ?targetCollectionIdentifier)
@@ -95,6 +96,12 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         ?kbrOriginal a schema:CreativeWork ;
                      schema:datePublished ?originalYearOfPublicationKBR .
       }
+      OPTIONAL { 
+        graph <http://kbr-originals> { ?kbrOriginal schema:about ?kbrOriginalBB . }
+
+        graph <http://master-data> { ?kbrOriginalBB skos:prefLabel ?kbrOriginalBBLabel . }
+        FILTER(lang(?kbrOriginalBBLabel) = 'en')
+      }
     }
     OPTIONAL { graph <http://beltrans-originals> { ?original schema:name ?originalTitle . } }
     OPTIONAL {
@@ -103,6 +110,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       graph <http://beltrans-contributors> { ?originalPublisher dcterms:identifier ?originalPublisherID . } 
     }
     BIND(CONCAT(?originalPublisherName, ' (', ?originalPublisherID, ')') AS ?originalPublisherNameID)
+
 
     # CLUSTER INFORMATION
     #
