@@ -61,6 +61,7 @@ SCRIPT_POSTPROCESS_QUERY_CONT_RESULT="post-process-contributors.py"
 SCRIPT_POSTPROCESS_DERIVE_COUNTRIES="add_country.py"
 SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION="add_coordinates.py"
 MODULE_POSTPROCESS_SORT_COLUMN_VALUES="tools.csv.sort_values_in_columns"
+SCRIPT_POSTPROCESS_LOCATIONS="post-process-locations.py"
 
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
@@ -167,6 +168,7 @@ TRIPLE_STORE_GRAPH_INT_CONT="http://beltrans-contributors"
 TRIPLE_STORE_GRAPH_WORKS="http://beltrans-works"
 TRIPLE_STORE_GRAPH_INT_ORIG="http://beltrans-originals"
 TRIPLE_STORE_GRAPH_INT_REMOVAL="http://beltrans-removal"
+TRIPLE_STORE_GRAPH_INT_GEO="http://beltrans-geo"
 
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
@@ -276,6 +278,10 @@ DATA_PROFILE_PUBS_PER_PBL_QUERY_FILE="translations-per-publisher.sparql"
 DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE="sparql-queries/get-contributions.sparql"
 
+GET_GEO_TEXT_INFO_QUERY_FILE="sparql-queries/get-text-location-info-per-data-source.sparql"
+GET_GEO_DATA_QUERY_FILE="sparql-queries/get-manifestations-geo-data.sparql"
+
+
 POSTPROCESS_SPARQL_QUERY_TRL="sparql-queries/integrated-data-postprocessing.sparql"
 
 SUFFIX_DATA_PROFILE_POSTPROCESS_TRL="postprocessing-input.csv"
@@ -312,8 +318,16 @@ SUFFIX_DATA_PROFILE_EXCEL_STATS="corpus-stats.xlsx"
 SUFFIX_DATA_PROFILE_KBCODE="kbcode-hierarchy"
 SUFFIX_DATA_PROFILE_CONTRIBUTIONS="manifestation-contributions.csv"
 
-SUFFIX_PLACE_OF_PUBLICATION_GEONAMES="place-of-publications-geonames.csv"
+SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_TARGET="place-of-publications-geonames-target.csv"
+SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_SOURCE="place-of-publications-geonames-source.csv"
 SUFFIX_UNKNOWN_GEONAMES_MAPPING="missing-geonames-mapping.csv"
+
+SUFFIX_GEO_TEXT="geo-text-information.csv"
+SUFFIX_GEO_TEXT_COMBINED="geo-text-information-combined.csv"
+SUFFIX_GEO_TEXT_COMBINED_ENRICHED="geo-text-information-combined-enriched.csv"
+SUFFIX_GEO_DATA="geo-data.csv"
+SUFFIX_GEO_BELTRANS_MANIFESTATIONS="manifestations-geo.csv"
+SUFFIX_GEO_DATA_LD="geo-data.ttl"
 
 #
 # Filenames used within an integration directory 
@@ -670,6 +684,9 @@ function extract {
   elif [ "$dataSource" = "translation-removal" ];
   then
     extractTranslationRemovalList "$integrationFolderName"
+  elif [ "$dataSource" = "geo" ];
+  then
+    extractGeoInformation "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
@@ -737,6 +754,9 @@ function transform {
   elif [ "$dataSource" = "translation-removal" ];
   then
     transformTranslationRemovalList "$integrationFolderName"
+  elif [ "$dataSource" = "geo" ];
+  then
+    transformGeoInformation "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
@@ -796,6 +816,9 @@ function load {
   elif [ "$dataSource" = "translation-removal" ];
   then
     loadTranslationRemovalList "$integrationFolderName"
+  elif [ "$dataSource" = "geo" ];
+  then
+    loadGeoInformation "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
@@ -822,6 +845,7 @@ function integrate {
   createContributorsQueries="config-integration-contributors-create.csv"
   updateManifestationsQueries="config-integration-manifestations-single-update.csv"
   updateContributorsQueries="config-integration-contributors-single-update.csv"
+
 
   queryLogDir="$integrationName/integration"
 
@@ -933,6 +957,13 @@ function integrate {
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
+  echo ""
+  echo "Create integrated geo information"
+  extractGeoInformation "$integrationName"
+  transformGeoInformation "$integrationName"
+  loadGeoInformation "$integrationName"
+
+
   # Disabled on 2023-06-06
   # Otherwise the clean correlation list input gets enriched with non-curated data
   #
@@ -946,7 +977,78 @@ function integrate {
   #  -q $POSTPROCESS_SPARQL_QUERY_TRL \
   #  -o $postprocessInputFileTranslations
 
+}
 
+# -----------------------------------------------------------------------------
+function extractGeoInformation {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  mkdir -p "$integrationName/geo"
+  local unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
+  local outputFileGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT"
+  local combinedGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED"
+  local combinedGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED_ENRICHED"
+  local geoData="$integrationName/geo/$SUFFIX_GEO_DATA"
+
+  echo ""
+  echo "Enrich geo information and create RDF descriptions of it"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeoText"
+
+  echo ""
+  echo "Combine location information from different data sources"
+  python $SCRIPT_POSTPROCESS_LOCATIONS -i "$outputFileGeoText" -o "$combinedGeoText"
+
+  echo "Derive missing country names from place names - KBR targetPlace ..."
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $combinedGeoText -o $combinedGeoTextEnriched \
+    -g geonames/ -c "countryOfPublication" -p "placeOfPublication"
+
+  echo "Create geonames relationships for place of publications ..."
+  time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
+    -i $combinedGeoTextEnriched -m $unknownGeonamesMapping -g geonames/ -p placeOfPublication \
+    --input-id-column "manifestationID" \
+    --column-place "placeOfPublication" \
+    --column-country "countryOfPublication" \
+    --column-identifier "placeGeonamesIdentifier" \
+    --column-longitude "longitude" \
+    --column-latitude "latitude" \
+    -o $geoData
+
+}
+
+# -----------------------------------------------------------------------------
+function transformGeoInformation {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local geoDataTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_LD"
+  mkdir -p "$integrationName/geo/rdf"
+
+  export RML_SOURCE_GEO="$integrationName/geo/$SUFFIX_GEO_DATA"
+
+  echo ""
+  echo "TRANSFORM geo data"
+  . map.sh geo-data.yml $geoDataTurtle
+}
+
+# -----------------------------------------------------------------------------
+function loadGeoInformation {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+  local geoDataTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_LD"
+
+  echo ""
+  echo "LOAD geo data"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_GEO" \
+    "$geoDataTurtle"
 
 }
 
@@ -970,6 +1072,7 @@ function query {
   outputFileContOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ORGS_FILE"
   outputFileContributions="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONTRIBUTIONS"
   outputFileKBCode="$integrationName/csv/$SUFFIX_DATA_PROFILE_KBCODE"
+  outputFileGeo="$integrationName/csv/$SUFFIX_GEO_BELTRANS_MANIFESTATIONS"
 
   echo ""
   echo "Creating the dataprofile CSV file ..."
@@ -988,6 +1091,10 @@ function query {
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileContributions"
 
   echo ""
+  echo "Creating the geo information CSV"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_DATA_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeo"
+
+  echo ""
   echo "Creating KBCode list"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileKBCode" "$ENV_SPARQL_ENDPOINT" "$outputFileKBCode"
 
@@ -1002,7 +1109,8 @@ function postprocess {
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
   integratedDataEnrichedSorted="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED_SORTED"
 
-  placeOfPublicationsGeonames="$integrationName/csv/$SUFFIX_PLACE_OF_PUBLICATION_GEONAMES"
+  placeOfPublicationsGeonamesTarget="$integrationName/csv/$SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_TARGET"
+  placeOfPublicationsGeonamesSource="$integrationName/csv/$SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_SOURCE"
   unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
 
   contributorsPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
@@ -1017,6 +1125,7 @@ function postprocess {
   manifestationContributions="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONTRIBUTIONS"
   allOrgs="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_ALL_ORGS"
 
+  outputFileGeo="$integrationName/csv/$SUFFIX_GEO_BELTRANS_MANIFESTATIONS"
   kbCodeHierarchy="$integrationName/csv/$SUFFIX_DATA_PROFILE_KBCODE"
 
   excelData="$integrationName/$SUFFIX_DATA_PROFILE_EXCEL_DATA"
@@ -1024,20 +1133,22 @@ function postprocess {
   source ./py-integration-env/bin/activate
 
 
-  echo "Derive missing country names from place names - KBR ..."
-  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedAllData -o $tmp1 -g geonames/ -c targetCountryOfPublicationKBR -p targetPlaceOfPublicationKBR
+  # 2023-11-14: these steps are executed combined in the extractGeoInformation function executed at the end of the integration
+  #echo "Derive missing country names from place names - KBR targetPlace ..."
+  #time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $integratedAllData -o $tmp1 -g geonames/ -c targetCountryOfPublicationKBR -p targetPlaceOfPublicationKBR
 
-  echo "Derive missing country names from place names - BnF ..."
-  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp1 -o $tmp2 -g geonames/ -c targetCountryOfPublicationBnF -p targetPlaceOfPublicationBnF
+  #echo "Derive missing country names from place names - BnF ..."
+  #time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp1 -o $tmp2 -g geonames/ -c targetCountryOfPublicationBnF -p targetPlaceOfPublicationBnF
 
-  echo "Derive missing country names from place names - KB ..."
-  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp2 -o $integratedData -g geonames/ -c targetCountryOfPublicationKB -p targetPlaceOfPublicationKB
+  #echo "Derive missing country names from place names - KB ..."
+  #time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp2 -o $integratedData -g geonames/ -c targetCountryOfPublicationKB -p targetPlaceOfPublicationKB
 
   echo "Postprocess manifestation data ..."
-  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedData -o $integratedDataEnriched -c $manifestationContributions
+  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedDataEnriched -c $manifestationContributions
 
-  echo "Create geonames relationships for place of publications ..."
-  time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonames
+  #echo "Create geonames relationships for place of publications (targetPlace)..."
+  #time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
+  #  -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonamesTarget
 
   
   echo "Sort certain columns in the contributors CSV"
@@ -1062,7 +1173,7 @@ function postprocess {
 
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $contributorsPersons $contributorsOrgs $placeOfPublicationsGeonames $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $contributorsPersons $contributorsOrgs $outputFileGeo $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
 
 }
 

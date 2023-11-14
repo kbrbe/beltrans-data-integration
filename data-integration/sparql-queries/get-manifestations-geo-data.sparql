@@ -1,0 +1,56 @@
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix btid: <http://kbr.be/id/data/>
+
+SELECT 
+  ?targetIdentifier 
+  ?sourceIdentifier 
+  ?targetPlaceOfPublication 
+  ?targetCountryOfPublication 
+  ?sourcePlaceOfPublication 
+  ?sourceCountryOfPublication 
+  ?targetPlaceOfPublicationLongitude 
+  ?targetPlaceOfPublicationLatitude
+  ?sourcePlaceOfPublicationLongitude
+  ?sourcePlaceOfPublicationLatitude
+WHERE {
+  
+ graph <http://beltrans-manifestations> { 
+   ?manifestation a schema:CreativeWork ;
+                  schema:isPartOf btid:beltransCorpus ;
+                  schema:translationOfWork ?original ;
+                  dcterms:identifier ?targetIdentifier .
+ }
+
+ # TARGET GEO DATA
+ #
+ graph <http://beltrans-geo> { ?manifestation schema:locationCreated ?targetLocation . }
+ graph <http://beltrans-geo> { 
+   ?targetLocation a schema:Place ; 
+                   dcterms:identifier ?targetPlaceOfPublicationIdentifier . 
+ }
+       
+ OPTIONAL { graph <http://beltrans-geo> { ?targetLocation rdfs:label ?targetPlaceOfPublication . } }
+ OPTIONAL { graph <http://beltrans-geo> { ?targetLocation rdfs:comment ?targetCountryOfPublication . } }
+ OPTIONAL { graph <http://beltrans-geo> { ?targetLocation schema:longitude ?targetPlaceOfPublicationLongitude . } }
+ OPTIONAL { graph <http://beltrans-geo> { ?targetLocation schema:latitude ?targetPlaceOfPublicationLatitude . } }
+
+ # SOURCE GEO DATA
+ #
+ graph <http://beltrans-originals> { 
+   ?original a schema:CreativeWork ;
+             dcterms:identifier ?sourceIdentifier .
+ }
+
+ graph <http://beltrans-geo> { ?original schema:locationCreated ?sourceLocation . }
+ graph <http://beltrans-geo> { 
+   ?sourceLocation a schema:Place ; 
+                   dcterms:identifier ?sourcePlaceOfPublicationIdentifier . 
+ }
+       
+ OPTIONAL { graph <http://beltrans-geo> { ?sourceLocation rdfs:label ?sourcePlaceOfPublication . } }
+ OPTIONAL { graph <http://beltrans-geo> { ?sourceLocation rdfs:comment ?sourceCountryOfPublication . } }
+ OPTIONAL { graph <http://beltrans-geo> { ?sourceLocation schema:longitude ?sourcePlaceOfPublicationLongitude . } }
+ OPTIONAL { graph <http://beltrans-geo> { ?sourceLocation schema:latitude ?sourcePlaceOfPublicationLatitude . } }
+  
+}

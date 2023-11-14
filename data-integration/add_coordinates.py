@@ -30,14 +30,20 @@ def main():
     """This script selects geoname identifeirs and longitude/latidude coordindates
     based on the place name (for Belgium, France & The Netherlands)"""
     parser = OptionParser(usage="usage: %prog [options]")
-    parser.add_option('-i', '--input-file', action='store', help='The input file as TSV')
+    parser.add_option('-i', '--input-file', action='store', help='The input file as CSV')
+    parser.add_option('--input-id-column', action='store', help='The name of the column with the row identifier')
     parser.add_option('-p', '--column-with-places', action='store', help='The name of the column that contains the place names')
     parser.add_option('-m', '--mapping_file', action='store', help='An optional CSV file with a mapping between place names and correct identifier/longitude/latitude combination')
     parser.add_option('-g', '--geonames-folder', action='store', help='The filepath to the the geonames (insert the "/" at the end) folder. In this folder the geonames files for the three countries must be named "BE.txt", "FR.txt" and "NL.txt"')
     parser.add_option('-o', '--output-file', action='store', help='The output as TSV')
+    parser.add_option('--column-place', action='store', help='The name of the output column for the place name')
+    parser.add_option('--column-country', action='store', help='The name of the output column for the country name')
+    parser.add_option('--column-identifier', action='store', help='The name of the output column for the geonames identifier')
+    parser.add_option('--column-longitude', action='store', help='The name of the output column for the longitude coordinate')
+    parser.add_option('--column-latitude', action='store', help='The name of the output column for the latitude coordinate')
     (options, args) = parser.parse_args()
 
-    if( ( not options.geonames_folder) or (not options.input_file) or (not options.column_with_places) or (not options.geonames_folder) or (not options.output_file) ):
+    if( ( not options.geonames_folder) or (not options.input_file) or (not options.column_with_places) or (not options.geonames_folder) or (not options.output_file) or (not options.column_place) or (not options.column_country) or (not options.column_identifier) or (not options.column_longitude) or (not options.column_latitude) or (not options.input_id_column) ):
       parser.print_help()
       exit(1) 
 
@@ -58,9 +64,8 @@ def main():
         inputReader = csv.DictReader(inFile, delimiter=',')
 
         # prepare slightly different output headers to include derived data
-        outputHeaders = ['targetIdentifier', 'targetPlaceOfPublication',
-                         'targetCountryOfPublication', 'targetPlaceOfPublicationIdentifier',
-                         'targetPlaceOfPublicationLongitude', 'targetPlaceOfPublicationLatitude']
+        outputHeaders = [options.input_id_column, options.column_place, options.column_country,
+                         options.column_identifier, options.column_longitude, options.column_latitude]
         outputWriter = csv.DictWriter(outFile, fieldnames=outputHeaders, delimiter=',')
         outputWriter.writeheader()
 
@@ -140,12 +145,12 @@ def main():
 
                 #outputRow = row.copy()
                 outputRow = {}
-                outputRow['targetIdentifier'] = row['targetIdentifier']
-                outputRow['targetPlaceOfPublication'] = locationMainSpelling
-                outputRow['targetCountryOfPublication'] = locationCountry
-                outputRow['targetPlaceOfPublicationIdentifier'] = locationIdentifier
-                outputRow['targetPlaceOfPublicationLongitude'] = locationLongitude
-                outputRow['targetPlaceOfPublicationLatitude'] = locationLatitude
+                outputRow[options.input_id_column] = row[options.input_id_column]
+                outputRow[options.column_place] = locationMainSpelling
+                outputRow[options.column_country] = locationCountry
+                outputRow[options.column_identifier] = locationIdentifier
+                outputRow[options.column_longitude] = locationLongitude
+                outputRow[options.column_latitude] = locationLatitude
 
                 outputWriter.writerow(outputRow)
         print(f'processed {numRows} rows and {numLocations} locations')
