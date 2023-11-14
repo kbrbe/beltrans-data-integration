@@ -53,17 +53,10 @@ def main():
     # In the output we only want a single publication year column
     # thus first remove the respective columns from different data sources
     yearHeadersToRemove = ['targetYearOfPublicationKBR', 'targetYearOfPublicationBnF', 'targetYearOfPublicationKB', 'targetYearOfPublicationUnesco']
-    placeHeadersToRemove = ['targetPlaceOfPublicationKBR', 'targetPlaceOfPublicationBnF', 'targetPlaceOfPublicationKB', 'targetPlaceOfPublicationUnesco']
-    countryHeadersToRemove = ['targetCountryOfPublicationKBR', 'targetCountryOfPublicationBnF', 'targetCountryOfPublicationKB', 'targetCountryOfPublicationUnesco']
-
 
     # and then add the single output columns we want per type
     yearHeaderIndex = headers.index(yearHeadersToRemove[0])
-    placeHeaderIndex = headers.index(placeHeadersToRemove[0])
-    countryHeaderIndex = headers.index(countryHeadersToRemove[0])
     headers.insert(yearHeaderIndex, 'targetYearOfPublication')
-    headers.insert(placeHeaderIndex, 'targetPlaceOfPublication')
-    headers.insert(countryHeaderIndex, 'targetCountryOfPublication')
 
     # add new columns for contributors after the targetCollectionIdentifier column
     contributionsIndex = headers.index('targetCollectionIdentifier') + 1
@@ -83,10 +76,8 @@ def main():
       'http://id.loc.gov/vocabulary/relators/pbd': 'publishingDirectorIdentifiers'
     }
 
-    for (y,p,c) in zip(yearHeadersToRemove, placeHeadersToRemove, countryHeadersToRemove):
-      headers.remove(y)
-      headers.remove(p)
-      headers.remove(c)
+    for h in yearHeadersToRemove:
+      headers.remove(h)
 
 
     outputWriter = csv.DictWriter(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, fieldnames=headers)
@@ -100,8 +91,6 @@ def main():
     for row in inputReader:
 
       utils_date.selectDate(row, 'targetYearOfPublication', sources, 'targetIdentifier', mismatchLog, 'publicationYear')
-      utils.mergeValues(row, 'targetPlaceOfPublication', sources)
-      utils.mergeValues(row, 'targetCountryOfPublication', sources)
       utils.addContributions(row, contributions[row['targetIdentifier']], roleMapping)
 
       outputWriter.writerow(row)

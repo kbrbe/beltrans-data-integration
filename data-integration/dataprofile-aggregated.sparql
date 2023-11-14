@@ -26,8 +26,19 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?isbn10;SEPARATOR=';') AS ?targetISBN10) 
     (group_concat(distinct ?isbn13;SEPARATOR=';') AS ?targetISBN13) 
 
+    (group_concat(distinct ?kbrDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
+    (group_concat(distinct ?bnfDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
+    (group_concat(distinct ?kbDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationKB)
+    (group_concat(distinct ?unescoDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationUnesco)
+
     (group_concat(distinct ?manifestationTitle;SEPARATOR=';') AS ?targetTitle)
     (group_concat(distinct ?manifestationSubtitle;SEPARATOR=';') AS ?targetSubtitle)
+
+    (group_concat(distinct ?originalTitle;SEPARATOR=';') AS ?sourceTitle)
+    (group_concat(distinct ?originalYearOfPublicationKBR;SEPARATOR=';') AS ?sourceYearOfPublication)
+    (group_concat(distinct ?originalKBRID;SEPARATOR=';') AS ?sourceKBRIdentifier)
+    (group_concat(distinct ?originalISBN10;SEPARATOR=';') AS ?sourceISBN10)
+    (group_concat(distinct ?originalISBN13;SEPARATOR=';') AS ?sourceISBN13)
 
 
     (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
@@ -41,10 +52,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?kbManifestationID;SEPARATOR=';') AS ?targetKBIdentifier)
     (group_concat(distinct ?unescoManifestationID;SEPARATOR=';') AS ?targetUnescoIdentifier)
 
-    (group_concat(distinct ?originalTitle;SEPARATOR=';') AS ?sourceTitle)
-    (group_concat(distinct ?originalKBRID;SEPARATOR=';') AS ?sourceKBRIdentifier)
-    (group_concat(distinct ?originalISBN10;SEPARATOR=';') AS ?sourceISBN10)
-    (group_concat(distinct ?originalISBN13;SEPARATOR=';') AS ?sourceISBN13)
     (group_concat(distinct ?originalPublisherNameID;SEPARATOR=';') AS ?sourcePublisherIdentifiers)
 
     (group_concat(distinct ?kbrTargetManifestationEdition;SEPARATOR=';') AS ?targetKBREdition)
@@ -53,20 +60,11 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
     (group_concat(distinct ?kbrTargetManifestationBindingTypeLabel;SEPARATOR=';') AS ?targetBindingType)
 
-    (group_concat(distinct ?kbrDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
-    (group_concat(distinct ?bnfDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
-    (group_concat(distinct ?kbDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationKB)
-    (group_concat(distinct ?unescoDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationUnesco)
 
-    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKBR)
-    (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationBnF)
-    (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationKB)
-    (group_concat(distinct ?unescoLocationCreated;SEPARATOR=';') AS ?targetPlaceOfPublicationUnesco)
-
-    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublicationKBR)
-    ("" AS ?targetCountryOfPublicationBnF)
-    ("" AS ?targetCountryOfPublicationKB)
-    (group_concat(distinct ?unescoCountryOfOriginLabel;SEPARATOR=';') AS ?targetCountryOfPublicationUnesco)
+    (group_concat(distinct ?manifestationPlaceOfPublication;SEPARATOR=';') AS ?targetPlaceOfPublication)
+    (group_concat(distinct ?manifestationCountryOfPublication;SEPARATOR=';') AS ?targetCountryOfPublication)
+    (group_concat(distinct ?originalPlaceOfPublication;SEPARATOR=';') AS ?sourcePlaceOfPublication)
+    (group_concat(distinct ?originalCountryOfPublication;SEPARATOR=';') AS ?sourceCountryOfPublication)
 
     (group_concat(distinct ?kbrResponsibilityStatement;SEPARATOR=';') AS ?targetKBRResponsibilityStatement)
     (group_concat(distinct ?bnfResponsibilityStatement;SEPARATOR=';') AS ?targetBnFResponsibilityStatement)
@@ -92,6 +90,11 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
                            rdfs:label "KBR" ;
                            rdf:value ?originalKBRID .
       } 
+      graph <http://beltrans-originals> { ?original schema:sameAs ?kbrOriginal . }
+      graph <http://kbr-originals> { 
+        ?kbrOriginal a schema:CreativeWork ;
+                     schema:datePublished ?originalYearOfPublicationKBR .
+      }
     }
     OPTIONAL { graph <http://beltrans-originals> { ?original schema:name ?originalTitle . } }
     OPTIONAL {
@@ -111,6 +114,22 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     
 
     OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation schema:datePublished ?manifestationYearOfPublication . } }
+
+    OPTIONAL { 
+      graph <http://beltrans-geo> { ?manifestation schema:locationCreated ?manifestationLocation . }
+
+      OPTIONAL { graph <http://beltrans-geo> { ?manifestationLocation rdfs:label ?manifestationPlaceOfPublication . } }
+      OPTIONAL { graph <http://beltrans-geo> { ?manifestationLocation rdfs:comment ?manifestationCountryOfPublication . } }
+    }
+
+    OPTIONAL { 
+      graph <http://beltrans-geo> { ?original schema:locationCreated ?originalLocation . }
+
+      OPTIONAL { graph <http://beltrans-geo> { ?originalLocation rdfs:label ?originalPlaceOfPublication . } }
+      OPTIONAL { graph <http://beltrans-geo> { ?originalLocation rdfs:comment ?originalCountryOfPublication . } }
+    }
+
+
 
     graph <http://beltrans-manifestations> {
       ?manifestation bf:title ?titleEntity .
@@ -147,6 +166,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         FILTER (lang(?sourceLangLabel) = 'en')
       }
     }
+
     
 
     # #########################################################################
@@ -162,7 +182,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:name ?kbrTitle . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:datePublished ?kbrDatePublished . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
-      OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:locationCreated ?kbrLocationCreated . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation rdfs:comment ?kbrResponsibilityStatement . }}
    
 
@@ -194,16 +213,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         }
       }
 
-      # COUNTRY OF ORIGIN
-      #
-      OPTIONAL { 
-        graph <http://kbr-syracuse> { ?kbrManifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }
-        OPTIONAL {
-          graph <http://master-data> { ?kbrCountryOfOrigin mads:authoritativeLabel ?kbrCountryOfOriginLabel . } 
-          FILTER (lang(?kbrCountryOfOriginLabel) = 'en')
-        }
-      }
-
     } # end optional KBR
 
     # #########################################################################
@@ -219,7 +228,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:name ?bnfTitle . }}
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:datePublished ?bnfDatePublished . }}
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:bookEdition ?bnfTargetManifestationEdition . }}
-      OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:locationCreated ?bnfLocationCreated . }}
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation rdfs:comment ?bnfResponsibilityStatement . }}
 
     }
@@ -237,7 +245,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:name ?kbTitle . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:datePublished ?kbDatePublished . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:bookEdition ?kbTargetManifestationEdition . }}
-      OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:locationCreated ?kbLocationCreated . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdfs:comment ?kbResponsibilityStatement . }}
 
 
@@ -260,8 +267,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       OPTIONAL { graph <http://unesco> { ?unescoManifestation dcterms:identifier ?unescoManifestationID . }}
       OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:name ?unescoTitle . }}
       OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:datePublished ?unescoDatePublished . }}
-      OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:locationCreated ?unescoLocationCreated . }}
-      OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:countryOfOrigin ?unescoCountryOfOriginLabel . }}
 
     } # end optional UNESCO
 

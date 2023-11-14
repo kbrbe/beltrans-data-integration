@@ -60,8 +60,8 @@ def main():
     headers.insert(9, 'publishingDirectorIn')
 
     if options.contributor_type == 'orgs':
-      headers.insert(10, 'publishedTranslationOf')
-      headers.insert(11, 'publishedOriginalOf')
+      headers.insert(11, 'publishedTranslationOf')
+      headers.insert(12, 'publishedOriginalOf')
 
     outputWriter = csv.DictWriter(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, fieldnames=headers)
     outputWriter.writeheader()

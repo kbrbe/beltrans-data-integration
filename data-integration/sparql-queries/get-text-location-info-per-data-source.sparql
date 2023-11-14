@@ -1,0 +1,120 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+prefix fabio: <http://purl.org/spar/fabio/> 
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX btid: <http://kbr.be/id/data/> 
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX btisni: <http://kbr.be/isni/>
+PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
+PREFIX up: <http://users.ugent.be/~tdenies/up/>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/> 
+PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
+PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
+
+
+  SELECT DISTINCT 
+    ?manifestationID
+
+    (group_concat(distinct ?kbrLocationCreated;SEPARATOR=';') AS ?placeOfPublicationKBR)
+    (group_concat(distinct ?bnfLocationCreated;SEPARATOR=';') AS ?placeOfPublicationBnF)
+    (group_concat(distinct ?kbLocationCreated;SEPARATOR=';') AS ?placeOfPublicationKB)
+    (group_concat(distinct ?unescoLocationCreated;SEPARATOR=';') AS ?placeOfPublicationUnesco)
+
+    (group_concat(distinct ?kbrCountryOfOriginLabel;SEPARATOR=';') AS ?countryOfPublicationKBR)
+    ("" AS ?countryOfPublicationBnF)
+    ("" AS ?countryOfPublicationKB)
+    (group_concat(distinct ?unescoCountryOfOriginLabel;SEPARATOR=';') AS ?countryOfPublicationUnesco)
+
+  WHERE {
+
+    # ORIGINALS
+    {
+      graph <http://beltrans-originals> { 
+        ?original a schema:CreativeWork ;
+                  dcterms:identifier ?manifestationID ;
+                  schema:sameAs ?kbrOriginal .
+      }
+
+      graph <http://kbr-originals> { 
+        ?kbrOriginal a schema:CreativeWork ;
+                     schema:locationCreated ?kbrLocationCreated . 
+      }
+
+      OPTIONAL { 
+        graph <http://kbr-originals> { ?kbrOriginal schema:countryOfOrigin ?kbrCountryOfOrigin . }
+        OPTIONAL {
+          graph <http://master-data> { ?kbrCountryOfOrigin mads:authoritativeLabel ?kbrCountryOfOriginLabel . } 
+          FILTER (lang(?kbrCountryOfOriginLabel) = 'en')
+        }
+      }
+    }
+
+    UNION 
+
+    # TRANSLATIONS
+    {
+      graph <http://beltrans-manifestations> { 
+        ?manifestation a schema:CreativeWork ;
+                       schema:isPartOf btid:beltransCorpus ;
+                       dcterms:identifier ?manifestationID .
+      }
+
+      # KBR
+      #
+      OPTIONAL {
+        graph <http://beltrans-manifestations> { ?manifestation schema:sameAs ?kbrManifestation . }
+        graph <http://kbr-syracuse> { ?kbrManifestation a schema:CreativeWork . }
+
+        # optional attributes of the translation itself
+        OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:locationCreated ?kbrLocationCreated . }}
+        OPTIONAL { 
+          graph <http://kbr-syracuse> { ?kbrManifestation schema:countryOfOrigin ?kbrCountryOfOrigin . }
+          OPTIONAL {
+            graph <http://master-data> { ?kbrCountryOfOrigin mads:authoritativeLabel ?kbrCountryOfOriginLabel . } 
+            FILTER (lang(?kbrCountryOfOriginLabel) = 'en')
+          }
+        }
+
+      } # end optional KBR
+
+      # BnF
+      #
+      OPTIONAL {
+        graph <http://beltrans-manifestations> { ?manifestation schema:sameAs ?bnfManifestation . }
+        graph <http://bnf-publications> { ?bnfManifestation a schema:CreativeWork . }
+
+        # optional attributes of the translation itself
+        OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:locationCreated ?bnfLocationCreated . }}
+      }
+
+      # KB
+      #
+      OPTIONAL {
+        graph <http://beltrans-manifestations> { ?manifestation schema:sameAs ?kbManifestation . }
+        graph <http://kb-publications> { ?kbManifestation a schema:CreativeWork . }
+
+        # optional attributes of the translation itself
+        OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:locationCreated ?kbLocationCreated . }}
+      } # end optional KB
+
+      # UNESCO
+      #
+      OPTIONAL {
+        graph <http://beltrans-manifestations> { ?manifestation schema:sameAs ?unescoManifestation . }
+        graph <http://unesco> { ?unescoManifestation a schema:CreativeWork . }
+
+        # optional attributes of the translation itself
+        OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:locationCreated ?unescoLocationCreated . }}
+        OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:countryOfOrigin ?unescoCountryOfOriginLabel . }}
+
+      } # end optional UNESCO
+    }
+
+}
+GROUP BY ?manifestationID
