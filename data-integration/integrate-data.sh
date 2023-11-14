@@ -3070,9 +3070,19 @@ function loadOriginalLinksKBR {
   local kbrOriginalLinksTurtleFRNL="$integrationName/$dataSourceName/rdf/fr-nl/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
   local kbrOriginalLinksTurtleNLFR="$integrationName/$dataSourceName/rdf/nl-fr/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
 
+  echo ""
   echo "Load KBR links to identified originals ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
     "$kbrOriginalLinksTurtleFRNL" "$kbrOriginalLinksTurtleNLFR"
+
+  echo ""
+  echo "Load fetched KBR originals from identified links ..."
+  loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$TRIPLE_STORE_GRAPH_KBR_TRL_ORIG" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
+
+  echo ""
+  echo "Load fetched authorities linked to KBR originals from identified links ..."
+  loadKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
+  loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
 }
 
 # -----------------------------------------------------------------------------
