@@ -224,6 +224,8 @@ GET_KBCODE_HIERARCHY_INFO_QUERY_FILE="sparql-queries/get-kbcode-hierarchy.sparql
 
 GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE="sparql-queries/get-missing-nationality-isni.sparql"
 
+DELETE_QUERY_KBR_REDUNDANT_ORIGINALS="sparql-queries/delete-kbr-redundant-originals.sparql"
+
 DELETE_QUERY_BNF_ISBN="sparql-queries/delete-bnf-isbn.sparql"
 DELETE_QUERY_BNF_ISBN10_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn10-without-hyphen.sparql"
 DELETE_QUERY_BNF_ISBN13_WITHOUT_HYPHEN="sparql-queries/delete-bnf-isbn13-without-hyphen.sparql"
@@ -374,6 +376,8 @@ SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR="title-duplicates-matches_nl-fr.csv"
 SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR="similarity-matches_nl-fr.csv"
 SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR="similarity-duplicates-matches_nl-fr.csv"
 SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR="similarity-multiple-matches.csv"
+
+SUFFIX_KBR_ORIGINAL_MATCHES_XML="fetched-originals.xml"
 
 SUFFIX_KBR_TITLE_MATCHES_FR_NL="title-matches_fr-nl.csv"
 SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL="title-duplicates-matches_fr-nl.csv"
@@ -1169,12 +1173,12 @@ function extractKBR {
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  extractKBRPersons "$integrationName" "$INPUT_KBR_LA_PERSON_NL" "nl-fr"
-  extractKBRPersons "$integrationName" "$INPUT_KBR_LA_PERSON_FR" "fr-nl"
-  extractKBRPersons "$integrationName" "$INPUT_KBR_BELGIANS" "belgians"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians"
 
-  extractKBROrgs "$integrationName" "$INPUT_KBR_LA_ORG_FR" "fr-nl"
-  extractKBROrgs "$integrationName" "$INPUT_KBR_LA_ORG_NL" "nl-fr"
+  extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_FR" "fr-nl"
+  extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_NL" "nl-fr"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
@@ -1198,23 +1202,11 @@ function extractKBR {
 
   python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsContributorIDList" -c "contributorID" "$kbrTranslationsCSVContDedupFRNL" "$kbrTranslationsCSVContDedupNLFR"
 
-  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_APEP \
-    -f $kbrOriginalsContributorIDList \
-    -o $kbrOriginalsFetchedPersonsXML \
-    --subject-tag "marc:record" \
-    --input-format "MARCXML"
+  fetchKBRLinkedAuthoritiesPersons "$kbrOriginalsContributorIDList" "0" "$kbrOriginalsFetchedPersonsXML"
+  fetchKBRLinkedAuthoritiesOrgs "$kbrOriginalsContributorIDList" "0" "$kbrOriginalsFetchedOrgsXML"
 
- python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_AORG \
-    -f $kbrOriginalsContributorIDList \
-    -o $kbrOriginalsFetchedOrgsXML \
-    --subject-tag "marc:record" \
-    --input-format "MARCXML"
-
-
-  extractKBRPersons "$integrationName" "$kbrOriginalsFetchedPersonsXML" "linked-originals"
-  extractKBROrgs "$integrationName" "$kbrOriginalsFetchedOrgsXML" "linked-originals"
+  extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals"
+  extractKBROrgs "$integrationName" "kbr" "$kbrOriginalsFetchedOrgsXML" "linked-originals"
   extractKBRPlaces
 
 }
@@ -1569,6 +1561,9 @@ function extractOriginalLinksKBR {
   local translationsSourceName=$3
   local originalsSourceName=$4
 
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
   mkdir -p "$integrationName/$dataSourceName/fr-nl"
   mkdir -p "$integrationName/$dataSourceName/nl-fr"
 
@@ -1592,6 +1587,7 @@ function extractOriginalLinksKBR {
 
   source ./py-integration-env/bin/activate
 
+  echo ""
   echo "EXTRACTION - find originals NL-FR"
 
   time python $SCRIPT_FIND_ORIGINALS \
@@ -1605,6 +1601,7 @@ function extractOriginalLinksKBR {
   --output-file-similarity-duplicate-id-matches $similarityDuplicatesMatchesNLFR \
   --output-file-similarity-multiple-matches $similarityMultipleMatchesNLFR
 
+  echo ""
   echo "EXTRACTION - find originals FR-NL"
 
   time python $SCRIPT_FIND_ORIGINALS \
@@ -1617,6 +1614,34 @@ function extractOriginalLinksKBR {
   --output-file-similarity-matches $similarityMatchesFRNL \
   --output-file-similarity-duplicate-id-matches $similarityDuplicatesMatchesFRNL \
   --output-file-similarity-multiple-matches $similarityMultipleMatchesFRNL
+
+  echo ""
+  echo "EXTRACTION - fetch live version of original records"
+  mkdir -p "$integrationName/$dataSourceName/book-data-and-contributions/mixed-lang/"
+  mkdir -p "$integrationName/$dataSourceName/agents/mixed-lang/"
+  mkdir -p "$integrationName/$dataSourceName/mixed-lang/"
+  local kbrOriginalsFetchedXML="$integrationName/$dataSourceName/mixed-lang/$SUFFIX_KBR_ORIGINAL_MATCHES_XML"
+  # call the script directly instead of using the getKBRRecords function
+  # because we want to give more than one input file (titleMatches and similarityMatches and both FR-NL and NL-FR)
+  python $SCRIPT_GET_KBR_RECORDS -o "$kbrOriginalsFetchedXML" --identifier-column "candidatesIDs" \
+    -b "150" -u "$ENV_KBR_API_Z3950" \
+    "$titleMatchesFRNL" "$similarityMatchesFRNL" "$titleMatchesNLFR" "$similarityMatchesNLFR"
+
+  extractKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$kbrOriginalsFetchedXML" "mixed-lang"
+
+  echo ""
+  echo "EXTRACTION - Extract and clean KBR translations linked authorities data"
+
+  linkedContributors="$integrationName/$dataSourceName/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
+  fetchedPersonsXML="$integrationName/$dataSourceName/agents/fetched-apep.xml"
+  fetchedOrgsXML="$integrationName/$dataSourceName/agents/fetched-aorg.xml"
+  fetchKBRLinkedAuthoritiesPersons "$linkedContributors" "1" "$fetchedPersonsXML"
+  fetchKBRLinkedAuthoritiesOrgs "$linkedContributors" "1" "$fetchedOrgsXML"
+
+  extractKBRPersons "$integrationName" "$dataSourceName" "$fetchedPersonsXML" "mixed-lang"
+  extractKBROrgs "$integrationName" "$dataSourceName" "$fetchedOrgsXML" "mixed-lang"
+
+
 
 }
 
@@ -1734,16 +1759,16 @@ function transformKBR {
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked person authorities data to RDF"
-  mapKBRLinkedPersonAuthorities $integrationName "fr-nl"
-  mapKBRLinkedPersonAuthorities $integrationName "nl-fr"
-  mapKBRLinkedPersonAuthorities $integrationName "belgians"
-  mapKBRLinkedPersonAuthorities $integrationName "linked-originals"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked org authorities data to RDF"
-  mapKBRLinkedOrgAuthorities $integrationName "fr-nl"
-  mapKBRLinkedOrgAuthorities $integrationName "nl-fr"
-  mapKBRLinkedOrgAuthorities $integrationName "linked-originals"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR places"
@@ -1777,6 +1802,7 @@ function transformOriginalLinksKBR {
   # create the folder to place the transformed data
   mkdir -p "$integrationName/$dataSourceName/rdf/fr-nl"
   mkdir -p "$integrationName/$dataSourceName/rdf/nl-fr"
+  mkdir -p "$integrationName/$dataSourceName/rdf/mixed-lang"
 
   originalLinksTurtleFRNL="$integrationName/$dataSourceName/rdf/fr-nl/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
   originalLinksTurtleNLFR="$integrationName/$dataSourceName/rdf/nl-fr/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
@@ -1790,6 +1816,7 @@ function transformOriginalLinksKBR {
   export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
 
   # 2) execute the mapping
+  echo ""
   echo "Map KBR original linking NL-FR ..."
   . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleFRNL
 
@@ -1799,9 +1826,19 @@ function transformOriginalLinksKBR {
   export RML_SOURCE_SIMILARITY_DUPLICATES_MATCHES="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
 
   # 2) execute the mapping
+  echo ""
   echo "Map KBR original linking FR-NL ..."
   . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleNLFR
 
+  echo ""
+  echo "Map extracted data about fetched KBR originals"
+  mapKBRBookInformationAndContributions "$integrationName/" "$dataSourceName" "mixed-lang"
+
+  echo ""
+  echo "Map extracted data about linked authorities from fetched KBR originals"
+  # those two functions already append the subfolder "kbr"
+  mapKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "mixed-lang"
 
 }
 
@@ -1998,14 +2035,15 @@ function extractKBRTranslationsAndContributions {
 function extractKBRPersons {
 
   local integrationName=$1
-  local kbrPersons=$2
-  local language=$3
+  local dataSourceName=$2
+  local kbrPersons=$3
+  local language=$4
 
-  kbrPersonsCSV="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
-  kbrPersonsNationalities="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
-  kbrPersonsISNIs="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
-  kbrPersonsNames="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES"
-  kbrPersonsNamesComplete="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
+  kbrPersonsCSV="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
+  kbrPersonsNationalities="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
+  kbrPersonsISNIs="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
+  kbrPersonsNames="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES"
+  kbrPersonsNamesComplete="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
 
   source py-integration-env/bin/activate
 
@@ -2029,11 +2067,12 @@ function extractKBRPersons {
 function extractKBROrgs {
 
   local integrationName=$1
-  local kbrOrgs=$2
-  local language=$3
+  local dataSourceName=$2
+  local kbrOrgs=$3
+  local language=$4
 
-  kbrOrgsCSV="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
-  kbrOrgsISNIs="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  kbrOrgsCSV="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
+  kbrOrgsISNIs="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
 
   source py-integration-env/bin/activate
 
@@ -2257,18 +2296,19 @@ function mapKBRTranslationLimitedOriginals {
 function mapKBRLinkedPersonAuthorities {
 
   local integrationName=$1
-  local language=$2
+  local dataSourceName=$2
+  local language=$3
 
   # input
-  local kbrPersons="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
-  local kbrPersonsNat="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
-  local kbrPersonsISNI="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
-  local kbrPersonsNames="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
+  local kbrPersons="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
+  local kbrPersonsNat="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
+  local kbrPersonsISNI="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
+  local kbrPersonsNames="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
  
   # output
-  local kbrPersonsTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_PERSONS_LD"
-  local kbrPersonsIdentifiersTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_PERSONS_IDENTIFIERS_LD"
-  local kbrPersonsNamesTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_PERSONS_NAMES_LD"
+  local kbrPersonsTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_LD"
+  local kbrPersonsIdentifiersTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_IDENTIFIERS_LD"
+  local kbrPersonsNamesTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_NAMES_LD"
 
   # 2) execute the mapping
   mapKBRPersons "$kbrPersons" "$kbrPersonsNat" "$kbrPersonsTurtle"
@@ -2281,17 +2321,18 @@ function mapKBRLinkedPersonAuthorities {
 function mapKBRLinkedOrgAuthorities {
 
   local integrationName=$1
-  local language=$2
+  local dataSourceName=$2
+  local language=$3
 
   # input
-  local kbrOrgsISNI="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
-  local kbrOrgs="$integrationName/kbr/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
-  local kbrOrgMatches="$integrationName/kbr/agents/$language/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES"
+  local kbrOrgsISNI="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  local kbrOrgs="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
+  local kbrOrgMatches="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES"
 
   # output
-  local kbrOrgsTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_ORGS_LD"
-  local kbrOrgMatchesTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_LD"
-  local kbrOrgsIdentifiersTurtle="$integrationName/kbr/rdf/$language/$SUFFIX_KBR_ORGS_IDENTIFIERS_LD"
+  local kbrOrgsTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_ORGS_LD"
+  local kbrOrgMatchesTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PBL_MULTIPLE_MATCHES_LD"
+  local kbrOrgsIdentifiersTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_ORGS_IDENTIFIERS_LD"
 
   # 2) execute the mapping
   mapKBROrgs "$kbrOrgs" "$kbrOrgsTurtle"
@@ -2481,15 +2522,8 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
-  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_APEP \
-    -f $correlationListKBRIDs \
-    -o $kbrOriginalsFetchedPersonsXML \
-    --filter-column-index "1" \
-    --subject-tag "marc:record" \
-    --input-format "MARCXML"
-
-  extractKBRPersons "$folderName" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
+  fetchKBRLinkedAuthoritiesPersons "$correlationListKBRIDs" "$inputFileIDColumnIndex" "$kbrOriginalsFetchedPersonsXML"
+  extractKBRPersons "$folderName" "kbr", "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
 }
 
 # -----------------------------------------------------------------------------
@@ -2524,15 +2558,44 @@ function extractContributorOrgCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedOrgsXML="$folderName/kbr/fetched-aorg.xml"
 
+  fetchKBRLinkedAuthoritiesOrgs "$correlationListKBRIDs" "1" "$kbrOriginalsFetchedOrgsXML"
+  extractKBROrgs "$folderName" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+
+}
+
+# -----------------------------------------------------------------------------
+function fetchKBRLinkedAuthoritiesPersons {
+  local inputFile=$1
+  local inputFileIDColumnIndex=$2
+  local outputFilePersons=$3
+
+  echo ""
+  echo "EXTRACT PERSON RECORDS (APEP)"
   python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_AORG \
-    -f $correlationListKBRIDs \
-    -o $kbrOriginalsFetchedOrgsXML \
-    --filter-column-index "1" \
+    -i $INPUT_KBR_APEP \
+    -f $inputFile \
+    -o $outputFilePersons \
+    --filter-column-index $inputFileIDColumnIndex \
     --subject-tag "marc:record" \
     --input-format "MARCXML"
 
-  extractKBROrgs "$folderName" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+}
+
+# -----------------------------------------------------------------------------
+function fetchKBRLinkedAuthoritiesOrgs {
+  local inputFile=$1
+  local inputFileIDColumnIndex=$2
+  local outputFileOrgs=$3
+
+  echo ""
+  echo "EXTRACT ORG RECORDS (AORG)"
+  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+    -i $INPUT_KBR_AORG \
+    -f $inputFile \
+    -o $outputFileOrgs \
+    --filter-column-index $inputFileIDColumnIndex \
+    --subject-tag "marc:record" \
+    --input-format "MARCXML"
 
 }
 
@@ -2581,33 +2644,14 @@ function extractTranslationCorrelationList {
   echo "EXTRACTION - Extract and clean KBR translations linked authorities data"
   kbrTranslationsFetchedPersonsXML="$integrationName/correlation/translations/kbr/agents/fetched-apep.xml"
   kbrTranslationsFetchedOrgsXML="$integrationName/correlation/translations/kbr/agents/fetched-aorg.xml"
-  kbrTranslationsContributorIDList="$integrationName/correlation/translations/kbr/agents/contributor-identifiers.csv"
-
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrTranslationsCSVContDedup="$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  # create a CSV with the single contributorID column
-  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrTranslationsContributorIDList" -c "contributorID" "$kbrTranslationsCSVContDedup"
+  fetchKBRLinkedAuthoritiesPersons "$kbrTranslationsCSVContDedup" "1" "$kbrTranslationsFetchedPersonsXML"
+  fetchKBRLinkedAuthoritiesOrgs "$kbrTranslationsCSVContDedup" "1" "$kbrTranslationsFetchedOrgsXML"
 
-  # no filter-column-index needed, because filter file only contains a single contributorID column
-  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_APEP \
-    -f $kbrTranslationsContributorIDList \
-    -o $kbrTranslationsFetchedPersonsXML \
-    --subject-tag "marc:record" \
-    --input-format "MARCXML"
-
- # no filter-column-index needed, because filter file only contains a single contributorID column
- python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_AORG \
-    -f $kbrTranslationsContributorIDList \
-    -o $kbrTranslationsFetchedOrgsXML \
-    --subject-tag "marc:record" \
-    --input-format "MARCXML"
-
-
-  extractKBRPersons "$integrationName/correlation/translations" "$kbrTranslationsFetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/translations" "$kbrTranslationsFetchedOrgsXML" "mixed-lang"
+  extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedPersonsXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedOrgsXML" "mixed-lang"
 
 
   echo ""
@@ -2621,36 +2665,17 @@ function extractTranslationCorrelationList {
 
 
   echo ""
-  echo "EXTRACTION - Extract and clean KBR translations linked authorities data"
+  echo "EXTRACTION - Extract and clean KBR originals linked authorities data"
   kbrOriginalsFetchedPersonsXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-apep.xml"
   kbrOriginalsFetchedOrgsXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-aorg.xml"
-  kbrOriginalsContributorIDList="$integrationName/correlation/originals/kbr/agents/mixed-lang/contributor-identifiers.csv"
-
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrOriginalsCSVContDedup="$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  # create a CSV with the single contributorID column
-  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrTranslationsContributorIDList" -c "contributorID" "$kbrTranslationsCSVContDedup"
+  fetchKBRLinkedAuthoritiesPersons "$kbrOriginalsCSVContDedup" "1" "$kbrOriginalsFetchedPersonsXML"
+  fetchKBRLinkedAuthoritiesOrgs "$kbrOriginalsCSVContDedup" "1" "$kbrOriginalsFetchedOrgsXML"
 
-  # no filter-column-index needed, because filter file only contains a single contributorID column
-  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_APEP \
-    -f $kbrTranslationsContributorIDList \
-    -o $kbrOriginalsFetchedPersonsXML \
-    --subject-tag "marc:record" \
-    --input-format "MARCXML"
-
-  # no filter-column-index needed, because filter file only contains a single contributorID column
-  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_AORG \
-    -f $kbrTranslationsContributorIDList \
-    -o $kbrOriginalsFetchedOrgsXML \
-    --subject-tag "marc:record" \
-    --input-format "MARCXML"
-
-
-  extractKBRPersons "$integrationName/correlation/originals" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/originals" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+  extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
  
 }
 
@@ -2731,7 +2756,7 @@ function transformContributorPersonCorrelationList {
   echo ""
   echo "Map fetched KBR contributor data - persons"
   mkdir -p "$folderName/kbr/rdf/mixed-lang"
-  mapKBRLinkedPersonAuthorities "$folderName" "mixed-lang"
+  mapKBRLinkedPersonAuthorities "$folderName" "kbr" "mixed-lang"
 
 }
 
@@ -2773,7 +2798,7 @@ function transformContributorOrgCorrelationList {
   echo ""
   echo "Map fetched KBR contributor data - orgs"
   mkdir -p "$folderName/kbr/rdf/mixed-lang"
-  mapKBRLinkedOrgAuthorities "$folderName" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$folderName" "kbr" "mixed-lang"
 
 }
 
@@ -2822,8 +2847,8 @@ function transformTranslationCorrelationList {
   mapKBRBookInformationAndContributions "$integrationName/correlation" "translations/kbr" "mixed-lang"
 
   # those two functions already append the subfolder "kbr"
-  mapKBRLinkedPersonAuthorities "$integrationName/correlation/translations" "mixed-lang"
-  mapKBRLinkedOrgAuthorities "$integrationName/correlation/translations" "mixed-lang"
+  mapKBRLinkedPersonAuthorities "$integrationName/correlation/translations" "kbr" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$integrationName/correlation/translations" "kbr" "mixed-lang"
 
   echo ""
   echo "Map extracted data about originals"
@@ -2831,8 +2856,8 @@ function transformTranslationCorrelationList {
   mapKBRBookInformationAndContributions "$integrationName/correlation" "originals/kbr" "mixed-lang"
 
   # those two functions already append the subfolder "kbr"
-  mapKBRLinkedPersonAuthorities "$integrationName/correlation/originals" "mixed-lang"
-  mapKBRLinkedOrgAuthorities "$integrationName/correlation/originals" "mixed-lang"
+  mapKBRLinkedPersonAuthorities "$integrationName/correlation/originals" "kbr" "mixed-lang"
+  mapKBRLinkedOrgAuthorities "$integrationName/correlation/originals" "kbr" "mixed-lang"
 
 }
 
@@ -3047,9 +3072,23 @@ function loadOriginalLinksKBR {
   local kbrOriginalLinksTurtleFRNL="$integrationName/$dataSourceName/rdf/fr-nl/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
   local kbrOriginalLinksTurtleNLFR="$integrationName/$dataSourceName/rdf/nl-fr/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
 
+  echo ""
   echo "Load KBR links to identified originals ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
     "$kbrOriginalLinksTurtleFRNL" "$kbrOriginalLinksTurtleNLFR"
+
+  echo ""
+  echo "Load fetched KBR originals from identified links ..."
+  loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$TRIPLE_STORE_GRAPH_KBR_TRL_ORIG" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
+
+  echo ""
+  echo "Load fetched authorities linked to KBR originals from identified links ..."
+  loadKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
+  loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
+
+  echo ""
+  echo "Delete redundant limited originals (after identifying and adding link to a real original) ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_REDUNDANT_ORIGINALS"
 }
 
 # -----------------------------------------------------------------------------
