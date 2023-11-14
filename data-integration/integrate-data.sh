@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 # Make the locally developed python package accessible via python -m 
 export PYTHONPATH=/home/slieber/repos/kbr/beltrans-data
