@@ -148,9 +148,9 @@ INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
 INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-11-08_person-contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2023-11-08_org-contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-11-08_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-11-08_translations_removal-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2023-11-14_org-contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-11-14_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-11-14_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -2633,8 +2633,8 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
-  fetchKBRLinkedAuthoritiesPersons "$correlationListKBRIDs" "$inputFileIDColumnIndex" "$kbrOriginalsFetchedPersonsXML"
-  extractKBRPersons "$folderName" "kbr", "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
+  fetchKBRLinkedAuthoritiesPersons "$correlationListKBRIDs" "1" "$kbrOriginalsFetchedPersonsXML"
+  extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
 }
 
 # -----------------------------------------------------------------------------
