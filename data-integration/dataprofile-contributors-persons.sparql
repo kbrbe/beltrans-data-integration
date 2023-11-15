@@ -38,7 +38,6 @@ SELECT DISTINCT
   (group_concat(distinct ?bnfID;SEPARATOR=';') AS ?bnfIDs)
   (group_concat(distinct ?ntaID;SEPARATOR=';') AS ?ntaIDs)
   (group_concat(distinct ?unescoID;SEPARATOR=';') AS ?unescoIDs)
-  (group_concat(distinct ?unescoIDLong;SEPARATOR=';') AS ?unescoIDsLong)
   (group_concat(distinct ?isni;SEPARATOR=';') AS ?isniIDs)
   (group_concat(distinct ?viaf;SEPARATOR=';') AS ?viafIDs)
   (group_concat(distinct ?wikidata;SEPARATOR=';') AS ?wikidataIDs)

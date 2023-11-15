@@ -66,6 +66,7 @@ def main():
     headers.insert(contributionsIndex, 'illustratorIdentifiers')
     headers.insert(contributionsIndex, 'translatorIdentifiers')
     headers.insert(contributionsIndex, 'authorIdentifiers')
+    headers.insert(contributionsIndex, 'author/scenarist')
 
     roleMapping = {
       'http://schema.org/author': 'authorIdentifiers',
