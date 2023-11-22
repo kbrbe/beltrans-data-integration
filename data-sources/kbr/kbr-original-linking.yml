@@ -77,6 +77,7 @@ mappings:
     po:
       - [a, prov:Activity]
       - [prov:generated, btid:manifestation_$(KBRID)~iri]
+      - [btm:verifiedBy, btid:exactTitleMatch~iri]
       - [prov:used, btid:manifestation_$(candidatesIDs)~iri]
       - [rdfs:comment, "The original was detected using a title lookup where an exact match was found"]
       - [up:assertionConfidence, 1.0]
@@ -95,6 +96,7 @@ mappings:
       - [a, prov:Activity]
       - [prov:generated, btid:manifestation_$(KBRID)~iri]
       - [prov:used, btid:manifestation_$(candidatesIDs)~iri]
+      - [btm:verifiedBy, btid:titleSimilarityMatch~iri]
       - [rdfs:comment, "The original was detected using a length-normalized Levenshtein distance and a similarity threshold of 0.9"]
       - [up:assertionConfidence, 0.9]
 
