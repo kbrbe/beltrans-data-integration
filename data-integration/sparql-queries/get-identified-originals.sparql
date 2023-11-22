@@ -1,0 +1,73 @@
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix up: <http://users.ugent.be/~tdenies/up/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix btid: <http://kbr.be/id/data/>
+
+
+SELECT DISTINCT 
+  ?translationID 
+  ?originalID 
+  ?similarity 
+  ?translationTitle 
+  ?originalTitle 
+  (group_concat(distinct ?translationGenreLabel;SEPARATOR=';') AS ?translationGenreEN) 
+  (group_concat(distinct ?originalGenreLabel;SEPARATOR=';') AS ?originalGenreEN)
+  (group_concat(distinct ?translationContributorNameID;SEPARATOR='\n') AS ?translationContributors)
+  (group_concat(distinct ?originalContributorNameID;SEPARATOR='\n') AS ?originalContributors)
+WHERE {
+  
+  graph <http://kbr-syracuse> {
+    ?translationActivity a prov:Activity ;
+                         up:assertionConfidence ?similarity ;
+                         prov:generated ?m ;
+                         prov:used ?original .
+    
+    ?m a schema:CreativeWork ;
+       schema:name ?translationTitle ;
+       dcterms:identifier ?translationID .
+  }
+        
+  graph <http://beltrans-manifestations> { 
+    ?integrated schema:sameAs ?m ;
+                schema:isPartOf btid:beltransCorpus .
+  }
+        
+  graph <http://kbr-originals> {
+    ?original a schema:CreativeWork ;
+              schema:name ?originalTitle ;
+              dcterms:identifier ?originalID .
+  }
+        
+  OPTIONAL {
+    graph <http://kbr-syracuse> { ?m ?contributorRelationship ?translationContributor . }
+    graph <http://kbr-linked-authorities> { 
+      ?translationContributor schema:name|rdfs:label ?translationContributorName ;
+                              dcterms:identifier ?translationContributorID .
+    }
+    BIND(CONCAT(COALESCE(?translationContributorName, "no name"), " (", COALESCE(?translationContributorID, "no ID"), ")") AS ?translationContributorNameID)
+  }
+        
+  OPTIONAL {
+    graph <http://kbr-originals> { ?original ?contributorRelationshipOriginal ?originalContributor . }
+    graph <http://kbr-linked-authorities> { 
+      ?originalContributor schema:name|rdfs:label ?originalContributorName ;
+                              dcterms:identifier ?originalContributorID .
+    }
+    BIND(CONCAT(COALESCE(?originalContributorName, "no name"), " (", COALESCE(?originalContributorID, "no ID"), ")") AS ?originalContributorNameID)
+  }
+        
+  OPTIONAL { 
+    graph <http://kbr-syracuse> { ?m schema:about ?translationGenre . }
+    graph <http://master-data> { ?translationGenre skos:prefLabel ?translationGenreLabel . }
+    FILTER(lang(?translationGenreLabel) = 'en')
+  }
+        
+  OPTIONAL { 
+    graph <http://kbr-syracuse> { ?original schema:about ?originalGenre . }
+    graph <http://master-data> { ?originalGenre skos:prefLabel ?originalGenreLabel . }
+    FILTER(lang(?originalGenreLabel) = 'en')
+  }
+}
+GROUP BY ?translationID ?originalID ?similarity ?translationTitle ?originalTitle
