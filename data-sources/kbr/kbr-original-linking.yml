@@ -30,39 +30,6 @@ variables:
 
 mappings:
 
-  # ---------------------------------------------------------------------------
-  #
-  translationLinks:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates direct schema:translationOfWork links from the translation to the original."
-    sources:
-      - access: *titleMatches
-        referenceFormulation: csv
-        delimiter: ','
-      - access: *similarityMatches
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_$(KBRID)
-    po:
-      - [schema:translationOfWork, btid:manifestation_$(candidatesIDs)~iri]
-
-  # ---------------------------------------------------------------------------
-  #
-  originalLinks:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates direct schema:workTranslation links from the original to the translation."
-    sources:
-      - access: *titleMatches
-        referenceFormulation: csv
-        delimiter: ','
-      - access: *similarityMatches
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_$(candidatesIDs)
-    po:
-      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
-
-
 
   # ---------------------------------------------------------------------------
   #

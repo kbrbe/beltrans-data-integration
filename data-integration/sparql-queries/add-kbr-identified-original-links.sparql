@@ -1,0 +1,24 @@
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix up: <http://users.ugent.be/~tdenies/up/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix btid: <http://kbr.be/id/data/>
+prefix btm: <http://kbr.be/ns/beltrans/model#>
+
+INSERT {
+  graph <http://kbr-syracuse> { ?translation schema:translationOfWork ?original . }
+  graph <http://kbr-originals> { ?original schema:workTranslation ?translation . }
+}
+WHERE {
+  graph <http://kbr-syracuse> { 
+    ?translationActivity a prov:Activity ;
+                         btm:verifiedBy btid:overlappingContributors ;
+  						 prov:generated ?translation ;
+  						 prov:used ?original .
+  }
+        
+  graph <http://kbr-originals> { ?original dcterms:identifier ?originalID . }
+  FILTER(!STRSTARTS(?originalID, "source"))
+  
+}
