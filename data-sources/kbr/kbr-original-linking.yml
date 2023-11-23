@@ -43,10 +43,10 @@ mappings:
     s: btid:translationActivity_$(KBRID)
     po:
       - [a, prov:Activity]
+      - [a, btm:IdentifiedOriginalActivityExactMatch]
       - [prov:generated, btid:manifestation_$(KBRID)~iri]
       - [btm:verifiedBy, btid:exactTitleMatch~iri]
       - [prov:used, btid:manifestation_$(candidatesIDs)~iri]
-      - [rdfs:comment, "The original was detected using a title lookup where an exact match was found"]
       - [up:assertionConfidence, 1.0]
 
   # ---------------------------------------------------------------------------
@@ -61,10 +61,10 @@ mappings:
     s: btid:translationActivity_$(KBRID)
     po:
       - [a, prov:Activity]
+      - [a, btm:IdentifiedOriginalActivitySimilarityMatch]
       - [prov:generated, btid:manifestation_$(KBRID)~iri]
       - [prov:used, btid:manifestation_$(candidatesIDs)~iri]
       - [btm:verifiedBy, btid:titleSimilarityMatch~iri]
-      - [rdfs:comment, "The original was detected using a length-normalized Levenshtein distance and a similarity threshold of 0.9"]
       - [up:assertionConfidence, 0.9]
 
 

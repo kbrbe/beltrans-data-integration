@@ -226,6 +226,9 @@ GET_KBCODE_HIERARCHY_INFO_QUERY_FILE="sparql-queries/get-kbcode-hierarchy.sparql
 
 GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE="sparql-queries/get-missing-nationality-isni.sparql"
 
+CREATE_QUERY_KBR_IDENTIFIED_ORIGINAL_LINKS="sparql-queries/add-kbr-identified-original-links.sparql"
+DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS="sparql-queries/delete-kbr-wrong-original-links.sparql"
+DELETE_QUERY_KBR_UNUSED_ORIGINALS="sparql-queries/delete-kbr-not-referenced-originals.sparql"
 DELETE_QUERY_KBR_REDUNDANT_ORIGINALS="sparql-queries/delete-kbr-redundant-originals.sparql"
 
 DELETE_QUERY_BNF_ISBN="sparql-queries/delete-bnf-isbn.sparql"
@@ -256,6 +259,7 @@ CREATE_QUERY_BIBFRAME_TITLES="sparql-queries/create-bibframe-titles.sparql"
 CREATE_QUERY_SCHEMA_TITLES="sparql-queries/derive-single-title-from-bibframe-titles.sparql"
 
 ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
+ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP="sparql-queries/annotate-found-originals-contributor-overlap.sparql"
 
 CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
 
@@ -3183,6 +3187,8 @@ function loadOriginalLinksKBR {
   local kbrOriginalLinksTurtleFRNL="$integrationName/$dataSourceName/rdf/fr-nl/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
   local kbrOriginalLinksTurtleNLFR="$integrationName/$dataSourceName/rdf/nl-fr/$SUFFIX_KBR_ORIGINAL_LINKING_LD"
 
+  # todo: maybe add this to another named graph, 
+  # and only "promote" links to the actual KBR graph after they survived a test based on overlapping contributors with SPARQL
   echo ""
   echo "Load KBR links to identified originals ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
@@ -3196,6 +3202,22 @@ function loadOriginalLinksKBR {
   echo "Load fetched authorities linked to KBR originals from identified links ..."
   loadKBRLinkedPersonAuthorities "$integrationName" "$dataSourceName" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
+
+  echo ""
+  echo "Annotate identified originals with overlapping contributors ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP"
+
+  echo ""
+  echo "Delete links to originals which are not verified by overlapping contributors ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
+
+  echo ""
+  echo "Add links between translations and originals that not only match with title, but also have overlapping contributors ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KBR_IDENTIFIED_ORIGINAL_LINKS"
+
+  echo ""
+  echo "Delete wrongly identified originals that are no longer linked to any translation ..."
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
 
   echo ""
   echo "Delete redundant limited originals (after identifying and adding link to a real original) ..."

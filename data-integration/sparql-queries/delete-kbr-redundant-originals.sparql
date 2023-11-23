@@ -1,8 +1,14 @@
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix schema: <http://schema.org/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix btm: <http://kbr.be/ns/beltrans/model#>
+
 DELETE {
   graph <http://kbr-originals> { ?limitedOriginal ?p ?o . }
   graph <http://kbr-syracuse> { ?m schema:translationOfWork ?limitedOriginal . }
+  graph <http://kbr-syracuse> { ?translationActivity prov:used ?limitedOriginal . }
+  graph <http://kbr-syracuse> { ?translationActivity rdf:type btm:IdentifiedOriginalActivityExactMatch . }
+  graph <http://kbr-syracuse> { ?translationActivity rdf:type btm:IdentifiedOriginalActivitySimilarityMatch . }
 }
 WHERE {
   graph <http://kbr-syracuse> { 
@@ -19,4 +25,11 @@ WHERE {
   }
   FILTER(STRSTARTS(?limitedOriginalIdentifier, "source"))
   FILTER(!STRSTARTS(?originalIdentifier, "source"))
+
+  OPTIONAL {
+    graph <http://kbr-syracuse> {
+      ?translationActivity a prov:Activity ;
+                           prov:used ?limitedOriginal .
+    }
+  }
 }
