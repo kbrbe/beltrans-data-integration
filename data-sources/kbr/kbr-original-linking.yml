@@ -30,39 +30,6 @@ variables:
 
 mappings:
 
-  # ---------------------------------------------------------------------------
-  #
-  translationLinks:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates direct schema:translationOfWork links from the translation to the original."
-    sources:
-      - access: *titleMatches
-        referenceFormulation: csv
-        delimiter: ','
-      - access: *similarityMatches
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_$(KBRID)
-    po:
-      - [schema:translationOfWork, btid:manifestation_$(candidatesIDs)~iri]
-
-  # ---------------------------------------------------------------------------
-  #
-  originalLinks:
-    creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates direct schema:workTranslation links from the original to the translation."
-    sources:
-      - access: *titleMatches
-        referenceFormulation: csv
-        delimiter: ','
-      - access: *similarityMatches
-        referenceFormulation: csv
-        delimiter: ',' 
-    s: btid:manifestation_$(candidatesIDs)
-    po:
-      - [schema:workTranslation, btid:manifestation_$(KBRID)~iri]
-
-
 
   # ---------------------------------------------------------------------------
   #
@@ -76,9 +43,10 @@ mappings:
     s: btid:translationActivity_$(KBRID)
     po:
       - [a, prov:Activity]
+      - [a, btm:IdentifiedOriginalActivityExactMatch]
       - [prov:generated, btid:manifestation_$(KBRID)~iri]
+      - [btm:verifiedBy, btid:exactTitleMatch~iri]
       - [prov:used, btid:manifestation_$(candidatesIDs)~iri]
-      - [rdfs:comment, "The original was detected using a title lookup where an exact match was found"]
       - [up:assertionConfidence, 1.0]
 
   # ---------------------------------------------------------------------------
@@ -93,9 +61,10 @@ mappings:
     s: btid:translationActivity_$(KBRID)
     po:
       - [a, prov:Activity]
+      - [a, btm:IdentifiedOriginalActivitySimilarityMatch]
       - [prov:generated, btid:manifestation_$(KBRID)~iri]
       - [prov:used, btid:manifestation_$(candidatesIDs)~iri]
-      - [rdfs:comment, "The original was detected using a length-normalized Levenshtein distance and a similarity threshold of 0.9"]
+      - [btm:verifiedBy, btid:titleSimilarityMatch~iri]
       - [up:assertionConfidence, 0.9]
 
 
