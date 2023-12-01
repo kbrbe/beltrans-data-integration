@@ -18,7 +18,8 @@ class KBRZ3950APIHandler:
 
     def query(self, queryString):
         self._queryString = queryString
-        self._queryURL = self._baseURL + '&q=' + urllib.parse.quote(queryString)
+        queryStringQuotes = queryString.replace("'", '"')
+        self._queryURL = self._baseURL + '&q=' + urllib.parse.quote(queryStringQuotes, safe='=*"()')
 
         # query 0 records, because we are only interested in the header mentioning the total number of records
         numberURL = self._queryURL + '&rows=0'
@@ -30,8 +31,8 @@ class KBRZ3950APIHandler:
     def numberResults(self):
         return self._numberResults
 
-    def data(self):
-        """This iterator function returns the search results in batches of specified size"""
+    def getRecords(self):
+        """This iterator function returns record per record (of all batches)"""
         startRecord = 0
         maxRecord = self._numberResults
 

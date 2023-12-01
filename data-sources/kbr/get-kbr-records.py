@@ -62,8 +62,8 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
       #
       # with the following line you can enable a second progress bar for records in a batch
       # however, this second progress bar usually is finished before initialized properly, so it might seem that nothing is happening
-      # for record in tqdm(apiHandler.data(), total=numberOfResults, position=1, leave=False, desc='Records in batch'):
-      for record in apiHandler.data():
+      # for record in tqdm(apiHandler.getRecords(), total=numberOfResults, position=1, leave=False, desc='Records in batch'):
+      for record in apiHandler.getRecords():
         outFile.write(ET.tostring(record))
 
     outFile.write(b'</collection>')

@@ -38,6 +38,9 @@ MODULE_GET_RDF_XML_SUBJECTS="tools.xml.get-subjects"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
 MODULE_EXTRACT_COLUMNS="tools.csv.extract_columns"
 
+MODULE_FETCH_KBR_DATA="tools.xml.query_kbr"
+MODULE_EXTRACT_KBR_CONTRIBUTOR_LINKS="tools.xml.extract_linked_authorities"
+
 MODULE_NORMALIZE_1_N_COLUMNS="tools.csv.normalize_1_n_relationship"
 
 # the following script is an older deprecated version of the script above
@@ -623,6 +626,19 @@ SUFFIX_WIKIDATA_LD="from-manually-enriched-wikidata.ttl"
 SUFFIX_CORRELATION_LD="correlation-contributor-entities.ttl"
 
 SUFFIX_CORRELATION_TRL_LD="correlation-translation-entities.ttl"
+
+# -----------------------------------------------------------------------------
+function fetch {
+
+  local dataSource=$1
+  local integrationFolderName=$2
+
+  if [ "$dataSource" = "kbr" ];
+  then
+    fetchKBR $integrationFolderName
+  fi
+
+}
 
 # -----------------------------------------------------------------------------
 function extract {
@@ -1262,6 +1278,124 @@ function folderHasToExist {
 }
 
 # -----------------------------------------------------------------------------
+function fetchKBR {
+  local integrationName=$1
+
+  echo ""
+  echo "FETCH - Download KBR data"
+  fetchKBRTranslations "$1"
+  fetchKBRLinkedAuthorities
+}
+
+# -----------------------------------------------------------------------------
+function fetchKBRTranslations {
+  local integrationName=$1
+
+  local queryFRNL="H041=('*fre*','*frm*','*fro*') AND LAND='*dut*' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
+
+  local queryNLFR="H041=('*dut*','*dum*') AND LAND='*fre*' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
+
+  local date=`date +"%Y-%m-%d"`
+  local dataFRNL="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
+  local dataNLFR="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
+  
+  echo ""
+  echo "FETCH - Download KBR translations FR-NL"
+  fetchKBRData "$queryFRNL" "$dataFRNL"
+
+  echo ""
+  echo "FETCH - Download KBR translations NL-FR"
+  fetchKBRData "$queryNLFR" "$dataNLFR"
+}
+
+# -----------------------------------------------------------------------------
+function fetchKBRLinkedAuthorities {
+  local integrationName=$1
+
+  local date=`date +"%Y-%m-%d"`
+  local dataFRNL="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
+  local dataNLFR="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
+
+  local personsFRNLXML="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.xml"
+  local personsNLFRXML="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.xml"
+
+  local orgsFRNLXML="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.xml"
+  local orgsNLFRXML="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.xml"
+
+  local personsFRNLIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.csv"
+  local personsNLFRIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.csv"
+
+  local orgsFRNLIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.csv"
+  local orgsNLFRIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.csv"
+
+  checkFile $dataFRNL
+  checkFile $dataNLFR
+
+  echo ""
+  echo "FETCH - Extract KBR translations FR-NL linked authorities"
+  python -m $MODULE_EXTRACT_KBR_CONTRIBUTOR_LINKS -i $dataFRNL --output-persons $personsFRNLIdentifiers --output-orgs $orgsFRNLIdentifiers
+
+  echo ""
+  echo "FETCH - Extract KBR translations NL-FR linked authorities"
+  python -m $MODULE_EXTRACT_KBR_CONTRIBUTOR_LINKS -i $dataNLFR --output-persons $personsNLFRIdentifiers --output-orgs $orgsNLFRIdentifiers
+
+  echo ""
+  echo "FETCH - Download KBR translations FR-NL linked authorities - person"
+  getKBRAutRecords $personsFRNLIdentifiers "contributorID" $personsFRNLXML 
+
+  echo ""
+  echo "FETCH - Download KBR translations FR-NL linked authorities - orgs"
+  getKBRAutRecords $orgsFRNLIdentifiers "contributorID" $orgsFRNLXML 
+
+  echo ""
+  echo "FETCH - Download KBR translations NL-FR linked authorities - persons"
+  getKBRAutRecords $personsNLFRIdentifiers "contributorID" $personsNLFRXML 
+
+  echo ""
+  echo "FETCH - Download KBR translations NL-FR linked authorities - orgs"
+  getKBRAutRecords $orgsNLFRIdentifiers "contributorID" $orgsNLFRXML 
+  
+}
+
+# -----------------------------------------------------------------------------
+function fetchKBRLinkedAuthoritiesPersonsFromDump {
+  local inputFile=$1
+  local inputFileIDColumnIndex=$2
+  local outputFilePersons=$3
+
+  echo ""
+  echo "EXTRACT PERSON RECORDS (APEP)"
+  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+    -i $INPUT_KBR_APEP \
+    -f $inputFile \
+    -o $outputFilePersons \
+    --filter-column-index $inputFileIDColumnIndex \
+    --subject-tag "marc:record" \
+    --input-format "MARCXML"
+
+}
+
+# -----------------------------------------------------------------------------
+function fetchKBRLinkedAuthoritiesOrgsFromDump {
+  local inputFile=$1
+  local inputFileIDColumnIndex=$2
+  local outputFileOrgs=$3
+
+  echo ""
+  echo "EXTRACT ORG RECORDS (AORG)"
+  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
+    -i $INPUT_KBR_AORG \
+    -f $inputFile \
+    -o $outputFileOrgs \
+    --filter-column-index $inputFileIDColumnIndex \
+    --subject-tag "marc:record" \
+    --input-format "MARCXML"
+
+}
+
+
+
+# -----------------------------------------------------------------------------
 function extractKBR {
 
   local integrationName=$1
@@ -1317,8 +1451,8 @@ function extractKBR {
 
   python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsContributorIDList" -c "contributorID" "$kbrTranslationsCSVContDedupFRNL" "$kbrTranslationsCSVContDedupNLFR"
 
-  fetchKBRLinkedAuthoritiesPersons "$kbrOriginalsContributorIDList" "0" "$kbrOriginalsFetchedPersonsXML"
-  fetchKBRLinkedAuthoritiesOrgs "$kbrOriginalsContributorIDList" "0" "$kbrOriginalsFetchedOrgsXML"
+  fetchKBRLinkedAuthoritiesPersonsFromDump "$kbrOriginalsContributorIDList" "0" "$kbrOriginalsFetchedPersonsXML"
+  fetchKBRLinkedAuthoritiesOrgsFromDump "$kbrOriginalsContributorIDList" "0" "$kbrOriginalsFetchedOrgsXML"
 
   extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals"
   extractKBROrgs "$integrationName" "kbr" "$kbrOriginalsFetchedOrgsXML" "linked-originals"
@@ -1750,8 +1884,8 @@ function extractOriginalLinksKBR {
   linkedContributors="$integrationName/$dataSourceName/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
   fetchedPersonsXML="$integrationName/$dataSourceName/agents/fetched-apep.xml"
   fetchedOrgsXML="$integrationName/$dataSourceName/agents/fetched-aorg.xml"
-  fetchKBRLinkedAuthoritiesPersons "$linkedContributors" "1" "$fetchedPersonsXML"
-  fetchKBRLinkedAuthoritiesOrgs "$linkedContributors" "1" "$fetchedOrgsXML"
+  fetchKBRLinkedAuthoritiesPersonsFromDump "$linkedContributors" "1" "$fetchedPersonsXML"
+  fetchKBRLinkedAuthoritiesOrgsFromDump "$linkedContributors" "1" "$fetchedOrgsXML"
 
   extractKBRPersons "$integrationName" "$dataSourceName" "$fetchedPersonsXML" "mixed-lang"
   extractKBROrgs "$integrationName" "$dataSourceName" "$fetchedOrgsXML" "mixed-lang"
@@ -2637,7 +2771,7 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
-  fetchKBRLinkedAuthoritiesPersons "$correlationListKBRIDs" "1" "$kbrOriginalsFetchedPersonsXML"
+  fetchKBRLinkedAuthoritiesPersonsFromDump "$correlationListKBRIDs" "1" "$kbrOriginalsFetchedPersonsXML"
   extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
 }
 
@@ -2673,44 +2807,8 @@ function extractContributorOrgCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedOrgsXML="$folderName/kbr/fetched-aorg.xml"
 
-  fetchKBRLinkedAuthoritiesOrgs "$correlationListKBRIDs" "1" "$kbrOriginalsFetchedOrgsXML"
+  fetchKBRLinkedAuthoritiesOrgsFromDump "$correlationListKBRIDs" "1" "$kbrOriginalsFetchedOrgsXML"
   extractKBROrgs "$folderName" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
-
-}
-
-# -----------------------------------------------------------------------------
-function fetchKBRLinkedAuthoritiesPersons {
-  local inputFile=$1
-  local inputFileIDColumnIndex=$2
-  local outputFilePersons=$3
-
-  echo ""
-  echo "EXTRACT PERSON RECORDS (APEP)"
-  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_APEP \
-    -f $inputFile \
-    -o $outputFilePersons \
-    --filter-column-index $inputFileIDColumnIndex \
-    --subject-tag "marc:record" \
-    --input-format "MARCXML"
-
-}
-
-# -----------------------------------------------------------------------------
-function fetchKBRLinkedAuthoritiesOrgs {
-  local inputFile=$1
-  local inputFileIDColumnIndex=$2
-  local outputFileOrgs=$3
-
-  echo ""
-  echo "EXTRACT ORG RECORDS (AORG)"
-  python -m $MODULE_FILTER_RDF_XML_SUBJECTS \
-    -i $INPUT_KBR_AORG \
-    -f $inputFile \
-    -o $outputFileOrgs \
-    --filter-column-index $inputFileIDColumnIndex \
-    --subject-tag "marc:record" \
-    --input-format "MARCXML"
 
 }
 
@@ -2762,8 +2860,8 @@ function extractTranslationCorrelationList {
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrTranslationsCSVContDedup="$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  fetchKBRLinkedAuthoritiesPersons "$kbrTranslationsCSVContDedup" "1" "$kbrTranslationsFetchedPersonsXML"
-  fetchKBRLinkedAuthoritiesOrgs "$kbrTranslationsCSVContDedup" "1" "$kbrTranslationsFetchedOrgsXML"
+  fetchKBRLinkedAuthoritiesPersonsFromDump "$kbrTranslationsCSVContDedup" "1" "$kbrTranslationsFetchedPersonsXML"
+  fetchKBRLinkedAuthoritiesOrgsFromDump "$kbrTranslationsCSVContDedup" "1" "$kbrTranslationsFetchedOrgsXML"
 
   extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedPersonsXML" "mixed-lang"
   extractKBROrgs "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedOrgsXML" "mixed-lang"
@@ -2786,8 +2884,8 @@ function extractTranslationCorrelationList {
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrOriginalsCSVContDedup="$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  fetchKBRLinkedAuthoritiesPersons "$kbrOriginalsCSVContDedup" "1" "$kbrOriginalsFetchedPersonsXML"
-  fetchKBRLinkedAuthoritiesOrgs "$kbrOriginalsCSVContDedup" "1" "$kbrOriginalsFetchedOrgsXML"
+  fetchKBRLinkedAuthoritiesPersonsFromDump "$kbrOriginalsCSVContDedup" "1" "$kbrOriginalsFetchedPersonsXML"
+  fetchKBRLinkedAuthoritiesOrgsFromDump "$kbrOriginalsCSVContDedup" "1" "$kbrOriginalsFetchedOrgsXML"
 
   extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
   extractKBROrgs "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
@@ -3685,6 +3783,17 @@ function checkFile {
 }
 
 # -----------------------------------------------------------------------------
+function fetchKBRData {
+  local query=$1
+  local outputFile=$2
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950" -q "$query" -o "$outputFile" -b 500
+}
+
+# -----------------------------------------------------------------------------
 function getKBRRecords {
   local inputFile=$1
   local idColumn=$2
@@ -3693,6 +3802,17 @@ function getKBRRecords {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
   python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "$idColumn" -b "150" -u "$ENV_KBR_API_Z3950" "$inputFile"
+}
+
+# -----------------------------------------------------------------------------
+function getKBRAutRecords {
+  local inputFile=$1
+  local idColumn=$2
+  local outputFile=$3
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+  python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "$idColumn" -b "150" -u "$ENV_KBR_API_Z3950_AUT" "$inputFile"
 }
 
 # -----------------------------------------------------------------------------
@@ -3899,7 +4019,17 @@ then
   echo "extract (e) transform (t) load (l)  integrate (i) query (q) and postprocess (p): 'etl', 'etliq', 'etliqp', 'e', 'et', 't', 'l', 'tl', 'q', 'i' etc"
   exit 1
 else
-  if [ "$1" = "etliqp" ];
+  if [ "$1" = "fetliqp" ];
+  then
+    fetch $2 $3
+    extract $2 $3
+    transform $2 $3
+    load $2 $3
+    integrate $3
+    query $3
+    postprocess $3
+
+  elif [ "$1" = "etliqp" ];
   then
     extract $2 $3
     transform $2 $3
@@ -3951,6 +4081,22 @@ else
   elif [ "$1" = "p" ];
   then
     postprocess $3
+
+  elif [ "$1" = "f" ];
+  then
+    fetch $2 $3
+
+  elif [ "$1" = "fetl" ];
+  then
+    fetch $2 $3
+    extract $2 $3
+    transform $2 $3
+    load $2 $3
+
+  elif [ "$1" = "fe" ];
+  then
+    fetch $2 $3
+    extract $2 $3
 
   elif [ "$1" = "etl" ];
   then
