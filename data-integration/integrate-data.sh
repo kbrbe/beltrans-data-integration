@@ -1358,6 +1358,7 @@ function fetchKBRLinkedAuthorities {
 }
 
 # -----------------------------------------------------------------------------
+# 2023-12-04: deprecated, replacement with live data getKBRAutRecords
 function fetchKBRLinkedAuthoritiesPersonsFromDump {
   local inputFile=$1
   local inputFileIDColumnIndex=$2
@@ -1376,6 +1377,7 @@ function fetchKBRLinkedAuthoritiesPersonsFromDump {
 }
 
 # -----------------------------------------------------------------------------
+# 2023-12-04: deprecated, replacement with live data getKBRAutRecords
 function fetchKBRLinkedAuthoritiesOrgsFromDump {
   local inputFile=$1
   local inputFileIDColumnIndex=$2
@@ -1451,8 +1453,8 @@ function extractKBR {
 
   python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsContributorIDList" -c "contributorID" "$kbrTranslationsCSVContDedupFRNL" "$kbrTranslationsCSVContDedupNLFR"
 
-  fetchKBRLinkedAuthoritiesPersonsFromDump "$kbrOriginalsContributorIDList" "0" "$kbrOriginalsFetchedPersonsXML"
-  fetchKBRLinkedAuthoritiesOrgsFromDump "$kbrOriginalsContributorIDList" "0" "$kbrOriginalsFetchedOrgsXML"
+  getKBRAutRecords "$kbrOriginalsContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML"
+  getKBRAutRecords "$kbrOriginalsContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML"
 
   extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals"
   extractKBROrgs "$integrationName" "kbr" "$kbrOriginalsFetchedOrgsXML" "linked-originals"
@@ -1884,8 +1886,8 @@ function extractOriginalLinksKBR {
   linkedContributors="$integrationName/$dataSourceName/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
   fetchedPersonsXML="$integrationName/$dataSourceName/agents/fetched-apep.xml"
   fetchedOrgsXML="$integrationName/$dataSourceName/agents/fetched-aorg.xml"
-  fetchKBRLinkedAuthoritiesPersonsFromDump "$linkedContributors" "1" "$fetchedPersonsXML"
-  fetchKBRLinkedAuthoritiesOrgsFromDump "$linkedContributors" "1" "$fetchedOrgsXML"
+  getKBRAutRecords "$linkedContributors" "contributorID" "$fetchedPersonsXML"
+  getKBRAutRecords "$linkedContributors" "contributorID" "$fetchedOrgsXML"
 
   extractKBRPersons "$integrationName" "$dataSourceName" "$fetchedPersonsXML" "mixed-lang"
   extractKBROrgs "$integrationName" "$dataSourceName" "$fetchedOrgsXML" "mixed-lang"
@@ -2771,7 +2773,7 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
-  fetchKBRLinkedAuthoritiesPersonsFromDump "$correlationListKBRIDs" "1" "$kbrOriginalsFetchedPersonsXML"
+  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML"
   extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
 }
 
@@ -2807,7 +2809,7 @@ function extractContributorOrgCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedOrgsXML="$folderName/kbr/fetched-aorg.xml"
 
-  fetchKBRLinkedAuthoritiesOrgsFromDump "$correlationListKBRIDs" "1" "$kbrOriginalsFetchedOrgsXML"
+  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedOrgsXML"
   extractKBROrgs "$folderName" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
 
 }
@@ -2860,8 +2862,8 @@ function extractTranslationCorrelationList {
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrTranslationsCSVContDedup="$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  fetchKBRLinkedAuthoritiesPersonsFromDump "$kbrTranslationsCSVContDedup" "1" "$kbrTranslationsFetchedPersonsXML"
-  fetchKBRLinkedAuthoritiesOrgsFromDump "$kbrTranslationsCSVContDedup" "1" "$kbrTranslationsFetchedOrgsXML"
+  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedPersonsXML"
+  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedOrgsXML"
 
   extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedPersonsXML" "mixed-lang"
   extractKBROrgs "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedOrgsXML" "mixed-lang"
@@ -2884,8 +2886,8 @@ function extractTranslationCorrelationList {
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrOriginalsCSVContDedup="$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  fetchKBRLinkedAuthoritiesPersonsFromDump "$kbrOriginalsCSVContDedup" "1" "$kbrOriginalsFetchedPersonsXML"
-  fetchKBRLinkedAuthoritiesOrgsFromDump "$kbrOriginalsCSVContDedup" "1" "$kbrOriginalsFetchedOrgsXML"
+  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedPersonsXML"
+  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedOrgsXML"
 
   extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
   extractKBROrgs "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
