@@ -52,7 +52,8 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
     for i in tqdm(range(0, len(kbrIdentifiers), batchSize), position=0, desc='Batches'):
       batch = kbrIdentifiersList[i:i+batchSize]
 
-      query = 'IDNO=(' + ','.join(batch) + ')'
+      # Create the query string, but only take KBR identifiers of valid length
+      query = 'IDNO=(' + ','.join([x for x in batch if len(x)==8]) + ')'
 
       # query the batch (e.g. query 100 identifiers)
       apiHandler.query(query)
