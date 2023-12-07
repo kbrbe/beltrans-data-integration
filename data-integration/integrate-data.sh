@@ -153,10 +153,10 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-11-08_person-contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2023-11-14_org-contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-11-14_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-11-14_translations_removal-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-12-06_person-contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2023-12-06_org-contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-12-06_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-12-06_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -551,6 +551,7 @@ SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML="correlation-original-kbr.xml"
 SUFFIX_CORRELATION_TRL_KBR_TRL_XML="correlation-translation-kbr.xml"
 SUFFIX_CORRELATION_TRL_SOURCE_LANG="correlation-trl-source-lang.csv"
 SUFFIX_CORRELATION_TRL_TARGET_LANG="correlation-trl-target-lang.csv"
+SUFFIX_CORRELATION_TRL_NATIONALITY="correlation-trl-nationality.csv"
 
 #
 # LINKED DATA - KBR TRANSLATIONS
@@ -1424,35 +1425,34 @@ function extractKBR {
   mkdir -p $integrationName/kbr/agents/nl-fr
 
   local alreadyFetchedContributors="$integrationName/kbr/$SUFFIX_KBR_LIST_FETCHED_CONTRIBUTORS"
-  echo "authorityID" > $alreadyFetchedContributors
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data FR-NL"
-  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
+  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data NL-FR"
-  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
+  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "$alreadyFetchedContributors"
-  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
-  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "$alreadyFetchedContributors"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
 
-  #extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_FR" "fr-nl" "$alreadyFetchedContributors"
-  #extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_NL" "nl-fr" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_FR" "fr-nl" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_NL" "nl-fr" "$alreadyFetchedContributors"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
   kbrTranslationsCSVFRNL="$integrationName/kbr/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   kbrTranslationsCSVNLFR="$integrationName/kbr/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
   kbrLinkedOriginalsXML="$integrationName/kbr/book-data-and-contributions/linked-originals/fetched-originals.xml"
-  #python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
-  #  --identifier-column "sourceKBRID" \
-  #  -b "150" \
-  #  -u "$ENV_KBR_API_Z3950" \
-  #  "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
+  python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
+    --identifier-column "sourceKBRID" \
+    -b "150" \
+    -u "$ENV_KBR_API_Z3950" \
+    "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
   extractKBRTranslationsAndContributions "$integrationName" "kbr" "$kbrLinkedOriginalsXML" "linked-originals"
 
   echo ""
@@ -1467,16 +1467,21 @@ function extractKBR {
   python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
 
   echo ""
-  echo "Fetch KBR originals"
-  echo getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
+  echo "Fetch KBR originals - persons"
   getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
-  echo getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
-  getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
+  echo ""
+  echo "Extract CSV data from fetched linked original authorities - persons"
+  extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
 
   echo ""
-  echo "Extract CSV data from fetched linked original authorities"
-  extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFechtedContributors"
+  echo "Fetch KBR originals - persons"
+  getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
+  echo ""
+  echo "Extract CSV data from fetched linked original authorities - orgs"
   extractKBROrgs "$integrationName" "kbr" "$kbrOriginalsFetchedOrgsXML" "linked-originals" "$alreadyFetchedContributors"
+
+  echo ""
+  echo "Extract KBR places"
   extractKBRPlaces
 
 }
@@ -2308,7 +2313,7 @@ function extractKBRPersons {
   local dataSourceName=$2
   local kbrPersons=$3
   local language=$4
-  local alreadyFetchedContributorsList=$5
+  local alreadyFetchedContributors=$5
 
   kbrPersonsCSV="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
   kbrPersonsNationalities="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
@@ -2318,6 +2323,7 @@ function extractKBRPersons {
 
   source py-integration-env/bin/activate
 
+  echo ""
   echo "Extract person authorities - $language ..."
   python $SCRIPT_EXTRACT_AGENTS_PERSONS \
     -i $kbrPersons \
@@ -2326,6 +2332,7 @@ function extractKBRPersons {
     --names-csv $kbrPersonsNames \
     --identifier-csv $kbrPersonsISNIs
 
+  echo ""
   echo "Complete author names sequence numbers - $language ..."
   python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS \
     -i $kbrPersonsNames \
@@ -2333,9 +2340,18 @@ function extractKBRPersons {
     --identifier-column "authorityID" \
     --sequence-number-column "sequence_number"
 
-  echo "Keep list of extracted persons"
-  appendValuesToCSV "$kbrPersonsCSV" "authorityID" "$alreadyFetchedContributorsList"
-   
+  if [ ! -z $alreadyFetchedContributors ];
+  then
+    numberExtractedPersons=`wc -l $kbrPersonsCSV`
+    # we extracted more KBR identifiers and therefore have to update the list of already fetched contributors
+    # the reason we do this in the extraction phase and not after fetching with getKBRAutRecords
+    # is that we initially start with an export and do not necessarilly call the fetch function,
+    # but we still want that the initially extracted authorities are note fetched again
+    echo ""
+    echo "Append $numberExtractedPersons person identifiers to already fetched list (number including header)"
+    appendValuesToCSV "$kbrPersonsCSV" "authorityID" "$alreadyFetchedContributors"
+  fi
+
 }
 
 # -----------------------------------------------------------------------------
@@ -2345,18 +2361,37 @@ function extractKBROrgs {
   local dataSourceName=$2
   local kbrOrgs=$3
   local language=$4
-  local alreadyFetchedContributorsList=$5
+  local alreadyFetchedContributors=$5
 
   kbrOrgsCSV="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
   kbrOrgsISNIs="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
 
   source py-integration-env/bin/activate
 
+  echo ""
   echo "Extract authorities $language - Organizations ..."
-  python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrOrgs -o $kbrOrgsCSV --identifier-csv $kbrOrgsISNIs
+  if [ -f $kbrOrgs ];
+  then
+    python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrOrgs -o $kbrOrgsCSV --identifier-csv $kbrOrgsISNIs
 
-  echo "Keep list of extracted orgs"
-  appendValuesToCSV "$kbrOrgsCSV" "authorityID" "$alreadyFetchedContributorsList"
+    if [ -n $alreadyFetchedContributors ];
+    then
+      numberExtractedOrgs=`wc -l $kbrOrgsCSV`
+      # we extracted more KBR identifiers and therefore have to update the list of already fetched contributors
+      # the reason we do this in the extraction phase and not after fetching with getKBRAutRecords
+      # is that we initially start with an export and do not necessarilly call the fetch function,
+      # but we still want that the initially extracted authorities are note fetched again
+      echo ""
+      echo "Append $numberExtractedOrgs org identifiers to already fetched list (number including header)"
+      appendValuesToCSV "$kbrOrgsCSV" "authorityID" "$alreadyFetchedContributors"
+    fi
+  else
+    echo ""
+    echo "Org input file does not exist, no org XML file to extract from!"
+  fi
+
+
+
 }
 
 # -----------------------------------------------------------------------------
@@ -2783,6 +2818,8 @@ function extractContributorPersonCorrelationList {
   local correlationListPseudonymOfIDs="$folderName/$SUFFIX_CORRELATION_PSEUDONYM"
   local correlationListRealNameOfIDs="$folderName/$SUFFIX_CORRELATION_REAL_NAME"
 
+  local correlationListNationalityCountryCodes="$folderName/$SUFFIX_CORRELATION_TRL_NATIONALITY"
+
   echo "Extract 1:n relationships of different persons correlation list columns from '$correlationList'"
   cp $correlationList $folderName
   extractSeparatedColumn $correlationList $correlationListNationalities "contributorID" "nationalityCountryCodes" "id" "nationality"
@@ -2793,6 +2830,7 @@ function extractContributorPersonCorrelationList {
   extractSeparatedColumn $correlationList $correlationListWikidataIDs "contributorID" "wikidataIDs" "id" "wikidata"
   extractSeparatedColumn $correlationList $correlationListUnescoIDs "contributorID" "unescoIDs" "id" "unesco"
   extractSeparatedColumn $correlationList $correlationListISNIIDs "contributorID" "isniIDs" "id" "ISNI"
+  extractSeparatedColumn $correlationList $correlationListNationalityCountryCodes "contributorID" "nationalityCountryCodes" "id" "countryCode"
 
   echo ""
   echo "EXTRACTION - Fetch, extract and clean KBR contributor person correlation list"
@@ -2800,7 +2838,7 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
-  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML"
+  #getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML"
   extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
 }
 
@@ -2860,6 +2898,8 @@ function extractTranslationCorrelationList {
   local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
   local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
+  local correlationListNationalityCountryCodes="$folderName/$SUFFIX_CORRELATION_TRL_NATIONALITY"
+
   local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
   
   echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
@@ -2872,6 +2912,7 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListUNESCOIDs "targetIdentifier" "targetUnescoIdentifier" "id" "unesco"
   extractSeparatedColumn $correlationList $correlationListSourceLanguage "targetIdentifier" "sourceLanguage" "id" "sourceLanguage"
   extractSeparatedColumn $correlationList $correlationListTargetLanguage "targetIdentifier" "targetLanguage" "id" "targetLanguage"
+  extractSeparatedColumn $correlationList $correlationListNationalityCountryCodes "targetIdentifier" "nationalityCountryCodes" "id" "countryCode"
 
   echo ""
   echo "Fetch and extract KBR translations"
@@ -2973,6 +3014,8 @@ function transformContributorPersonCorrelationList {
   local correlationListUnescoIDs="$folderName/$SUFFIX_CORRELATION_UNESCO"
   local correlationListISNIIDs="$folderName/$SUFFIX_CORRELATION_ISNI"
 
+  local correlationListNationalityCountryCodes="$folderName/$SUFFIX_CORRELATION_TRL_NATIONALITY"
+
   #local correlationListUnescoLongIDs="$folderName/$SUFFIX_CORRELATION_UNESCO_LONG"
   local correlationListVIAFIDs="$folderName/$SUFFIX_CORRELATION_VIAF"
   local correlationListWikidataIDs="$folderName/$SUFFIX_CORRELATION_WIKIDATA"
@@ -2981,12 +3024,12 @@ function transformContributorPersonCorrelationList {
 
 
   export RML_SOURCE_CORRELATION_CONTRIBUTORS="$correlationList"
-  export RML_SOURCE_CORRELATION_NATIONALITY="$correlationListNationalities"
   export RML_SOURCE_CORRELATION_KBR="$correlationListKBRIDs"
   export RML_SOURCE_CORRELATION_BNF="$correlationListBnFIDs"
   export RML_SOURCE_CORRELATION_NTA="$correlationListNTAIDs"
   export RML_SOURCE_CORRELATION_UNESCO="$correlationListUnescoIDs"
   export RML_SOURCE_CORRELATION_ISNI="$correlationListISNIIDs"
+  export RML_SOURCE_CORRELATION_NATIONALITY="$correlationListNationalityCountryCodes"
 
   export RML_SOURCE_CORRELATION_VIAF="$correlationListVIAFIDs"
   export RML_SOURCE_CORRELATION_WIKIDATA="$correlationListWikidataIDs"
@@ -3840,30 +3883,30 @@ function getKBRAutRecords {
   local outputFile=$3
   local alreadyFetchedContributors=$4
 
-
-  local inputFileFolder=$(dirname $inputFile)
-  local notYetFetched="$inputFileFolder/diff-authorities-to-fetch.csv"
-
-  local currentTime=`date +"%Y-%m-%d_%H-%M-%S-%N"`
-  local tempInput="/tmp/kbr-contributors-$currentTime.csv"
-  python -m $MODULE_NORMALIZE_HEADERS -i $inputFile --delimiter ',' --header-mapping-file $KBR_CONTRIBUTOR_HEADER_CONVERSION -o $tempInput
-
-  python -m $MODULE_CSV_SET_DIFFERENCE -o $notYetFetched --minus-rest --column "authorityID" "$tempInput" "$alreadyFetchedContributors"
-  local numberRows=`wc -l $inputFile`
-  local numberRowsDiff=`wc -l $notYetFetched`
-
-  echo ""
-  echo "Fetch KBR authority data (records we do not have already: $numberRowsDiff from $numberRowsDiff)"
-  echo "(from file '$idColumn' in '$inputFile')"
-
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
-  echo python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "authorityID" -b "150" -u "$ENV_KBR_API_Z3950_AUT" "$notYetFetched"
-  python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "authorityID" -b "150" -u "$ENV_KBR_API_Z3950_AUT" "$notYetFetched"
 
-  echo ""
-  echo "Append $notYetFetched records to already fetched list"
-  appendValuesToCSV "$notYetFetched" "authorityID" "$alreadyFetchedContributors"
+  if [ -z $alreadyFetchedContributors ];
+  then
+    echo ""
+    echo "Fetch KBR authority data"
+    python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "$idColumn" -b "150" -u "$ENV_KBR_API_Z3950_AUT" "$inputFile"
+
+  else
+    local currentTime=`date +"%Y-%m-%d_%H-%M-%S"`
+    local inputFileFolder=$(dirname $inputFile)
+    local notYetFetched="$inputFileFolder/diff-authorities-to-fetch-$currentTime.csv"
+
+    python -m $MODULE_CSV_SET_DIFFERENCE -o $notYetFetched --minus-rest --column "$idColumn" --column "authorityID" --output-column "authorityID" "$inputFile" "$alreadyFetchedContributors"
+    local numberRows=`wc -l $inputFile`
+    local numberRowsDiff=`wc -l $notYetFetched`
+
+    echo ""
+    echo "Fetch KBR authority data (records we do not have already: $numberRowsDiff from $numberRowsDiff)"
+    python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "authorityID" -b "150" -u "$ENV_KBR_API_Z3950_AUT" "$notYetFetched"
+
+  fi
+
 }
 
 # -----------------------------------------------------------------------------
@@ -3872,12 +3915,18 @@ function appendValuesToCSV {
   local inputFileIDColumn=$2
   local outputFile=$3
 
-  echo "BEGIN APPEND VALUES"
-  local currentTime=`date +"%Y-%m-%d_%H-%M-%S"`
-  local tempOutput="/tmp/append-values-$currentTime.csv"
-  python -m $MODULE_EXTRACT_COLUMNS -o "$tempOutput" --column "$inputFileIDColumn" --append "$inputFile" 
-  echo python -m $MODULE_NORMALIZE_HEADERS -i $tempOutput --delimiter ',' --header-mapping-file $KBR_CONTRIBUTOR_HEADER_CONVERSION -o $outputFile
-  python -m $MODULE_NORMALIZE_HEADERS -i $tempOutput --delimiter ',' --header-mapping-file $KBR_CONTRIBUTOR_HEADER_CONVERSION -o $outputFile
+  echo ""
+  echo "Store extracted and thus already fetched identifiers"
+  # using extract columns, but with append mode
+  if [ $inputFileIDColumn != "authorityID" ];
+  then
+    local currentTime=`date +"%Y-%m-%d_%H-%M-%S"`
+    local tempOutput="/tmp/append-values-$currentTime.csv"
+    python -m $MODULE_NORMALIZE_HEADERS -i $inputFile --delimiter ',' --header-mapping-file $KBR_CONTRIBUTOR_HEADER_CONVERSION -o $tempOutput
+    python -m $MODULE_EXTRACT_COLUMNS -o "$outputFile" --column "$inputFileIDColumn" --append "$tempOutput" 
+  else
+    python -m $MODULE_EXTRACT_COLUMNS -o "$outputFile" --column "$inputFileIDColumn" --append "$inputFile" 
+  fi
 
 }
 
