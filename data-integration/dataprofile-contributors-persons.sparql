@@ -25,6 +25,7 @@ SELECT DISTINCT
   (group_concat(distinct ?pseudonymIdentifier;SEPARATOR=';') as ?pseudonymOf)
   (group_concat(distinct ?otherIdentityIdentifier;SEPARATOR=';') as ?realNameOf)
   (group_concat(distinct ?nationalityLabel;SEPARATOR=';') AS ?nationalities)
+  (group_concat(distinct ?nationality;SEPARATOR=';') AS ?nationalityCountryCodes)
   (group_concat(distinct ?genderLabel;SEPARATOR=';') AS ?gender)
   (group_concat(distinct ?kbrBirthDate;SEPARATOR=';') AS ?birthDateKBR)
   (group_concat(distinct ?bnfBirthDate;SEPARATOR=';') AS ?birthDateBnF)
