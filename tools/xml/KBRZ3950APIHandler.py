@@ -25,8 +25,11 @@ class KBRZ3950APIHandler:
         numberURL = self._queryURL + '&rows=0'
 
         response = requests.get(numberURL)
-        tree = ET.fromstring(response.content)
-        self._numberResults = int(tree.find('./result').get('numFound'))
+        if response:
+          tree = ET.fromstring(response.content)
+          self._numberResults = int(tree.find('./result').get('numFound'))
+        else:
+          self._numberResults = 0
 
     def numberResults(self):
         return self._numberResults
@@ -35,6 +38,9 @@ class KBRZ3950APIHandler:
         """This iterator function returns record per record (of all batches)"""
         startRecord = 0
         maxRecord = self._numberResults
+
+        if maxRecord == 0:
+          return None
 
         for i in range(startRecord, maxRecord, self._batchSize):
             response = requests.get(self._queryURL + '&rows=' + str(self._batchSize) + '&start=' + str(i))
