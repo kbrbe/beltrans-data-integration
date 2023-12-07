@@ -5,4 +5,4 @@
 export PYTHONPATH=$(pwd)
 
 # make environment variables available
-export $(cat .data-integration/.env | sed 's/#.*//g' | xargs)
+export $(cat ./data-integration/.env | sed 's/#.*//g' | xargs)
