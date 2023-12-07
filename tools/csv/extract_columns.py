@@ -24,7 +24,7 @@ def main(inputFilenames, outputFilename, columns, delimiter, filterFilename=None
     rowFilter = RowFilter(filterCriteria) 
 
   outputMode = 'a' if appendData else 'w'
-  with open(outputFilename, outputMode) as outFile:
+  with open(outputFilename, outputMode, newline='') as outFile:
     outputWriter = csv.DictWriter(outFile, fieldnames=columns)
     outputWriter.writeheader()
 
@@ -70,3 +70,4 @@ def parseArguments():
 if __name__ == '__main__':
   options = parseArguments()
   main(options.input_files, options.output_file, options.column, options.delimiter, filterFilename=options.filter_file, appendData=options.append)
+
