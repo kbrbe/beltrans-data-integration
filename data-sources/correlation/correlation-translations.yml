@@ -36,6 +36,7 @@ variables:
   sourceContISBN13: &sourceContISBN13 ${RML_SOURCE_CORRELATION_TRL_ISBN13}
   sourceContSourceLang: &sourceContSourceLang ${RML_SOURCE_CORRELATION_TRL_SOURCE_LANG}
   sourceContTargetLang: &sourceContTargetLang ${RML_SOURCE_CORRELATION_TRL_TARGET_LANG}
+  sourceContTargetBB: &sourceContTargetBB ${RML_SOURCE_CORRELATION_TRL_TARGET_BB}
 
 mappings:
 
@@ -195,6 +196,19 @@ mappings:
             - [grel:valueParameter2, ""]
 
 
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  targetBB:
+    sources:
+      - access: *sourceContTargetBB
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po: 
+      - [schema:about, btid:$(targetThesaurusBB)~iri]
 
 
 

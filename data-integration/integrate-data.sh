@@ -14,6 +14,10 @@ SCRIPT_EXTRACT_IDENTIFIED_AUTHORITIES="../data-sources/kbr/get-identified-author
 SCRIPT_EXTRACT_SEPARATED_COL="../data-sources/kbr/extract-and-normalize-separated-strings.py"
 SCRIPT_DEDUPLICATE_KBR_PUBLISHERS="../data-sources/kbr/deduplicate-publishers.py"
 
+MODULE_NORMALIZED_LOOKUP="tools.csv.normalized_lookup"
+
+LOOKUP_FILE_BB_EN="../data-sources/master-data/bb-en.csv"
+
 SCRIPT_GET_KBR_RECORDS="../data-sources/kbr/get-kbr-records.py"
 
 MODULE_COMPLETE_SEQUENCE_NUMBERS="tools.csv.complete_sequence_numbers"
@@ -527,7 +531,6 @@ SUFFIX_BNFISNI_CONT_LD="bnf-data-of-missing-nationalities.xml"
 # CORRELATIONS
 #
 SUFFIX_CORRELATION="correlation-entities"
-SUFFIX_CORRELATION_NATIONALITY="correlation-persons-nationalities.csv"
 SUFFIX_CORRELATION_KBR="correlation-persons-kbr.csv"
 SUFFIX_CORRELATION_BNF="correlation-persons-bnf.csv"
 SUFFIX_CORRELATION_NTA="correlation-persons-nta.csv"
@@ -539,6 +542,7 @@ SUFFIX_CORRELATION_VIAF="correlation-persons-viaf.csv"
 SUFFIX_CORRELATION_WIKIDATA="correlation-persons-wikidata.csv"
 SUFFIX_CORRELATION_PSEUDONYM="correlation-persons-pseudonym.csv"
 SUFFIX_CORRELATION_REAL_NAME="correlation-persons-real-name.csv"
+SUFFIX_CORRELATION_NATIONALITY="correlation-persons-nationality.csv"
 
 SUFFIX_CORRELATION_TRL="correlation-translation-entities"
 SUFFIX_CORRELATION_TRL_ISBN10="correlation-trl-isbn10.csv"
@@ -551,7 +555,8 @@ SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML="correlation-original-kbr.xml"
 SUFFIX_CORRELATION_TRL_KBR_TRL_XML="correlation-translation-kbr.xml"
 SUFFIX_CORRELATION_TRL_SOURCE_LANG="correlation-trl-source-lang.csv"
 SUFFIX_CORRELATION_TRL_TARGET_LANG="correlation-trl-target-lang.csv"
-SUFFIX_CORRELATION_TRL_NATIONALITY="correlation-trl-nationality.csv"
+SUFFIX_CORRELATION_TRL_TARGET_BB_NAMES="correlation-trl-target-bb-names.csv"
+SUFFIX_CORRELATION_TRL_TARGET_BB_CODES="correlation-trl-target-bb-codes.csv"
 
 #
 # LINKED DATA - KBR TRANSLATIONS
@@ -2374,7 +2379,7 @@ function extractKBROrgs {
   then
     python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrOrgs -o $kbrOrgsCSV --identifier-csv $kbrOrgsISNIs
 
-    if [ -n $alreadyFetchedContributors ];
+    if [ ! -z $alreadyFetchedContributors ];
     then
       numberExtractedOrgs=`wc -l $kbrOrgsCSV`
       # we extracted more KBR identifiers and therefore have to update the list of already fetched contributors
@@ -2805,7 +2810,6 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName"
 
   local correlationList="$INPUT_CORRELATION_PERSON"
-  local correlationListNationalities="$folderName/$SUFFIX_CORRELATION_NATIONALITY"
   local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_KBR"
   local correlationListBnFIDs="$folderName/$SUFFIX_CORRELATION_BNF"
   local correlationListNTAIDs="$folderName/$SUFFIX_CORRELATION_NTA"
@@ -2818,11 +2822,10 @@ function extractContributorPersonCorrelationList {
   local correlationListPseudonymOfIDs="$folderName/$SUFFIX_CORRELATION_PSEUDONYM"
   local correlationListRealNameOfIDs="$folderName/$SUFFIX_CORRELATION_REAL_NAME"
 
-  local correlationListNationalityCountryCodes="$folderName/$SUFFIX_CORRELATION_TRL_NATIONALITY"
+  local correlationListNationalityCountryCodes="$folderName/$SUFFIX_CORRELATION_NATIONALITY"
 
   echo "Extract 1:n relationships of different persons correlation list columns from '$correlationList'"
   cp $correlationList $folderName
-  extractSeparatedColumn $correlationList $correlationListNationalities "contributorID" "nationalityCountryCodes" "id" "nationality"
   extractSeparatedColumn $correlationList $correlationListKBRIDs "contributorID" "kbrIDs" "id" "KBR"
   extractSeparatedColumn $correlationList $correlationListBnFIDs "contributorID" "bnfIDs" "id" "BnF"
   extractSeparatedColumn $correlationList $correlationListNTAIDs "contributorID" "ntaIDs" "id" "NTA"
@@ -2898,7 +2901,8 @@ function extractTranslationCorrelationList {
   local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
   local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
-  local correlationListNationalityCountryCodes="$folderName/$SUFFIX_CORRELATION_TRL_NATIONALITY"
+  local correlationListTargetBBNames="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_NAMES"
+  local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
   local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
   
@@ -2912,7 +2916,19 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListUNESCOIDs "targetIdentifier" "targetUnescoIdentifier" "id" "unesco"
   extractSeparatedColumn $correlationList $correlationListSourceLanguage "targetIdentifier" "sourceLanguage" "id" "sourceLanguage"
   extractSeparatedColumn $correlationList $correlationListTargetLanguage "targetIdentifier" "targetLanguage" "id" "targetLanguage"
-  extractSeparatedColumn $correlationList $correlationListNationalityCountryCodes "targetIdentifier" "nationalityCountryCodes" "id" "countryCode"
+  extractSeparatedColumn $correlationList $correlationListTargetBBNames "targetIdentifier" "targetThesaurusBB" "id" "targetThesaurusBB"
+
+  python -m $MODULE_NORMALIZED_LOOKUP \
+    --input-file $correlationListTargetBBNames \
+    --lookup-file $LOOKUP_FILE_BB_EN \
+    --output-file $correlationListTargetBBCodes \
+    --lookup-key-column "name" \
+    --lookup-value-column "id" \
+    --input-key-column "targetThesaurusBB" \
+    --input-id-column "id" \
+    --output-value-column "targetThesaurusBB" \
+    --input-delimiter "," \
+    --lookup-delimiter ";"
 
   echo ""
   echo "Fetch and extract KBR translations"
@@ -3007,18 +3023,18 @@ function transformContributorPersonCorrelationList {
   mkdir -p "$folderName/rdf"
 
   local correlationList="$INPUT_CORRELATION_PERSON"
-  local correlationListNationalities="$folderName/$SUFFIX_CORRELATION_NATIONALITY"
   local correlationListKBRIDs="$folderName/$SUFFIX_CORRELATION_KBR"
   local correlationListBnFIDs="$folderName/$SUFFIX_CORRELATION_BNF"
   local correlationListNTAIDs="$folderName/$SUFFIX_CORRELATION_NTA"
   local correlationListUnescoIDs="$folderName/$SUFFIX_CORRELATION_UNESCO"
   local correlationListISNIIDs="$folderName/$SUFFIX_CORRELATION_ISNI"
 
-  local correlationListNationalityCountryCodes="$folderName/$SUFFIX_CORRELATION_TRL_NATIONALITY"
+  local correlationListNationalityCountryCodes="$folderName/$SUFFIX_CORRELATION_NATIONALITY"
 
   #local correlationListUnescoLongIDs="$folderName/$SUFFIX_CORRELATION_UNESCO_LONG"
   local correlationListVIAFIDs="$folderName/$SUFFIX_CORRELATION_VIAF"
   local correlationListWikidataIDs="$folderName/$SUFFIX_CORRELATION_WIKIDATA"
+
 
   local correlationTurtle="$folderName/rdf/$SUFFIX_CORRELATION_LD"
 
@@ -3109,6 +3125,7 @@ function transformTranslationCorrelationList {
   local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
   local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
+  local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
   local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
 
@@ -3121,6 +3138,7 @@ function transformTranslationCorrelationList {
   export RML_SOURCE_CORRELATION_TRL_UNESCO="$correlationListUNESCOIDs"
   export RML_SOURCE_CORRELATION_TRL_SOURCE_LANG="$correlationListSourceLanguage"
   export RML_SOURCE_CORRELATION_TRL_TARGET_LANG="$correlationListTargetLanguage"
+  export RML_SOURCE_CORRELATION_TRL_TARGET_BB="$correlationListTargetBBCodes"
  
   echo ""
   echo "Map translations correlation data"

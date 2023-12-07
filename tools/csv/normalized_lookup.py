@@ -19,17 +19,21 @@ def main(inputFilename, lookupFilename, outputFilename, lookupKeyColumn, lookupV
     utils.checkIfColumnsExist(inputReader.fieldnames, [lookupKeyColumn, lookupValueColumn])
 
     lookup = {}
+    lookupCounter = 0
     # build the lookup data structure
     #
     for row in inputReader:
       lookupKey = row[lookupKeyColumn]
       lookupValue = row[lookupValueColumn]
 
-      normKey = utils_string.getNormalizedString(lookupKey)
+      normKey = utils_string.getNormalizedString(lookupKey).replace(' ','')
       if lookupKey in lookup:
         lookup[normKey].append(lookupValue)
       else:
         lookup[normKey] = [lookupValue]
+      lookupCounter += 1
+
+  print(f'Successfully read {lookupCounter} lookup values!')
 
   with open(inputFilename, 'r') as inFile, \
        open(outputFilename, 'w') as outFile:
@@ -41,12 +45,13 @@ def main(inputFilename, lookupFilename, outputFilename, lookupKeyColumn, lookupV
     for row in inputReader:
       inputLookupKey = row[inputKeyColumn]
       rowID = row[inputIDColumn]
-      normInputLookupKey = utils_string.getNormalizedString(inputLookupKey)
+      normInputLookupKey = utils_string.getNormalizedString(inputLookupKey).replace(' ','')
 
       if normInputLookupKey in lookup:
         foundValue = lookup[normInputLookupKey] 
         outputWriter.writerow({inputIDColumn: rowID, outputValueColumn: ';'.join(foundValue)})
       else:
+        print()
         print(f'No matching value found for {inputLookupKey} (normalized: "{normInputLookupKey}")')
 
 
@@ -70,5 +75,5 @@ def parseArguments():
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
   options = parseArguments()
-  main(options.input_file, options.lookup_file, options.output_file, options.lookup_key_column, options.lookup_value_column, options.input_key_column, options.input_id_column, options.outputValueColumn, options.input_delimiter, options.lookup_delimiter)
+  main(options.input_file, options.lookup_file, options.output_file, options.lookup_key_column, options.lookup_value_column, options.input_key_column, options.input_id_column, options.output_value_column, options.input_delimiter, options.lookup_delimiter)
 
