@@ -41,7 +41,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     (group_concat(distinct ?originalISBN13;SEPARATOR=';') AS ?sourceISBN13)
 
 
-    (group_concat(distinct ?kbrTargetManifestationBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
+    (group_concat(distinct ?targetBBLabel;SEPARATOR=';') AS ?targetThesaurusBB)
     (group_concat(distinct ?kbrOriginalBBLabel;SEPARATOR=';') AS ?sourceThesaurusBB)
     (group_concat(distinct ?kbTargetManifestationKBCodeLabel;SEPARATOR=';') AS ?targetThesaurusKBCode)
     (group_concat(distinct ?bnfTargetManifestationRameauLabel;SEPARATOR=';') AS ?targetThesaurusRameau)
@@ -98,7 +98,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
       OPTIONAL { 
         graph <http://kbr-originals> { ?kbrOriginal schema:about ?kbrOriginalBB . }
-
         graph <http://master-data> { ?kbrOriginalBB skos:prefLabel ?kbrOriginalBBLabel . }
         FILTER(lang(?kbrOriginalBBLabel) = 'en')
       }
@@ -154,6 +153,15 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
     OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation bibo:isbn10 ?isbn10 . } }
     OPTIONAL { graph <http://beltrans-manifestations> { ?manifestation bibo:isbn13 ?isbn13 . } }
 
+    # BELGIAN BIBLIOGRAPHY
+    #
+    OPTIONAL { 
+      graph <http://beltrans-manifestations> { ?manifestation schema:about ?targetBB . }
+      OPTIONAL {
+        graph <http://master-data> { ?targetBB skos:prefLabel ?targetBBLabel . }
+        FILTER(lang(?targetBBLabel) = 'en')
+      }
+    }
 
     # TARGET LANGUAGE
     #
@@ -201,15 +209,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
         BIND(CONCAT(?kbrTargetManifestationCollectionName, ' (', ?kbrTargetManifestationCollectionID, ')') AS ?kbrTargetManifestationCollectionNameID)
       }
 
-      # BELGIAN BIBLIOGRAPHY
-      #
-      OPTIONAL { 
-        graph <http://kbr-syracuse> { ?kbrManifestation schema:about ?kbrTargetManifestationBB . }
-        OPTIONAL {
-          graph <http://master-data> { ?kbrTargetManifestationBB skos:prefLabel ?kbrTargetManifestationBBLabel . }
-          FILTER(lang(?kbrTargetManifestationBBLabel) = 'en')
-        }
-      }
 
       # BINDING TYPE
       #
