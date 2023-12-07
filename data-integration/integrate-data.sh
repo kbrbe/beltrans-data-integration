@@ -236,6 +236,7 @@ GET_KBCODE_HIERARCHY_INFO_QUERY_FILE="sparql-queries/get-kbcode-hierarchy.sparql
 
 GET_MISSING_NATIONALITIES_ISNI_QUERY_FILE="sparql-queries/get-missing-nationality-isni.sparql"
 
+CREATE_QUERY_BB="sparql-queries/add-bb-genres.sparql"
 CREATE_QUERY_KBR_IDENTIFIED_ORIGINAL_LINKS="sparql-queries/add-kbr-identified-original-links.sparql"
 DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS="sparql-queries/delete-kbr-wrong-original-links.sparql"
 DELETE_QUERY_KBR_UNUSED_ORIGINALS="sparql-queries/delete-kbr-not-referenced-originals.sparql"
@@ -991,6 +992,10 @@ function integrate {
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+
+  echo ""
+  echo "Add BB genre classification to integrated records ..."
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BB"
 
   echo ""
   echo "Create integrated geo information"
