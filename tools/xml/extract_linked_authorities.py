@@ -37,14 +37,14 @@ def addContributorFieldsToContributorCSV(elem, writer, mainField, addedField):
   foundAddedFieldContributors = []
 
   #
-  # add person contributors from the field 100 (https://github.com/kbrbe/beltrans-data-integration/issues/71)
+  # add person/org contributors from the field 100 (https://github.com/kbrbe/beltrans-data-integration/issues/71)
   #
   mainFieldContributors = elem.findall(f'./marc:datafield[@tag="{mainField}"]', ALL_NS)
   for p in mainFieldContributors:
     c = None
     if mainField.startswith('10'):
       c = PersonContributor.fromTuple(getContributorData(p))
-    elif mainField.startswith('70'):
+    elif mainField.startswith('11'):
       c = OrganizationalContributor.fromTuple(getContributorData(p))
     if c:
       # every contributor may have several roles
@@ -52,12 +52,12 @@ def addContributorFieldsToContributorCSV(elem, writer, mainField, addedField):
         foundMainFieldContributors.append({'contributorID': c.getIdentifier(), 'contributorName': c.getName(), 'contributorRole': cRole})
 
   #
-  # add person contributors from the linked authorities field
+  # add person/org contributors from the linked authorities field
   #
   addedFieldContributors = elem.findall(f'./marc:datafield[@tag="{addedField}"]', ALL_NS)
   for p in addedFieldContributors:
     c = None
-    if addedField.startswith('11'):
+    if addedField.startswith('70'):
       c = PersonContributor.fromTuple(getContributorData(p))
     elif addedField.startswith('71'):
       c = OrganizationalContributor.fromTuple(getContributorData(p))
