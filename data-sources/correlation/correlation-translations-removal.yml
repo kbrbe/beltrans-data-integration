@@ -53,13 +53,13 @@ mappings:
       - [rdfs:comment, "Created from removal list"]
       - [rdfs:label, "BELTRANS manifestation $(targetIdentifier)"]
       - [bf:title, btid:title_$(targetIdentifier)~iri]
-      - p: schema:datePublished
-        o: $(targetYearOfPublication)
-        condition:
-          function: idlab-fn:notEqual
-          parameters:
-            - [grel:valueParameter, $(targetYearOfPublication)]
-            - [grel:valueParameter2, ""] 
+#      - p: schema:datePublished
+#        o: $(targetYearOfPublication)
+#        condition:
+#          function: idlab-fn:notEqual
+#          parameters:
+#            - [grel:valueParameter, $(targetYearOfPublication)]
+#            - [grel:valueParameter2, ""] 
 
 
   # ---------------------------------------------------------------------------
