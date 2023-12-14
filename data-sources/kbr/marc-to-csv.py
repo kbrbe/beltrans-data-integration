@@ -234,6 +234,8 @@ def addCollectionLinksToCSV(elem, writer, stats):
   kbrID = utils.getElementValue(elem.find('./marc:controlfield[@tag="001"]', ALL_NS))
   collectionLinks = elem.findall('./marc:datafield[@tag="773"]', ALL_NS)
 
+
+  collectionLinksFound = False
   for cl in collectionLinks:
     collectionID = utils.getElementValue(cl.find('./marc:subfield[@code="*"]', ALL_NS))
     collectionName = utils.getElementValue(cl.find('./marc:subfield[@code="t"]', ALL_NS))
@@ -245,6 +247,21 @@ def addCollectionLinksToCSV(elem, writer, stats):
     }
 
     writer.writerow(newRecord)
+    collectionLinksFound = True
+
+  if not collectionLinksFound:
+    collectionLinksText = elem.findall('./marc:datafield[@tag="490"]', ALL_NS)
+    for cl in collectionLinksText:
+      collectionName = utils.getElementValue(cl.find('./marc:subfield[@code="a"]', ALL_NS))
+      if collectionName != '': 
+        collectionID = hashlib.md5(utils.getNormalizedString(collectionName).encode('utf-8')).hexdigest()
+        newRecord = {
+          'KBRID': kbrID,
+          'collectionID': collectionID,
+          'collection-name': collectionName
+        }
+        writer.writerow(newRecord)
+          
 
 # -----------------------------------------------------------------------------
 def main():
