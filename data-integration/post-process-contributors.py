@@ -86,7 +86,6 @@ def main():
     # write relevant data to output
     for row in contributorsReader:
       rowID = row['contributorID']
-      contributorName = row['name']
 
       if options.contributor_type == 'persons':
         # add a single column for birth date respectively death date

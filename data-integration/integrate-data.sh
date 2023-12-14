@@ -86,8 +86,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 #
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-12-04.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-12-04.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-12-07.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-12-07.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -98,10 +98,10 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2023-12-04.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2023-12-04.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2023-12-04.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2023-12-04.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2023-12-07.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2023-12-07.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2023-12-07.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2023-12-07.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"

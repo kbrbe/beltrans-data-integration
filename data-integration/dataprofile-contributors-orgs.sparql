@@ -38,12 +38,20 @@ WHERE {
                     dcterms:identifier ?contributorID .
   }
 
-  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelNL . } }
-  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelFR . } }
-  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelEN . } }
-  FILTER(lang(?contributorLabelNL) = "nl")
-  FILTER(lang(?contributorLabelFR) = "fr")
-  FILTER(lang(?contributorLabelEN) = "en")
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelNL . } 
+  	FILTER(lang(?contributorLabelNL) = "nl")
+  }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelFR . } 
+    FILTER(lang(?contributorLabelFR) = "fr")
+  }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelEN . } 
+    FILTER(lang(?contributorLabelEN) = "en")       
+  }
+
+
 
   OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:isPartOf ?imprintOwner . } }
  
