@@ -85,9 +85,11 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 # INPUT FILENAMES
 #
 
+INPUT_EXISTING_CLUSTER_KEYS="corpus-versions/2023-12-07/integration/clustering/descriptive-keys-no-uri.csv"
+
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-12-07.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-12-07.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2023-12-15.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2023-12-15.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -98,10 +100,10 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2023-12-07.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2023-12-07.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2023-12-07.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2023-12-07.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2023-12-15.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2023-12-15.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2023-12-15.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2023-12-15.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
@@ -157,10 +159,10 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-12-06_person-contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2023-12-06_org-contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-12-06_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-12-06_translations_removal-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-12-15_person-contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2023-12-15_org-contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-12-15_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-12-15_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -332,6 +334,8 @@ SUFFIX_DATA_PROFILE_EXCEL_DATA="corpus-data.xlsx"
 SUFFIX_DATA_PROFILE_EXCEL_STATS="corpus-stats.xlsx"
 SUFFIX_DATA_PROFILE_KBCODE="kbcode-hierarchy"
 SUFFIX_DATA_PROFILE_CONTRIBUTIONS="manifestation-contributions.csv"
+
+SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS="cluster-assignments-from-correlation-list.csv"
 
 SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_TARGET="place-of-publications-geonames-target.csv"
 SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_SOURCE="place-of-publications-geonames-source.csv"
@@ -983,6 +987,10 @@ function integrate {
 
   echo ""
   echo "Perform Clustering ..."
+  # 2023-12-15: this works, but EXISTING_CLUSTER_KEYS is element->key and not cluster->id
+  #existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
+  #python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
+  #clustering "$integrationName" "$existingClusterAssignments" "$INPUT_EXISTING_CLUSTER_KEYS"
   clustering "$integrationName"
 
   echo ""
@@ -1220,6 +1228,8 @@ function postprocess {
 # -----------------------------------------------------------------------------
 function clustering {
   local integrationName=$1
+  local existingClusters=$2
+  local existingClusterKeys=$3
 
   local outputDir="$integrationName/integration/clustering"
   local fileKeyComponents="$outputDir/key-components.csv"
@@ -1231,7 +1241,6 @@ function clustering {
   #keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys.sparql"
   keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys-all.sparql"
    
-
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
@@ -1251,24 +1260,45 @@ function clustering {
   python -m tools.csv.clustering_normalization \
     -i $fileKeyComponents \
     -o $clusterInput \
-    --id-column "m" \
+    --id-column "mID" \
     --column "keyPart1" \
     --column "keyPart2"
 
-  # perform the clustering
-  #
-  echo "CLUSTERING - Perform the clustering"
-  python -m tools.csv.clustering \
-    -i $clusterInput \
-    -o $clusters \
-    --id-column "elementID" \
-    --key-column "descriptiveKey"
+  local existingClusters=$2
+  local existingClusterKeys=$3
+
+  if [ -z $existingClusters ] || [ -z $existingClusterKeys ];
+  then
+    
+    # perform the clustering from scratch
+    #
+    echo "CLUSTERING - Perform the clustering (from scratch)"
+    python -m work_set_clustering.clustering \
+      -i $clusterInput \
+      -o $clusters \
+      --id-column "elementID" \
+      --key-column "descriptiveKey"
+
+  else
+    # perform the clustering with existing clusters
+    #
+    echo "CLUSTERING - Perform the clustering (update existing clusters)"
+    python -m work_set_clustering.clustering \
+      -i $clusterInput \
+      -o $clusters \
+      --id-column "elementID" \
+      --key-column "descriptiveKey" \
+      --existing-clusters "$existingClusters" \
+      --existing-clusters-keys "$existingClusterKeys"
+
+  fi
 
   # create RDF representing the cluster assignments
   #
   echo "CLUSTERING - Create RDF"
   export RML_SOURCE_CLUSTERS=$clusters
   . map.sh clustering/cluster-assignments.yml $clustersTurtle
+
 
   # upload RDF to enable advanced querying of cluster information
   #

@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 from tools.csv.row_filter import RowFilter
 
 # -----------------------------------------------------------------------------
-def main(inputFilenames, outputFilename, columns, delimiter, filterFilename=None, appendData=False):
+def main(inputFilenames, outputFilename, columns, delimiter, filterFilename=None, appendData=False, outputColumns=None):
 
   # First check if each input file contains the specified columns
   #
@@ -23,9 +23,17 @@ def main(inputFilenames, outputFilename, columns, delimiter, filterFilename=None
       filterCriteria = [(row[0], row[1], row[2]) for row in filterFileReader]
     rowFilter = RowFilter(filterCriteria) 
 
+  colMapping = {}
+  if outputColumns:
+    if len(columns) != len(outputColumns):
+      print(f'Number of input columns does not correspond with number of output columns!')
+      print(f'columns: {columns}, output columns: {outputColumns}')
+    colMapping = dict(zip(columns, outputColumns))
+
   outputMode = 'a' if appendData else 'w'
   with open(outputFilename, outputMode, newline='') as outFile:
-    outputWriter = csv.DictWriter(outFile, fieldnames=columns)
+    outputFieldnames = outputColumns if outputColumns else columns
+    outputWriter = csv.DictWriter(outFile, fieldnames=outputFieldnames)
     outputWriter.writeheader()
 
     for inputFilename in inputFilenames:
@@ -45,11 +53,15 @@ def main(inputFilenames, outputFilename, columns, delimiter, filterFilename=None
               if rowFilter.passFilter(row):
                 outputRow = { key: row[key] for key in columns }
                 if outputRow != lastRow:
+                  if outputColumns:
+                    utils.replaceDictKeys(outputRow, colMapping)
                   outputWriter.writerow(outputRow)
                 lastRow = outputRow
             else:
               outputRow = { key: row[key] for key in columns }
               if outputRow != lastRow:
+                if outputColumns:
+                  utils.replaceDictKeys(outputRow, colMapping)
                 outputWriter.writerow(outputRow)
               lastRow = outputRow
 
@@ -62,6 +74,7 @@ def parseArguments():
   parser.add_argument('-a', '--append', action='store_true', help='Append data to the output file instead of overwriting existing data')
   parser.add_argument('-f', '--filter-file', action='store', help='The optional name of a file with filter criteria based on which data should be extracted')
   parser.add_argument('-d', '--delimiter', action='store', default=',', help='The optional delimiter of the input CSV, default is a comma')
+  parser.add_argument('--output-column', action='append', help='The name of the output columns')
   options = parser.parse_args()
 
   return options
@@ -69,5 +82,5 @@ def parseArguments():
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
   options = parseArguments()
-  main(options.input_files, options.output_file, options.column, options.delimiter, filterFilename=options.filter_file, appendData=options.append)
+  main(options.input_files, options.output_file, options.column, options.delimiter, filterFilename=options.filter_file, appendData=options.append, outputColumns=options.output_column)
 

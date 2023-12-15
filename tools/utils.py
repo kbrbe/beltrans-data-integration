@@ -1,7 +1,7 @@
 import time
 import lxml.etree as ET
+#import pandas as pd
 import csv
-import pandas as pd
 import os
 import re
 from stdnum import isbn
@@ -255,7 +255,8 @@ def getElementValue(elem, sep=';'):
       valueList = list()
       for e in elem:
         if hasattr(e, 'text'):
-          valueList.append(e.text)
+          if e.text:
+            valueList.append(e.text)
       return ';'.join(valueList)
     else:
       if hasattr(elem, 'text'):
@@ -508,6 +509,18 @@ def getNewValue(oldValue, newValue, delimiter, mode):
     print(f'This should not happen: mode can only be "append" or "replace", but "{mode}" was given')
 
 
+# -----------------------------------------------------------------------------
+def replaceDictKeys(dictionary, mapping):
+  """This function replaces the keys in the dictionary with the new keys.
+  >>> dict0 = {"oldA": "a", "oldB": "b", "oldC": "c"}
+  >>> replaceDictKeys(dict0, {"oldA": "newA", "oldB": "newB"})
+  >>> dict0
+  {'oldC': 'c', 'newA': 'a', 'newB': 'b'}
+  """
+  for oldKey, newKey in mapping.items():
+    if oldKey in dictionary:
+      dictionary[newKey] = dictionary[oldKey]
+      del dictionary[oldKey]
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":

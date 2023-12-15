@@ -111,7 +111,7 @@ def parseArguments():
     exit(1)
 
   if not options.output_column:
-    print(f'Error: no name for output column specified')
+    print(f'Error: no name for output columns specified')
     exit(1)
 
   if options.delimiter == None:

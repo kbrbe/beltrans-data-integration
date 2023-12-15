@@ -82,3 +82,24 @@ class TestExtractColumns(unittest.TestCase):
     expectedNumberOfOutputRows = 3
     self.assertEqual(getNumberOfRows(self.outputFile), expectedNumberOfOutputRows, msg="Equality filter was not applied")
 
+  # ---------------------------------------------------------------------------
+  def testCustomOutputHeadersTooMany(self):
+    """When too many output headers are defined an error should be thrown"""
+    with self.assertRaises(Exception):
+      inputFile = './test/resources/tools/persons.csv'
+      extract_columns([inputFile], self.outputFile, ["authorityID"], ",", filterFilename=filterFile, outputColumns=["aID", "bID"])
+
+  # ---------------------------------------------------------------------------
+  def testCustomOutputHeadersTooLess(self):
+    """When too less output headers are defined an error should be thrown"""
+    with self.assertRaises(Exception):
+      inputFile = './test/resources/tools/persons.csv'
+      extract_columns([inputFile], self.outputFile, ["authorityID"], ",", filterFilename=filterFile, outputColumns=[])
+
+  # ---------------------------------------------------------------------------
+  def testCustomOutputHeaders(self):
+    """When output headers are defined they should be used in the output"""
+    inputFile = './test/resources/tools/persons.csv'
+    extract_columns([inputFile], self.outputFile, ["authorityID"], ",", outputColumns=["aID"])
+    expectedValues = ['123', '456', '789']
+    self.assertListEqual(getColumnValues(self.outputFile, "aID"), expectedValues, msg="Wrong values in appended CSV")

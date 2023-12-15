@@ -37,7 +37,7 @@ mappings:
       - access: *sourceClusters
         referenceFormulation: csv
         delimiter: ','
-    s: $(elementID)
+    s: btid:$(elementID)
     po:
       - [fabio:manifestationOf, btid:cluster_$(clusterID)~iri]
 
@@ -54,5 +54,5 @@ mappings:
     po:
       - [a, fabio:Work]
       - [dcterms:identifier, $(clusterID)]
-      - [fabio:hasManifestation, $(elementID)~iri]
+      - [fabio:hasManifestation, btid:$(elementID)~iri]
 
