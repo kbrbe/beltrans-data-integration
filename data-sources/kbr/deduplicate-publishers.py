@@ -80,8 +80,8 @@ def main():
     #duplicateCheck(dutchNames, warningWriter)
     #duplicateCheck(frenchNames, warningWriter)
     
-    inputReader = csv.reader(fIn, delimiter=delimiterInput)
-    outputWriter = csv.writer(fOut, delimiter=delimiterInput)
+    inputReader = csv.DictReader(fIn, delimiter=delimiterInput)
+    outputWriter = csv.DictWriter(fOut, fieldnames=inputReader.fieldnames, delimiter=delimiterInput)
     multipleMatchesWriter = csv.writer(fMultipleMatch, delimiter=delimiterInput)
     noMatchesWriter = csv.writer(fNoMatch, delimiter=delimiterInput)
 
@@ -99,14 +99,14 @@ def main():
     numberDutchReplacements = 0
     numberFrenchReplacements = 0
 
-    outputWriter.writerow(next(inputReader))
+    outputWriter.writeheader()
 
     for row in inputReader:
-      manifestationID = row[0]
-      contributorID = row[1]
-      contributorName = row[2]
-      contributorRole = row[3]
-      uncertainty = row[4]
+      manifestationID = row['KBRID']
+      contributorID = row['contributorID']
+      contributorName = row['contributorName']
+      contributorRole = row['contributorRole']
+      uncertainty = row['uncertainty']
 
       newContributorID = contributorID
       newContributorName = contributorName
@@ -145,7 +145,10 @@ def main():
 
         else:
           noMatches.add(contributorID)
-      outputWriter.writerow([manifestationID, newContributorID, newContributorName, contributorRole, uncertainty])
+      outputRow = row
+      outputRow['contributorID'] = newContributorID
+      outputRow['contributorName'] = newContributorName
+      outputWriter.writerow(outputRow)
       numberRecords += 1
 
     for multipleMatchID in multipleMatches:

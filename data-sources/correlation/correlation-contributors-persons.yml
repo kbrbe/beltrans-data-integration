@@ -88,10 +88,6 @@ mappings:
             - [grel:valueParameter, $(deathDate)]
             - [grel:valueParameter2, ""]
 
-
-
-
-
   # ---------------------------------------------------------------------------
   #
   nationality:
@@ -101,7 +97,7 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po: 
-      - [schema:nationality, countries:$(nationality)~iri]
+      - [schema:nationality, countries:$(countryCode)~iri]
 
   # ---------------------------------------------------------------------------
   #
@@ -441,6 +437,7 @@ mappings:
     s: btid:correlation_$(contributorID)
     po:
       - [a, btm:CorrelationActivity]
+      - [a, prov:Activity]
       - [rdfs:label, "Curation of correlation"]
       - [prov:generated, btid:$(contributorID)~iri]
 

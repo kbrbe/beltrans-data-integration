@@ -1,0 +1,17 @@
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix schema: <http://schema.org/>
+
+INSERT { graph <http://beltrans-manifestations> { ?manifestation schema:about ?genre . } }
+WHERE {
+
+  graph <http://beltrans-manifestations> {
+    ?manifestation a schema:CreativeWork ;
+                   schema:sameAs ?kbrURI . 
+  }
+
+  graph <http://kbr-syracuse> {
+    ?kbrURI a schema:CreativeWork ;
+            schema:about ?genre .
+  } 
+}

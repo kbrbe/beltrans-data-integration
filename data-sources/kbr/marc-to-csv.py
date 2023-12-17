@@ -46,7 +46,7 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
     c = PersonContributor.fromTuple(getContributorData(p))
     # every contributor may have several roles
     for cRole in c.getRoles(): 
-      foundContributors.append({'contributorID': c.getIdentifier(), 'contributorName': c.getName(), 'contributorRole': cRole, 'uncertainty': 'no'})
+      foundContributors.append({'contributorType': 'person','contributorID': c.getIdentifier(), 'contributorName': c.getName(), 'contributorRole': cRole, 'uncertainty': 'no'})
 
   #
   # add person contributors from the linked authorities field
@@ -61,7 +61,7 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
       if cRole == 'pbl':
         cName = utils.getNormalizedString(cName)
         linkedOrganizationNames.add(cName)
-      foundContributors.append({'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': 'no'})
+      foundContributors.append({'contributorType': 'person', 'contributorID': cID, 'contributorName': cName, 'contributorRole': cRole, 'uncertainty': 'no'})
 
   #
   # add organizational contributors such as publishers
@@ -78,7 +78,7 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
       if c.roleUncertain():
         uncertainty = 'yes'
       cNameNorm = utils.getNormalizedString(cName)
-      foundContributors.append({'contributorID': cID, 'contributorName': cNameNorm, 'contributorRole': cRole, 'uncertainty': uncertainty})
+      foundContributors.append({'contributorType': 'org', 'contributorID': cID, 'contributorName': cNameNorm, 'contributorRole': cRole, 'uncertainty': uncertainty})
 
   #
   # Publishers are also indicated in field 264, but only as text string as it appeared on the book
@@ -121,7 +121,7 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
           utils.count(stats['counter'], 'publishers-without-authority')
           stats['unique-publishers-without-authority'].add(nameID)
           textNameNorm = utils.getNormalizedString(textName)
-          foundContributors.append({'contributorID': nameID, 'contributorName': textNameNorm, 'contributorRole': 'pbl', 'uncertainty': 'no'})
+          foundContributors.append({'contributorType': 'org', 'contributorID': nameID, 'contributorName': textNameNorm, 'contributorRole': 'pbl', 'uncertainty': 'no'})
        
 
   #
@@ -234,6 +234,8 @@ def addCollectionLinksToCSV(elem, writer, stats):
   kbrID = utils.getElementValue(elem.find('./marc:controlfield[@tag="001"]', ALL_NS))
   collectionLinks = elem.findall('./marc:datafield[@tag="773"]', ALL_NS)
 
+
+  collectionLinksFound = False
   for cl in collectionLinks:
     collectionID = utils.getElementValue(cl.find('./marc:subfield[@code="*"]', ALL_NS))
     collectionName = utils.getElementValue(cl.find('./marc:subfield[@code="t"]', ALL_NS))
@@ -245,6 +247,21 @@ def addCollectionLinksToCSV(elem, writer, stats):
     }
 
     writer.writerow(newRecord)
+    collectionLinksFound = True
+
+  if not collectionLinksFound:
+    collectionLinksText = elem.findall('./marc:datafield[@tag="490"]', ALL_NS)
+    for cl in collectionLinksText:
+      collectionName = utils.getElementValue(cl.find('./marc:subfield[@code="a"]', ALL_NS))
+      if collectionName != '': 
+        collectionID = hashlib.md5(utils.getNormalizedString(collectionName).encode('utf-8')).hexdigest()
+        newRecord = {
+          'KBRID': kbrID,
+          'collectionID': collectionID,
+          'collection-name': collectionName
+        }
+        writer.writerow(newRecord)
+          
 
 # -----------------------------------------------------------------------------
 def main():
@@ -272,7 +289,7 @@ def main():
        open(options.output_work_file, 'w') as outWorkFile:
 
     workFields = ['KBRID', 'sourceKBRID', 'isbn10', 'isbn13', 'sourceISBN10', 'sourceISBN13', 'title', 'subtitle', 'sourceTitle', 'originalTitle', 'collection', 'languages', 'placeOfPublication', 'countryOfPublication', 'yearOfPublication', 'responsibilityStatement', 'bindingType', 'edition', 'belgianBibliography']
-    contFields = ['KBRID', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
+    contFields = ['KBRID', 'contributorType', 'contributorID', 'contributorName', 'contributorRole', 'uncertainty']
     collectionLinksFields = ['KBRID', 'collectionID', 'collection-name']
 
     workWriter = csv.DictWriter(outWorkFile, fieldnames=workFields, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)

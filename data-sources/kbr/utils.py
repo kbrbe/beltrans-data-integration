@@ -20,7 +20,7 @@ def getListOfIdentifiers(authorityID, rawString, identifierName, stats):
 
   extractedIdentifiers = []
   if ';' in rawString:
-    stats[f'more-than-one-{identifierName}'] += 1
+    count(stats, f'more-than-one-{identifierName}')
     identifiers = rawString.split(';')
     for i in identifiers:
       if i != '':

@@ -19,6 +19,8 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
     with open(inputFilename, 'r') as inFile:
       inputReader = csv.DictReader(inFile, delimiter=delimiter)
       utils.checkIfColumnsExist(inputReader.fieldnames, [identifierColumn])
+
+  kbrIdentifierLength = 8
   
   # Iterate over all input files and uniquely store found KBR identifiers
   #
@@ -32,10 +34,15 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
       for row in inputReader:
         rowID = row[identifierColumn]
         if rowID != '':
-          kbrIdentifiers.add(rowID)
+          if len(rowID) == kbrIdentifierLength:
+            kbrIdentifiers.add(rowID)
 
-  print(f'Successfully read {len(kbrIdentifiers)} KBR identifiers from the input CSV!')
-  print(f'Starting to fetch the data in batches of {batchSize} ...')
+  if len(kbrIdentifiers) > 0:
+    print(f'Successfully read {len(kbrIdentifiers)} KBR identifiers from the input CSV!')
+    print(f'Starting to fetch the data in batches of {batchSize} ...')
+  else:
+    print(f'No valid KBR identifiers found, nothing to fetch!')
+    exit(1)
 
   apiHandler = kbrAPI(url)
   apiHandler.setBatchSize(batchSize)
@@ -52,6 +59,7 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
     for i in tqdm(range(0, len(kbrIdentifiers), batchSize), position=0, desc='Batches'):
       batch = kbrIdentifiersList[i:i+batchSize]
 
+      # Create the query string, but only take KBR identifiers of valid length
       query = 'IDNO=(' + ','.join(batch) + ')'
 
       # query the batch (e.g. query 100 identifiers)
@@ -62,8 +70,8 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
       #
       # with the following line you can enable a second progress bar for records in a batch
       # however, this second progress bar usually is finished before initialized properly, so it might seem that nothing is happening
-      # for record in tqdm(apiHandler.data(), total=numberOfResults, position=1, leave=False, desc='Records in batch'):
-      for record in apiHandler.data():
+      # for record in tqdm(apiHandler.getRecords(), total=numberOfResults, position=1, leave=False, desc='Records in batch'):
+      for record in apiHandler.getRecords():
         outFile.write(ET.tostring(record))
 
     outFile.write(b'</collection>')

@@ -3,15 +3,17 @@ prefix btid: <http://kbr.be/id/data/>
 prefix bf: <http://id.loc.gov/ontologies/bibframe/>
 prefix bibo: <http://purl.org/ontology/bibo/>
 prefix marcrel: <http://id.loc.gov/vocabulary/relators/>
+prefix dcterms: <http://purl.org/dc/terms/>
 prefix btm: <http://kbr.be/ns/beltrans/model#>
 
-SELECT ?m ?keyPart1 ?keyPart2
+SELECT ?mID ?keyPart1 ?keyPart2
 FROM <http://beltrans-manifestations>
 FROM <http://beltrans-originals>
 WHERE {
   
   graph <http://beltrans-manifestations> {
     ?m a schema:CreativeWork ;
+       dcterms:identifier ?mID ;
        schema:name|bibo:isbn10|bibo:isbn13 ?keyPart1 .
   }
 

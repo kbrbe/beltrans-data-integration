@@ -52,13 +52,51 @@ mappings:
       - [a, schema:Organization]
       - [dcterms:identifier, $(contributorID)]
       - [rdfs:comment, "Created from correlation list"]
-      - p: rdfs:label
-        o: $(name)
+      - p: a
+        o: btm:Imprint
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(name)]
+            - [grel:valueParameter, $(is imprint of)]
             - [grel:valueParameter2, ""] 
+      - p: schema:isPartOf
+        o: 
+          value: btid:$(is imprint of)
+          type: iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(is imprint of)]
+            - [grel:valueParameter2, ""] 
+      - p: rdfs:label
+        o:
+          - value: $(name NL)
+            language: nl
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(name NL)]
+            - [grel:valueParameter2, ""] 
+      - p: rdfs:label
+        o:
+          - value: $(name EN)
+            language: en
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(name EN)]
+            - [grel:valueParameter2, ""] 
+      - p: rdfs:label
+        o:
+          - value: $(name FR)
+            language: fr
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(name FR)]
+            - [grel:valueParameter2, ""] 
+
+
 
 
 

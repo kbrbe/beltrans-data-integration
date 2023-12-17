@@ -17,7 +17,10 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
 
 SELECT DISTINCT
   ?contributorID
-  (group_concat(distinct ?contributorLabel;SEPARATOR=';') AS ?name)
+  (group_concat(distinct ?contributorLabelNL;SEPARATOR=';') AS ?nameNL)
+  (group_concat(distinct ?contributorLabelFR;SEPARATOR=';') AS ?nameFR)
+  (group_concat(distinct ?contributorLabelEN;SEPARATOR=';') AS ?nameEN)
+  (group_concat(distinct ?imprintOwner;SEPARATOR=';') AS ?isImprintFrom)
   (group_concat(distinct ?kbrID;SEPARATOR=';') AS ?kbrIDs)
   (group_concat(distinct ?bnfID;SEPARATOR=';') AS ?bnfIDs)
   (group_concat(distinct ?ntaID;SEPARATOR=';') AS ?ntaIDs)
@@ -35,8 +38,22 @@ WHERE {
                     dcterms:identifier ?contributorID .
   }
 
-  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabel . } }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelNL . } 
+  	FILTER(lang(?contributorLabelNL) = "nl")
+  }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelFR . } 
+    FILTER(lang(?contributorLabelFR) = "fr")
+  }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelEN . } 
+    FILTER(lang(?contributorLabelEN) = "en")       
+  }
 
+
+
+  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:isPartOf ?imprintOwner . } }
  
   # ISNI
   #

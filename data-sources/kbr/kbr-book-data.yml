@@ -353,9 +353,16 @@ mappings:
         referenceFormulation: csv
         delimiter: ',' 
     s: btid:collection_$(collectionID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(collectionID)]
+        - [grel:valueParameter2, ""] 
     po:
       - [a, schema:CreativeWorkSeries]
       - [dcterms:identifier, $(collectionID)]
       - [schema:name, $(collection-name)]
+
+
 
 

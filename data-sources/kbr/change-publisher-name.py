@@ -60,21 +60,21 @@ def main():
     for row in lookupReader:
       replaceNames[row['old-name']] = row['new-name']
 
-    inputReader = csv.reader(fIn, delimiter=delimiterInput)
-    outputWriter = csv.writer(fOut, delimiter=delimiterInput)
+    inputReader = csv.DictReader(fIn, delimiter=delimiterInput)
+    outputWriter = csv.DictWriter(fOut, fieldnames=inputReader.fieldnames, delimiter=delimiterInput)
 
     toBeReplaced = set()
     replaced = set()
     numberRecords = 0
 
-    outputWriter.writerow(next(inputReader))
+    outputWriter.writeheader()
 
     for row in inputReader:
-      manifestationID = row[0]
-      contributorID = row[1]
-      contributorName = row[2]
-      contributorRole = row[3]
-      uncertainty = row[4]
+      manifestationID = row['KBRID']
+      contributorID = row['contributorID']
+      contributorName = row['contributorName']
+      contributorRole = row['contributorRole']
+      uncertainty = row['uncertainty']
 
       newContributorName = contributorName
       contributorNameNorm = utils.getNormalizedString(contributorName)
@@ -86,7 +86,9 @@ def main():
           newContributorName = replaceNames[contributorName]
           replaced.add(contributorID)
 
-      outputWriter.writerow([manifestationID, contributorID, newContributorName, contributorRole, uncertainty])
+      outputRow = row
+      outputRow['contributorName'] = newContributorName
+      outputWriter.writerow(outputRow)
       numberRecords += 1
 
   numberToBeReplaced = len(toBeReplaced)
