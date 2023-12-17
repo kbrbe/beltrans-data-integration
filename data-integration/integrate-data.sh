@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Make the locally developed python package accessible via python -m 
-export PYTHONPATH=/home/slieber/repos/kbr/beltrans-data
+cd ..
+export PYTHONPATH=$(pwd)
+cd -
 
 SCRIPT_CLEAN_TRANSLATIONS="../data-sources/kbr/clean-marc-slim.py"
 SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
@@ -159,8 +161,8 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-12-15_person-contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2023-12-15_org-contributors-correlation-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-12-15_person_contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2023-12-15_org_contributors-correlation-list.csv"
 INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-12-15_translations_correlation-list.csv"
 INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-12-15_translations_removal-list.csv"
 
@@ -2876,7 +2878,7 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
-  #getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML"
+  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML"
   extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
 }
 
@@ -2951,19 +2953,24 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListUNESCOIDs "targetIdentifier" "targetUnescoIdentifier" "id" "unesco"
   extractSeparatedColumn $correlationList $correlationListSourceLanguage "targetIdentifier" "sourceLanguage" "id" "sourceLanguage"
   extractSeparatedColumn $correlationList $correlationListTargetLanguage "targetIdentifier" "targetLanguage" "id" "targetLanguage"
-  extractSeparatedColumn $correlationList $correlationListTargetBBNames "targetIdentifier" "targetThesaurusBB" "id" "targetThesaurusBB"
 
-  python -m $MODULE_NORMALIZED_LOOKUP \
-    --input-file $correlationListTargetBBNames \
-    --lookup-file $LOOKUP_FILE_BB_EN \
-    --output-file $correlationListTargetBBCodes \
-    --lookup-key-column "name" \
-    --lookup-value-column "id" \
-    --input-key-column "targetThesaurusBB" \
-    --input-id-column "id" \
-    --output-value-column "targetThesaurusBB" \
-    --input-delimiter "," \
-    --lookup-delimiter ";"
+
+  # 2023-12-15: we currently have LEXICON codes instead the name of genres
+  # if there will be names again, the extra step below to lookup codes is important
+  extractSeparatedColumn $correlationList $correlationListTargetBBCodes "targetIdentifier" "targetThesaurusBB" "id" "targetThesaurusBB"
+  #extractSeparatedColumn $correlationList $correlationListTargetBBNames "targetIdentifier" "targetThesaurusBB" "id" "targetThesaurusBB"
+
+  #python -m $MODULE_NORMALIZED_LOOKUP \
+  #  --input-file $correlationListTargetBBNames \
+  #  --lookup-file $LOOKUP_FILE_BB_EN \
+  #  --output-file $correlationListTargetBBCodes \
+  #  --lookup-key-column "name" \
+  #  --lookup-value-column "id" \
+  #  --input-key-column "targetThesaurusBB" \
+  #  --input-id-column "id" \
+  #  --output-value-column "targetThesaurusBB" \
+  #  --input-delimiter "," \
+  #  --lookup-delimiter ";"
 
   echo ""
   echo "Fetch and extract KBR translations"
@@ -3558,7 +3565,7 @@ function loadKBRLinkedOrgAuthorities {
   echo ""
   echo "Load org authorities - $language ..."
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
-    "$kbrOrgs" "$kbrOrgMatchesTurtle"
+    "$kbrOrgs"
 
   if [ -f "$kbrOrgsIdentifiersTurtle" ];
   then
@@ -3568,9 +3575,12 @@ function loadKBRLinkedOrgAuthorities {
   fi
   
 
-  echo "Load possible KBR publisher matches ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES \
-    "$kbrOrgMatchesTurtle"
+  if [ -f "$kbrOrgMatchesTurtle" ];
+  then
+    echo "Load possible KBR publisher matches ..."
+    python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES \
+      "$kbrOrgMatchesTurtle"
+  fi
 
 }
 
