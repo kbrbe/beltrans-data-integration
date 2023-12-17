@@ -60,6 +60,7 @@ def main(input_file, sheet_names, csvFiles):
       outputWriter = csv.writer(outFile)
       for row in sheet.rows:
         outputWriter.writerow([cell.value for cell in row])
+    outputFileIndex += 1
 
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
