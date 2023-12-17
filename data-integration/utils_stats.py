@@ -128,6 +128,7 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withBnFIdentifier': countRowsWithValueForColumn(corpus, 'targetBnFIdentifier'),
     'withKBIdentifier': countRowsWithValueForColumn(corpus, 'targetKBIdentifier'),
     'withUnescoIdentifier': countRowsWithValueForColumn(corpus, 'targetUnescoIdentifier'),
+    'withCollection': countRowsWithValueForColumn(corpus, 'targetCollectionIdentifier'),
     'withKBRBnFKBAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetBnFIdentifier', 'targetKBIdentifier', 'targetUnescoIdentifier']),
     'withKBRBnFAndKBIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetBnFIdentifier', 'targetKBIdentifier']),
     'withKBRAndBnFIdentifier': countRowsWithValueForColumns(corpus, ['targetKBRIdentifier', 'targetBnFIdentifier']),
