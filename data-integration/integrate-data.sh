@@ -73,6 +73,7 @@ SCRIPT_POSTPROCESS_DERIVE_COUNTRIES="add_country.py"
 SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION="add_coordinates.py"
 MODULE_POSTPROCESS_SORT_COLUMN_VALUES="tools.csv.sort_values_in_columns"
 SCRIPT_POSTPROCESS_LOCATIONS="post-process-locations.py"
+SCRIPT_POSTPROCESS_DATES="post-process-dates.py"
 
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
@@ -300,6 +301,9 @@ DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE="sparql-queries/get-contributions.sparql"
 GET_GEO_TEXT_INFO_QUERY_FILE="sparql-queries/get-text-location-info-per-data-source.sparql"
 GET_GEO_DATA_QUERY_FILE="sparql-queries/get-manifestations-geo-data.sparql"
 
+GET_DATE_TEXT_INFO_PUB_QUERY_FILE="sparql-queries/get-text-date-info-publications-per-data-source.sparql"
+GET_DATE_TEXT_INFO_CONT_QUERY_FILE="sparql-queries/get-text-date-info-contributors-per-data-source.sparql"
+
 
 POSTPROCESS_SPARQL_QUERY_TRL="sparql-queries/integrated-data-postprocessing.sparql"
 
@@ -349,6 +353,13 @@ SUFFIX_GEO_TEXT_COMBINED_ENRICHED="geo-text-information-combined-enriched.csv"
 SUFFIX_GEO_DATA="geo-data.csv"
 SUFFIX_GEO_BELTRANS_MANIFESTATIONS="manifestations-geo.csv"
 SUFFIX_GEO_DATA_LD="geo-data.ttl"
+
+SUFFIX_DATE_PUBLICATIONS_TEXT="date-publications-text-information.csv"
+SUFFIX_DATE_CONTRIBUTORS_TEXT="date-contributors-text-information.csv"
+SUFFIX_DATE_DATA_PUB="date-data-publications.csv"
+SUFFIX_DATE_DATA_CONT="date-data-contributors.csv"
+SUFFIX_DATE_DATA_PUB_LD="date-data-publications.ttl"
+SUFFIX_DATE_DATA_CONT_LD="date-data-contributors.ttl"
 
 #
 # Filenames used within an integration directory 
@@ -729,6 +740,9 @@ function extract {
   elif [ "$dataSource" = "geo" ];
   then
     extractGeoInformation "$integrationFolderName"
+  elif [ "$dataSource" = "date" ];
+  then
+    extractDateInformation "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     extractKBR $integrationFolderName
@@ -799,6 +813,9 @@ function transform {
   elif [ "$dataSource" = "geo" ];
   then
     transformGeoInformation "$integrationFolderName"
+  elif [ "$dataSource" = "date" ];
+  then
+    transformDateInformation "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     transformKBR $integrationFolderName
@@ -861,6 +878,9 @@ function load {
   elif [ "$dataSource" = "geo" ];
   then
     loadGeoInformation "$integrationFolderName"
+  elif [ "$dataSource" = "date" ];
+  then
+    loadDateInformation "$integrationFolderName"
   elif [ "$dataSource" = "all" ];
   then
     loadMasterData $integrationFolderName
@@ -1013,6 +1033,13 @@ function integrate {
   transformGeoInformation "$integrationName"
   loadGeoInformation "$integrationName"
 
+  echo ""
+  echo "Create integrated dates information"
+  extractDateInformation "$integrationName"
+  transformDateInformation "$integrationName"
+  loadDateInformation "$integrationName"
+
+
 
   # Disabled on 2023-06-06
   # Otherwise the clean correlation list input gets enriched with non-curated data
@@ -1026,6 +1053,37 @@ function integrate {
   #  -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
   #  -q $POSTPROCESS_SPARQL_QUERY_TRL \
   #  -o $postprocessInputFileTranslations
+
+}
+
+# -----------------------------------------------------------------------------
+function extractDateInformation {
+
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  mkdir -p "$integrationName/dates"
+
+  local outputFileDateTextPub="$integrationName/dates/$SUFFIX_DATE_PUBLICATIONS_TEXT"
+  local outputFileDateTextCont="$integrationName/dates/$SUFFIX_DATE_CONTRIBUTORS_TEXT"
+  local datesDataPub="$integrationName/dates/$SUFFIX_DATE_DATA_PUB"
+  local datesDataCont="$integrationName/dates/$SUFFIX_DATE_DATA_CONT"
+
+  echo ""
+  echo "Integrate date information"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_DATE_TEXT_INFO_PUB_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileDateTextPub"
+  #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_DATE_TEXT_INFO_CONT_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileDateTextCont"
+
+  echo ""
+  echo "Merge date values ..."
+  time python $SCRIPT_POSTPROCESS_DATES \
+    -i "$outputFileDateTextPub" \
+    -d "dateOfPublication" \
+    --id-column "manifestationID" \
+    -o $datesDataPub
+
 
 }
 
@@ -1069,6 +1127,28 @@ function extractGeoInformation {
 }
 
 # -----------------------------------------------------------------------------
+function transformDateInformation {
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local datesDataPub="$integrationName/dates/$SUFFIX_DATE_DATA_PUB"
+  #local datesDataCont="$integrationName/dates/$SUFFIX_DATE_DATA_CONT"
+
+  local dateDataTurtle="$integrationName/dates/rdf/$SUFFIX_DATE_DATA_PUB_LD"
+
+  mkdir -p "$integrationName/dates/rdf"
+
+  export RML_SOURCE_DATE_PUB="$integrationName/dates/$SUFFIX_DATE_DATA_PUB"
+  export RML_SOURCE_DATE_CONT="$integrationName/dates/$SUFFIX_DATE_DATA_CONT"
+
+  echo ""
+  echo "TRANSFORM dates data"
+  . map.sh dates-data.yml $dateDataTurtle
+}
+
+# -----------------------------------------------------------------------------
 function transformGeoInformation {
   local integrationName=$1
 
@@ -1083,6 +1163,24 @@ function transformGeoInformation {
   echo ""
   echo "TRANSFORM geo data"
   . map.sh geo-data.yml $geoDataTurtle
+}
+
+# -----------------------------------------------------------------------------
+function loadDateInformation {
+
+  local integrationName=$1
+
+  # get environment variables
+  export $(cat .env | sed 's/#.*//g' | xargs)
+
+  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+  local dateDataTurtle="$integrationName/dates/rdf/$SUFFIX_DATE_DATA_PUB_LD"
+
+  echo ""
+  echo "LOAD dates data"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+    "$dateDataTurtle"
+
 }
 
 # -----------------------------------------------------------------------------
@@ -1193,13 +1291,12 @@ function postprocess {
   #echo "Derive missing country names from place names - KB ..."
   #time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $tmp2 -o $integratedData -g geonames/ -c targetCountryOfPublicationKB -p targetPlaceOfPublicationKB
 
-  echo "Postprocess manifestation data ..."
-  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedDataEnriched -c $manifestationContributions
-
   #echo "Create geonames relationships for place of publications (targetPlace)..."
   #time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
   #  -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonamesTarget
 
+  echo "Postprocess manifestation data ..."
+  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedDataEnriched -c $manifestationContributions
   
   echo "Sort certain columns in the contributors CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $contributorsPersonsAllData -o $contributorsPersonsAllDataSorted \
