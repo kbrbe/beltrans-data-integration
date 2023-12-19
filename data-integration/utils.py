@@ -24,6 +24,11 @@ def addContributions(row, contributions, roleMapping):
   if ('http://id.loc.gov/vocabulary/relators/sce' in contributions) and ('http://schema.org/author' in contributions):
     authorScenaristSet = set(contributions['http://schema.org/author']).union(set(contributions['http://id.loc.gov/vocabulary/relators/sce']))
     row['author/scenarist'] = ';'.join(sorted(authorScenaristSet))
+  elif ('http://id.loc.gov/vocabulary/relators/sce' in contributions) and ('http://schema.org/author' not in contributions):
+    row['author/scenarist'] = ';'.join(contributions['http://id.loc.gov/vocabulary/relators/sce'])
+  elif ('http://id.loc.gov/vocabulary/relators/sce' not in contributions) and ('http://schema.org/author' in contributions):
+    row['author/scenarist'] = ';'.join(contributions['http://schema.org/author'])
+
   for contRole, contValues in contributions.items():
     #print(f'contRole: {contRole}')
     row[roleMapping[contRole]] = ';'.join(sorted(contValues))
