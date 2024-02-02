@@ -1,0 +1,72 @@
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix schema: <http://schema.org/>
+prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+prefix btid: <http://kbr.be/id/data/>
+
+SELECT ?mID ?otherMID ?translationTitle ?originalTitle ?translationKBRID ?otherTranslationKBRID ?originalKBRID
+WHERE {
+ 
+  # 
+  # Get a manifestation from the BELTRANS translations
+  #
+  graph <http://beltrans-manifestations> {
+    ?m a schema:CreativeWork ;
+       schema:isPartOf btid:beltransCorpus ;
+       dcterms:identifier ?mID ;
+       schema:name ?translationTitle ;
+       schema:translationOfWork ?o .
+  }
+  
+  OPTIONAL {
+  	graph <http://beltrans-manifestations> {
+    	?m bf:identifiedBy ?kbrEntity .
+        ?kbrEntity a bf:Identifier ;
+                   rdfs:label "KBR" ;
+                   rdf:value ?translationKBRID
+    }
+  }        
+
+  #
+  # SELECT the original title of the translation
+  #
+  graph <http://beltrans-originals> {
+    ?o a schema:CreativeWork ;
+       dcterms:identifier ?oID ;
+       schema:name ?originalTitle .
+  }
+        
+  #
+  # Get another manifestation of the corpus that has the title of the others original
+  #
+  graph <http://beltrans-manifestations> {
+    ?otherM a schema:CreativeWork ;
+            schema:isPartOf btid:beltransCorpus ;
+            dcterms:identifier ?otherMID ;
+            schema:name ?originalTitle .
+  }
+        
+  OPTIONAL {
+  	graph <http://beltrans-manifestations> {
+    	?otherM bf:identifiedBy ?kbrEntityOther .
+        ?kbrEntityOther a bf:Identifier ;
+                   rdfs:label "KBR" ;
+                   rdf:value ?otherTranslationKBRID
+    }
+  }  
+  
+  OPTIONAL {
+  	graph <http://beltrans-originals> {
+    	?m bf:identifiedBy ?kbrOriginalEntity .
+        ?kbrOriginalEntity a bf:Identifier ;
+                   rdfs:label "KBR" ;
+                   rdf:value ?originalKBRID .
+    }
+  }  
+        
+ # 
+ # The other translation should not be the same translation (they are linked to different originals)
+ #
+ FILTER NOT EXISTS {
+   graph <http://beltrans-manifestations> { ?otherM schema:translationOfWork ?o } 
+ }
+}
