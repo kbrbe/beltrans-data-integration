@@ -282,6 +282,8 @@ CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql
 LINK_QUERY_CONTRIBUTORS="integration_queries/link-beltrans-manifestations-contributors.sparql"
 LINK_QUERY_CONTRIBUTORS_ORIG="integration_queries/link-beltrans-original-manifestations-contributors.sparql"
 
+DATA_PROFILE_QUERY_FILE_CLUSTER_OLDEST_MANIFESTATIONS="sparql-queries/get-oldest-cluster-manifestation.sparql"
+
 DATA_PROFILE_QUERY_FILE_AGG="dataprofile-aggregated.sparql"
 DATA_PROFILE_QUERY_FILE_CONT_PERSONS="dataprofile-contributors-persons.sparql"
 DATA_PROFILE_QUERY_FILE_CONT_ORGS="dataprofile-contributors-orgs.sparql"
@@ -305,9 +307,12 @@ GET_DATE_TEXT_INFO_PUB_QUERY_FILE="sparql-queries/get-text-date-info-publication
 GET_DATE_TEXT_INFO_CONT_QUERY_FILE="sparql-queries/get-text-date-info-contributors-per-data-source.sparql"
 
 
+
 POSTPROCESS_SPARQL_QUERY_TRL="sparql-queries/integrated-data-postprocessing.sparql"
 
 SUFFIX_DATA_PROFILE_POSTPROCESS_TRL="postprocessing-input.csv"
+
+SUFFIX_DATA_PROFILE_OLDEST_MANIFESTATIONS="cluster-oldest-manifestations.csv"
 
 SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE="contributors-persons-all-info.csv"
 SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE_SORTED="contributors-persons-all-info-sorted.csv"
@@ -1221,6 +1226,7 @@ function query {
   outputFileContributions="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONTRIBUTIONS"
   outputFileKBCode="$integrationName/csv/$SUFFIX_DATA_PROFILE_KBCODE"
   outputFileGeo="$integrationName/csv/$SUFFIX_GEO_BELTRANS_MANIFESTATIONS"
+  outputFileOldestManifestations="$integrationName/csv/$SUFFIX_DATA_PROFILE_OLDEST_MANIFESTATIONS"
 
   echo ""
   echo "Creating the dataprofile CSV file ..."
@@ -1241,6 +1247,10 @@ function query {
   echo ""
   echo "Creating the geo information CSV"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_DATA_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeo"
+
+  echo ""
+  echo "Creating the oldest manifestations per cluster information CSV"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$DATA_PROFILE_QUERY_FILE_CLUSTER_OLDEST_MANIFESTATIONS" "$ENV_SPARQL_ENDPOINT" "$outputFileOldestManifestations"
 
   echo ""
   echo "Creating KBCode list"
@@ -1318,9 +1328,10 @@ function postprocess {
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataEnriched -o $integratedDataEnrichedSorted \
        -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication"
 
+  oldestManifestations="$integrationName/csv/$SUFFIX_DATA_PROFILE_OLDEST_MANIFESTATIONS"
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $contributorsPersons $contributorsOrgs $outputFileGeo $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $oldestManifestations $contributorsPersons $contributorsOrgs $outputFileGeo $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "clusters" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
 
 }
 
