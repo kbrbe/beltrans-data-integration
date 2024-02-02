@@ -19,5 +19,5 @@ WHERE {
   }
   BIND(CONCAT( COALESCE(?contributorLabel, "missing name"), " (", ?contributorID, ")") as ?contributorNameID)
 
-  FILTER( ?contributorRole IN (schema:author, schema:translator, schema:publisher, marcrel:ill, marcrel:sce, marcrel:pbd) )
+  #FILTER( ?contributorRole IN (schema:author, schema:translator, schema:publisher, marcrel:ill, marcrel:sce, marcrel:pbd) )
 }
