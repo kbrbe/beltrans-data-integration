@@ -217,7 +217,7 @@ def getElementValue(elem, sep=';'):
         if hasattr(e, 'text'):
           if e.text is not None:
             valueList.append(e.text)
-      return ';'.join(valueList)
+      return sep.join(valueList)
     else:
       if hasattr(elem, 'text'):
         return elem.text
