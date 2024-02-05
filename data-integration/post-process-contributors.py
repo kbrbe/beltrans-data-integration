@@ -55,9 +55,10 @@ def main():
     # similarly, add columns for statistics we will add
     headers.insert(5, 'authorIn')
     headers.insert(6, 'translatorIn')
-    headers.insert(7, 'illustratorIn')
-    headers.insert(8, 'scenaristIn')
-    headers.insert(9, 'publishingDirectorIn')
+    headers.insert(7, 'adapterIn')
+    headers.insert(8, 'illustratorIn')
+    headers.insert(9, 'scenaristIn')
+    headers.insert(10, 'publishingDirectorIn')
 
     if options.contributor_type == 'orgs':
       headers.insert(11, 'publishedTranslationOf')
@@ -70,11 +71,12 @@ def main():
     sources = ['KBR', 'BnF', 'NTA', 'ISNI']
     mismatchLog = {}
 
-    contributions = {'authors': {}, 'translators': {}, 'illustrators': {}, 'scenarists': {}, 'publishingDirectors': {}, 'publishersTranslation': {}, 'publishersOriginal': {}}
+    contributions = {'authors': {}, 'translators': {}, 'adapters': {}, 'illustrators': {}, 'scenarists': {}, 'publishingDirectors': {}, 'publishersTranslation': {}, 'publishersOriginal': {}}
     manifestationsReader = csv.DictReader(inFileManifestations, delimiter=',')
     for row in manifestationsReader:
       utils_stats.countContributionBasedOnIdentifier(row['authorIdentifiers'], contributions['authors'])
       utils_stats.countContributionBasedOnIdentifier(row['translatorIdentifiers'], contributions['translators'])
+      utils_stats.countContributionBasedOnIdentifier(row['adapterIdentifiers'], contributions['adapters'])
       utils_stats.countContributionBasedOnIdentifier(row['illustratorIdentifiers'], contributions['illustrators'])
       utils_stats.countContributionBasedOnIdentifier(row['scenaristIdentifiers'], contributions['scenarists'])
       utils_stats.countContributionBasedOnIdentifier(row['publishingDirectorIdentifiers'], contributions['publishingDirectors'])
@@ -97,6 +99,7 @@ def main():
         # manifestation data is looked up using the provided manifestations file residing in a Pandas dataframe
         numberAuthored = contributions['authors'][rowID] if rowID in contributions['authors'] else 0
         numberTranslated = contributions['translators'][rowID] if rowID in contributions['translators'] else 0
+        numberAdapted = contributions['adapters'][rowID] if rowID in contributions['adapters'] else 0
         numberIllustrated = contributions['illustrators'][rowID] if rowID in contributions['illustrators'] else 0
         numberScened = contributions['scenarists'][rowID] if rowID in contributions['scenarists'] else 0
         numberDirected = contributions['publishingDirectors'][rowID] if rowID in contributions['publishingDirectors'] else 0
@@ -109,12 +112,14 @@ def main():
 
         row['authorIn'] = numberAuthored
         row['translatorIn'] = numberTranslated
+        row['adapterIn'] = numberAdapted
         row['illustratorIn'] = numberIllustrated
         row['scenaristIn'] = numberScened
         row['publishingDirectorIn'] = numberDirected
       else:
         row['authorIn'] = 0
         row['translatorIn'] = 0
+        row['adapterIn'] = 0
         row['illustratorIn'] = 0
         row['scenaristIn'] = 0
         row['publishingDirectorIn'] = 0

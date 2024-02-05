@@ -65,8 +65,10 @@ def main():
     headers.insert(contributionsIndex, 'scenaristIdentifiers')
     headers.insert(contributionsIndex, 'illustratorIdentifiers')
     headers.insert(contributionsIndex, 'translatorIdentifiers')
+    headers.insert(contributionsIndex, 'adapterIdentifiers')
     headers.insert(contributionsIndex, 'authorIdentifiers')
     headers.insert(contributionsIndex, 'author/scenarist')
+    headers.insert(contributionsIndex, 'translator/adapter')
 
     roleMapping = {
       'http://schema.org/author': 'authorIdentifiers',
@@ -74,7 +76,8 @@ def main():
       'http://schema.org/publisher': 'targetPublisherIdentifiers',
       'http://id.loc.gov/vocabulary/relators/ill': 'illustratorIdentifiers',
       'http://id.loc.gov/vocabulary/relators/sce': 'scenaristIdentifiers',
-      'http://id.loc.gov/vocabulary/relators/pbd': 'publishingDirectorIdentifiers'
+      'http://id.loc.gov/vocabulary/relators/pbd': 'publishingDirectorIdentifiers',
+      'http://id.loc.gov/vocabulary/relators/adp': 'adapterIdentifiers',
     }
 
     for h in yearHeadersToRemove:

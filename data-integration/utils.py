@@ -8,30 +8,70 @@ import pandas as pd
 
 
 # -----------------------------------------------------------------------------
+def addCombinedCounting(row, contributions, roleMapping, firstRole, secondRole, combinedRole):
+  """ Helper function that is indirectly tested via addContributions. """
+
+  if (firstRole in contributions) and (secondRole in contributions):
+    combinedSet = set(contributions[firstRole]).union(set(contributions[secondRole]))
+    row[combinedRole] = ';'.join(sorted(combinedSet))
+  elif (firstRole in contributions) and (secondRole not in contributions):
+    row[combinedRole] = ';'.join(contributions[firstRole])
+  elif (firstRole not in contributions) and (secondRole in contributions):
+    row[combinedRole] = ';'.join(contributions[secondRole])
+
+
+
+# -----------------------------------------------------------------------------
 def addContributions(row, contributions, roleMapping):
   """This function adds the given contributor values based on the given roleMapping.
 
-  >>> row0 = {'targetIdentifier': '1', 'authors': '', 'translators': ''}
-  >>> contributions0 = {'http://schema.org/author': ['John (123)', 'Jane (456)'], 'http://schema.org/translator': ['David (789)']}
-  >>> roleMapping = {'http://schema.org/author': 'authors', 'http://schema.org/translator': 'translators'}
+  >>> row0 = {'targetIdentifier': '1', 'authors': '', 'translators': '', 'scenarists': '', 'adapters': ''}
+  >>> contributions0 = {
+  ... 'http://schema.org/author': ['John (123)', 'Jane (456)'],
+  ... 'http://schema.org/translator': ['David (789)'],
+  ... 'http://id.loc.gov/vocabulary/relators/sce': ['Bob (111)'],
+  ... 'http://id.loc.gov/vocabulary/relators/adp': ['Julia (222)'],
+  ... 'http://id.loc.gov/vocabulary/relators/other': ['Anonymous (000)']
+  ... }
+  >>> roleMapping = {
+  ... 'http://schema.org/author': 'authors', 
+  ... 'http://schema.org/translator': 'translators', 
+  ... 'http://id.loc.gov/vocabulary/relators/sce': 'scenarists',
+  ... 'http://id.loc.gov/vocabulary/relators/adp': 'adapters'}
   >>> addContributions(row0, contributions0, roleMapping)
+
+  Single roles will be found
   >>> row0['authors']
   'Jane (456);John (123)'
   >>> row0['translators']
   'David (789)'
-  """  
+  >>> row0['scenarists']
+  'Bob (111)'
+  >>> row0['adapters']
+  'Julia (222)'
 
-  if ('http://id.loc.gov/vocabulary/relators/sce' in contributions) and ('http://schema.org/author' in contributions):
-    authorScenaristSet = set(contributions['http://schema.org/author']).union(set(contributions['http://id.loc.gov/vocabulary/relators/sce']))
-    row['author/scenarist'] = ';'.join(sorted(authorScenaristSet))
-  elif ('http://id.loc.gov/vocabulary/relators/sce' in contributions) and ('http://schema.org/author' not in contributions):
-    row['author/scenarist'] = ';'.join(contributions['http://id.loc.gov/vocabulary/relators/sce'])
-  elif ('http://id.loc.gov/vocabulary/relators/sce' not in contributions) and ('http://schema.org/author' in contributions):
-    row['author/scenarist'] = ';'.join(contributions['http://schema.org/author'])
+  It adds combined columns for author and scenarist
+  >>> row0['author/scenarist']
+  'Bob (111);Jane (456);John (123)'
+
+  It adds combined columns for translators and adapters
+  >>> row0['translator/adapter']
+  'David (789);Julia (222)'
+
+  Roles not in the mapping are not added
+  >>> 'otherRole' in row0
+  False
+  """  
+  schemaURI = 'http://schema.org/'
+  locURI = 'http://id.loc.gov/vocabulary/relators/'
+
+  addCombinedCounting(row, contributions, roleMapping, f'{schemaURI}author', f'{locURI}sce', 'author/scenarist')
+  addCombinedCounting(row, contributions, roleMapping, f'{schemaURI}translator', f'{locURI}adp', 'translator/adapter')
 
   for contRole, contValues in contributions.items():
     #print(f'contRole: {contRole}')
-    row[roleMapping[contRole]] = ';'.join(sorted(contValues))
+    if contRole in roleMapping:
+      row[roleMapping[contRole]] = ';'.join(sorted(contValues))
 
 # -----------------------------------------------------------------------------
 def addToMismatchLog(mismatchLog, dateType, roleType, contributorURI, s, value):

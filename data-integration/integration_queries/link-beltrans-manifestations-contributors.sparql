@@ -30,5 +30,11 @@ WHERE {
 
     # We want to fetch the following contributor relationships
     #
-    FILTER(?contributionRelationship IN (schema:author, schema:translator, schema:publisher, marcrel:ill, marcrel:sce, marcrel:pbd))
+    #FILTER(?contributionRelationship IN (schema:author, schema:translator, schema:publisher, marcrel:ill, marcrel:sce, marcrel:pbd))
+    FILTER(
+      STRSTARTS(STR(?contributionRelationship), "http://schema.org/author")
+      || STRSTARTS(STR(?contributionRelationship), "http://schema.org/translator")
+      || STRSTARTS(STR(?contributionRelationship), "http://schema.org/publisher")
+      || STRSTARTS(STR(?contributionRelationship), "http://id.loc.gov/vocabulary/relators/")
+    )
 }
