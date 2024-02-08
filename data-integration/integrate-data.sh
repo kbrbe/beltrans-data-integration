@@ -162,9 +162,9 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2023-12-15_person_contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2023-12-15_org_contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2023-12-15_translations_correlation-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-02-05_person_contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2024-02-05_org_contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024_translations_correlation-list.csv"
 INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-12-15_translations_removal-list.csv"
 
 
@@ -3065,21 +3065,22 @@ function extractTranslationCorrelationList {
 
   # 2023-12-15: we currently have LEXICON codes instead the name of genres
   # if there will be names again, the extra step below to lookup codes is important
-  extractSeparatedColumn $correlationList $correlationListTargetBBCodes "targetIdentifier" "targetThesaurusBB" "id" "targetThesaurusBB"
-  #extractSeparatedColumn $correlationList $correlationListTargetBBNames "targetIdentifier" "targetThesaurusBB" "id" "targetThesaurusBB"
+  #extractSeparatedColumn $correlationList $correlationListTargetBBCodes "targetIdentifier" "targetThesaurusBB" "id" "targetThesaurusBB"
+  extractSeparatedColumn $correlationList $correlationListTargetBBNames "targetIdentifier" "targetThesaurusBB" "id" "targetThesaurusBB"
 
-  #python -m $MODULE_NORMALIZED_LOOKUP \
-  #  --input-file $correlationListTargetBBNames \
-  #  --lookup-file $LOOKUP_FILE_BB_EN \
-  #  --output-file $correlationListTargetBBCodes \
-  #  --lookup-key-column "name" \
-  #  --lookup-value-column "id" \
-  #  --input-key-column "targetThesaurusBB" \
-  #  --input-id-column "id" \
-  #  --output-value-column "targetThesaurusBB" \
-  #  --input-delimiter "," \
-  #  --lookup-delimiter ";"
+  python -m $MODULE_NORMALIZED_LOOKUP \
+    --input-file $correlationListTargetBBNames \
+    --lookup-file $LOOKUP_FILE_BB_EN \
+    --output-file $correlationListTargetBBCodes \
+    --lookup-key-column "name" \
+    --lookup-value-column "id" \
+    --input-key-column "targetThesaurusBB" \
+    --input-id-column "id" \
+    --output-value-column "targetThesaurusBB" \
+    --input-delimiter "," \
+    --lookup-delimiter ";"
 
+  exit 1
   echo ""
   echo "Fetch and extract KBR translations"
   mkdir -p "$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang"
