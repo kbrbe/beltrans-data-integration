@@ -51,8 +51,14 @@ def main(inputFilename, lookupFilename, outputFilename, lookupKeyColumn, lookupV
         foundValue = lookup[normInputLookupKey] 
         outputWriter.writerow({inputIDColumn: rowID, outputValueColumn: ';'.join(foundValue)})
       else:
-        print()
-        print(f'No matching value found for {inputLookupKey} (normalized: "{normInputLookupKey}")')
+        # Special exception for when the script is used for mixed input of Belgian Bibliographie codes
+        # In case we lookup genre names to retrieve the Belgian Bibliographie LEXICON code
+        # but some input columns already contain the LEXICON code, we simply take the found value
+        if inputLookupKey.startswith('LEXICON'):
+          outputWriter.writerow({inputIDColumn: rowID, outputValueColumn: inputLookupKey})
+        else:
+          print()
+          print(f'No matching value found for {inputLookupKey} (normalized: "{normInputLookupKey}")')
 
 
 # -----------------------------------------------------------------------------
