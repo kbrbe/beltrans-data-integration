@@ -27,7 +27,6 @@ prefixes:
 
 variables:
   sourceCont: &sourceCont ${RML_SOURCE_CORRELATION_CONTRIBUTORS}
-  sourceContNationality: &sourceContNationality ${RML_SOURCE_CORRELATION_NATIONALITY}
   sourceContKBR: &sourceContKBR ${RML_SOURCE_CORRELATION_KBR}
   sourceContBnF: &sourceContBnF ${RML_SOURCE_CORRELATION_BNF}
   sourceContNTA: &sourceContNTA ${RML_SOURCE_CORRELATION_NTA}
@@ -57,43 +56,43 @@ mappings:
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(is imprint of)]
+            - [grel:valueParameter, $(isImprintFrom)]
             - [grel:valueParameter2, ""] 
       - p: schema:isPartOf
         o: 
-          value: btid:$(is imprint of)
+          value: btid:$(isImprintFrom)
           type: iri
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(is imprint of)]
+            - [grel:valueParameter, $(isImprintFrom)]
             - [grel:valueParameter2, ""] 
       - p: rdfs:label
         o:
-          - value: $(name NL)
+          - value: $(nameNL)
             language: nl
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(name NL)]
+            - [grel:valueParameter, $(nameNL)]
             - [grel:valueParameter2, ""] 
       - p: rdfs:label
         o:
-          - value: $(name EN)
+          - value: $(nameEN)
             language: en
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(name EN)]
+            - [grel:valueParameter, $(nameEN)]
             - [grel:valueParameter2, ""] 
       - p: rdfs:label
         o:
-          - value: $(name FR)
+          - value: $(nameFR)
             language: fr
         condition:
           function: idlab-fn:notEqual
           parameters:
-            - [grel:valueParameter, $(name FR)]
+            - [grel:valueParameter, $(nameFR)]
             - [grel:valueParameter2, ""] 
 
 
