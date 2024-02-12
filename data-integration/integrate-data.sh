@@ -116,7 +116,7 @@ INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.cs
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_$date.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-02-08.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -165,7 +165,7 @@ INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-
 
 INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-02-05_person_contributors-correlation-list.csv"
 INPUT_CORRELATION_ORG="../data-sources/correlation/2024-02-05_org_contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024_translations_correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-02-05_translations_correlation-list.csv"
 INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-12-15_translations_removal-list.csv"
 
 
@@ -1621,6 +1621,8 @@ function extractKBR {
   kbrOriginalsPersonContributorIDList="$integrationName/kbr/book-data-and-contributions/linked-originals/$SUFFIX_KBR_TRL_CONT_APEP"
   kbrOriginalsOrgContributorIDList="$integrationName/kbr/book-data-and-contributions/linked-originals/$SUFFIX_KBR_TRL_CONT_AORG"
 
+  # Use filters to extract different types of authorities from the same contribution CSV file
+  #
   python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsPersonContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_PERSON
   python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
 
@@ -3088,7 +3090,6 @@ function extractTranslationCorrelationList {
     --input-delimiter "," \
     --lookup-delimiter ";"
 
-  exit 1
   echo ""
   echo "Fetch and extract KBR translations"
   mkdir -p "$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang"

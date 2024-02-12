@@ -6,4 +6,5 @@
 *.json
 !author-headers.csv
 !agents/publisher-name-mapping.csv
-
+!person-filter.csv
+!org-filter.csv
