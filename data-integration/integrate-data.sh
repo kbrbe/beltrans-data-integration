@@ -166,7 +166,7 @@ INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-
 INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-02-05_person_contributors-correlation-list.csv"
 INPUT_CORRELATION_ORG="../data-sources/correlation/2024-02-05_org_contributors-correlation-list.csv"
 INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-02-05_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2023-12-15_translations_removal-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-02-05_translations_removal-list.csv"
 
 
 # #############################################################################
