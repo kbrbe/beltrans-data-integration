@@ -97,7 +97,7 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po: 
-      - [schema:nationality, countries:$(countryCode)~iri]
+      - [schema:nationality, $(countryCode)~iri]
 
   # ---------------------------------------------------------------------------
   #
