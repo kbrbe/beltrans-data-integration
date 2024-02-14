@@ -26,6 +26,9 @@ MODULE_COMPLETE_SEQUENCE_NUMBERS="tools.csv.complete_sequence_numbers"
 
 MODULE_CSV_SET_DIFFERENCE="tools.csv.difference"
 
+MODULE_REORDER_COLUMNS="tools.csv.reorder_columns"
+DATAPROFILE_TRL_COL_ORDER="translations-column-order.csv"
+
 SCRIPT_FIND_ORIGINALS="find-originals.py"
 
 SCRIPT_CONVERT_BB="../data-sources/master-data/convert-thesaurus.py"
@@ -338,6 +341,7 @@ SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
 SUFFIX_DATA_PROFILE_FILE_ALL="integrated-data-all-info.csv"
 SUFFIX_DATA_PROFILE_FILE_ENRICHED="integrated-data-enriched.csv"
 SUFFIX_DATA_PROFILE_FILE_ENRICHED_SORTED="integrated-data-enriched-sorted.csv"
+SUFFIX_DATA_PROFILE_FILE_ORDERED_COLS="integrated-data-ordered-columns.csv"
 SUFFIX_DATA_PROFILE_AGG_FILE_PROCESSED="integrated-data-aggregated.csv"
 SUFFIX_DATA_PROFILE_CONT_BE_FILE_PROCESSED="integrated-data-contributors-belgian.csv"
 SUFFIX_DATA_PROFILE_CONT_ALL_FILE_PROCESSED="integrated-data-contributors-all.csv"
@@ -1267,6 +1271,7 @@ function postprocess {
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
   integratedDataEnrichedSorted="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED_SORTED"
+  integratedDataOrderedColumns="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ORDERED_COLS"
 
   placeOfPublicationsGeonamesTarget="$integrationName/csv/$SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_TARGET"
   placeOfPublicationsGeonamesSource="$integrationName/csv/$SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_SOURCE"
@@ -1325,14 +1330,17 @@ function postprocess {
   echo "Postprocess contributor data - orgs (keep non-contributors)..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedDataEnriched -o $allOrgs --keep-non-contributors -t "orgs"
 
-  echo "Sort certain columns in the manifestation CSV"
+  echo "Sort delimited values in certain columns in the manifestation CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataEnriched -o $integratedDataEnrichedSorted \
        -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication"
+
+  echo "Reorder columns for translation sheet"
+  time python -m $MODULE_REORDER_COLUMNS -i "$integratedDataEnrichedSorted" -c "$DATAPROFILE_TRL_COL_ORDER" -o "$integratedDataOrderedColumns"
 
   oldestManifestations="$integrationName/csv/$SUFFIX_DATA_PROFILE_OLDEST_MANIFESTATIONS"
 
   echo "Create Excel sheet for data ..."
-  time python $SCRIPT_CSV_TO_EXCEL $integratedDataEnrichedSorted $oldestManifestations $contributorsPersons $contributorsOrgs $outputFileGeo $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "clusters" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
+  time python $SCRIPT_CSV_TO_EXCEL $integratedDataOrderedColumns $oldestManifestations $contributorsPersons $contributorsOrgs $outputFileGeo $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "clusters" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
 
 }
 
