@@ -34,3 +34,4 @@ geonames/
 !missing-geonames-mapping.csv
 !*stats.csv
 !config-integration*
+!translations-column-order.csv

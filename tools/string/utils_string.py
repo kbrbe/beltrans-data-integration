@@ -67,6 +67,7 @@ def getNormalizedString(s):
 
   """
   charReplacements = {
+    '.': '',
     ',': '',
     '?': '',
     '!': '',

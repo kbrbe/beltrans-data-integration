@@ -1,0 +1,45 @@
+prefix schema: <http://schema.org/>
+prefix fabio: <http://purl.org/spar/fabio/>
+prefix btid: <http://kbr.be/id/data/>
+
+
+SELECT ?cluster ?oldestM ?numManifestations ?numSameAge ?title
+WHERE {
+
+  graph <http://beltrans-manifestations> {
+    ?oldestM schema:name ?title . 
+  }
+
+  # intermediate query to select one of possibly multiple oldest manifestations
+  #
+  {
+    SELECT ?cluster (SAMPLE(?m) as ?oldestM) ?numManifestations (COUNT(?m) as ?numSameAge)
+    WHERE {
+      graph <http://beltrans-manifestations> {
+        ?m schema:datePublished ?minDate
+      }
+      graph <http://beltrans-works> {
+        ?cluster fabio:hasManifestation ?m .
+      }
+            
+      # inner query to select the year of the oldest manifestation per cluster
+      #
+      {
+        SELECT ?cluster (MIN(?pubDate) as ?minDate) (COUNT(?m) as ?numManifestations)
+        WHERE {
+          graph <http://beltrans-manifestations> {
+            ?m a schema:CreativeWork ;
+                 schema:isPartOf btid:beltransCorpus ;
+                 schema:datePublished ?pubDate .
+
+          }
+          graph <http://beltrans-works> {
+            ?cluster fabio:hasManifestation ?m .
+          }
+        }
+        GROUP BY ?cluster ?numManifestations
+      } # end innermost query to find oldest manifestations
+    }
+    GROUP BY ?cluster ?numManifestations ?numSameAge
+  } # end middle filter query
+}

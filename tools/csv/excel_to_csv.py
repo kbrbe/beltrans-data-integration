@@ -55,8 +55,10 @@ def main(input_file, sheet_names, csvFiles):
   for filename in csvFiles:
     # get the sheet corresponding with the index
     sheet = wb[sheet_names[outputFileIndex]]
+    sheetName = sheet_names[outputFileIndex]
     with open(filename, 'w', encoding="utf-8") as outFile:
 
+      print(f'Sheet {sheetName} has {sheet.max_row} rows')
       outputWriter = csv.writer(outFile)
       for row in sheet.rows:
         outputWriter.writerow([cell.value for cell in row])

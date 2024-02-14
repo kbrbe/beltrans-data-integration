@@ -258,6 +258,13 @@ def selectDate(row, dateType, sources, rowIDCol, mismatchLog, mismatchLogKey):
     >>> row['birthDate'] == '1988-04-25 or 1989'
     True
 
+    Do not log an error if a date is compared to only empty values
+    >>> row = {'authorKBRIdentifier': '1234', 'birthDateKBR': '', 'birthDateISNI': '1989'}
+    >>> mismatchLog = {}
+    >>> selectDate(row, 'birthDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', mismatchLog, 'key')
+    >>> mismatchLog
+    {}
+    
     The same works also for death dates
     >>> row = {'deathDateKBR': '1988-04-25', 'deathDateISNI': '1988'}
     >>> selectDate(row, 'deathDate', ['KBR', 'ISNI'], 'authorKBRIdentifier', {}, 'key')

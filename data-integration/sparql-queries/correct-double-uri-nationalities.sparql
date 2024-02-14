@@ -1,0 +1,18 @@
+prefix schema: <http://schema.org/>
+prefix btid: <http://kbr.be/id/data/>
+prefix btm: <http://kbr.be/ns/beltrans/model#>
+prefix prov: <http://www.w3.org/ns/prov#>
+
+DELETE { graph <http://beltrans-contributors> {?c schema:nationality ?nationalityURI . }}
+INSERT { graph <http://beltrans-contributors> {?c schema:nationality ?newURI . } }
+WHERE {
+  graph <http://beltrans-contributors> { 
+    ?c a schema:Person ;  
+       schema:nationality ?nationalityURI .
+    
+    ?generation a btm:CorrelationActivity ;
+                prov:generated ?c .
+  }
+        
+  BIND(IRI(REPLACE(STR(?nationalityURI), "http%3A%2F%2Fid.loc.gov%2Fvocabulary%2Fcountries%2F", "")) AS ?newURI)
+}

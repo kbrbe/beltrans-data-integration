@@ -29,7 +29,7 @@ def cleanDate(df):
           if(code == 'c'):
             date = sf.text
             if(date != ''):
-              newDate = utils.parseYear(date, ['[%Y]', '(%Y)', '%Y', '%Y-', '%Y]', '%Y.'])
+              newDate = utils.parseYear(date, ['[%Y]', '(%Y)', '%Y', '%Y-', '%Y]', '%Y.', '%Y .', '%Y ;', '[%Y ?]', 'cop. %Y'])
               # replace if the detected years are from the 70s, 80s etc (this also includes values such as '197?' or '2014-2015')
               #if( newDate.startswith(('197', '198', '199', '200', '201', '2020')) ):
               sf.text = newDate
