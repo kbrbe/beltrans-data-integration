@@ -6,7 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
-## [20230203] - 2022-02-03
+## [20240208] - 2024-02-08
+## [20231215] - 2023-12-15
+## [20231114] - 2023-11-14
+## [20231009] - 2023-10-09
+
+## [20230630] - 2023-06-30
+
+The biggest changes in this version are the addition of pseudonym and alternate name information as well as a generic SPARQL update query for the data integration.
+
+Added
+
+* Pseudonyms and alternate names in RDF ([#183](https://github.com/kbrbe/beltrans-data-integration/issues/183)), PR [#186](https://github.com/kbrbe/beltrans-data-integration/pull/186)
+* Deduplicate collective pseudonyms (need human curation) ([#185](https://github.com/kbrbe/beltrans-data-integration/issues/185))
+* Birth and death date is taken from person correlation list ([83ddc5](https://github.com/kbrbe/beltrans-data-integration/commit/83ddc55beb75d89c07edf6fad16e53ec7f1e40b6))
+* Script to fetch bibliographic KBR records via Z39.50 API ([187](https://github.com/kbrbe/beltrans-data-integration/issues/187))
+* Enrich our data via the central ISNI database ([#188](https://github.com/kbrbe/beltrans-data-integration/issues/188))
+* Functionality to compute the BnF control character ([#99](https://github.com/kbrbe/beltrans-data-integration/issues/99))
+
+Changed
+
+* Use a generic UPDATE query with `bf:identifiedBy` and FILTER to increase integration performance, see also `..SingleUpdateQuery` classes in query\_builder ([#179](https://github.com/kbrbe/beltrans-data-integration/issues/179)), PR [#182](https://github.com/kbrbe/beltrans-data-integration/pull/182)
+
+Fixed
+
+* SPARQL Update query to generate `dcterms:identifier` properties for BnF manifestations ([#180](https://github.com/kbrbe/beltrans-data-integration/issues/180))
+* Correlation list filter SPARQL query ([1107df](https://github.com/kbrbe/beltrans-data-integration/commit/1107df32253a6a5735b0eaff33ecfe4a5aae8736))
+* Missing relevant nationality query works again ([169f32](https://github.com/kbrbe/beltrans-data-integration/commit/169f32b57080ea8c369938c569b63d0cc25513d5))
+
+## [20230203] - 2023-02-03
 
 The biggest changes in this version was the addition of a big 4th data source (Unesco Index Translationum) in the data integration pipeline and a feature which allows to specify a correlation list of person contributors excluded from the automatic data integration based on identifiers.
 
@@ -249,3 +277,4 @@ This version corresponds to the milestone https://github.com/SvenLieber/beltrans
 [20220811]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-06-24...2022-08-11
 [20220912]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-08-11...2022-09-12
 [20230203]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-09-12...2023-02-03
+[20230630]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-02-03...2023-06-30
