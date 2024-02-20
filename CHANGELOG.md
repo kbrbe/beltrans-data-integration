@@ -6,7 +6,128 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
-## [20230203] - 2022-02-03
+
+
+## [20240208] - 2024-02-08
+
+Besides a lot of manual curation the biggest change in this version is the addition of the role `adapter` and that we store dates explicitly in the integrated data named graph.
+
+### Added
+
+* SPARQL query to identify translation loops, i.e. translation linking to an original and that original linking to its translation as original ([6e0613](https://github.com/kbrbe/beltrans-data-integration/commit/6e0613d5d3b52aa6b7c14b78915110874b836105))
+* New sheet with information per cluster and oldest manifestation in the cluster ([#242](https://github.com/kbrbe/beltrans-data-integration/issues/242))
+* Column for new role `adapter` as well as a `translator/adapter` column for the combination ([#244](https://github.com/kbrbe/beltrans-data-integration/issues/244))
+
+### Changed
+
+* Add dates for manifestations and contributors to the RDF Knowledge Graph instead of only adding them to Excel in a postprocessing step ([5d6ba](https://github.com/kbrbe/beltrans-data-integration/commit/5d6bacec5d41b09507c6f51ac46626b17230e205))
+* Adapted the regular expressions to extract more KBR dates ([aa7bc](https://github.com/kbrbe/beltrans-data-integration/commit/aa7bc2618a02774015dd4c5d153568dd28c6eab3))
+* Information about Belgians from KBR are also fetched via Z39.50 API ([515a98](https://github.com/kbrbe/beltrans-data-integration/commit/515a98e6ea7d89275d2f63f3508cad3b3dbe32f1))
+* String normalization also replaces a dot to avoid issues with genre lookup ([39ee31](https://github.com/kbrbe/beltrans-data-integration/commit/39ee312e0583a271931c1c781da9c324458ce2dc))
+* New postprocessing steps to change the order of columns for the Excel version of the corpus ([#243](https://github.com/kbrbe/beltrans-data-integration/issues/243))
+
+### Fixed
+
+* Display of column `author/scenarist` is now correct ([54e5d](https://github.com/kbrbe/beltrans-data-integration/commit/54e5d68d2b25046f90a45c82206442b77dbef467))
+
+## [20231215] - 2023-12-15
+
+The last version before the end of the year and planned paternity leave of the data manager. Next to smaller improvements, the biggest change is the consistent use of KBR APIs to extract data, on the one hand avoiding manual exports and on the other hand fetching KBR data linked in correlation lists.
+
+### Added
+
+* Nationality country code column in the correlation lists ([#237](https://github.com/kbrbe/beltrans-data-integration/issues/237))
+* Multilingual labels for organizations as well as links to which "organization" is an imprint of another ([#240](https://github.com/kbrbe/beltrans-data-integration/issues/240))
+* Instead of only fetching KBR collection information from the MARC field `773$*`/`773$t`, we also look up collection names from `490$a` and create our own hash-sum identifier if necessary ([#217](https://github.com/kbrbe/beltrans-data-integration/issues/217))
+* Bash script to automate the extraction of CSV files from the Excel correlation lists ([3fcc1](https://github.com/kbrbe/beltrans-data-integration/commit/3fcc1b4b1706b98e98d623fe94ab7af11264c950)
+
+### Changed
+
+* Adapted all KBR pipeline steps to consistently use the KBR Z39.50 APIs for bibliographic and authority records for automated data exports, among others we do not have to manually start exports anymore ([#220](https://github.com/kbrbe/beltrans-data-integration/issues/220)) We also keep a list of already fetched records to avoid unnecessary roundtrips.
+* Explicitly store BB genre classifications in the integrated data named graph instead of querying it by following `schema:sameAs` links ([#239](https://github.com/kbrbe/beltrans-data-integration/issues/239)) including BB genre classifications from the translation correlation list
+* Adapted the helper script to identify set differences and added unit tests ([a15e12](https://github.com/kbrbe/beltrans-data-integration/commit/a15e12c4a4243f22ac8acc95f257e2a7df12ea65))
+* Reuse existing cluster keys to avoid recreating new work identifiers for correlation list entries ([373fb](https://github.com/kbrbe/beltrans-data-integration/commit/373fb2231ef5b52f3d5436af5de6278d75162be9))
+
+### Fixed
+
+* Based on ambigious titles, wrong matches between translations and original titles were made, we added an additional contributor check to avoid this ([#235](https://github.com/kbrbe/beltrans-data-integration/issues/235))
+* KBR identifiers missing due to wrong extraction are now included ([72b6ca](https://github.com/kbrbe/beltrans-data-integration/commit/72b6ca560c56bef97f05c6288c32680656016af6))
+
+
+## [20231114] - 2023-11-14
+
+The biggest changes in this version are that we also use manually curated lists for organization contributors and translations that need to be removed, as well as displaying data about originals in the corpus Excel sheet (with geo data explicitly stored in the RDF Knowledge Graph)
+
+### Added
+
+* Display information about original titles in the Excel version of the corpus ([#203](https://github.com/kbrbe/beltrans-data-integration/issues/203)), this includes a refactoring of the ETL steps for KBR data to have more fine-granular functions that can also be used in other contexts such as linked originals
+* Not only represent each MARC relator code URI as PROV role, but also by using the MARC URI itself such that we can lookup the label of a MARC relator code property ([b47d37](https://github.com/kbrbe/beltrans-data-integration/commit/b47d37eb79c8b314326bc495d2b77f57c8bf5346))
+* Use `bf:identifiedBy` statements of local identifiers together with a SPARQL query to detect dead `schema:sameAs` links ([#207](https://github.com/kbrbe/beltrans-data-integration/issues/207))
+* Filter step to deduplicate roles, e.g. if a more fine-granular role of a contributor is known based on KBR data we remove the more general *author* role from a potentially other data source ([#206](https://github.com/kbrbe/beltrans-data-integration/issues/206))
+* Also use the KBR original title when creating descriptive keys for clustering ([7f1b7](https://github.com/kbrbe/beltrans-data-integration/commit/7f1b772238fecfeb9b7af21718f3cdb010ba4a16))
+* Use an organization correlation list ([#150](https://github.com/kbrbe/beltrans-data-integration/issues/150)) in addition to the person contributor and translation correlation list
+* Use a manually curated translation removal list to remove identified wrong translations from other data sources ([#215](https://github.com/kbrbe/beltrans-data-integration/issues/215))
+* Script to generate integrated records of BELTRANS originals ([7b0ad](https://github.com/kbrbe/beltrans-data-integration/commit/7b0ad6186ce0eded4640d6a63bb60765c68669e7))
+* New column for `author/scenarist` combining both roles to ease analysis with Excel ([#226](https://github.com/kbrbe/beltrans-data-integration/issues/226))
+
+### Changed
+
+* Geo information is generated in a postprocessing step, but also added to the RDF Knowlege Graph ([#225](https://github.com/kbrbe/beltrans-data-integration/issues/225))
+* Changed the prioritization of which source title should be shown from `KBR, BnF, KB, Unesco` to `KBR, BnF, Unesco, KB` ([f39584](https://github.com/kbrbe/beltrans-data-integration/commit/f395841f75b7228cd6d22eabf26ee64c2bca45b6))
+* Display the uniform BELTRANS identifier next to contributors instead of a list of local identifiers ([#211](https://github.com/kbrbe/beltrans-data-integration/issues/211))
+* Show organizations that were publishers of corpus translations in the *org-contributors* sheet ([#209](https://github.com/kbrbe/beltrans-data-integration/issues/209)), before only organizations where shown which where author, scenarist, illustrator or publishing director of a translation
+* Map KBR contributors of all roles to RDF, not only a few selected ones ([292fd3](https://github.com/kbrbe/beltrans-data-integration/commit/292fd3f89bc94970a1c4300ed584c9db006b4e4d))
+* Fetch and extract KBR contributor data in the correlation list from the new KBR Z39.50 authority API ([3b3433](https://github.com/kbrbe/beltrans-data-integration/commit/3b3433a25ad4d36565799d728ff1c278f0596c67))
+* Querying additional original information made the corpus query unusable because it became too slow. The query was refactored to remove some OPTIONAL statements, mainly by querying the contributors in a separate query and linking them in a postprocessing step ([#223](https://github.com/kbrbe/beltrans-data-integration/issues/223))
+* Adapted the integration statistics to most recent changes in our pipeline ([#227](https://github.com/kbrbe/beltrans-data-integration/issues/227))
+* Identify the KBR identifier of matching original titles with a local dump, but load live bibliographic data from the API with the found identifier instead of using the probably outdated data ([#230](https://github.com/kbrbe/beltrans-data-integration/issues/230))
+* Not showing the long Unesco identifier anymore that is based on a checksum of the Unesco data. Only display the short Unesco identifier from a manually curated list ([#224](https://github.com/kbrbe/beltrans-data-integration/issues/224))
+
+### Fixed
+
+* Only relevant named graphs are used when generating contribution relationships for integrated data ([#205](https://github.com/kbrbe/beltrans-data-integration/issues/205)), additionally we do it with one SPARQL query with FILTER expression instead of one SPARQL query per role
+
+
+## [20231009] - 2023-10-09
+
+The biggest changes in this version are that we use a manually curated translation correlation list to improve our data quality with a human in the loop (in addition to the person contributor correlation list that we already used) and that we cluster our manifestations to work level based on a OCLC Work-Set algorithm
+
+### Added
+
+* Using a translation correlation list in addition to our previously used person contributor correlation list (+ integration test) ([#190](https://github.com/kbrbe/beltrans-data-integration/issues/190))
+* Cluster our manifestations to the work level by using a Python implementation of the OCLC Work-Set algorithm ([#193](https://github.com/kbrbe/beltrans-data-integration/issues/193)), also improved the generation of clustering input data based on experiments with our data ([#197](https://github.com/kbrbe/beltrans-data-integration/issues/197)). This script was outsourced to a different repo https://github.com/kbrbe/work-set-clustering (DOI: [10.5281/zenodo.10011416](https://zenodo.org/doi/10.5281/zenodo.10011416))
+* Enrich our data via the central ISNI database via a script that we outsourced to a different repo https://github.com/kbrbe/enrich-authority-csv. Statistics of the enrichment are available in a [Jupyter notebook](https://github.com/kbrbe/beltrans-data-integration/blob/main/data-integration/Enriching.ipynb) ([#188](https://github.com/kbrbe/beltrans-data-integration/issues/188)), PR [#189](https://github.com/kbrbe/beltrans-data-integration/pull/189)
+* Smaller helper scripts as part of PR [#189](https://github.com/kbrbe/beltrans-data-integration/pull/189) such as finding the difference between two CSV files ([d904bc](https://github.com/kbrbe/beltrans-data-integration/commit/d904bc26084ba8e9f3aea37f939a0be92533e151)) or using different matching algorithms to identify name matches ([a0fd9d](https://github.com/kbrbe/beltrans-data-integration/pull/189/commits/a0fd9d3a5dbbeea89c16a3aecea46bf3225befaf))
+* Mapping the most common source and target languages from the correlation list ([1365bf](https://github.com/kbrbe/beltrans-data-integration/commit/1365bf9604cf07f729179bd2e6b2f1b0a346467e))
+
+### Changed
+
+* Provide a single sourceTitle (original title) column instead source title column per data source, there is a prioritization of data sources to decide which original title will be shown ([#195](https://github.com/kbrbe/beltrans-data-integration/issues/195))
+* Displaying years of publication correctly, i.e. prefer the value of the manually curated correlation list above found data ([#201](https://github.com/kbrbe/beltrans-data-integration/issues/201))
+
+## [20230630] - 2023-06-30
+
+The biggest changes in this version are the addition of pseudonym and alternate name information as well as a generic SPARQL update query for the data integration.
+
+### Added
+
+* Pseudonyms and alternate names in RDF ([#183](https://github.com/kbrbe/beltrans-data-integration/issues/183)), PR [#186](https://github.com/kbrbe/beltrans-data-integration/pull/186)
+* Deduplicate collective pseudonyms (need human curation) ([#185](https://github.com/kbrbe/beltrans-data-integration/issues/185))
+* Birth and death date is taken from person correlation list ([83ddc5](https://github.com/kbrbe/beltrans-data-integration/commit/83ddc55beb75d89c07edf6fad16e53ec7f1e40b6))
+* Script to fetch bibliographic KBR records via Z39.50 API ([187](https://github.com/kbrbe/beltrans-data-integration/issues/187))
+* Functionality to compute the BnF control character ([#99](https://github.com/kbrbe/beltrans-data-integration/issues/99))
+
+### Changed
+
+* Use a generic UPDATE query with `bf:identifiedBy` and FILTER to increase integration performance, see also `..SingleUpdateQuery` classes in query\_builder ([#179](https://github.com/kbrbe/beltrans-data-integration/issues/179)), PR [#182](https://github.com/kbrbe/beltrans-data-integration/pull/182)
+
+### Fixed
+
+* SPARQL Update query to generate `dcterms:identifier` properties for BnF manifestations ([#180](https://github.com/kbrbe/beltrans-data-integration/issues/180))
+* Correlation list filter SPARQL query ([1107df](https://github.com/kbrbe/beltrans-data-integration/commit/1107df32253a6a5735b0eaff33ecfe4a5aae8736))
+* Missing relevant nationality query works again ([169f32](https://github.com/kbrbe/beltrans-data-integration/commit/169f32b57080ea8c369938c569b63d0cc25513d5))
+
+## [20230203] - 2023-02-03
 
 The biggest changes in this version was the addition of a big 4th data source (Unesco Index Translationum) in the data integration pipeline and a feature which allows to specify a correlation list of person contributors excluded from the automatic data integration based on identifiers.
 
@@ -192,7 +313,7 @@ It corresponds to the milestone https://github.com/kbrbe/beltrans-data-integrati
 - The list of contributors is now complete, a wrong SPARQL query resulted in the issue that only contributors where shown which were also translators ([#70](https://github.com/kbrbe/beltrans-data-integration/issues/70))
 - We use now less self-created publisher IDs and refer to existing publisher records as much as possible. Publishers in KBR records are represented both in text fields and as linked authorities, when there was no linked authority in the record we created our own identifier. However a global check afterwards was needed to check if the publisher name is found in all KBR authority records ([#62](https://github.com/kbrbe/beltrans-data-integration/issues/62))
 
-## [20211213] - 2021-12-23
+## [20211223] - 2021-12-23
 
 This version contains fixes and improvements based on received corpus feedback.
 It corresponds to the milestone https://github.com/SvenLieber/beltrans-data/milestone/2.
@@ -249,3 +370,8 @@ This version corresponds to the milestone https://github.com/SvenLieber/beltrans
 [20220811]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-06-24...2022-08-11
 [20220912]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-08-11...2022-09-12
 [20230203]: https://github.com/kbrbe/beltrans-data-integration/compare/2022-09-12...2023-02-03
+[20230630]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-02-03...2023-06-30
+[20231009]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-06-30...2023-10-09
+[20231114]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-10-09...2023-11-14
+[20231215]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-11-14...2023-12-15
+[20240208]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-12-15...2023-02-08
