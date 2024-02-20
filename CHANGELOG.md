@@ -6,10 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This repository contains code to create a data corpus, instead of following [Semantic Versioning](https://semver.org/spec/v2.0.0.html) we use the date of a corpus release as version number, because in fact we implicitly version the corpus.
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
+
+* Years of publication are not only created in a postprocessing step, but are also added to our RDF Knowledge Graph
+
 ## [20240208] - 2024-02-08
 ## [20231215] - 2023-12-15
+
 ## [20231114] - 2023-11-14
+
 ## [20231009] - 2023-10-09
+
+Added
+
+* Using a translation correlation list in addition to our previously used person contributor correlation list (+ integration test) ([#190](https://github.com/kbrbe/beltrans-data-integration/issues/190))
+* Cluster our manifestations to the work level by using a Python implementation of the OCLC Work-Set algorithm ([#193](https://github.com/kbrbe/beltrans-data-integration/issues/193)), also improved the generation of clustering input data based on experiments with our data ([#197](https://github.com/kbrbe/beltrans-data-integration/issues/197)). This script was outsourced to a different repo https://github.com/kbrbe/work-set-clustering (DOI: [10.5281/zenodo.10011416](https://zenodo.org/doi/10.5281/zenodo.10011416))
+* Enrich our data via the central ISNI database via a script that we outsourced to a different repo https://github.com/kbrbe/enrich-authority-csv. Statistics of the enrichment are available in a [Jupyter notebook](https://github.com/kbrbe/beltrans-data-integration/blob/main/data-integration/Enriching.ipynb) ([#188](https://github.com/kbrbe/beltrans-data-integration/issues/188)), PR [#189](https://github.com/kbrbe/beltrans-data-integration/pull/189)
+* Smaller helper scripts as part of PR [#189](https://github.com/kbrbe/beltrans-data-integration/pull/189) such as finding the difference between two CSV files ([d904bc](https://github.com/kbrbe/beltrans-data-integration/commit/d904bc26084ba8e9f3aea37f939a0be92533e151)) or using different matching algorithms to identify name matches ([a0fd9d](https://github.com/kbrbe/beltrans-data-integration/pull/189/commits/a0fd9d3a5dbbeea89c16a3aecea46bf3225befaf))
+* Mapping the most common source and target languages from the correlation list ([1365bf](https://github.com/kbrbe/beltrans-data-integration/commit/1365bf9604cf07f729179bd2e6b2f1b0a346467e))
+
+Changed
+
+* Provide a single sourceTitle column instead source title column per data source ([#195](https://github.com/kbrbe/beltrans-data-integration/issues/195))
+* Displaying years of publication correctly, i.e. prefer the value of the manually curated correlation list above found data ([#201](https://github.com/kbrbe/beltrans-data-integration/issues/201))
 
 ## [20230630] - 2023-06-30
 
@@ -21,7 +39,6 @@ Added
 * Deduplicate collective pseudonyms (need human curation) ([#185](https://github.com/kbrbe/beltrans-data-integration/issues/185))
 * Birth and death date is taken from person correlation list ([83ddc5](https://github.com/kbrbe/beltrans-data-integration/commit/83ddc55beb75d89c07edf6fad16e53ec7f1e40b6))
 * Script to fetch bibliographic KBR records via Z39.50 API ([187](https://github.com/kbrbe/beltrans-data-integration/issues/187))
-* Enrich our data via the central ISNI database ([#188](https://github.com/kbrbe/beltrans-data-integration/issues/188))
 * Functionality to compute the BnF control character ([#99](https://github.com/kbrbe/beltrans-data-integration/issues/99))
 
 Changed
