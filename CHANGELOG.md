@@ -7,9 +7,28 @@ This repository contains code to create a data corpus, instead of following [Sem
 Every version of the corpus may contain breaking changes, thus a semantic versioning with minor and patch would not be very effective.
 
 
-* Years of publication are not only created in a postprocessing step, but are also added to our RDF Knowledge Graph
 
 ## [20240208] - 2024-02-08
+
+Besides a lot of manual curation the biggest change in this version is the addition of the role `adapter` and that we store dates explicitly in the integrated data named graph.
+
+### Added
+
+* SPARQL query to identify translation loops, i.e. translation linking to an original and that original linking to its translation as original ([6e0613](https://github.com/kbrbe/beltrans-data-integration/commit/6e0613d5d3b52aa6b7c14b78915110874b836105))
+* New sheet with information per cluster and oldest manifestation in the cluster ([#242](https://github.com/kbrbe/beltrans-data-integration/issues/242))
+* Column for new role `adapter` as well as a `translator/adapter` column for the combination ([#244](https://github.com/kbrbe/beltrans-data-integration/issues/244))
+
+### Changed
+
+* Add dates for manifestations and contributors to the RDF Knowledge Graph instead of only adding them to Excel in a postprocessing step ([5d6ba](https://github.com/kbrbe/beltrans-data-integration/commit/5d6bacec5d41b09507c6f51ac46626b17230e205))
+* Adapted the regular expressions to extract more KBR dates ([aa7bc](https://github.com/kbrbe/beltrans-data-integration/commit/aa7bc2618a02774015dd4c5d153568dd28c6eab3))
+* Information about Belgians from KBR are also fetched via Z39.50 API ([515a98](https://github.com/kbrbe/beltrans-data-integration/commit/515a98e6ea7d89275d2f63f3508cad3b3dbe32f1))
+* String normalization also replaces a dot to avoid issues with genre lookup ([39ee31](https://github.com/kbrbe/beltrans-data-integration/commit/39ee312e0583a271931c1c781da9c324458ce2dc))
+* New postprocessing steps to change the order of columns for the Excel version of the corpus ([#243](https://github.com/kbrbe/beltrans-data-integration/issues/243))
+
+### Fixed
+
+* Display of column `author/scenarist` is now correct ([54e5d](https://github.com/kbrbe/beltrans-data-integration/commit/54e5d68d2b25046f90a45c82206442b77dbef467))
 
 ## [20231215] - 2023-12-15
 
@@ -294,7 +313,7 @@ It corresponds to the milestone https://github.com/kbrbe/beltrans-data-integrati
 - The list of contributors is now complete, a wrong SPARQL query resulted in the issue that only contributors where shown which were also translators ([#70](https://github.com/kbrbe/beltrans-data-integration/issues/70))
 - We use now less self-created publisher IDs and refer to existing publisher records as much as possible. Publishers in KBR records are represented both in text fields and as linked authorities, when there was no linked authority in the record we created our own identifier. However a global check afterwards was needed to check if the publisher name is found in all KBR authority records ([#62](https://github.com/kbrbe/beltrans-data-integration/issues/62))
 
-## [20211213] - 2021-12-23
+## [20211223] - 2021-12-23
 
 This version contains fixes and improvements based on received corpus feedback.
 It corresponds to the milestone https://github.com/SvenLieber/beltrans-data/milestone/2.
@@ -355,3 +374,4 @@ This version corresponds to the milestone https://github.com/SvenLieber/beltrans
 [20231009]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-06-30...2023-10-09
 [20231114]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-10-09...2023-11-14
 [20231215]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-11-14...2023-12-15
+[20240208]: https://github.com/kbrbe/beltrans-data-integration/compare/2023-12-15...2023-02-08
