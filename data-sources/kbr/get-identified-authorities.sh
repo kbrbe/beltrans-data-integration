@@ -21,5 +21,7 @@ outputFile=$2
 # head -n 1 $inputFile > $outputFile
 
 # extract contributors with an ID with more than 8 characters and append the found lines to the output file
-awk -F, 'length($2) > 8 { print }' $inputFile > $outputFile
+# 2024-03-20: it has to be ensured that the third column is the kbr ID column (see https://github.com/kbrbe/beltrans-data-integration/issues/249)
+# length($3) is the length of the third column, the dollar variable is in single quotes and hence interpreted by awk and not bash
+awk -F, 'length($3) > 8 { print }' $inputFile > $outputFile
 
