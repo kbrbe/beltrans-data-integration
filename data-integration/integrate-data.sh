@@ -94,8 +94,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 INPUT_EXISTING_CLUSTER_KEYS="corpus-versions/2023-12-07/integration/clustering/descriptive-keys-no-uri.csv"
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-02-08.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-02-08.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-03-14.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-03-14.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -2449,6 +2449,7 @@ function extractKBRTranslationsAndContributions {
   python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrTranslationsCSVCont -o $kbrTranslationsCSVContReplaced
 
   echo "Deduplicate newly identified contributors - $language"
+  echo ""
   python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrTranslationsCSVContReplaced -o $kbrTranslationsCSVContDedup --no-matches-log $kbrNoMatches --multiple-matches-log $kbrMultipleMatches
 
   echo "Extract BB assignments for $language translations ..."
@@ -2469,8 +2470,8 @@ function extractKBRTranslationsAndContributions {
 
 
   echo "Extract newly identified contributors $language ..."
+  echo ""
   extractIdentifiedAuthorities "$kbrTranslationsCSVContDedup" "$kbrTranslationsIdentifiedAuthorities"
-
 
 }
 
@@ -4051,7 +4052,6 @@ function fetchKBRData {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  echo python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950" -q "$query" -o "$outputFile" -b 500
   python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950" -q "$query" -o "$outputFile" -b 500
 }
 
@@ -4063,7 +4063,6 @@ function fetchKBRAuthorityData {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  echo python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950_AUT" -q "$query" -o "$outputFile" -b 500
   python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950_AUT" -q "$query" -o "$outputFile" -b 500
 }
 
