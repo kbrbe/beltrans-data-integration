@@ -1,7 +1,6 @@
 prefix schema: <http://schema.org/>
 prefix dcterms: <http://purl.org/dc/terms/>
 
-SELECT *
 INSERT {
 
   graph <http://beltrans-contributors> { ?o schema:address ?addressURI . }

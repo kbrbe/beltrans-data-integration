@@ -305,6 +305,7 @@ DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE="sparql-queries/get-contributions.sparql"
 
 GET_GEO_TEXT_INFO_QUERY_FILE="sparql-queries/get-text-location-info-per-data-source.sparql"
+GET_GEO_TEXT_INFO_ORG_QUERY_FILE="sparql-queries/get-text-location-info-org-addresses.sparql"
 GET_GEO_DATA_QUERY_FILE="sparql-queries/get-manifestations-geo-data.sparql"
 
 GET_DATE_TEXT_INFO_PUB_QUERY_FILE="sparql-queries/get-text-date-info-publications-per-data-source.sparql"
@@ -358,11 +359,15 @@ SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_SOURCE="place-of-publications-geonames-sour
 SUFFIX_UNKNOWN_GEONAMES_MAPPING="missing-geonames-mapping.csv"
 
 SUFFIX_GEO_TEXT="geo-text-information.csv"
+SUFFIX_GEO_TEXT_ORG="geo-text-information-org.csv"
+SUFFIX_GEO_TEXT_ORG_ENRICHED="geo-text-information-org-enriched.csv"
 SUFFIX_GEO_TEXT_COMBINED="geo-text-information-combined.csv"
 SUFFIX_GEO_TEXT_COMBINED_ENRICHED="geo-text-information-combined-enriched.csv"
 SUFFIX_GEO_DATA="geo-data.csv"
+SUFFIX_GEO_DATA_ORG="geo-data-org.csv"
 SUFFIX_GEO_BELTRANS_MANIFESTATIONS="manifestations-geo.csv"
 SUFFIX_GEO_DATA_LD="geo-data.ttl"
+SUFFIX_GEO_DATA_ORG_LD="geo-data-org.ttl"
 
 SUFFIX_DATE_PUBLICATIONS_TEXT="date-publications-text-information.csv"
 SUFFIX_DATE_CONTRIBUTORS_TEXT="date-contributors-text-information.csv"
@@ -1102,13 +1107,22 @@ function extractGeoInformation {
   mkdir -p "$integrationName/geo"
   local unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
   local outputFileGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT"
+  local orgGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_ORG"
+  local orgGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_ORG_ENRICHED"
   local combinedGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED"
   local combinedGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED_ENRICHED"
   local geoData="$integrationName/geo/$SUFFIX_GEO_DATA"
+  local geoDataOrg="$integrationName/geo/$SUFFIX_GEO_DATA"
 
   echo ""
   echo "Enrich geo information and create RDF descriptions of it"
+  echo ""
+
+  echo "Get names of publication places"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeoText"
+
+  echo "Get names of organization addresses"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_ORG_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$orgGeoText"
 
   echo ""
   echo "Combine location information from different data sources"
@@ -1117,6 +1131,10 @@ function extractGeoInformation {
   echo "Derive missing country names from place names - KBR targetPlace ..."
   time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $combinedGeoText -o $combinedGeoTextEnriched \
     -g geonames/ -c "countryOfPublication" -p "placeOfPublication"
+
+  echo "Derive missing country names from org addresses ..."
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $orgGeoText -o $orgGeoTextEnriched \
+    -g geonames/ -c "orgCountry" -p "orgCity"
 
   echo "Create geonames relationships for place of publications ..."
   time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
@@ -1128,6 +1146,19 @@ function extractGeoInformation {
     --column-longitude "longitude" \
     --column-latitude "latitude" \
     -o $geoData
+
+  echo "Create geonames relationships for org addresses ..."
+  time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
+    -i $orgGeoTextEnriched -m $unknownGeonamesMapping -g geonames/ -p orgCity \
+    --input-id-column "beltransID" \
+    --column-place "orgCity" \
+    --column-country "orgCountry" \
+    --column-identifier "placeGeonamesIdentifier" \
+    --column-longitude "longitude" \
+    --column-latitude "latitude" \
+    -o $geoDataOrg
+
+
 
 }
 
