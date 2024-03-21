@@ -1,0 +1,37 @@
+prefix schema: <http://schema.org/>
+prefix dcterms: <http://purl.org/dc/terms/>
+
+SELECT *
+INSERT {
+
+  graph <http://beltrans-contributors> { ?o schema:address ?addressURI . }
+  graph <http://beltrans-contributors> {
+    ?addressURI a schema:PostalAddress ;
+                schema:addressCountry ?country ;
+                schema:addressLocality ?localiy ;
+                schema:addressRegion ?region ;
+                schema:postalCode ?postalCode ;
+                schema:streetAddress ?streetAddress .
+  }
+}
+WHERE {
+
+  graph <http://beltrans-contributors> { 
+    ?o a schema:Organization ;
+       dcterms:identifier ?oID ;
+       schema:sameAs ?kbrO . 
+  }
+  graph <http://kbr-linked-authorities> {
+    ?kbrO a schema:Organization ;
+          schema:address ?kbrAddress .
+  }
+
+  BIND(IRI(CONCAT("http://kbr.be/id/data/address_", STR(?oID))) AS ?addressURI)
+        
+  OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAddress schema:addressCountry ?country . } }
+  OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAddress schema:addressLocality ?locality . } }
+  OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAddress schema:addressRegion ?region . } }
+  OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAddress schema:postalCode ?postalCode . } }
+  OPTIONAL { graph <http://kbr-linked-authorities> { ?kbrAddress schema:streetAddress ?streetAddress . } }
+        
+}
