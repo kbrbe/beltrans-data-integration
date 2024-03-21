@@ -106,10 +106,10 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-02-08.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-02-08.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-02-08.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-02-08.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-03-14.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-03-14.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-03-14.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-03-14.xml"
 
 INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
 INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
@@ -119,7 +119,7 @@ INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.cs
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-02-08.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-03-14.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -402,10 +402,6 @@ SUFFIX_KBR_LIST_FETCHED_CONTRIBUTORS="already-fetched-contributors.csv"
 SUFFIX_KBR_TRL_ISBN10="isbn10.csv"
 SUFFIX_KBR_TRL_ISBN13="isbn13.csv"
 
-SUFFIX_KBR_LA_PLACES_VLG="publisher-places-VLG.csv"
-SUFFIX_KBR_LA_PLACES_WAL="publisher-places-WAL.csv"
-SUFFIX_KBR_LA_PLACES_BRU="publisher-places-BRU.csv"
-
 # DATA SOURCE - KBR LINKED AUTHORITIES
 #
 SUFFIX_KBR_LA_PERSONS_CLEANED="translations-linked-authorities-persons-cleaned.csv"
@@ -608,7 +604,6 @@ SUFFIX_KBR_ORIGINAL_LINKING_LD="translations-original-links.ttl"
 #
 SUFFIX_KBR_PERSONS_LD="persons.ttl"
 SUFFIX_KBR_ORGS_LD="organizations.ttl"
-SUFFIX_KBR_PLACES_LD="places.ttl"
 SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
 SUFFIX_KBR_PERSONS_IDENTIFIERS_LD="persons-identifiers.ttl"
 SUFFIX_KBR_ORGS_IDENTIFIERS_LD="orgs-identifiers.ttl"
@@ -1648,10 +1643,6 @@ function extractKBR {
   echo "Extract CSV data from fetched linked original authorities - orgs"
   extractKBROrgs "$integrationName" "kbr" "$kbrOriginalsFetchedOrgsXML" "linked-originals" "$alreadyFetchedContributors"
 
-  echo ""
-  echo "Extract KBR places"
-  extractKBRPlaces
-
 }
 
 # -----------------------------------------------------------------------------
@@ -2213,10 +2204,6 @@ function transformKBR {
   mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
   mapKBRLinkedOrgAuthorities $integrationName "kbr" "linked-originals"
 
-  echo ""
-  echo "TRANSFORMATION - Map KBR places"
-  local kbrPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
-  mapKBRPlaces "$integrationName" "$kbrPlacesTurtle"
 
 }
 
@@ -2563,15 +2550,6 @@ function extractKBROrgs {
 
 }
 
-# -----------------------------------------------------------------------------
-function extractKBRPlaces {
-
-  echo "Copy publisher location information ..."
-  cp "$INPUT_KBR_LA_PLACES_VLG" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
-  cp "$INPUT_KBR_LA_PLACES_WAL" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_WAL"
-  cp "$INPUT_KBR_LA_PLACES_BRU" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_BRU"
-}
-
 
 # -----------------------------------------------------------------------------
 function extractKBRBelgians {
@@ -2897,20 +2875,6 @@ function mapKBRLinkedIdentifiers {
     echo "No KBR linked identifiers to map! - $sourceFile"
   fi
 
-}
-
-# -----------------------------------------------------------------------------
-function mapKBRPlaces {
-  local integrationName=$1
-
-  local kbrPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
-
-  export RML_SOURCE_KBR_PUBLISHER_PLACES_FLANDERS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
-  export RML_SOURCE_KBR_PUBLISHER_PLACES_WALLONIA="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_WAL"
-  export RML_SOURCE_KBR_PUBLISHER_PLACES_BRUSSELS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_BRU"
-
-  echo "Map KBR Places"
-  . map.sh ../data-sources/kbr/kbr-places.yml $kbrPlacesTurtle
 }
 
 
@@ -3709,21 +3673,6 @@ function loadKBRLinkedOrgAuthorities {
       "$kbrOrgMatchesTurtle"
   fi
 
-}
-
-
-# -----------------------------------------------------------------------------
-function loadKBRPlaces {
-  local integrationName=$1
-  local linkedAuthoritiesNamedGraph=$2
-
-  # get environment variables
-  export $(cat .env | sed 's/#.*//g' | xargs)
-  local kbrPlaces="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
-  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
-
-  echo "Load KBR places ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrPlaces"
 }
 
 
