@@ -25,6 +25,12 @@ class TestGeonamesIdentifierEnrichment(unittest.TestCase):
       '-g', 'test/resources/geoname-identifier-enrichment/geonames/',
       '-i', 'test/resources/geoname-identifier-enrichment/testdata.csv',
       '-p', 'targetPlaceOfPublication',
+      '--input-id-column', 'targetIdentifier',
+      '--column-place', 'targetPlaceOfPublication',
+      '--column-country', 'targetCountryOfPublication',
+      '--column-identifier', 'targetPlaceOfPublicationIdentifier',
+      '--column-longitude', 'targetPlaceOfPublicationLongitude',
+      '--column-latitude', 'targetPlaceOfPublicationLatitude',
       '-o', cls.tempEnriched]
     subprocess.run(args)
 
