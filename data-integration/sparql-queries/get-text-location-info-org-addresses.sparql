@@ -30,10 +30,13 @@ WHERE {
   }
   
   OPTIONAL { graph <http://beltrans-contributors> { ?orgAddress schema:addressLocality ?orgCity . } }
-  OPTIONAL { graph <http://beltrans-contributors> { ?orgAddress schema:addressCountry ?orgCountryCode . } }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?orgAddress schema:addressCountry ?orgCountryCode . } 
+
+    graph <http://master-data> { ?orgCountryCode mads:authoritativeLabel ?orgCountryLabel . }
+    FILTER (lang(?orgCountryLabel) = 'en')
+  }
   
 
-  graph <http://master-data> { ?orgCountryCode mads:authoritativeLabel ?orgCountryLabel . }
-  FILTER (lang(?orgCountryLabel) = 'en')
          
 }
