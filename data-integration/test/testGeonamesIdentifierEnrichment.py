@@ -68,7 +68,7 @@ class TestGeonamesIdentifierEnrichment(unittest.TestCase):
     """When the location column is empty but we have a country column, the country column should not be removed https://github.com/kbrbe/beltrans-data-integration/issues/252"""
     expectedCountry = 'Belgium'
     foundCountry = TestGeonamesIdentifierEnrichment.data.getTargetIdentifierCountry("17")
-    self.assertEqual(foundCountry, expectedCountry, f'There should be the country {expectedCountry}, but {foundCountry}" was found')
+    self.assertEqual(foundCountry, expectedCountry, f'There should be the country {expectedCountry}, but "{foundCountry}" was found')
 
 
   # ---------------------------------------------------------------------------

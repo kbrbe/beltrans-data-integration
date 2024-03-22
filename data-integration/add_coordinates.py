@@ -105,7 +105,9 @@ def main():
                 # ElseIf because some places exist in several countries, but we want to prioritize Belgium
                 # E.g. Hasselt exists in Belgium and in the Netherlands
                 if lNorm == '':
-                    pass
+                  if options.column_country in row:
+                    # Don't overwrite existing values if nothing was found https://github.com/kbrbe/beltrans-data-integration/issues/252
+                    locationCountry = row[options.column_country]
                 elif lNorm in be:
                     locationMainSpelling = utils_geo.getGeoNamesMainSpellingFromDataFrame(beContent, be[lNorm])
                     locationCountry = 'Belgium'
