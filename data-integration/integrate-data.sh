@@ -1112,7 +1112,7 @@ function extractGeoInformation {
   local combinedGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED"
   local combinedGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED_ENRICHED"
   local geoData="$integrationName/geo/$SUFFIX_GEO_DATA"
-  local geoDataOrg="$integrationName/geo/$SUFFIX_GEO_DATA"
+  local geoDataOrg="$integrationName/geo/$SUFFIX_GEO_DATA_ORG"
 
   echo ""
   echo "Enrich geo information and create RDF descriptions of it"
@@ -1128,14 +1128,17 @@ function extractGeoInformation {
   echo "Combine location information from different data sources"
   python $SCRIPT_POSTPROCESS_LOCATIONS -i "$outputFileGeoText" -o "$combinedGeoText"
 
+  echo ""
   echo "Derive missing country names from place names - KBR targetPlace ..."
   time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $combinedGeoText -o $combinedGeoTextEnriched \
     -g geonames/ -c "countryOfPublication" -p "placeOfPublication"
 
+  echo ""
   echo "Derive missing country names from org addresses ..."
   time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $orgGeoText -o $orgGeoTextEnriched \
-    -g geonames/ -c "orgCountry" -p "orgCity"
+    -g geonames/ -c "orgCountryLabel" -p "orgCity"
 
+  echo ""
   echo "Create geonames relationships for place of publications ..."
   time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
     -i $combinedGeoTextEnriched -m $unknownGeonamesMapping -g geonames/ -p placeOfPublication \
@@ -1147,12 +1150,13 @@ function extractGeoInformation {
     --column-latitude "latitude" \
     -o $geoData
 
+  echo ""
   echo "Create geonames relationships for org addresses ..."
   time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
     -i $orgGeoTextEnriched -m $unknownGeonamesMapping -g geonames/ -p orgCity \
     --input-id-column "beltransID" \
     --column-place "orgCity" \
-    --column-country "orgCountry" \
+    --column-country "orgCountryLabel" \
     --column-identifier "placeGeonamesIdentifier" \
     --column-longitude "longitude" \
     --column-latitude "latitude" \
