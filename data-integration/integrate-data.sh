@@ -1196,13 +1196,20 @@ function transformGeoInformation {
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   local geoDataTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_LD"
+  local geoDataOrgTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_ORG_LD"
+
   mkdir -p "$integrationName/geo/rdf"
 
   export RML_SOURCE_GEO="$integrationName/geo/$SUFFIX_GEO_DATA"
+  export RML_SOURCE_GEO_ORG="$integrationName/geo/$SUFFIX_GEO_DATA_ORG"
 
   echo ""
-  echo "TRANSFORM geo data"
+  echo "TRANSFORM geo data of publications"
   . map.sh geo-data.yml $geoDataTurtle
+
+  echo ""
+  echo "TRANSFORM geo data of organizations"
+  . map.sh geo-data-org.yml $geoDataOrgTurtle
 }
 
 # -----------------------------------------------------------------------------
@@ -1232,11 +1239,13 @@ function loadGeoInformation {
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
   local geoDataTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_LD"
+  local geoDataOrgTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_ORG_LD"
 
   echo ""
-  echo "LOAD geo data"
+  echo "LOAD geo data of publications"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_GEO" \
-    "$geoDataTurtle"
+    "$geoDataTurtle" "$geoDataOrgTurtle"
+
 
 }
 
