@@ -55,7 +55,7 @@ WHERE {
 
 
 
-  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:isPartOf ?imprintOwner . } }
+  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:isPartOf/dcterms:identifier ?imprintOwner . } }
 
   OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:address/schema:addressRegion ?contributorRegion . } }
   OPTIONAL { 
