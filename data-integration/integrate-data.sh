@@ -414,6 +414,7 @@ SUFFIX_KBR_LA_PERSONS_FR_NORM="fr-translations-linked-authorities-persons-norm.c
 SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 
 SUFFIX_KBR_LA_PERSONS_NAT="translations-linked-authorities-nationalities.csv"
+SUFFIX_KBR_LA_PERSONS_LANG="translations-linked-authorities-languages.csv"
 SUFFIX_KBR_LA_PERSONS_NAMES="translations-linked-authorities-names.csv"
 SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE="translations-linked-authorities-names-complete.csv"
 
@@ -2513,6 +2514,7 @@ function extractKBRPersons {
 
   kbrPersonsCSV="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
   kbrPersonsNationalities="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
+  kbrPersonsLanguages="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_LANG"
   kbrPersonsISNIs="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
   kbrPersonsNames="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES"
   kbrPersonsNamesComplete="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
@@ -2525,6 +2527,7 @@ function extractKBRPersons {
     -i $kbrPersons \
     -o $kbrPersonsCSV \
     -n $kbrPersonsNationalities \
+    -l $kbrPersonsLanguages \
     --names-csv $kbrPersonsNames \
     --identifier-csv $kbrPersonsISNIs
 
@@ -2802,6 +2805,7 @@ function mapKBRLinkedPersonAuthorities {
   # input
   local kbrPersons="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
   local kbrPersonsNat="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
+  local kbrPersonsLanguages="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_LANG"
   local kbrPersonsISNI="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
   local kbrPersonsNames="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
  
@@ -2811,7 +2815,7 @@ function mapKBRLinkedPersonAuthorities {
   local kbrPersonsNamesTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_NAMES_LD"
 
   # 2) execute the mapping
-  mapKBRPersons "$kbrPersons" "$kbrPersonsNat" "$kbrPersonsTurtle"
+  mapKBRPersons "$kbrPersons" "$kbrPersonsNat" "$kbrPersonsLanguages" "$kbrPersonsTurtle"
   mapKBRNames "$kbrPersonsNames" "$kbrPersonsNamesTurtle"
   mapKBRLinkedIdentifiers "$kbrPersonsISNI" "$kbrPersonsIdentifiersTurtle"
 
@@ -2845,10 +2849,12 @@ function mapKBRLinkedOrgAuthorities {
 function mapKBRPersons {
   local sourceFile=$1
   local sourceFileNat=$2
-  local outputTurtle=$3
+  local sourceFileLang=$3
+  local outputTurtle=$4
 
   export RML_SOURCE_KBR_PERSONS="$sourceFile"
   export RML_SOURCE_KBR_PERSONS_NAT="$sourceFileNat"
+  export RML_SOURCE_KBR_PERSONS_LANG="$sourceFileLang"
 
   echo ""
   echo "Map KBR Persons - $sourceFile"

@@ -22,6 +22,7 @@ prefixes:
 variables:
   sourceKBRPersons: &sourceKBRPersons ${RML_SOURCE_KBR_PERSONS}
   sourceKBRPersonsNat: &sourceKBRPersonsNat ${RML_SOURCE_KBR_PERSONS_NAT}
+  sourceKBRPersonsLang: &sourceKBRPersonsLang ${RML_SOURCE_KBR_PERSONS_LANG}
 
 mappings:
 
@@ -123,5 +124,19 @@ mappings:
     s: btid:authority_$(authorityID)
     po:
       - [schema:nationality, $(nationality)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  languages:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links between person authorities and their language."
+    sources:
+      - access: *sourceKBRPersonsLang
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:authority_$(authorityID)
+    po:
+      - [schema:knowsLanguage, $(language)~iri]
 
 
