@@ -5,18 +5,19 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 prefix btid: <http://kbr.be/id/data/>
 
 
-SELECT ?clusterID ?oldestM ?numManifestations ?numSameAge ?title
+SELECT ?clusterID ?oldestMID ?numManifestations ?numSameAge ?title
 WHERE {
 
   graph <http://beltrans-works> { ?cluster dcterms:identifier ?clusterID . }
-  OPTIONAL { 
-    graph <http://beltrans-works> { ?cluster schema:about ?genre . } 
-    graph <http://master-data> { ?genre skos:prefLabel ?genreLabel . }
-    FILTER(lang(?genreLabel) = 'en')
-  }
+  #OPTIONAL { 
+  #  graph <http://beltrans-works> { ?cluster schema:about ?genre . } 
+  #  graph <http://master-data> { ?genre skos:prefLabel ?genreLabel . }
+  #  FILTER(lang(?genreLabel) = 'en')
+  #}
 
   graph <http://beltrans-manifestations> { 
     ?oldestM schema:name ?title ;
+             dcterms:identifier ?oldestMID ;
              schema:datePublished ?oldestYearOfPublication .
   }
 
