@@ -1,0 +1,282 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  bibo: "http://purl.org/ontology/bibo/"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  lang: "http://id.loc.gov/vocabulary/languages/"
+  schema: "http://schema.org/"
+  up: "http://users.ugent.be/~tdenies/up/"
+  marcrel: "http://id.loc.gov/vocabulary/relators/"
+  bnf: "http://data.bnf.fr/ark:/12148/"
+  nta: "http://data.bibliotheken.nl/id/thes/"
+  nbt: "http://data.bibliotheken.nl/id/nbt/"
+  isni: "http://kbr.be/isni/"
+
+variables:
+  sourceCont: &sourceCont ${RML_SOURCE_CORRELATION_TRL}
+  sourceOriginalContKBR: &sourceOriginalContKBR ${RML_SOURCE_CORRELATION_ORIG_KBR}
+  sourceOriginalContISBN10: &sourceOriginalContISBN10 ${RML_SOURCE_CORRELATION_ORIG_ISBN10}
+  sourceOriginalContISBN13: &sourceOriginalContISBN13 ${RML_SOURCE_CORRELATION_ORIG_ISBN13}
+  sourceContSourceLang: &sourceOriginalContSourceLang ${RML_SOURCE_CORRELATION_TRL_SOURCE_LANG}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  # The URI pattern has to the same as in the create-beltrans-origina.sparql query (original_*)
+  #
+  originals:
+    sources:
+      - access: *sourceCont
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(targetIdentifier)
+    po:
+      - [a, schema:CreativeWork]
+      - [dcterms:identifier, $(targetIdentifier)]
+      - [schema:workTranslation, btid:$(targetIdentifier)~iri]
+      - [schema:name, $(sourceTitle)]
+      - [rdfs:comment, "Created from correlation list"]
+      - [rdfs:label, "BELTRANS original $(targetIdentifier)"]
+      - [bf:title, btid:title_original_$(targetIdentifier)~iri]
+      - p: schema:datePublished
+        o: $(sourceYearOfPublication)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(sourceYearOfPublication)]
+            - [grel:valueParameter2, ""] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  sourceLanguages:
+    sources:
+      - access: *sourceContSourceLang
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(id)
+    po:
+      - p: schema:inLanguage
+        o: http://id.loc.gov/vocabulary/languages/fre~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sourceLanguage)]
+            - [grel:valueParameter2, "French"]
+      - p: schema:inLanguage
+        o: http://id.loc.gov/vocabulary/languages/dut~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sourceLanguage)]
+            - [grel:valueParameter2, "Dutch"]
+      - p: schema:inLanguage
+        o: http://id.loc.gov/vocabulary/languages/eng~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sourceLanguage)]
+            - [grel:valueParameter2, "English"]
+      - p: schema:inLanguage
+        o: http://id.loc.gov/vocabulary/languages/ger~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sourceLanguage)]
+            - [grel:valueParameter2, "German"]
+
+  # ---------------------------------------------------------------------------
+  #
+  translationsBibframeMainTitle:
+    sources:
+      - access: *sourceCont
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:title_original_$(targetIdentifier)
+    po:
+      - [a, bf:Title]
+      - [bf:mainTitle, $(targetTitle)]
+
+  # ---------------------------------------------------------------------------
+  #
+  isbn10:
+    sources:
+      - access: *sourceOriginalContISBN10
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(id)
+    po: 
+      - [bibo:isbn10, $(isbn10)]
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  isbn13:
+    sources:
+      - access: *sourceOriginalContISBN13
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(id)
+    po: 
+      - [bibo:isbn13, $(isbn13)]
+
+  # ---------------------------------------------------------------------------
+  #
+  kbrLink:
+    sources:
+      - access: *sourceOriginalContKBR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(id)
+    po:
+      - p: bf:identifiedBy
+        o: btid:kbr_$(KBR)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(KBR)]
+            - [grel:valueParameter2, ""]
+      - p: schema:sameAs
+        o: btid:manifestation_$(KBR)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(KBR)]
+            - [grel:valueParameter2, ""]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  isbn10Link:
+    sources:
+      - access: *sourceOriginalContISBN10
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(id)
+    po:
+      - p: bf:identifiedBy
+        o: btid:isbn10_$(isbn10)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isbn10)]
+            - [grel:valueParameter2, ""]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  isbn13Link:
+    sources:
+      - access: *sourceOriginalContISBN13
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(id)
+    po:
+      - p: bf:identifiedBy
+        o: btid:isbn13_$(isbn13)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(isbn13)]
+            - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  kbrEntity:
+    sources:
+      - access: *sourceOriginalContKBR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:kbr_$(KBR)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(KBR)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "KBR"]
+      - [rdf:value, $(KBR)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  isbn10Entity:
+    sources:
+      - access: *sourceOriginalContISBN10
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:isbn10_$(isbn10)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(isbn10)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "ISBN-10"]
+      - [rdf:value, $(isbn10)]
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  isbn13Entity:
+    sources:
+      - access: *sourceOriginalContISBN13
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:isbn13_$(isbn13)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(isbn13)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "ISBN-13"]
+      - [rdf:value, $(isbn13)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  CorrelationAnnotation:
+    sources:
+      - access: *sourceCont
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:correlation_original_$(targetIdentifier)
+    po:
+      - [a, btm:CorrelationActivity]
+      - [rdfs:label, "Curation of correlation"]
+      - [prov:generated, btid:original_$(targetIdentifier)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  CorrelationAnnotationUsedKBR:
+    sources:
+      - access: *sourceOriginalContKBR
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:correlation_original_$(id)
+    po:
+      - [prov:used, btid:manifestation_$(KBR)~iri]
+
+

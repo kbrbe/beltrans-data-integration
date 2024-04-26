@@ -584,6 +584,10 @@ SUFFIX_CORRELATION_TRL_TARGET_LANG="correlation-trl-target-lang.csv"
 SUFFIX_CORRELATION_TRL_TARGET_BB_NAMES="correlation-trl-target-bb-names.csv"
 SUFFIX_CORRELATION_TRL_TARGET_BB_CODES="correlation-trl-target-bb-codes.csv"
 
+SUFFIX_CORRELATION_ORIG_ISBN10="correlation-orig-isbn10.csv"
+SUFFIX_CORRELATION_ORIG_ISBN13="correlation-orig-isbn13.csv"
+SUFFIX_CORRELATION_ORIG_KBR="correlation-orig-kbr-id.csv"
+
 #
 # LINKED DATA - KBR TRANSLATIONS
 #
@@ -3072,6 +3076,10 @@ function extractTranslationCorrelationList {
   local correlationListKBIDs="$folderName/$SUFFIX_CORRELATION_TRL_KB"
   local correlationListUNESCOIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
 
+  local correlationListOriginalISBN10="$folderName/$SUFFIX_CORRELATION_ORIG_ISBN10"
+  local correlationListOriginalISBN13="$folderName/$SUFFIX_CORRELATION_ORIG_ISBN13"
+  local correlationListOriginalKBRIDs="$folderName/$SUFFIX_CORRELATION_ORIG_KBR"
+
   local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
   local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
@@ -3091,6 +3099,10 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListSourceLanguage "targetIdentifier" "sourceLanguage" "id" "sourceLanguage"
   extractSeparatedColumn $correlationList $correlationListTargetLanguage "targetIdentifier" "targetLanguage" "id" "targetLanguage"
 
+  extractSeparatedColumn $correlationList $correlationListOriginalISBN10 "targetIdentifier" "sourceISBN10" "id" "isbn10"
+  extractSeparatedColumn $correlationList $correlationListOriginalISBN13 "targetIdentifier" "sourceISBN13" "id" "isbn13"
+  extractSeparatedColumn $correlationList $correlationListOriginalKBRIDs "targetIdentifier" "sourceKBRIdentifier" "id" "KBR"
+  
 
   # 2023-12-15: we currently have LEXICON codes instead the name of genres
   # if there will be names again, the extra step below to lookup codes is important
@@ -3290,6 +3302,7 @@ function transformTranslationCorrelationList {
 
   folderName="$integrationName/correlation/translations"
   mkdir -p "$integrationName/correlation/translations/rdf"
+  mkdir -p "$integrationName/correlation/originals/rdf"
   
   local correlationList="$INPUT_CORRELATION_TRANSLATIONS"
   local correlationListISBN10="$folderName/$SUFFIX_CORRELATION_TRL_ISBN10"
@@ -3300,6 +3313,10 @@ function transformTranslationCorrelationList {
   local correlationListKBIDs="$folderName/$SUFFIX_CORRELATION_TRL_KB"
   local correlationListUNESCOIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
 
+  local correlationListOriginalISBN10="$folderName/$SUFFIX_CORRELATION_ORIG_ISBN10"
+  local correlationListOriginalISBN13="$folderName/$SUFFIX_CORRELATION_ORIG_ISBN13"
+  local correlationListOriginalKBRIDs="$folderName/$SUFFIX_CORRELATION_ORIG_KBR"
+
   local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
   local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
@@ -3307,6 +3324,7 @@ function transformTranslationCorrelationList {
   local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
   local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
+  local correlationOriginalsTurtle="$integrationName/correlation/originals/rdf/$SUFFIX_CORRELATION_TRL_LD"
 
   export RML_SOURCE_CORRELATION_TRL="$correlationList"
   export RML_SOURCE_CORRELATION_TRL_ISBN10="$correlationListISBN10"
@@ -3318,10 +3336,18 @@ function transformTranslationCorrelationList {
   export RML_SOURCE_CORRELATION_TRL_SOURCE_LANG="$correlationListSourceLanguage"
   export RML_SOURCE_CORRELATION_TRL_TARGET_LANG="$correlationListTargetLanguage"
   export RML_SOURCE_CORRELATION_TRL_TARGET_BB="$correlationListTargetBBCodes"
+
+  export RML_SOURCE_CORRELATION_ORIG_ISBN10="$correlationListOriginalISBN10"
+  export RML_SOURCE_CORRELATION_ORIG_ISBN13="$correlationListOriginalISBN13"
+  export RML_SOURCE_CORRELATION_ORIG_KBR="$correlationListOriginalKBRIDs"
  
   echo ""
   echo "Map translations correlation data"
   . map.sh ../data-sources/correlation/correlation-translations.yml $correlationTurtle
+
+  echo ""
+  echo "Map originals correlation data"
+  . map.sh ../data-sources/correlation/correlation-originals.yml $correlationOriginalsTurtle
 
   echo ""
   echo "Map extracted data about KBR translations from correlation list"
@@ -3435,11 +3461,21 @@ function loadTranslationCorrelationList {
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
   local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
+
+  # This is data about originals extracted from the correlation list itself (title, ISBN, etc)
+  local correlationOriginalsTurtle="$integrationName/correlation/originals/rdf/$SUFFIX_CORRELATION_TRL_LD"
+
+  # This is actual data of originals extracted from data sources (all fields of a record)
   local originalsTurtle="$integrationName/correlation/originals/rdf/mixed-lang"
 
   echo "Load translations correlation list"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
     "$correlationTurtle"
+
+  echo "Load translations correlation list - original data"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_ORIG" \
+    "$correlationOriginalsTurtle"
+
 
   echo "Load extracted data about correlation list KBR translations"
   loadKBRBookInformationAndContributions "$integrationName/correlation" "translations/kbr" "$TRIPLE_STORE_GRAPH_KBR_TRL" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
