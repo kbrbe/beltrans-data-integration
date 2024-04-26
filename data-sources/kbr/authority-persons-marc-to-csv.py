@@ -92,7 +92,7 @@ def addAuthorityFieldsToCSV(elem, writer, natWriter, langWriter, nameWriter, ide
   namePerson = utils.getElementValue(elem.find('./marc:datafield[@tag="100"]/marc:subfield[@code="a"]', ALL_NS))
   nameOrg = utils.getElementValue(elem.find('./marc:datafield[@tag="110"]/marc:subfield[@code="a"]', ALL_NS))
   nationalities = utils.getElementValue(elem.findall('./marc:datafield[@tag="370"]/marc:subfield[@code="c"]', ALL_NS))
-  languages = utils.getElementValue(elem.findall('./marc:datafield[@tag="377"]/subfield[@code="a"]', ALL_NS)
+  languages = utils.getElementValue(elem.findall('./marc:datafield[@tag="377"]/subfield[@code="a"]', ALL_NS))
   gender = utils.getElementValue(elem.find('./marc:datafield[@tag="375"]/marc:subfield[@code="a"]', ALL_NS))
   birthDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="f"]', ALL_NS))
   deathDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="g"]', ALL_NS))
@@ -202,7 +202,7 @@ def main():
   with open(options.output_file, 'w') as outFile, \
        open(options.names_csv, 'w') as namesFile, \
        open(options.identifier_csv, 'w') as identifierFile, \
-       open(options.nationality_csv, 'w') as natFile \
+       open(options.nationality_csv, 'w') as natFile, \
        open(options.language_csv, 'w') as langFile:
 
     stats = {'authorityType': {}, 'more-than-one-ISNI': 0, 'more-than-one-VIAF': 0}
