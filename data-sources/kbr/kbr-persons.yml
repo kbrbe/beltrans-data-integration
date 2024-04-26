@@ -17,6 +17,7 @@ prefixes:
   skos: "http://www.w3.org/2004/02/skos/core#"
   ex: "http://example.org/ns#"
   countries: "http://id.loc.gov/vocabulary/countries/"
+  lang: "http://id.loc.gov/vocabulary/languages/"
   schema: "http://schema.org/"
 
 variables:
