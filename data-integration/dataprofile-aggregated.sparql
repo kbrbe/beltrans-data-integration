@@ -44,10 +44,7 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
     # target year of publication should be inserted here on position 11 (Excel sheet column G)
     #
-    (group_concat(distinct ?kbrDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationKBR)
-    (group_concat(distinct ?bnfDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationBnF)
-    (group_concat(distinct ?kbDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationKB)
-    (group_concat(distinct ?unescoDatePublishedInclCurated;SEPARATOR=';') AS ?targetYearOfPublicationUnesco)
+    (group_concat(distinct ?manifestationYearOfPublication;SEPARATOR=';') AS ?targetYearOfPublication)
 
     # edition information
     #
@@ -234,7 +231,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       # optional attributes of the translation itself
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation dcterms:identifier ?kbrManifestationID . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:name ?kbrTitle . }}
-      OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:datePublished ?kbrDatePublished . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation schema:bookEdition ?kbrTargetManifestationEdition . }}
       OPTIONAL { graph <http://kbr-syracuse> { ?kbrManifestation rdfs:comment ?kbrResponsibilityStatement . }}
    
@@ -271,7 +267,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       # optional attributes of the translation itself
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation dcterms:identifier ?bnfManifestationID . }}
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:name ?bnfTitle . }}
-      OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:datePublished ?bnfDatePublished . }}
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation schema:bookEdition ?bnfTargetManifestationEdition . }}
       OPTIONAL { graph <http://bnf-publications> { ?bnfManifestation rdfs:comment ?bnfResponsibilityStatement . }}
 
@@ -288,7 +283,6 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       # optional attributes of the translation itself
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation dcterms:identifier ?kbManifestationID . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:name ?kbTitle . }}
-      OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:datePublished ?kbDatePublished . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation schema:bookEdition ?kbTargetManifestationEdition . }}
       OPTIONAL { graph <http://kb-publications> { ?kbManifestation rdfs:comment ?kbResponsibilityStatement . }}
 
@@ -311,19 +305,8 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       # optional attributes of the translation itself
       OPTIONAL { graph <http://unesco> { ?unescoManifestation dcterms:identifier ?unescoManifestationID . }}
       OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:name ?unescoTitle . }}
-      OPTIONAL { graph <http://unesco> { ?unescoManifestation schema:datePublished ?unescoDatePublished . }}
 
     } # end optional UNESCO
-
-
-        
-
-    # If there is a manually curated date of publication (schema:datePublished on the integrated record)
-    # then use that date for all the local dates. Like this, the postprocessing script will not find contradicting dates
-    BIND( COALESCE(?manifestationYearOfPublication, ?kbrDatePublished, "") AS ?kbrDatePublishedInclCurated)
-    BIND( COALESCE(?manifestationYearOfPublication, ?bnfDatePublished, "") AS ?bnfDatePublishedInclCurated)
-    BIND( COALESCE(?manifestationYearOfPublication, ?kbDatePublished, "") AS ?kbDatePublishedInclCurated)
-    BIND( COALESCE(?manifestationYearOfPublication, ?unescoDatePublished, "") AS ?unescoDatePublishedInclCurated)
 
 }
 GROUP BY ?manifestationID
