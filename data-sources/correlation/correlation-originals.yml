@@ -31,7 +31,7 @@ variables:
   sourceOriginalContKBR: &sourceOriginalContKBR ${RML_SOURCE_CORRELATION_ORIG_KBR}
   sourceOriginalContISBN10: &sourceOriginalContISBN10 ${RML_SOURCE_CORRELATION_ORIG_ISBN10}
   sourceOriginalContISBN13: &sourceOriginalContISBN13 ${RML_SOURCE_CORRELATION_ORIG_ISBN13}
-  sourceContSourceLang: &sourceOriginalContSourceLang ${RML_SOURCE_CORRELATION_TRL_SOURCE_LANG}
+  sourceContSourceLang: &sourceContSourceLang ${RML_SOURCE_CORRELATION_TRL_SOURCE_LANG}
 
 mappings:
 
@@ -47,7 +47,7 @@ mappings:
     s: btid:original_$(targetIdentifier)
     po:
       - [a, schema:CreativeWork]
-      - [dcterms:identifier, $(targetIdentifier)]
+      - [dcterms:identifier, original_$(targetIdentifier)]
       - [schema:workTranslation, btid:$(targetIdentifier)~iri]
       - [schema:name, $(sourceTitle)]
       - [rdfs:comment, "Created from correlation list"]
