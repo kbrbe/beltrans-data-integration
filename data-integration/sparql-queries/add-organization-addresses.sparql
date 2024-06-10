@@ -7,7 +7,7 @@ INSERT {
   graph <http://beltrans-contributors> {
     ?addressURI a schema:PostalAddress ;
                 schema:addressCountry ?country ;
-                schema:addressLocality ?localiy ;
+                schema:addressLocality ?locality ;
                 schema:addressRegion ?region ;
                 schema:postalCode ?postalCode ;
                 schema:streetAddress ?streetAddress .
