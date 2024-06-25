@@ -22,6 +22,7 @@ prefixes:
 variables:
   marcRoles: &marcRoles ${RML_SOURCE_MASTER_MARC_ROLES}
   bindingTypes: &bindingTypes ${RML_SOURCE_MASTER_BINDING_TYPES}
+  bookFormats: &bookFormats ${RML_SOURCE_MASTER_BOOK_FORMATS}
   thesaurusEN: &thesaurusEN ${RML_SOURCE_MASTER_THES_EN}
   thesaurusNL: &thesaurusNL ${RML_SOURCE_MASTER_THES_NL}
   thesaurusFR: &thesaurusFR ${RML_SOURCE_MASTER_THES_FR}
@@ -136,5 +137,18 @@ mappings:
       - [rdfs:label, $(labelEN), en~lang]
       - [rdfs:label, $(labelNL), nl~lang]
       - [rdfs:label, $(labelFR), fr~lang]
+
+  # ---------------------------------------------------------------------------
+  #
+  bookFormats:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates multilingual RDF resources for book formats as used by the KB with the property schema:bookFormat."
+    sources:
+      - access: *bookFormats
+        referenceFormulation: csv
+        delimiter: ','
+    s: schema:$(code)
+    po:
+      - [rdfs:label, $(labelEN), en~lang]
 
 
