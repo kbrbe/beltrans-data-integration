@@ -3,6 +3,7 @@ import re
 import lxml.etree as ET
 import requests
 import time
+import rdflib
 import pandas as pd
 from io import StringIO
 
@@ -49,7 +50,7 @@ def addDataToBlazegraph(url, filename, fileFormat, namedGraph=None, auth=None):
     print(r.content)
 
 # -----------------------------------------------------------------------------
-def query(target, queryString, outputWriter):
+def query(target, queryString, outputWriter, auth=None):
   """This function executes the given SPARQL query against the target and writes the output to outputWriter."""
   res = None
   if isinstance(target, rdflib.ConjunctiveGraph):
@@ -60,8 +61,9 @@ def query(target, queryString, outputWriter):
       print(row)
   else:
     # SPARQLWrapper has issues retrieving CSV from Blazegraph, thus we send the query low level via a request
-    res = requests.post(target, data=queryString, headers={'Accept': 'text/csv', 'Content-Type': 'application/sparql-query'})
-    outputWriter.write(res.content)
+    res = requests.post(target, data=queryString, headers={'Accept': 'text/csv', 'Content-Type': 'application/sparql-query'}, auth=auth)
+    res.raise_for_status()
+    outputWriter.write(res.content.decode('utf-8'))
 
 # ------------------------------------------------------------
 def queryToDataframe(target, queryFilename, indexCol):

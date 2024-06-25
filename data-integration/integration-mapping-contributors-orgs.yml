@@ -1,0 +1,115 @@
+prefixes:
+  idlab-fn: "http://example.com/idlab/function/"
+  dc: "http://purl.org/dc/elements/1.1/"
+  dcterms: "http://purl.org/dc/terms/"
+  http: "http://www.w3.org/2011/http#"
+  grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
+  bf: "http://id.loc.gov/ontologies/bibframe/"
+  owl: "http://www.w3.org/2002/07/owl#"
+  xsd: "http://www.w3.org/2001/XMLSchema#"
+  edm: "http://www.europeana.eu/schemas/edm/"
+  foaf: "http://xmlns.com/foaf/0.1/"
+  prov: "http://www.w3.org/ns/prov#"
+  bibo: "http://purl.org/ontology/bibo/"
+  btm: "http://kbr.be/ns/beltrans/model#"
+  bts: "http://kbr.be/ns/beltrans/shapes#"
+  btid: "http://kbr.be/id/data/"
+  btabout: "http://kbr.be/about/data/"
+  ex: "http://example.org/ns#"
+  countries: "http://id.loc.gov/vocabulary/countries/"
+  lang: "http://id.loc.gov/vocabulary/languages/"
+  schema: "http://schema.org/"
+  up: "http://users.ugent.be/~tdenies/up/"
+  marcrel: "http://id.loc.gov/vocabulary/relators/"
+  fabio: "http://purl.org/spar/fabio/"
+  bnf: "http://data.bnf.fr/ark:/12148/"
+  kb: "http://data.bibliotheken.nl/id/nbt/"
+  nta: "http://data-bibliotheken.nl/id/thes/"
+  isni: "http://kbr.be/isni/"
+
+variables:
+  integrationClusters: &integrationClusters ${RML_SOURCE_INTEGRATION_CLUSTERS}
+
+mappings:
+
+  # ---------------------------------------------------------------------------
+  #
+  clusterAssignment:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping links BELTRANS manifestations to their computed work cluster using fabio:manifestationOf."
+    sources:
+      - access: *integrationClusters
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(clusterID)
+    po:
+      - [a, schema:Organization]
+      - [rdfs:label, "BELTRANS contributor $(clusterID)"]
+      - [dcterms:identifier, $(clusterID)]
+      - [bf:identifiedBy, btid:identifier_$(identifierName)_$(identifier)~iri]
+      - p: schema:sameAs
+        o: btid:authority_$(identifier)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(identifierName)]
+            - [grel:valueParameter2, "KBR"] 
+      - p: schema:sameAs
+        o: isni:authority_$(identifier)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(identifierName)]
+            - [grel:valueParameter2, "ISNI"] 
+      - p: schema:sameAs
+        o: bnf:$(identifier)#about~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(identifierName)]
+            - [grel:valueParameter2, "BnF"] 
+      - p: schema:sameAs
+        o: nta:$(identifier)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(identifierName)]
+            - [grel:valueParameter2, "NTA"] 
+      - p: schema:sameAs
+        o: btid:manifestation_unesco_$(identifier)~iri
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(identifierName)]
+            - [grel:valueParameter2, "Unesco"] 
+      - p: bibo:isbn10
+        o: $(identifier)
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(identifierName)]
+            - [grel:valueParameter2, "ISBN-10"] 
+      - p: bibo:isbn13
+        o: $(identifier)
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(identifierName)]
+            - [grel:valueParameter2, "ISBN-13"] 
+
+
+  # ---------------------------------------------------------------------------
+  #
+  identifiers:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping links BELTRANS manifestations to their computed work cluster using fabio:manifestationOf."
+    sources:
+      - access: *integrationClusters
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:identifier_$(identifierName)_$(identifier)
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, $(identifierName)]
+      - [rdf:value, $(identifier)]
+ 

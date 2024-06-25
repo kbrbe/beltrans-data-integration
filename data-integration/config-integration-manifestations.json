@@ -1,0 +1,81 @@
+{
+  "integration": {
+    "identifiers": ["ISBN-10", "ISBN-13", "KBR", "BnF", "KB", "Unesco"],
+    "mappingFile": "integration-mapping-manifestations.yml",
+    "namedGraph": "http://beltrans-manifestations",
+    "targetType": "schema:CreativeWork",
+    "properties": [
+      {"targetProperty": "schema:name"}, 
+      {"targetProperty": "schema:inLanguage"},
+      {
+       "targetProperty": "btm:sourceLanguage",
+       "sourceProperty": "schema:inLanguage",
+       "sourceGraphType": "originalsGraph",
+       "sourceGraphLinkProperty": "schema:translationOfWork"}
+     ],
+     "postIntegrationQueries": ["sparql-queries/derive-bibo-isbn-properties.sparql"]
+  },
+  "sources": {
+    "KBR": {
+      "sourceType": "schema:CreativeWork",
+      "namedGraph": "http://kbr-syracuse",
+      "originalsGraph": "http://kbr-originals",
+      "properties": [
+        {"targetProperty": "schema:name"}, 
+        {"targetProperty": "schema:inLanguage"},
+        {
+         "targetProperty": "btm:sourceLanguage",
+         "sourceProperty": "schema:inLanguage",
+         "sourceGraphType": "originalsGraph",
+         "sourceGraphLinkProperty": "schema:translationOfWork"}
+       ]
+    },
+    "BnF": {
+      "sourceType": "schema:CreativeWork",
+      "namedGraph": "http://bnf-publications",
+      "originalsGraph": "http://bnf-originals",
+      "properties": [
+        {"targetProperty": "schema:name"}, 
+        {"targetProperty": "schema:inLanguage"},
+        {
+         "targetProperty": "btm:sourceLanguage",
+         "sourceProperty": "schema:inLanguage",
+         "sourceGraphType": "originalsGraph",
+         "sourceGraphLinkProperty": "schema:translationOfWork"}
+       ]
+    },
+    "KB": {
+      "sourceType": "schema:CreativeWork",
+      "namedGraph": "http://kb-publications",
+      "originalsGraph": "http://kb-originals",
+      "properties": [
+        {"targetProperty": "schema:name"}, 
+        {"targetProperty": "schema:inLanguage"},
+        {
+         "targetProperty": "btm:sourceLanguage",
+         "sourceProperty": "schema:inLanguage",
+         "sourceGraphType": "originalsGraph",
+         "sourceGraphLinkProperty": "schema:translationOfWork"}
+       ]
+    },
+    "Unesco": {
+      "sourceType": "schema:CreativeWork",
+      "namedGraph": "http://unesco",
+      "originalsGraph": "http://unesco-originals",
+      "properties": [
+        {"targetProperty": "schema:name"}, 
+        {"targetProperty": "schema:inLanguage"},
+        {
+         "targetProperty": "btm:sourceLanguage",
+         "sourceProperty": "schema:inLanguage",
+         "sourceGraphType": "originalsGraph",
+         "sourceGraphLinkProperty": "schema:translationOfWork"}
+       ]
+    }
+  },
+  "existingClusters": {
+    "namedGraph": "http://beltrans-manifestations",
+    "sourceType": "schema:CreativeWork",
+    "dataSourceIdentifiers": ["KBR", "BnF", "KB", "Unesco"]
+  }
+}

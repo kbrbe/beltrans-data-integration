@@ -1,0 +1,28 @@
+prefix schema: <http://schema.org/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+
+INSERT {
+  graph <http://beltrans-manifestations> { ?s bibo:isbn10 ?isbn10 ; bibo:isbn13 ?isbn13 . } 
+}
+WHERE {
+  graph <http://beltrans-manifestations> { 
+    ?s a schema:CreativeWork .
+  }
+
+  OPTIONAL { graph <http://beltrans-manifestations> { 
+    ?s bf:identifiedBy ?isbn10Entity .
+    ?isbn10Entity a bf:Identifier ;
+                  rdfs:label "ISBN-10" ;
+                  rdf:value ?isbn10 . 
+    }
+  }
+        
+  OPTIONAL { graph <http://beltrans-manifestations> { 
+    ?s bf:identifiedBy ?isbn13Entity .
+    ?isbn13Entity a bf:Identifier ;
+                  rdfs:label "ISBN-13" ;
+                  rdf:value ?isbn13 . 
+    }
+  }
+}

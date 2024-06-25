@@ -1,0 +1,61 @@
+{
+  "integration": {
+    "identifiers": ["VIAF", "ISNI", "KBR", "BnF", "NTA", "Unesco", "Wikidata"],
+    "mappingFile": "integration-mapping-contributors-orgs-test.yml",
+    "namedGraph": "http://beltrans-contributors",
+    "targetType": "schema:Organization"
+  },
+  "sources": {
+    "ISNI": {
+      "sourceType": "schema:Organization",
+      "namedGraph": "http://isni-sru",
+      "properties": [
+        {"targetProperty": "schema:name"},
+        {"targetProperty": ["schema:address", "schema:addressCountry"],
+         "targetPropertyEntityUUID": "dcterms:identifier",
+         "targetPropertyEntityType": "schema:PostalAddress",
+         "targetPropertyEntityPrefix": "address" }
+      ]
+    },
+    "KBR": {
+      "sourceType": "schema:Organization",
+      "namedGraph": "http://kbr-linked-authorities",
+      "properties": [
+        {"targetProperty": "schema:name"},
+        {"targetProperty": ["schema:address", "schema:addressCountry"],
+         "targetPropertyEntityUUID": "dcterms:identifier",
+         "targetPropertyEntityType": "schema:PostalAddress",
+         "targetPropertyEntityPrefix": "address" }
+      ]
+    },
+    "BnF": {
+      "sourceType": "foaf:Organization",
+      "namedGraph": "http://bnf-contributors",
+      "properties": [
+        {"targetProperty": "schema:name",
+         "sourceProperty": "foaf:name"},
+        {"targetProperty": ["schema:address", "schema:addressCountry"],
+         "sourceProperty": "rdagroup2elements:placeAssociatedWithTheCorporateBody",
+         "targetPropertyEntityUUID": "dcterms:identifier",
+         "targetPropertyEntityType": "schema:PostalAddress",
+         "targetPropertyEntityPrefix": "address" }
+      ]
+    },
+    "NTA": {
+      "sourceType": "schema:Organization",
+      "namedGraph": "http://kb-linked-authorities",
+      "properties": [
+        {"targetProperty": "schema:name"},
+        {"targetProperty": ["schema:address", "schema:addressCountry"],
+         "targetPropertyEntityUUID": "dcterms:identifier",
+         "targetPropertyEntityType": "schema:PostalAddress",
+         "targetPropertyEntityPrefix": "address" }
+      ]
+    }
+  },
+  "existingClusters": {
+    "namedGraph": "http://beltrans-contributors",
+    "sourceType": "schema:Organization",
+    "dataSourceIdentifiers": ["KBR", "BnF", "NTA", "Unesco"]
+  }
+}

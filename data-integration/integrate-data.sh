@@ -44,6 +44,7 @@ SCRIPT_COMPUTE_STATS="create-publication-stats.py"
 SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
 
 SCRIPT_INTERLINK_DATA="interlink_named_graph_data_single_update.py"
+SCRIPT_INTERLINK_DATA_CLUSTERING="interlink_named_graph_data_clustering.py"
 
 MODULE_GET_RDF_XML_SUBJECTS="tools.xml.get-subjects"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
@@ -65,6 +66,8 @@ SCRIPT_PARSE_UNESCO_HTML="../data-sources/unesco/parse-content.py"
 MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS="tools.csv.count_unique_values"
 MODULE_GROUP_BY="tools.csv.group_by"
 MODULE_EXTRACT_STRING_FROM_COLUMN="tools.csv.extract_string_from_column"
+
+SCRIPT_QUERY_DATAPROFILE="execute_dataprofile_query.py"
 
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
@@ -141,6 +144,7 @@ INPUT_KB_ORGS_DIR="../data-sources/kb/orgs"
 
 INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
 INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
+INPUT_MASTER_MARC_BOOK_FORMATS="../data-sources/master-data/book-formats.csv"
 INPUT_MASTER_COUNTRIES="../data-sources/master-data/countries.nt"
 INPUT_MASTER_LANGUAGES="../data-sources/master-data/languages.nt"
 INPUT_MASTER_GENDER="../data-sources/master-data/gender.ttl"
@@ -521,6 +525,7 @@ SUFFIX_BNF_ISBN10_HYPHEN_NT="bnf-fixed-isbn10.nt"
 #
 SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
 SUFFIX_MASTER_BINDING_TYPES="binding-types.csv"
+SUFFIX_MASTER_BOOK_FORMATS="book-formats.csv"
 SUFFIX_MASTER_COUNTRIES="countries.nt"
 SUFFIX_MASTER_LANGUAGES="languages.nt"
 SUFFIX_MASTER_GENDER="gender.ttl"
@@ -919,6 +924,10 @@ function integrate {
   updateManifestationsQueries="config-integration-manifestations-single-update.csv"
   updateContributorsQueries="config-integration-contributors-single-update.csv"
 
+  manifestationIntegrationConfig="config-integration-manifestations.json"
+  contributorIntegrationConfigPersons="config-integration-contributors-persons.json"
+  contributorIntegrationConfigOrgs="config-integration-contributors-orgs.json" 
+
 
   queryLogDir="$integrationName/integration"
 
@@ -982,13 +991,20 @@ function integrate {
   # 
   echo ""
   echo "Automatically integrate manifestations ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
-    --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
+  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  #  --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
+  time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+    --config $manifestationIntegrationConfig --query-log-dir $queryLogDir
 
   echo ""
   echo "Automatically integrate contributors ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
-    --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
+  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  #  --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
+  time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    --config $contributorIntegrationConfigPersons --query-log-dir $queryLogDir
+
+  time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    --config $contributorIntegrationConfigOrgs --query-log-dir $queryLogDir
 
   # 2023-05-04 perform updates which did not finish due to a network interruption
 #  python interlink_updates.py -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
@@ -1255,6 +1271,8 @@ function query {
   local integrationName=$1
 
   mkdir -p $integrationName/csv
+  mkdir -p $integrationName/csv/query-manifestation
+
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
@@ -1263,7 +1281,8 @@ function query {
   queryFileContOrgs="$DATA_PROFILE_QUERY_FILE_CONT_ORGS"
   queryFileKBCode="$GET_KBCODE_HIERARCHY_INFO_QUERY_FILE"
 
-  outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
+  #outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
+  integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
 
   # persons will be "all data" as it contains several birth and death dates, it will be filtered in the postprocessing
   outputFileContPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
@@ -1275,7 +1294,8 @@ function query {
 
   echo ""
   echo "Creating the dataprofile CSV file ..."
-  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
+  #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
+  time python $SCRIPT_QUERY_DATAPROFILE -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" --output-file "$integratedData" --config "config-integration-query-manifestations.json" --query-log-dir "$integrationName/csv/query-manifestation"
 
   echo ""
   echo "Creating the contributor persons CSV file ..."
@@ -1287,7 +1307,7 @@ function query {
 
   echo ""
   echo "Creating list linking manifestations to contributors"
-  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileContributions"
+  #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileContributions"
 
   echo ""
   echo "Creating the geo information CSV"
@@ -1352,26 +1372,28 @@ function postprocess {
   #  -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonamesTarget
 
   echo "Postprocess manifestation data ..."
-  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedDataEnriched -c $manifestationContributions
+  #time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedDataEnriched -c $manifestationContributions
+  # 2024-06-25: other data analysis scripts need "integrated-data-enriched.csv"
+  cp $integratedData $integratedDataEnriched
   
   echo "Sort certain columns in the contributors CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $contributorsPersonsAllData -o $contributorsPersonsAllDataSorted \
        -c "nationalities" -c "gender"
 
   echo "Postprocess contributor data - persons ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $contributorsPersons -t "persons"
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedData -o $contributorsPersons -t "persons"
 
   echo "Postprocess contributor data - orgs ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedDataEnriched -o $contributorsOrgs -t "orgs"
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedData -o $contributorsOrgs -t "orgs"
 
   echo "Postprocess contributor data -persons (keep non-contributors)..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $allPersons --keep-non-contributors -t "persons"
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedData -o $allPersons --keep-non-contributors -t "persons"
 
   echo "Postprocess contributor data - orgs (keep non-contributors)..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedDataEnriched -o $allOrgs --keep-non-contributors -t "orgs"
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedData -o $allOrgs --keep-non-contributors -t "orgs"
 
   echo "Sort delimited values in certain columns in the manifestation CSV"
-  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataEnriched -o $integratedDataEnrichedSorted \
+  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedData -o $integratedDataEnrichedSorted \
        -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication"
 
   echo "Reorder columns for translation sheet"
@@ -2149,6 +2171,7 @@ function extractMasterData {
   echo "EXTRACTION - Nothing to extract from master data, copying files"
   cp "$INPUT_MASTER_MARC_ROLES" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
   cp "$INPUT_MASTER_MARC_BINDING_TYPES" "$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
+  cp "$INPUT_MASTER_MARC_BOOK_FORMATS" "$integrationName/master-data/$SUFFIX_MASTER_BOOK_FORMATS"
   cp "$INPUT_MASTER_COUNTRIES" "$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
   cp "$INPUT_MASTER_LANGUAGES" "$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   cp "$INPUT_MASTER_GENDER" "$integrationName/master-data/$SUFFIX_MASTER_GENDER"
@@ -2938,6 +2961,7 @@ function mapMasterData {
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
   export RML_SOURCE_MASTER_MARC_ROLES="$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
   export RML_SOURCE_MASTER_BINDING_TYPES="$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
+  export RML_SOURCE_MASTER_BOOK_FORMATS="$integrationName/master-data/$SUFFIX_MASTER_BOOK_FORMATS"
   export RML_SOURCE_MASTER_THES_EN="$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
   export RML_SOURCE_MASTER_THES_NL="$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
   export RML_SOURCE_MASTER_THES_FR="$integrationName/master-data/$SUFFIX_MASTER_THES_FR"
