@@ -41,6 +41,7 @@ mappings:
       - [a, schema:Person]
       - [dcterms:identifier, $(authorityID)]
       - [rdfs:label, $(name)]
+      - [bf:identifiedBy, btid:identifier_kbr_$(authorityID)~iri]
       - p: a
         o: btm:Pseudonym
         condition:
@@ -112,6 +113,22 @@ mappings:
     po:
       - [a, schema:WebPage]
       - [foaf:primaryTopic, btid:authority_$(authorityID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsKBRIdentifier:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates descriptions of authorities represented as schema WebPage."
+    sources:
+#      - access: "kbr/2021-10-25-clean-isni-data.csv"
+      - access: *sourceKBRPersons
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:identifier_kbr_$(authorityID)
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "KBR"]
+      - [rdf:value, $(authorityID)]
 
   # ---------------------------------------------------------------------------
   #
