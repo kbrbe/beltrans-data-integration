@@ -36,23 +36,44 @@ def main():
 
     identifiers = []
     rowNumber = 0
+    numberSecondFileMultipleIdentifiers = 0
     for row in readerSecond:
-      foundIdentifier = row[options.first_column]
-      identifiers.append(foundIdentifier)
-      if foundIdentifier in identifiers:
-        print(f'Warning, identifier {foundIdentifier} was already found, column values are not unique!')
+      foundIdentifierString = row[options.first_column]
+      if foundIdentifierString != '':
+        foundIdentifiers = foundIdentifierString.split(';') if ';' in foundIdentifierString else [foundIdentifierString]
+        for foundIdentifier in foundIdentifiers:
+          identifiers.append(foundIdentifier)
+          if foundIdentifier in identifiers:
+            print(f'Warning, identifier {foundIdentifier} was already found, column values are not unique!')
+
+        if len(foundIdentifiers) > 1:
+          numberSecondFileMultipleIdentifiers += 1
       rowNumber += 1
 
     outputWriter.writeheader()
     firstRowNumber = 0
     outputRowNumber = 0
+    outputRowNumberIdentifier = 0
+    numberFirstFileMultipleIdentifiers = 0
     for row in readerFirst:
-      foundIdentifier = row[options.second_column]
-      if foundIdentifier not in identifiers:
-        outputRowNumber += 1
-        outputWriter.writerow(row)
+      foundIdentifierString = row[options.second_column]
+      if foundIdentifierString != '':
+        foundIdentifiers = foundIdentifierString.split(';') if ';' in foundIdentifierString else [foundIdentifierString]
+        oneNotFound = False
+        for foundIdentifier in foundIdentifiers:
+          if foundIdentifier not in identifiers:
+            oneNotFound = True
+            outputRowNumberIdentifier += 1
+        if oneNotFound:
+          outputRowNumber += 1
+          outputWriter.writerow(row)
+
+        if len(foundIdentifiers) > 1:
+          numberFirstFileMultipleIdentifiers += 1
+
       firstRowNumber += 1
       
-    print(f'{outputRowNumber}/{firstRowNumber} of the first file were not found in the second CSV ({rowNumber} lines).')
+    print(f'{outputRowNumber}/{firstRowNumber} ({outputRowNumberIdentifier} identifiers) of the first file were not found in the second CSV ({rowNumber} lines).')
+    print(f'Number of rows with multiple identifiers first file: {numberFirstFileMultipleIdentifiers} ; second file: {numberSecondFileMultipleIdentifiers}')
 
 main()
