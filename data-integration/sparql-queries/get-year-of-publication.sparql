@@ -1,0 +1,11 @@
+PREFIX schema: <http://schema.org/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+SELECT ?manifestationID ?yearOfPublication
+WHERE {
+  graph <http://beltrans-manifestations> {
+    ?m a schema:CreativeWork ;
+       dcterms:identifier ?manifestationID ;
+       schema:datePublished ?yearOfPublication .
+  }
+}

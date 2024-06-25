@@ -44,6 +44,7 @@ SCRIPT_COMPUTE_STATS="create-publication-stats.py"
 SCRIPT_CREATE_CONTRIBUTOR_LIST="create-contributor-list.py"
 
 SCRIPT_INTERLINK_DATA="interlink_named_graph_data_single_update.py"
+SCRIPT_INTERLINK_DATA_CLUSTERING="interlink_named_graph_data_clustering.py"
 
 MODULE_GET_RDF_XML_SUBJECTS="tools.xml.get-subjects"
 SCRIPT_GET_RDF_XML_OBJECTS="../data-sources/bnf/get-objects.py"
@@ -65,6 +66,8 @@ SCRIPT_PARSE_UNESCO_HTML="../data-sources/unesco/parse-content.py"
 MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS="tools.csv.count_unique_values"
 MODULE_GROUP_BY="tools.csv.group_by"
 MODULE_EXTRACT_STRING_FROM_COLUMN="tools.csv.extract_string_from_column"
+
+SCRIPT_QUERY_DATAPROFILE="execute_dataprofile_query.py"
 
 SCRIPT_UPLOAD_DATA="../utils/upload-data.sh"
 SCRIPT_DELETE_NAMED_GRAPH="../utils/delete-named-graph.sh"
@@ -94,8 +97,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 INPUT_EXISTING_CLUSTER_KEYS="corpus-versions/2023-12-07/integration/clustering/descriptive-keys-no-uri.csv"
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-02-08.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-02-08.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-04-26.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-04-26.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -106,20 +109,16 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-02-08.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-02-08.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-02-08.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-02-08.xml"
-
-INPUT_KBR_LA_PLACES_VLG="../data-sources/kbr/agents/publisher-places-VLG.csv"
-INPUT_KBR_LA_PLACES_WAL="../data-sources/kbr/agents/publisher-places-WAL.csv"
-INPUT_KBR_LA_PLACES_BRU="../data-sources/kbr/agents/publisher-places-BRU.csv"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-04-26.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-04-26.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-04-26.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-04-26.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-02-08.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-04-26.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -145,6 +144,7 @@ INPUT_KB_ORGS_DIR="../data-sources/kb/orgs"
 
 INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
 INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
+INPUT_MASTER_MARC_BOOK_FORMATS="../data-sources/master-data/book-formats.csv"
 INPUT_MASTER_COUNTRIES="../data-sources/master-data/countries.nt"
 INPUT_MASTER_LANGUAGES="../data-sources/master-data/languages.nt"
 INPUT_MASTER_GENDER="../data-sources/master-data/gender.ttl"
@@ -166,10 +166,10 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-02-05_person_contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2024-02-05_org_contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-02-05_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-02-05_translations_removal-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-04-23_person_contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2024-04-23_org_contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-04-23_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-04-23_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -305,6 +305,7 @@ DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE="sparql-queries/get-contributions.sparql"
 
 GET_GEO_TEXT_INFO_QUERY_FILE="sparql-queries/get-text-location-info-per-data-source.sparql"
+GET_GEO_TEXT_INFO_ORG_QUERY_FILE="sparql-queries/get-text-location-info-org-addresses.sparql"
 GET_GEO_DATA_QUERY_FILE="sparql-queries/get-manifestations-geo-data.sparql"
 
 GET_DATE_TEXT_INFO_PUB_QUERY_FILE="sparql-queries/get-text-date-info-publications-per-data-source.sparql"
@@ -358,11 +359,15 @@ SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_SOURCE="place-of-publications-geonames-sour
 SUFFIX_UNKNOWN_GEONAMES_MAPPING="missing-geonames-mapping.csv"
 
 SUFFIX_GEO_TEXT="geo-text-information.csv"
+SUFFIX_GEO_TEXT_ORG="geo-text-information-org.csv"
+SUFFIX_GEO_TEXT_ORG_ENRICHED="geo-text-information-org-enriched.csv"
 SUFFIX_GEO_TEXT_COMBINED="geo-text-information-combined.csv"
 SUFFIX_GEO_TEXT_COMBINED_ENRICHED="geo-text-information-combined-enriched.csv"
 SUFFIX_GEO_DATA="geo-data.csv"
+SUFFIX_GEO_DATA_ORG="geo-data-org.csv"
 SUFFIX_GEO_BELTRANS_MANIFESTATIONS="manifestations-geo.csv"
 SUFFIX_GEO_DATA_LD="geo-data.ttl"
+SUFFIX_GEO_DATA_ORG_LD="geo-data-org.ttl"
 
 SUFFIX_DATE_PUBLICATIONS_TEXT="date-publications-text-information.csv"
 SUFFIX_DATE_CONTRIBUTORS_TEXT="date-contributors-text-information.csv"
@@ -402,10 +407,6 @@ SUFFIX_KBR_LIST_FETCHED_CONTRIBUTORS="already-fetched-contributors.csv"
 SUFFIX_KBR_TRL_ISBN10="isbn10.csv"
 SUFFIX_KBR_TRL_ISBN13="isbn13.csv"
 
-SUFFIX_KBR_LA_PLACES_VLG="publisher-places-VLG.csv"
-SUFFIX_KBR_LA_PLACES_WAL="publisher-places-WAL.csv"
-SUFFIX_KBR_LA_PLACES_BRU="publisher-places-BRU.csv"
-
 # DATA SOURCE - KBR LINKED AUTHORITIES
 #
 SUFFIX_KBR_LA_PERSONS_CLEANED="translations-linked-authorities-persons-cleaned.csv"
@@ -417,6 +418,7 @@ SUFFIX_KBR_LA_PERSONS_FR_NORM="fr-translations-linked-authorities-persons-norm.c
 SUFFIX_KBR_LA_ORGS_FR_NORM="fr-translations-linked-authorities-orgs-norm.csv"
 
 SUFFIX_KBR_LA_PERSONS_NAT="translations-linked-authorities-nationalities.csv"
+SUFFIX_KBR_LA_PERSONS_LANG="translations-linked-authorities-languages.csv"
 SUFFIX_KBR_LA_PERSONS_NAMES="translations-linked-authorities-names.csv"
 SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE="translations-linked-authorities-names-complete.csv"
 
@@ -523,6 +525,7 @@ SUFFIX_BNF_ISBN10_HYPHEN_NT="bnf-fixed-isbn10.nt"
 #
 SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
 SUFFIX_MASTER_BINDING_TYPES="binding-types.csv"
+SUFFIX_MASTER_BOOK_FORMATS="book-formats.csv"
 SUFFIX_MASTER_COUNTRIES="countries.nt"
 SUFFIX_MASTER_LANGUAGES="languages.nt"
 SUFFIX_MASTER_GENDER="gender.ttl"
@@ -586,6 +589,10 @@ SUFFIX_CORRELATION_TRL_TARGET_LANG="correlation-trl-target-lang.csv"
 SUFFIX_CORRELATION_TRL_TARGET_BB_NAMES="correlation-trl-target-bb-names.csv"
 SUFFIX_CORRELATION_TRL_TARGET_BB_CODES="correlation-trl-target-bb-codes.csv"
 
+SUFFIX_CORRELATION_ORIG_ISBN10="correlation-orig-isbn10.csv"
+SUFFIX_CORRELATION_ORIG_ISBN13="correlation-orig-isbn13.csv"
+SUFFIX_CORRELATION_ORIG_KBR="correlation-orig-kbr-id.csv"
+
 #
 # LINKED DATA - KBR TRANSLATIONS
 #
@@ -608,7 +615,6 @@ SUFFIX_KBR_ORIGINAL_LINKING_LD="translations-original-links.ttl"
 #
 SUFFIX_KBR_PERSONS_LD="persons.ttl"
 SUFFIX_KBR_ORGS_LD="organizations.ttl"
-SUFFIX_KBR_PLACES_LD="places.ttl"
 SUFFIX_KBR_BELGIANS_LD="belgians.ttl"
 SUFFIX_KBR_PERSONS_IDENTIFIERS_LD="persons-identifiers.ttl"
 SUFFIX_KBR_ORGS_IDENTIFIERS_LD="orgs-identifiers.ttl"
@@ -918,6 +924,10 @@ function integrate {
   updateManifestationsQueries="config-integration-manifestations-single-update.csv"
   updateContributorsQueries="config-integration-contributors-single-update.csv"
 
+  manifestationIntegrationConfig="config-integration-manifestations.json"
+  contributorIntegrationConfigPersons="config-integration-contributors-persons.json"
+  contributorIntegrationConfigOrgs="config-integration-contributors-orgs.json" 
+
 
   queryLogDir="$integrationName/integration"
 
@@ -981,13 +991,20 @@ function integrate {
   # 
   echo ""
   echo "Automatically integrate manifestations ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
-    --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
+  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  #  --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
+  time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+    --config $manifestationIntegrationConfig --query-log-dir $queryLogDir
 
   echo ""
   echo "Automatically integrate contributors ..."
-  python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
-    --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
+  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  #  --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
+  time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    --config $contributorIntegrationConfigPersons --query-log-dir $queryLogDir
+
+  time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+    --config $contributorIntegrationConfigOrgs --query-log-dir $queryLogDir
 
   # 2023-05-04 perform updates which did not finish due to a network interruption
 #  python interlink_updates.py -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
@@ -1107,22 +1124,38 @@ function extractGeoInformation {
   mkdir -p "$integrationName/geo"
   local unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
   local outputFileGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT"
+  local orgGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_ORG"
+  local orgGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_ORG_ENRICHED"
   local combinedGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED"
   local combinedGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED_ENRICHED"
   local geoData="$integrationName/geo/$SUFFIX_GEO_DATA"
+  local geoDataOrg="$integrationName/geo/$SUFFIX_GEO_DATA_ORG"
 
   echo ""
   echo "Enrich geo information and create RDF descriptions of it"
+  echo ""
+
+  echo "Get names of publication places"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeoText"
+
+  echo "Get names of organization addresses"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_ORG_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$orgGeoText"
 
   echo ""
   echo "Combine location information from different data sources"
   python $SCRIPT_POSTPROCESS_LOCATIONS -i "$outputFileGeoText" -o "$combinedGeoText"
 
+  echo ""
   echo "Derive missing country names from place names - KBR targetPlace ..."
   time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $combinedGeoText -o $combinedGeoTextEnriched \
     -g geonames/ -c "countryOfPublication" -p "placeOfPublication"
 
+  echo ""
+  echo "Derive missing country names from org addresses ..."
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $orgGeoText -o $orgGeoTextEnriched \
+    -g geonames/ -c "orgCountryLabel" -p "orgCity"
+
+  echo ""
   echo "Create geonames relationships for place of publications ..."
   time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
     -i $combinedGeoTextEnriched -m $unknownGeonamesMapping -g geonames/ -p placeOfPublication \
@@ -1133,6 +1166,20 @@ function extractGeoInformation {
     --column-longitude "longitude" \
     --column-latitude "latitude" \
     -o $geoData
+
+  echo ""
+  echo "Create geonames relationships for org addresses ..."
+  time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
+    -i $orgGeoTextEnriched -m $unknownGeonamesMapping -g geonames/ -p orgCity \
+    --input-id-column "beltransID" \
+    --column-place "orgCity" \
+    --column-country "orgCountryLabel" \
+    --column-identifier "placeGeonamesIdentifier" \
+    --column-longitude "longitude" \
+    --column-latitude "latitude" \
+    -o $geoDataOrg
+
+
 
 }
 
@@ -1166,13 +1213,20 @@ function transformGeoInformation {
   export $(cat .env | sed 's/#.*//g' | xargs)
 
   local geoDataTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_LD"
+  local geoDataOrgTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_ORG_LD"
+
   mkdir -p "$integrationName/geo/rdf"
 
   export RML_SOURCE_GEO="$integrationName/geo/$SUFFIX_GEO_DATA"
+  export RML_SOURCE_GEO_ORG="$integrationName/geo/$SUFFIX_GEO_DATA_ORG"
 
   echo ""
-  echo "TRANSFORM geo data"
+  echo "TRANSFORM geo data of publications"
   . map.sh geo-data.yml $geoDataTurtle
+
+  echo ""
+  echo "TRANSFORM geo data of organizations"
+  . map.sh geo-data-org.yml $geoDataOrgTurtle
 }
 
 # -----------------------------------------------------------------------------
@@ -1202,11 +1256,13 @@ function loadGeoInformation {
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
   local geoDataTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_LD"
+  local geoDataOrgTurtle="$integrationName/geo/rdf/$SUFFIX_GEO_DATA_ORG_LD"
 
   echo ""
-  echo "LOAD geo data"
+  echo "LOAD geo data of publications"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_GEO" \
-    "$geoDataTurtle"
+    "$geoDataTurtle" "$geoDataOrgTurtle"
+
 
 }
 
@@ -1215,6 +1271,8 @@ function query {
   local integrationName=$1
 
   mkdir -p $integrationName/csv
+  mkdir -p $integrationName/csv/query-manifestation
+
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
@@ -1223,7 +1281,8 @@ function query {
   queryFileContOrgs="$DATA_PROFILE_QUERY_FILE_CONT_ORGS"
   queryFileKBCode="$GET_KBCODE_HIERARCHY_INFO_QUERY_FILE"
 
-  outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
+  #outputFileAgg="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
+  integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
 
   # persons will be "all data" as it contains several birth and death dates, it will be filtered in the postprocessing
   outputFileContPersonsAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_CONT_PERSONS_ALL_DATA_FILE"
@@ -1235,7 +1294,8 @@ function query {
 
   echo ""
   echo "Creating the dataprofile CSV file ..."
-  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
+  #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
+  time python $SCRIPT_QUERY_DATAPROFILE -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" --output-file "$integratedData" --config "config-integration-query-manifestations.json" --query-log-dir "$integrationName/csv/query-manifestation"
 
   echo ""
   echo "Creating the contributor persons CSV file ..."
@@ -1247,7 +1307,7 @@ function query {
 
   echo ""
   echo "Creating list linking manifestations to contributors"
-  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileContributions"
+  #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileContributions"
 
   echo ""
   echo "Creating the geo information CSV"
@@ -1312,26 +1372,28 @@ function postprocess {
   #  -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonamesTarget
 
   echo "Postprocess manifestation data ..."
-  time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedDataEnriched -c $manifestationContributions
+  #time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedDataEnriched -c $manifestationContributions
+  # 2024-06-25: other data analysis scripts need "integrated-data-enriched.csv"
+  cp $integratedData $integratedDataEnriched
   
   echo "Sort certain columns in the contributors CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $contributorsPersonsAllData -o $contributorsPersonsAllDataSorted \
        -c "nationalities" -c "gender"
 
   echo "Postprocess contributor data - persons ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $contributorsPersons -t "persons"
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedData -o $contributorsPersons -t "persons"
 
   echo "Postprocess contributor data - orgs ..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedDataEnriched -o $contributorsOrgs -t "orgs"
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedData -o $contributorsOrgs -t "orgs"
 
   echo "Postprocess contributor data -persons (keep non-contributors)..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedDataEnriched -o $allPersons --keep-non-contributors -t "persons"
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedData -o $allPersons --keep-non-contributors -t "persons"
 
   echo "Postprocess contributor data - orgs (keep non-contributors)..."
-  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedDataEnriched -o $allOrgs --keep-non-contributors -t "orgs"
+  time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedData -o $allOrgs --keep-non-contributors -t "orgs"
 
   echo "Sort delimited values in certain columns in the manifestation CSV"
-  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataEnriched -o $integratedDataEnrichedSorted \
+  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedData -o $integratedDataEnrichedSorted \
        -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication"
 
   echo "Reorder columns for translation sheet"
@@ -1647,10 +1709,6 @@ function extractKBR {
   echo ""
   echo "Extract CSV data from fetched linked original authorities - orgs"
   extractKBROrgs "$integrationName" "kbr" "$kbrOriginalsFetchedOrgsXML" "linked-originals" "$alreadyFetchedContributors"
-
-  echo ""
-  echo "Extract KBR places"
-  extractKBRPlaces
 
 }
 
@@ -2113,6 +2171,7 @@ function extractMasterData {
   echo "EXTRACTION - Nothing to extract from master data, copying files"
   cp "$INPUT_MASTER_MARC_ROLES" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
   cp "$INPUT_MASTER_MARC_BINDING_TYPES" "$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
+  cp "$INPUT_MASTER_MARC_BOOK_FORMATS" "$integrationName/master-data/$SUFFIX_MASTER_BOOK_FORMATS"
   cp "$INPUT_MASTER_COUNTRIES" "$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
   cp "$INPUT_MASTER_LANGUAGES" "$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   cp "$INPUT_MASTER_GENDER" "$integrationName/master-data/$SUFFIX_MASTER_GENDER"
@@ -2213,10 +2272,6 @@ function transformKBR {
   mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
   mapKBRLinkedOrgAuthorities $integrationName "kbr" "linked-originals"
 
-  echo ""
-  echo "TRANSFORMATION - Map KBR places"
-  local kbrPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
-  mapKBRPlaces "$integrationName" "$kbrPlacesTurtle"
 
 }
 
@@ -2449,6 +2504,7 @@ function extractKBRTranslationsAndContributions {
   python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrTranslationsCSVCont -o $kbrTranslationsCSVContReplaced
 
   echo "Deduplicate newly identified contributors - $language"
+  echo ""
   python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrTranslationsCSVContReplaced -o $kbrTranslationsCSVContDedup --no-matches-log $kbrNoMatches --multiple-matches-log $kbrMultipleMatches
 
   echo "Extract BB assignments for $language translations ..."
@@ -2469,8 +2525,8 @@ function extractKBRTranslationsAndContributions {
 
 
   echo "Extract newly identified contributors $language ..."
+  echo ""
   extractIdentifiedAuthorities "$kbrTranslationsCSVContDedup" "$kbrTranslationsIdentifiedAuthorities"
-
 
 }
 
@@ -2485,6 +2541,7 @@ function extractKBRPersons {
 
   kbrPersonsCSV="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
   kbrPersonsNationalities="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
+  kbrPersonsLanguages="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_LANG"
   kbrPersonsISNIs="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
   kbrPersonsNames="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES"
   kbrPersonsNamesComplete="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
@@ -2497,6 +2554,7 @@ function extractKBRPersons {
     -i $kbrPersons \
     -o $kbrPersonsCSV \
     -n $kbrPersonsNationalities \
+    -l $kbrPersonsLanguages \
     --names-csv $kbrPersonsNames \
     --identifier-csv $kbrPersonsISNIs
 
@@ -2560,15 +2618,6 @@ function extractKBROrgs {
 
 
 
-}
-
-# -----------------------------------------------------------------------------
-function extractKBRPlaces {
-
-  echo "Copy publisher location information ..."
-  cp "$INPUT_KBR_LA_PLACES_VLG" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
-  cp "$INPUT_KBR_LA_PLACES_WAL" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_WAL"
-  cp "$INPUT_KBR_LA_PLACES_BRU" "$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_BRU"
 }
 
 
@@ -2783,6 +2832,7 @@ function mapKBRLinkedPersonAuthorities {
   # input
   local kbrPersons="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
   local kbrPersonsNat="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
+  local kbrPersonsLanguages="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_LANG"
   local kbrPersonsISNI="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_IDENTIFIERS"
   local kbrPersonsNames="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAMES_COMPLETE"
  
@@ -2792,7 +2842,7 @@ function mapKBRLinkedPersonAuthorities {
   local kbrPersonsNamesTurtle="$integrationName/$dataSourceName/rdf/$language/$SUFFIX_KBR_PERSONS_NAMES_LD"
 
   # 2) execute the mapping
-  mapKBRPersons "$kbrPersons" "$kbrPersonsNat" "$kbrPersonsTurtle"
+  mapKBRPersons "$kbrPersons" "$kbrPersonsNat" "$kbrPersonsLanguages" "$kbrPersonsTurtle"
   mapKBRNames "$kbrPersonsNames" "$kbrPersonsNamesTurtle"
   mapKBRLinkedIdentifiers "$kbrPersonsISNI" "$kbrPersonsIdentifiersTurtle"
 
@@ -2826,10 +2876,12 @@ function mapKBRLinkedOrgAuthorities {
 function mapKBRPersons {
   local sourceFile=$1
   local sourceFileNat=$2
-  local outputTurtle=$3
+  local sourceFileLang=$3
+  local outputTurtle=$4
 
   export RML_SOURCE_KBR_PERSONS="$sourceFile"
   export RML_SOURCE_KBR_PERSONS_NAT="$sourceFileNat"
+  export RML_SOURCE_KBR_PERSONS_LANG="$sourceFileLang"
 
   echo ""
   echo "Map KBR Persons - $sourceFile"
@@ -2898,20 +2950,6 @@ function mapKBRLinkedIdentifiers {
 
 }
 
-# -----------------------------------------------------------------------------
-function mapKBRPlaces {
-  local integrationName=$1
-
-  local kbrPlacesTurtle="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
-
-  export RML_SOURCE_KBR_PUBLISHER_PLACES_FLANDERS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_VLG"
-  export RML_SOURCE_KBR_PUBLISHER_PLACES_WALLONIA="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_WAL"
-  export RML_SOURCE_KBR_PUBLISHER_PLACES_BRUSSELS="$integrationName/kbr/agents/$SUFFIX_KBR_LA_PLACES_BRU"
-
-  echo "Map KBR Places"
-  . map.sh ../data-sources/kbr/kbr-places.yml $kbrPlacesTurtle
-}
-
 
 # -----------------------------------------------------------------------------
 function mapMasterData {
@@ -2923,6 +2961,7 @@ function mapMasterData {
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
   export RML_SOURCE_MASTER_MARC_ROLES="$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
   export RML_SOURCE_MASTER_BINDING_TYPES="$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
+  export RML_SOURCE_MASTER_BOOK_FORMATS="$integrationName/master-data/$SUFFIX_MASTER_BOOK_FORMATS"
   export RML_SOURCE_MASTER_THES_EN="$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
   export RML_SOURCE_MASTER_THES_NL="$integrationName/master-data/$SUFFIX_MASTER_THES_NL"
   export RML_SOURCE_MASTER_THES_FR="$integrationName/master-data/$SUFFIX_MASTER_THES_FR"
@@ -3061,6 +3100,10 @@ function extractTranslationCorrelationList {
   local correlationListKBIDs="$folderName/$SUFFIX_CORRELATION_TRL_KB"
   local correlationListUNESCOIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
 
+  local correlationListOriginalISBN10="$folderName/$SUFFIX_CORRELATION_ORIG_ISBN10"
+  local correlationListOriginalISBN13="$folderName/$SUFFIX_CORRELATION_ORIG_ISBN13"
+  local correlationListOriginalKBRIDs="$folderName/$SUFFIX_CORRELATION_ORIG_KBR"
+
   local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
   local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
@@ -3080,6 +3123,10 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListSourceLanguage "targetIdentifier" "sourceLanguage" "id" "sourceLanguage"
   extractSeparatedColumn $correlationList $correlationListTargetLanguage "targetIdentifier" "targetLanguage" "id" "targetLanguage"
 
+  extractSeparatedColumn $correlationList $correlationListOriginalISBN10 "targetIdentifier" "sourceISBN10" "id" "isbn10"
+  extractSeparatedColumn $correlationList $correlationListOriginalISBN13 "targetIdentifier" "sourceISBN13" "id" "isbn13"
+  extractSeparatedColumn $correlationList $correlationListOriginalKBRIDs "targetIdentifier" "sourceKBRIdentifier" "id" "KBR"
+  
 
   # 2023-12-15: we currently have LEXICON codes instead the name of genres
   # if there will be names again, the extra step below to lookup codes is important
@@ -3279,6 +3326,7 @@ function transformTranslationCorrelationList {
 
   folderName="$integrationName/correlation/translations"
   mkdir -p "$integrationName/correlation/translations/rdf"
+  mkdir -p "$integrationName/correlation/originals/rdf"
   
   local correlationList="$INPUT_CORRELATION_TRANSLATIONS"
   local correlationListISBN10="$folderName/$SUFFIX_CORRELATION_TRL_ISBN10"
@@ -3289,6 +3337,10 @@ function transformTranslationCorrelationList {
   local correlationListKBIDs="$folderName/$SUFFIX_CORRELATION_TRL_KB"
   local correlationListUNESCOIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
 
+  local correlationListOriginalISBN10="$folderName/$SUFFIX_CORRELATION_ORIG_ISBN10"
+  local correlationListOriginalISBN13="$folderName/$SUFFIX_CORRELATION_ORIG_ISBN13"
+  local correlationListOriginalKBRIDs="$folderName/$SUFFIX_CORRELATION_ORIG_KBR"
+
   local correlationListSourceLanguage="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_LANG"
   local correlationListTargetLanguage="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_LANG"
 
@@ -3296,6 +3348,7 @@ function transformTranslationCorrelationList {
   local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
   local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
+  local correlationOriginalsTurtle="$integrationName/correlation/originals/rdf/$SUFFIX_CORRELATION_TRL_LD"
 
   export RML_SOURCE_CORRELATION_TRL="$correlationList"
   export RML_SOURCE_CORRELATION_TRL_ISBN10="$correlationListISBN10"
@@ -3307,10 +3360,18 @@ function transformTranslationCorrelationList {
   export RML_SOURCE_CORRELATION_TRL_SOURCE_LANG="$correlationListSourceLanguage"
   export RML_SOURCE_CORRELATION_TRL_TARGET_LANG="$correlationListTargetLanguage"
   export RML_SOURCE_CORRELATION_TRL_TARGET_BB="$correlationListTargetBBCodes"
+
+  export RML_SOURCE_CORRELATION_ORIG_ISBN10="$correlationListOriginalISBN10"
+  export RML_SOURCE_CORRELATION_ORIG_ISBN13="$correlationListOriginalISBN13"
+  export RML_SOURCE_CORRELATION_ORIG_KBR="$correlationListOriginalKBRIDs"
  
   echo ""
   echo "Map translations correlation data"
   . map.sh ../data-sources/correlation/correlation-translations.yml $correlationTurtle
+
+  echo ""
+  echo "Map originals correlation data"
+  . map.sh ../data-sources/correlation/correlation-originals.yml $correlationOriginalsTurtle
 
   echo ""
   echo "Map extracted data about KBR translations from correlation list"
@@ -3424,11 +3485,21 @@ function loadTranslationCorrelationList {
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
   local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
+
+  # This is data about originals extracted from the correlation list itself (title, ISBN, etc)
+  local correlationOriginalsTurtle="$integrationName/correlation/originals/rdf/$SUFFIX_CORRELATION_TRL_LD"
+
+  # This is actual data of originals extracted from data sources (all fields of a record)
   local originalsTurtle="$integrationName/correlation/originals/rdf/mixed-lang"
 
   echo "Load translations correlation list"
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
     "$correlationTurtle"
+
+  echo "Load translations correlation list - original data"
+  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_ORIG" \
+    "$correlationOriginalsTurtle"
+
 
   echo "Load extracted data about correlation list KBR translations"
   loadKBRBookInformationAndContributions "$integrationName/correlation" "translations/kbr" "$TRIPLE_STORE_GRAPH_KBR_TRL" "$TRIPLE_STORE_GRAPH_KBR_LA" "mixed-lang"
@@ -3708,21 +3779,6 @@ function loadKBRLinkedOrgAuthorities {
       "$kbrOrgMatchesTurtle"
   fi
 
-}
-
-
-# -----------------------------------------------------------------------------
-function loadKBRPlaces {
-  local integrationName=$1
-  local linkedAuthoritiesNamedGraph=$2
-
-  # get environment variables
-  export $(cat .env | sed 's/#.*//g' | xargs)
-  local kbrPlaces="$integrationName/kbr/rdf/$SUFFIX_KBR_PLACES_LD"
-  local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
-
-  echo "Load KBR places ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrPlaces"
 }
 
 
@@ -4051,7 +4107,6 @@ function fetchKBRData {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  echo python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950" -q "$query" -o "$outputFile" -b 500
   python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950" -q "$query" -o "$outputFile" -b 500
 }
 
@@ -4063,7 +4118,6 @@ function fetchKBRAuthorityData {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  echo python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950_AUT" -q "$query" -o "$outputFile" -b 500
   python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950_AUT" -q "$query" -o "$outputFile" -b 500
 }
 

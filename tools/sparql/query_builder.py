@@ -55,6 +55,7 @@ class Query(ABC):
         else:
             return queryPart
 
+      
    # ---------------------------------------------------------------------------
     @classmethod
     def _getINSERTIdentifierDeclarationTriplePattern(cls, identifier, source, graph=None):
@@ -196,6 +197,7 @@ PREFIX btisni: <http://kbr.be/isni/>
 PREFIX mads: <http://www.loc.gov/mads/rdf/v1#>
 PREFIX up: <http://users.ugent.be/~tdenies/up/>
 PREFIX bnf-onto: <http://data.bnf.fr/ontology/bnf-onto/>
+PREFIX fabio: <http://purl.org/spar/fabio/> 
 PREFIX frbr: <http://rdvocab.info/uri/schema/FRBRentitiesRDA/>
 PREFIX rda-wemi: <http://rdvocab.info/RDARelationshipsWEMI/>
 PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
@@ -544,6 +546,441 @@ class ManifestationQuery(Query, ABC):
             return 'OPTIONAL { ' + queryPart + ' } '
         else:
             return queryPart
+
+class IdentifiersDescriptiveKeysQuery(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, sourceGraph: str, targetGraph: str,
+                 identifiersToAdd: list,
+                 entitySourceClass: str):
+        """
+
+        Parameters
+        ----------
+        sourceGraph : str
+            The name of the source graph without brackets, e.g. http://kb-manifestations
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        identifiersToAdd : list
+            The names of other identifiers which will be added from source to target if a match was found.
+            On the one hand, this name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+            and on the other hand to build variable names in the SPARQL query.
+        entitySourceClass : str
+            The RDF class used to identify a  record in the source graph,
+            e.g. schema:CreativeWork or schema:Book
+        """
+        self.sourceGraph = sourceGraph
+        self.targetGraph = targetGraph
+        self.identifiersToAdd = identifiersToAdd
+        self.entitySourceClass = entitySourceClass
+
+        print(f'Constructor received identifiersToAdd: {identifiersToAdd}')
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        query = "SELECT ?entityID ?identifierName ?identifierValue WHERE { "
+        for property, object in [('a', self.entitySourceClass),
+                                 ('dcterms:identifier', '?entityID')]:
+            query += Query._getSimpleTriplePattern('?entity',
+                                                  property,
+                                                  object,
+                                                  graph=self.sourceGraph,
+                                                  optional=False,
+                                                  newline=True)
+
+        query += self._getSubquery(self.identifiersToAdd)
+
+        query += "} \n"  # end of query WHERE clause
+
+        return query
+
+    # ---------------------------------------------------------------------------
+    def _getSubquery(self, identifiersToAdd):
+
+        identifierTypes = 'bf:Identifier, bf:Isni'
+        identifierNames = ','.join(f'"{id}"' for id in identifiersToAdd)
+        pattern = Template("""
+        {
+          graph <${namedGraph}> { 
+            ?entity bf:identifiedBy ?identifierEntityURI .
+
+            ?identifierEntityURI a ?identifierType ;
+                                    rdfs:label ?identifierName ;
+                                    rdf:value ?identifierValue .
+          }
+          FILTER( ?identifierType IN (${identifierTypes}) )
+          FILTER( ?identifierName IN (${identifierNames}) )
+
+        FILTER NOT EXISTS {
+          graph <${targetGraph}> {
+        
+            ?anyIntegratedRecordURI schema:sameAs ?entity .
+            ?anyCorrelationActivity a btm:CorrelationActivity ;
+                                    prov:generated ?anyIntegratedRecordURI .
+          }
+      }
+
+
+        }
+        """)
+
+        return pattern.substitute(namedGraph=self.sourceGraph,identifierNames=identifierNames, identifierTypes=identifierTypes,targetGraph=self.targetGraph)
+
+class ClustersDescriptiveKeysQuery(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, targetGraph: str, memberIdentifiers: list, keyIdentifiers: list,
+                 entitySourceClass: str):
+        """
+
+        Parameters
+        ----------
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        memberIdentifiers : list
+            The names of identifiers of cluster members
+            This name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+        keyIdentifiers : list
+            The names of identifiers that cluster members have in common
+            This name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+        entitySourceClass : str
+            The RDF class used to identify a  record in the source graph,
+            e.g. schema:CreativeWork or schema:Book
+        """
+        self.targetGraph = targetGraph
+        self.memberIdentifiers = memberIdentifiers
+        self.keyIdentifiers = keyIdentifiers
+        self.entitySourceClass = entitySourceClass
+
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        pattern = Template("""
+    SELECT DISTINCT ?memberName ?memberIdentifier ?keyIdentifierName ?keyIdentifier
+    WHERE {
+      graph <${namedGraph}> {
+      ?cluster a ${entityClass} ;
+               bf:identifiedBy ?memberIdentifierEntity ;
+               bf:identifiedBy ?keyIdentifierEntity .
+    
+      ?memberIdentifierEntity rdfs:label ?memberName ;
+                              rdf:value ?memberIdentifier .
+    
+      ?keyIdentifierEntity rdfs:label ?keyIdentifierName ;
+                           rdf:value ?keyIdentifier .
+      }
+      FILTER( ?memberName IN ( ${memberNameListString} ) )
+      FILTER( ?keyIdentifierName IN ( ${keyIdentifiersNameListString} ) )
+   }""")
+        memberListString = ','.join(f'"{id}"' for id in self.memberIdentifiers)
+        keyIdentifiersListString = ','.join(f'"{id}"' for id in self.keyIdentifiers)
+
+        query = pattern.substitute(namedGraph=self.targetGraph, entityClass=self.entitySourceClass,memberNameListString=memberListString,keyIdentifiersNameListString=keyIdentifiersListString)
+
+
+        return query
+
+
+class ClustersDescriptiveKeysSameAsQuery(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, targetGraph: str, sourceGraph: str, linkProperty: str, memberIdentifiers: list, sourceType: str, targetType: str):
+        """
+
+        Parameters
+        ----------
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        memberIdentifiers : list
+            The names of identifiers of cluster members
+            This name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+        keyIdentifiers : list
+            The names of identifiers that cluster members have in common
+            This name is used to refer to the name of the identifier (rdfs:label) according to BIBFRAME
+        entitySourceClass : str
+            The RDF class used to identify a  record in the source graph,
+            e.g. schema:CreativeWork or schema:Book
+        """
+        self.targetGraph = targetGraph
+        self.sourceGraph = sourceGraph
+        self.targetType = targetType
+        self.sourceType = sourceType
+        self.linkProperty = linkProperty
+        self.memberIdentifiers = memberIdentifiers
+
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        pattern = Template("""
+    INSERT {
+      graph <${targetGraph}> {
+        ?cluster bf:identifiedBy ?keyEntityURI .
+
+        ?keyEntityURI a ?entityType ;
+                      rdfs:label ?memberName ;
+                      rdf:value ?memberIdentifier .
+      }
+    }
+    WHERE {
+
+      graph <${targetGraph}> {
+        ?cluster a ${targetType} ;
+                 ${linkProperty} ?memberURI .
+      }
+
+      graph <${sourceGraph}> {
+        ?memberURI a ${sourceType} ;
+                 bf:identifiedBy ?memberIdentifierEntity .
+    
+        ?memberIdentifierEntity a ?entityType ;
+                                rdfs:label ?memberName ;
+                                rdf:value ?memberIdentifier .
+    
+      }
+      FILTER( ?memberName IN ( ${memberNameListString} ) )
+      OPTIONAL {
+        graph <${targetGraph}> {
+          ?anyCorrelationActivity a btm:CorrelationActivity ;
+                                  prov:generated ?cluster . 
+        }
+      }
+      FILTER( !bound(?anyCorrelationActivity) )
+      BIND( IRI( CONCAT( "${baseURL}_", ?memberName, "_", ?memberIdentifier ) ) as ?keyEntityURI)
+
+
+   }""")
+        memberListString = ','.join(f'"{id}"' for id in self.memberIdentifiers)
+
+        query = pattern.substitute(targetGraph=self.targetGraph, sourceGraph=self.sourceGraph, targetType=self.targetType, sourceType=self.sourceType, baseURL=Query.BASE_URL,memberNameListString=memberListString, linkProperty=self.linkProperty)
+
+        return query 
+
+
+class PropertyUpdateSimpleQuery(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, targetGraph: str, sourceGraph: str, property: str, linkProperty: str, targetType: str, sourceType: str):
+        """
+
+        Parameters
+        ----------
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        """
+        self.targetGraph = targetGraph
+        self.sourceGraph = sourceGraph
+        self.property = property
+        self.linkProperty = linkProperty
+        self.targetType = targetType
+        self.sourceType = sourceType
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        pattern = Template("""
+    INSERT {
+      graph <${targetGraph}> {
+        ?entity ${property} ?propertyValue .
+      }
+    }
+    WHERE {
+      graph <${targetGraph}> {
+        ?entity a ${targetType} ;
+                ${linkProperty} ?sourceURI .
+      }
+
+      graph <${sourceGraph}> {
+        ?sourceURI a ${sourceType} ;
+                   ${property} ?propertyValue .
+      }
+      FILTER NOT EXISTS {
+        graph <${targetGraph}> {
+          ?entity ${property} ?someValue .
+        }
+      }
+   }""")
+
+        query = pattern.substitute(targetGraph=self.targetGraph, sourceGraph=self.sourceGraph, property=self.property, linkProperty=self.linkProperty, targetType=self.targetType, sourceType=self.sourceType)
+
+        return query
+
+
+class PropertyUpdateComplexMappingQuery(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, targetGraph: str, sourceGraph: str, targetProperty: str, sourceProperty: str, sourcePropertyGraph: str, sourceGraphLinkProperty: str, linkProperty: str, targetType: str, sourceType: str):
+        """
+
+        Parameters
+        ----------
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        """
+        self.targetGraph = targetGraph
+        self.sourceGraph = sourceGraph
+        self.targetProperty = targetProperty
+        self.sourceProperty = sourceProperty
+        self.linkProperty = linkProperty
+        self.sourcePropertyGraph = sourcePropertyGraph
+        self.sourceGraphLinkProperty = sourceGraphLinkProperty
+        self.targetType = targetType
+        self.sourceType = sourceType
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        pattern = Template("""
+    INSERT {
+      graph <${targetGraph}> {
+        ?entity ${targetProperty} ?propertyValue .
+      }
+    }
+    WHERE {
+      graph <${targetGraph}> {
+        ?entity a ${targetType} ;
+                ${linkProperty} ?sourceURI .
+      }
+
+      graph <${sourceGraph}> {
+        ?sourceURI a ${sourceType} ;
+                   ${sourceGraphLinkProperty} ?originalURI .
+      }
+
+      graph <${sourcePropertyGraph}> {
+        ?originalURI ${sourceProperty} ?propertyValue .
+      }
+      FILTER NOT EXISTS {
+        graph <${targetGraph}> {
+          ?entity ${targetProperty} ?someValue .
+        }
+      }
+   }""")
+
+        query = pattern.substitute(targetGraph=self.targetGraph, sourceGraph=self.sourceGraph, targetProperty=self.targetProperty, linkProperty=self.linkProperty, sourceProperty=self.sourceProperty, sourcePropertyGraph=self.sourcePropertyGraph, sourceGraphLinkProperty=self.sourceGraphLinkProperty, targetType=self.targetType, sourceType=self.sourceType)
+
+        return query
+
+class PropertyUpdateSimpleMappingQuery(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, targetGraph: str, sourceGraph: str, targetProperty: str, sourceProperty: str, linkProperty: str, targetType: str, sourceType: str):
+        """
+
+        Parameters
+        ----------
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        """
+        self.targetGraph = targetGraph
+        self.sourceGraph = sourceGraph
+        self.targetProperty = targetProperty
+        self.sourceProperty = sourceProperty
+        self.linkProperty = linkProperty
+        self.targetType = targetType
+        self.sourceType = sourceType
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        pattern = Template("""
+    INSERT {
+      graph <${targetGraph}> {
+        ?entity ${targetProperty} ?propertyValue .
+      }
+    }
+    WHERE {
+      graph <${targetGraph}> {
+        ?entity a ${targetType} ;
+                ${linkProperty} ?sourceURI .
+      }
+
+      graph <${sourceGraph}> {
+        ?sourceURI a ${sourceType} ;
+                   ${sourceProperty} ?propertyValue .
+      }
+
+      FILTER NOT EXISTS {
+        graph <${targetGraph}> {
+          ?entity ${targetProperty} ?someValue .
+        }
+      }
+   }""")
+
+        query = pattern.substitute(targetGraph=self.targetGraph, sourceGraph=self.sourceGraph, targetProperty=self.targetProperty, linkProperty=self.linkProperty, sourceProperty=self.sourceProperty, targetType=self.targetType, sourceType=self.sourceType)
+
+        return query
+
+class PropertyUpdatePropertyPathQuery(ManifestationQuery):
+
+    # -----------------------------------------------------------------------------
+    def __init__(self, targetGraph: str, sourceGraph: str, targetProperty: list, linkProperty: str, targetPropertyEntityUUID: str, targetPropertyEntityPrefix: str, targetPropertyEntityType: str, targetType: str, sourceType: str):
+        """
+
+        Parameters
+        ----------
+        targetGraph : str
+            The name of the target graph without brackets, e.g. http://beltrans-manifestations
+        """
+        self.targetGraph = targetGraph
+        self.sourceGraph = sourceGraph
+        self.targetProperty = targetProperty
+        self.linkProperty = linkProperty
+        self.targetPropertyEntityUUID=targetPropertyEntityUUID
+        self.targetPropertyEntityPrefix=targetPropertyEntityPrefix
+        self.targetPropertyEntityType=targetPropertyEntityType
+        self.targetType = targetType
+        self.sourceType = sourceType
+
+    # ---------------------------------------------------------------------------
+    def _buildQuery(self):
+
+        pattern = Template("""
+    INSERT {
+      graph <${targetGraph}> {
+        ?entity ${targetPropertyFirst} ?propertyEntityURI .
+
+        ?propertyEntityURI a ${propertyEntityType} ;
+                           ${targetPropertySecond} ?propertyValue .
+      }
+    }
+    WHERE {
+      graph <${targetGraph}> {
+        ?entity a ${targetType} ;
+                ${targetPropertyEntityUUID} ?entityUUID ;
+                ${linkProperty} ?sourceURI .
+      }
+
+      graph <${sourceGraph}> {
+        ?sourceURI a ${sourceType} ;
+                   ${sourcePropertyPath} ?propertyValue .
+      }
+
+      BIND( IRI( CONCAT( "${baseURL}", ?entityUUID ) ) as ?propertyEntityURI)
+      FILTER NOT EXISTS {
+        graph <${targetGraph}> {
+          ?entity ${sourcePropertyPath} ?someValue .
+        }
+      }
+   }""")
+
+        targetPropertyPath = '/'.join(self.targetProperty)
+        query = pattern.substitute(
+                  baseURL=Query.BASE_URL + self.targetPropertyEntityPrefix,
+                  targetGraph=self.targetGraph, 
+                  sourceGraph=self.sourceGraph, 
+                  targetPropertyFirst=self.targetProperty[0],
+                  targetPropertySecond=self.targetProperty[1],
+                  targetPropertyEntityUUID=self.targetPropertyEntityUUID,
+                  linkProperty=self.linkProperty,
+                  propertyEntityType=self.targetPropertyEntityType,
+                  sourcePropertyPath=targetPropertyPath,
+                  targetType=self.targetType, 
+                  sourceType=self.sourceType)
+
+        return query
 
 
 class ManifestationCreateQueryIdentifiers(ManifestationQuery):

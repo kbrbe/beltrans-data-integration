@@ -25,6 +25,12 @@ class TestGeonamesIdentifierEnrichment(unittest.TestCase):
       '-g', 'test/resources/geoname-identifier-enrichment/geonames/',
       '-i', 'test/resources/geoname-identifier-enrichment/testdata.csv',
       '-p', 'targetPlaceOfPublication',
+      '--input-id-column', 'targetIdentifier',
+      '--column-place', 'targetPlaceOfPublication',
+      '--column-country', 'targetCountryOfPublication',
+      '--column-identifier', 'targetPlaceOfPublicationIdentifier',
+      '--column-longitude', 'targetPlaceOfPublicationLongitude',
+      '--column-latitude', 'targetPlaceOfPublicationLatitude',
       '-o', cls.tempEnriched]
     subprocess.run(args)
 
@@ -57,6 +63,12 @@ class TestGeonamesIdentifierEnrichment(unittest.TestCase):
     """When the location column is empty, the target place of publication longitude column should be empty too"""
     foundLongitude = TestGeonamesIdentifierEnrichment.data.getTargetIdentifierPlaceOfPublicationLongitude("2")
     self.assertEqual(foundLongitude, "", msg= f'For an empty location the longitude {foundLongitude} was found instead of left empty')
+
+  def testEmptyLocationButStillCountry(self):
+    """When the location column is empty but we have a country column, the country column should not be removed https://github.com/kbrbe/beltrans-data-integration/issues/252"""
+    expectedCountry = 'Belgium'
+    foundCountry = TestGeonamesIdentifierEnrichment.data.getTargetIdentifierCountry("17")
+    self.assertEqual(foundCountry, expectedCountry, f'There should be the country {expectedCountry}, but "{foundCountry}" was found')
 
 
   # ---------------------------------------------------------------------------
@@ -101,7 +113,7 @@ class TestGeonamesIdentifierEnrichment(unittest.TestCase):
     identifiers = []
     for row in TestGeonamesIdentifierEnrichment.rawData:
       identifiers.append(row['targetIdentifier'])
-    self.assertEqual(identifiers, ['1','2','3','4','5','123','6', '7', '7', '8', '8', '8', '9', '9', '10', '11', '11', '12', '12', '13', '13', '14', '14', '15', '16'], msg="Identifiers contain non expected values")
+    self.assertEqual(identifiers, ['1','2','3','4','5','123','6', '7', '7', '8', '8', '8', '9', '9', '10', '11', '11', '12', '12', '13', '13', '14', '14', '15', '16', '17'], msg="Identifiers contain non expected values")
 
 
   # ---------------------------------------------------------------------------

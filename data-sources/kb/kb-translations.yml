@@ -86,6 +86,13 @@ mappings:
           parameters:
             - [grel:valueParameter, $(edition)]
             - [grel:valueParameter2, ""] 
+      - p: schema:bookFormat
+        o: $(format)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(format)]
+            - [grel:valueParameter2, ""] 
       - p: bibo:isbn10
         o: $(isbn10)
         condition:

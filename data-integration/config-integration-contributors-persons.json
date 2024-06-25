@@ -1,0 +1,83 @@
+{
+  "integration": {
+    "identifiers": ["VIAF", "ISNI", "KBR", "BnF", "NTA", "Unesco", "Wikidata"],
+    "mappingFile": "integration-mapping-contributors-persons.yml",
+    "namedGraph": "http://beltrans-contributors",
+    "targetType": "schema:Person"
+  },
+  "sources": {
+    "ISNI-SRU": {
+      "sourceType": "schema:Person",
+      "namedGraph": "http://isni-sru",
+      "properties": [
+        {"targetProperty": "schema:nationality"},
+        {"targetProperty": "schema:gender"},
+        {"targetProperty": "rdfs:label"},
+        {"targetProperty": "schema:familyName"},
+        {"targetProperty": "schema:givenName"}
+      ]
+    },
+    "KBR": {
+      "sourceType": "schema:Person",
+      "namedGraph": "http://kbr-linked-authorities",
+      "properties": [
+        {"targetProperty": "schema:nationality"},
+        {"targetProperty": "schema:gender"},
+        {"targetProperty": "rdfs:label"},
+        {"targetProperty": "schema:familyName"},
+        {"targetProperty": "schema:givenName"}
+      ]
+    },
+    "BnF": {
+      "sourceType": "foaf:Person",
+      "namedGraph": "http://bnf-contributors",
+      "properties": [
+        {
+          "targetProperty": "schema:nationality",
+          "sourceProperty": "rdagroup2elements:countryAssociatedWithThePerson"
+        },
+        {"targetProperty": "schema:gender"},
+        {
+          "targetProperty": "rdfs:label",
+          "sourceProperty": "foaf:name"
+        },
+        {
+          "targetProperty": "schema:familyName",
+          "sourceProperty": "foaf:familyName"
+        },
+        {
+          "targetProperty": "schema:givenName",
+          "sourceProperty": "foaf:givenName"
+        }
+      ]
+
+    },
+    "NTA": {
+      "sourceType": "schema:Person",
+      "namedGraph": "http://kb-linked-authorities",
+      "properties": [
+        {"targetProperty": "schema:nationality"},
+        {"targetProperty": "schema:gender"},
+        {"targetProperty": "rdfs:label"},
+        {"targetProperty": "schema:familyName"},
+        {"targetProperty": "schema:givenName"}
+      ]
+    },
+    "Unesco": {
+      "sourceType": "schema:Person",
+      "namedGraph": "http://unesco-linked-authorities",
+      "properties": [
+        {"targetProperty": "schema:nationality"},
+        {"targetProperty": "schema:gender"},
+        {"targetProperty": "rdfs:label"},
+        {"targetProperty": "schema:familyName"},
+        {"targetProperty": "schema:givenName"}
+      ]
+    }
+  },
+  "existingClusters": {
+    "namedGraph": "http://beltrans-contributors",
+    "sourceType": "schema:Person",
+    "dataSourceIdentifiers": ["KBR", "BnF", "NTA", "Unesco"]
+  }
+}

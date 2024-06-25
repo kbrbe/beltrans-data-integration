@@ -138,6 +138,7 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withBnFAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['targetBnFIdentifier', 'targetUnescoIdentifier']),
     'withKBAndUnescoIdentifier': countRowsWithValueForColumns(corpus, ['targetKBIdentifier', 'targetUnescoIdentifier']),
     'withBBThesaurusID': countRowsWithValueForColumn(corpus, 'targetThesaurusBB'),
+    'withSourceBBThesaurusID': countRowsWithValueForColumn(corpus, 'sourceThesaurusBB') if 'sourceThesaurusBB' in corpus else 0,
     'withSourceKBRIdentifier': countRowsWithValueForColumn(corpus, 'sourceKBRIdentifier'),
     'withSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitle') if 'sourceTitle' in corpus else 0,
     'withKBRSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKBR'),
@@ -156,6 +157,11 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withIntegratedScenarist': countRowsWithValueForColumn(corpus, 'scenaristIdentifiers'),
     'withIntegratedPublishingDirector': countRowsWithValueForColumn(corpus, 'publishingDirectorIdentifiers'),
     'withIntegratedPublisher': countRowsWithValueForColumn(corpus, targetPublisherColumnName) if targetPublisherColumnName in corpus else 0,
+    'withIntegratedSourcePublisher': countRowsWithValueForColumn(corpus, 'sourcePublisherIdentifiers') if 'sourcePublisherIdentifiers' in corpus else 0,
+    'withTargetPlaceOfPublication': countRowsWithValueForColumn(corpus, 'targetPlaceOfPublication') if 'targetPlaceOfPublication' in corpus else 0,
+    'withSourcePlaceOfPublication': countRowsWithValueForColumn(corpus, 'sourcePlaceOfPublication') if 'sourcePlaceOfPublication' in corpus else 0,
+    'withTargetCountryOfPublication': countRowsWithValueForColumn(corpus, 'targetCountryOfPublication') if 'targetCountryOfPublication' in corpus else 0,
+    'withSourceCountryOfPublication': countRowsWithValueForColumn(corpus, 'sourceCountryOfPublication') if 'sourceCountryOfPublication' in corpus else 0,
     'comment': comment
   }
   return measurement

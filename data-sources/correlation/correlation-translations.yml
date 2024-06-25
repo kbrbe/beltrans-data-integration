@@ -51,6 +51,7 @@ mappings:
     po:
       - [a, schema:CreativeWork]
       - [dcterms:identifier, $(targetIdentifier)]
+      - [schema:translationOfWork, btid:original_$(targetIdentifier)~iri]
       - [rdfs:comment, "Created from correlation list"]
       - [rdfs:label, "BELTRANS manifestation $(targetIdentifier)"]
       - [bf:title, btid:title_$(targetIdentifier)~iri]

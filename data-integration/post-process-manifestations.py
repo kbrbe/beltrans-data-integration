@@ -50,13 +50,6 @@ def main():
     inputReader = csv.DictReader(inFile, delimiter=',')
     headers = inputReader.fieldnames.copy()
 
-    # In the output we only want a single publication year column
-    # thus first remove the respective columns from different data sources
-    yearHeadersToRemove = ['targetYearOfPublicationKBR', 'targetYearOfPublicationBnF', 'targetYearOfPublicationKB', 'targetYearOfPublicationUnesco']
-
-    # and then add the single output columns we want per type
-    yearHeaderIndex = headers.index(yearHeadersToRemove[0])
-    headers.insert(yearHeaderIndex, 'targetYearOfPublication')
 
     # add new columns for contributors after the targetCollectionIdentifier column
     contributionsIndex = headers.index('targetCollectionIdentifier') + 1
@@ -80,9 +73,6 @@ def main():
       'http://id.loc.gov/vocabulary/relators/adp': 'adapterIdentifiers',
     }
 
-    for h in yearHeadersToRemove:
-      headers.remove(h)
-
 
     outputWriter = csv.DictWriter(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, fieldnames=headers)
     outputWriter.writeheader()
@@ -94,7 +84,6 @@ def main():
     # write relevant data to output
     for row in inputReader:
 
-      utils_date.selectDate(row, 'targetYearOfPublication', sources, 'targetIdentifier', mismatchLog, 'publicationYear')
       utils.addContributions(row, contributions[row['targetIdentifier']], roleMapping)
 
       outputWriter.writerow(row)

@@ -53,16 +53,16 @@ def main():
       headers.insert(4, 'deathDate')
 
     # similarly, add columns for statistics we will add
-    headers.insert(5, 'authorIn')
-    headers.insert(6, 'translatorIn')
-    headers.insert(7, 'adapterIn')
-    headers.insert(8, 'illustratorIn')
-    headers.insert(9, 'scenaristIn')
-    headers.insert(10, 'publishingDirectorIn')
+    headers.insert(7, 'authorIn')
+    headers.insert(8, 'translatorIn')
+    headers.insert(9, 'adapterIn')
+    headers.insert(10, 'illustratorIn')
+    headers.insert(11, 'scenaristIn')
+    headers.insert(12, 'publishingDirectorIn')
 
     if options.contributor_type == 'orgs':
-      headers.insert(11, 'publishedTranslationOf')
-      headers.insert(12, 'publishedOriginalOf')
+      headers.insert(13, 'publishedTranslationOf')
+      headers.insert(14, 'publishedOriginalOf')
 
     outputWriter = csv.DictWriter(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, fieldnames=headers)
     outputWriter.writeheader()

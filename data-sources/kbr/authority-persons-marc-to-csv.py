@@ -81,7 +81,7 @@ def extractAndWriteAlternativeNames(authorityID, authorityName, elem, writer, st
 
 
 # -----------------------------------------------------------------------------
-def addAuthorityFieldsToCSV(elem, writer, natWriter, nameWriter, identifierWriter, stats):
+def addAuthorityFieldsToCSV(elem, writer, natWriter, langWriter, nameWriter, identifierWriter, stats):
   """This function extracts authority relevant data from the given XML element 'elem' and writes it to the given CSV file writer."""
 
   #
@@ -92,6 +92,7 @@ def addAuthorityFieldsToCSV(elem, writer, natWriter, nameWriter, identifierWrite
   namePerson = utils.getElementValue(elem.find('./marc:datafield[@tag="100"]/marc:subfield[@code="a"]', ALL_NS))
   nameOrg = utils.getElementValue(elem.find('./marc:datafield[@tag="110"]/marc:subfield[@code="a"]', ALL_NS))
   nationalities = utils.getElementValue(elem.findall('./marc:datafield[@tag="370"]/marc:subfield[@code="c"]', ALL_NS))
+  languages = utils.getElementValue(elem.findall('./marc:datafield[@tag="377"]/subfield[@code="a"]', ALL_NS))
   gender = utils.getElementValue(elem.find('./marc:datafield[@tag="375"]/marc:subfield[@code="a"]', ALL_NS))
   birthDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="f"]', ALL_NS))
   deathDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="g"]', ALL_NS))
@@ -134,6 +135,17 @@ def addAuthorityFieldsToCSV(elem, writer, natWriter, nameWriter, identifierWrite
     for n in nationalityURIString.split(';'):
       natWriter.writerow({'authorityID': authorityID, 'nationality': n})
 
+  # Write 1:n language relationships to a separate file (one row = one nationality relationship)
+  #
+  if languages:
+
+    # create a semicolon-separated list of language URIs
+    languageURIString = utils.createURIString(languages, ';', 'http://id.loc.gov/vocabulary/languages/') 
+
+    # split by semicolon to create 1:n relationships
+    for l in languageURIString.split(';'):
+      langWriter.writerow({'authorityID': authorityID, 'language': l})
+
   if isniRaw != '':
     extractedISNIIdentifiers = utils.getListOfIdentifiers(authorityID, isniRaw, 'ISNI', stats)
 
@@ -172,6 +184,7 @@ def main():
   parser.add_option('-i', '--input-file', action='store', help='The input file containing MARC SLIM XML records')
   parser.add_option('-o', '--output-file', action='store', help='The output CSV file containing selected MARC fields')
   parser.add_option('-n', '--nationality-csv', action='store', help='The output CSV file containing the IDs of authorities and their nationality')
+  parser.add_option('-l', '--language-csv', action='store', help='The output CSV file containing the IDs of authorities and their language')
   parser.add_option('--identifier-csv', action='store', help='The output CSV file containing the IDs of authorities and linked 1:n identifiers')
   parser.add_option('--names-csv', action='store', help='The output CSV file containing alternate names and pseudonym information')
   (options, args) = parser.parse_args()
@@ -179,7 +192,7 @@ def main():
   #
   # Check if we got all required arguments
   #
-  if( (not options.input_file) or (not options.output_file) or (not options.nationality_csv) or (not options.names_csv) or (not options.identifier_csv) ):
+  if( (not options.input_file) or (not options.output_file) or (not options.nationality_csv) or (not options.language_csv) or (not options.names_csv) or (not options.identifier_csv) ):
     parser.print_help()
     exit(1)
 
@@ -189,7 +202,8 @@ def main():
   with open(options.output_file, 'w') as outFile, \
        open(options.names_csv, 'w') as namesFile, \
        open(options.identifier_csv, 'w') as identifierFile, \
-       open(options.nationality_csv, 'w') as natFile:
+       open(options.nationality_csv, 'w') as natFile, \
+       open(options.language_csv, 'w') as langFile:
 
     stats = {'authorityType': {}, 'more-than-one-ISNI': 0, 'more-than-one-VIAF': 0}
     outputFields = ['authorityID', 'authorityType', 'name', 'family_name', 'given_name', 'gender', 'birth_date', 'death_date', 'country_code']
@@ -198,6 +212,9 @@ def main():
 
     nationalityWriter = csv.DictWriter(natFile, fieldnames=['authorityID', 'nationality'], delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     nationalityWriter.writeheader()
+
+    languageWriter = csv.DictWriter(langFile, fieldnames=['authorityID', 'language'], delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    languageWriter.writeheader()
 
     identifierWriter = csv.DictWriter(identifierFile, fieldnames=['authorityID', 'type', 'identifier'], delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     identifierWriter.writeheader()
@@ -219,7 +236,7 @@ def main():
 
       # The parser finished reading one authority record, get information and then discard the record
       if  event == 'end' and elem.tag == ET.QName(NS_MARCSLIM, 'record'):
-        addAuthorityFieldsToCSV(elem, outputWriter, nationalityWriter, namesWriter, identifierWriter, stats)
+        addAuthorityFieldsToCSV(elem, outputWriter, nationalityWriter, languageWriter, namesWriter, identifierWriter, stats)
         root.clear()
     elem.clear()
     #print(stats['more-than-one-isni'])

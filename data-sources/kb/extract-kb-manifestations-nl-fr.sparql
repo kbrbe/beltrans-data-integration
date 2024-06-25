@@ -1,5 +1,5 @@
 PREFIX kb: <http://data.bibliotheken.nl/def#>
-SELECT ?manifestation ?manifestationID ?isbn ?title ?sourceTitle ?edition ?responsibilityStatement ?description ?authorID ?publicationYear ?placeOfPublication ?publisherName
+SELECT ?manifestation ?manifestationID ?isbn ?title ?sourceTitle ?edition ?format ?responsibilityStatement ?description ?authorID ?publicationYear ?placeOfPublication ?publisherName
 WHERE {
 
   ?manifestation a schema:Book ;
@@ -13,6 +13,7 @@ WHERE {
   OPTIONAL { ?manifestation schema:description ?description . }
   OPTIONAL { ?manifestation rdfs:label ?responsibilityStatement . }
   OPTIONAL { ?manifestation schema:bookEdition ?edition . }
+  OPTIONAL { ?manifestation schema:bookFormat ?format . }
   OPTIONAL { ?manifestation schema:isbn ?isbn . }
   OPTIONAL { ?manifestation schema:author ?authorID . }
 

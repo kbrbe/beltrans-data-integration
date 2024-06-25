@@ -21,6 +21,8 @@ SELECT DISTINCT
   (group_concat(distinct ?contributorLabelFR;SEPARATOR=';') AS ?nameFR)
   (group_concat(distinct ?contributorLabelEN;SEPARATOR=';') AS ?nameEN)
   (group_concat(distinct ?imprintOwner;SEPARATOR=';') AS ?isImprintFrom)
+  (group_concat(distinct ?countryLabel;SEPARATOR=';') AS ?country)
+  (group_concat(distinct ?contributorRegion;SEPARATOR=';') AS ?region)
   (group_concat(distinct ?kbrID;SEPARATOR=';') AS ?kbrIDs)
   (group_concat(distinct ?bnfID;SEPARATOR=';') AS ?bnfIDs)
   (group_concat(distinct ?ntaID;SEPARATOR=';') AS ?ntaIDs)
@@ -53,7 +55,16 @@ WHERE {
 
 
 
-  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:isPartOf ?imprintOwner . } }
+  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:isPartOf/dcterms:identifier ?imprintOwner . } }
+
+  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:address/schema:addressRegion ?contributorRegion . } }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { 
+      ?contributorURI schema:address/schema:addressCountry ?contributorCountryURI . 
+    } 
+    graph <http://master-data> { ?contributorCountryURI skos:prefLabel ?countryLabel . }
+    FILTER(lang(?countryLabel) = "en")
+  }
  
   # ISNI
   #
