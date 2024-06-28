@@ -37,6 +37,10 @@ variables:
   sourceContSourceLang: &sourceContSourceLang ${RML_SOURCE_CORRELATION_TRL_SOURCE_LANG}
   sourceContTargetLang: &sourceContTargetLang ${RML_SOURCE_CORRELATION_TRL_TARGET_LANG}
   sourceContTargetBB: &sourceContTargetBB ${RML_SOURCE_CORRELATION_TRL_TARGET_BB}
+  sourceContAuthor: &sourceContAuthor ${RML_SOURCE_CORRELATION_TRL_AUTHOR}
+  sourceContTranslator: &sourceContTranslator ${RML_SOURCE_CORRELATION_TRL_TRANSLATOR}
+  sourceContTargetPublisher: &sourceContTranslator ${RML_SOURCE_CORRELATION_TRL_TARGET_PUBLISHER}
+  sourceContTargetPlace: &sourceContTargetPlace ${RML_SOURCE_CORRELATION_TRL_TARGET_PLACE}
 
 mappings:
 
@@ -370,6 +374,55 @@ mappings:
           parameters:
             - [grel:valueParameter, $(isbn13)]
             - [grel:valueParameter2, ""]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorLink:
+    sources:
+      - access: *sourceContAuthor
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - [schema:author, $(authorIdentifier)]
+      - [marcrel:aut, $(authorIdentifier)]
+
+  # ---------------------------------------------------------------------------
+  #
+  translatorLink:
+    sources:
+      - access: *sourceContAuthor
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - [schema:translator, $(translatorIdentifier)]
+      - [marcrel:trl, $(translatorIdentifier)]
+
+  # ---------------------------------------------------------------------------
+  #
+  targetPublisherLink:
+    sources:
+      - access: *sourceContTargetPublisher
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - [schema:publisher, $(targetPublisherIdentifier)]
+      - [marcrel:pbl, $(targetPublisherIdentifier)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  targetPublisherLink:
+    sources:
+      - access: *sourceContTargetPlace
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - [schema:locationCreated, $(targetPlaceOfPublication)]
+
 
   # ---------------------------------------------------------------------------
   #

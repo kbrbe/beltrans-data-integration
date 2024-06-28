@@ -590,6 +590,16 @@ SUFFIX_CORRELATION_TRL_TARGET_LANG="correlation-trl-target-lang.csv"
 SUFFIX_CORRELATION_TRL_TARGET_BB_NAMES="correlation-trl-target-bb-names.csv"
 SUFFIX_CORRELATION_TRL_TARGET_BB_CODES="correlation-trl-target-bb-codes.csv"
 
+SUFFIX_CORRELATION_TRL_AUTHORS="correlation-trl-authors.csv"
+SUFFIX_CORRELATION_TRL_TRANSLATORS="correlation-trl-translators.csv"
+SUFFIX_CORRELATION_TRL_TARGET_PUBLISHERS="correlation-trl-target-publishers.csv"
+
+SUFFIX_CORRELATION_TRL_LINK_AUTHORS="correlation-trl-author-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS="correlation-trl-translator-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS="correlation-trl-target-publisher-links.csv"
+  
+SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE="correlation-trl-target-place-links.csv"
+
 SUFFIX_CORRELATION_ORIG_ISBN10="correlation-orig-isbn10.csv"
 SUFFIX_CORRELATION_ORIG_ISBN13="correlation-orig-isbn13.csv"
 SUFFIX_CORRELATION_ORIG_KBR="correlation-orig-kbr-id.csv"
@@ -3114,7 +3124,17 @@ function extractTranslationCorrelationList {
   local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
   local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
+
+  local correlationListAuthors="$folderName/$SUFFIX_CORRELATION_TRL_AUTHORS"
+  local correlationListTranslators="$folderName/$SUFFIX_CORRELATION_TRL_TRANSLATORS"
+  local correlationListTargetPublishers="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_PUBLISHERS"
+
+  local authorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_AUTHORS"
+  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS"
+  local targetPublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS"
   
+  local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
+
   echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
   cp $correlationList "$folderName"
   extractSeparatedColumn $correlationList $correlationListISBN10 "targetIdentifier" "targetISBN10" "id" "isbn10"
@@ -3129,7 +3149,17 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListOriginalISBN10 "targetIdentifier" "sourceISBN10" "id" "isbn10"
   extractSeparatedColumn $correlationList $correlationListOriginalISBN13 "targetIdentifier" "sourceISBN13" "id" "isbn13"
   extractSeparatedColumn $correlationList $correlationListOriginalKBRIDs "targetIdentifier" "sourceKBRIdentifier" "id" "KBR"
+
+  extractSeparatedColumn $correlationList $correlationListAuthors "targetIdentifier" "authorIdentifiers" "id" "authorIdentifier"
+  extractSeparatedColumn $correlationList $correlationListTranslators "targetIdentifier" "translatorIdentifiers" "id" "translatorIdentifier"
+  extractSeparatedColumn $correlationList $correlationListTargetPublishers "targetIdentifier" "targetPublisherIdentifiers" "id" "targerPublisherIdentifier"
+
+  extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targerPlaceOfPublication"
+
   
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListAuthors -o $authorIdentifierLinks -c "authorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTranslators -o $translatorIdentifierLinks -c "translatorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTargetPublishers -o $targetPublisherIdentifierLinks -c "targetPublisherIdentifier"
 
   # 2023-12-15: we currently have LEXICON codes instead the name of genres
   # if there will be names again, the extra step below to lookup codes is important
@@ -3350,6 +3380,12 @@ function transformTranslationCorrelationList {
   local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
   local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
+  local authorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_AUTHORS"
+  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS"
+  local targetPublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS"
+  
+  local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
+
   local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
   local correlationOriginalsTurtle="$integrationName/correlation/originals/rdf/$SUFFIX_CORRELATION_TRL_LD"
 
@@ -3367,6 +3403,13 @@ function transformTranslationCorrelationList {
   export RML_SOURCE_CORRELATION_ORIG_ISBN10="$correlationListOriginalISBN10"
   export RML_SOURCE_CORRELATION_ORIG_ISBN13="$correlationListOriginalISBN13"
   export RML_SOURCE_CORRELATION_ORIG_KBR="$correlationListOriginalKBRIDs"
+
+  export RML_SOURCE_CORRELATION_TRL_AUTHOR="$authorIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_TRANSLATOR="$translatorIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_TARGET_PUBLISHER="$targetPublisherIdentifierLinks"
+
+  export RML_SOURCE_CORRELATION_TRL_TARGET_PLACE="$targetPlaceLinks"
+  
  
   echo ""
   echo "Map translations correlation data"
