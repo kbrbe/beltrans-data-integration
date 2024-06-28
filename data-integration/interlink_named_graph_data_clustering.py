@@ -60,9 +60,9 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
 
     # (2) get initial cluster information from already existing records created from correlation list
     #
-    (existingClusterAssignment, existingDescriptiveKeys) = getExistingClusters(url, targetGraph, config, "elementID", "descriptiveKey", auth)
+    #(existingClusterAssignment, existingDescriptiveKeys) = getExistingClusters(url, targetGraph, config, "elementID", "descriptiveKey", auth)
+    existingClusterAssignment = getExistingClusters(url, targetGraph, config, "elementID", "descriptiveKey", auth)
 
-    print(f'calling updateClusters, inputFilenames={descriptiveKeysFilenames}, existingClusterKeysFilename={existingDescriptiveKeys}')
     clusterFilename=os.path.join(queryLogDir, f'integration-clusters-{targetTypeString}.csv')
     clusterComponentsFilename=os.path.join(queryLogDir, f'integration-cluster-components-{targetTypeString}.csv')
 
@@ -74,8 +74,8 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
       idColumnName='elementID',
       keyColumnName='descriptiveKey',
       delimiter=',',
-      existingClustersFilename=existingClusterAssignment,
-      existingClusterKeysFilename=existingDescriptiveKeys
+      existingClustersFilename=existingClusterAssignment
+      #existingClusterKeysFilename=existingDescriptiveKeys
     )
 
     with open(clusterFilename, 'r') as clusterFile, \
@@ -216,35 +216,36 @@ def getExistingClusters(url, targetGraph, config, entityIDColumnName, descriptiv
   namedGraph = config['existingClusters']['namedGraph']
   dataSourceIdentifiers = config['existingClusters']['dataSourceIdentifiers']
 
+  # querying the descriptive keys from the correlation list is probably not what we want, https://github.com/kbrbe/work-set-clustering/issues/9
   # query descriptive keys
-  descriptiveKeysQueryString = ClustersDescriptiveKeysQuery(
-    targetGraph="http://beltrans-manifestations", 
-    memberIdentifiers=dataSourceIdentifiers, 
-    keyIdentifiers=descriptiveKeyIdentifiers, 
-    entitySourceClass=config['integration']['targetType']).getQueryString()
+  #descriptiveKeysQueryString = ClustersDescriptiveKeysQuery(
+  #  targetGraph="http://beltrans-manifestations", 
+  #  memberIdentifiers=dataSourceIdentifiers, 
+  #  keyIdentifiers=descriptiveKeyIdentifiers, 
+  #  entitySourceClass=config['integration']['targetType']).getQueryString()
 
-  existingKeysComponentsFilename = f'existing-cluster-key-components.csv'
-  existingKeysFilename = f'existing-clusters-keys.csv'
-  existingKeysQueryFilename = f'existing-clusters-keys-query.sparql'
+  #existingKeysComponentsFilename = f'existing-cluster-key-components.csv'
+  #existingKeysFilename = f'existing-clusters-keys.csv'
+  #existingKeysQueryFilename = f'existing-clusters-keys-query.sparql'
 
   # Optionally serialize SPARQL query
-  if queryLogDir:
-    logSPARQLQuery(queryLogDir, descriptiveKeysQueryString, existingKeysQueryFilename)
+  #if queryLogDir:
+  #  logSPARQLQuery(queryLogDir, descriptiveKeysQueryString, existingKeysQueryFilename)
 
   # Execute SPARQL query and save resulting descriptive keys to file
-  with open(existingKeysComponentsFilename, 'w', encoding='utf-8') as descriptiveKeyFile:
-    utils_sparql.query(url, descriptiveKeysQueryString, descriptiveKeyFile, auth=auth)
+  #with open(existingKeysComponentsFilename, 'w', encoding='utf-8') as descriptiveKeyFile:
+  #  utils_sparql.query(url, descriptiveKeysQueryString, descriptiveKeyFile, auth=auth)
 
   # Create descriptive key strings from the seperate columns
   # The SPARQL query could immediately CONCAT, but this goes hard on performance
-  with open(existingKeysComponentsFilename, 'r') as descriptiveKeysComponentsFile, \
-       open(existingKeysFilename, 'w') as descriptiveKeyFile:
+  #with open(existingKeysComponentsFilename, 'r') as descriptiveKeysComponentsFile, \
+  #     open(existingKeysFilename, 'w') as descriptiveKeyFile:
 
-    inputReader = csv.DictReader(descriptiveKeysComponentsFile)
-    descriptiveKeysWriter = csv.DictWriter(descriptiveKeyFile, fieldnames=[entityIDColumnName, descriptiveKeyColumnName])
-    descriptiveKeysWriter.writeheader()
-    for row in inputReader:
-      descriptiveKeysWriter.writerow({entityIDColumnName: '/'.join([row['memberName'], row['memberIdentifier']]), descriptiveKeyColumnName: '/'.join([row['keyIdentifierName'], row['keyIdentifier']])})
+  #  inputReader = csv.DictReader(descriptiveKeysComponentsFile)
+  #  descriptiveKeysWriter = csv.DictWriter(descriptiveKeyFile, fieldnames=[entityIDColumnName, descriptiveKeyColumnName])
+  #  descriptiveKeysWriter.writeheader()
+  #  for row in inputReader:
+  #    descriptiveKeysWriter.writerow({entityIDColumnName: '/'.join([row['memberName'], row['memberIdentifier']]), descriptiveKeyColumnName: '/'.join([row['keyIdentifierName'], row['keyIdentifier']])})
 
   # query cluster assignment
   existingClusterAssignmentsComponentsFilename = f'existing-cluster-assignments-components.csv'
@@ -253,7 +254,8 @@ def getExistingClusters(url, targetGraph, config, entityIDColumnName, descriptiv
 
   getDescriptiveKeys(url, config['existingClusters']['dataSourceIdentifiers'], "", config['existingClusters']['sourceType'], config['existingClusters'], targetGraph, auth, existingClusterAssignmentsComponentsFilename, existingClusterAssignmentsFilename, existingClusterAssignmentsQueryFilename, "clusterID", "elementID", queryLogDir=queryLogDir)
 
-  return (existingClusterAssignmentsFilename, existingKeysFilename)
+  #return (existingClusterAssignmentsFilename, existingKeysFilename)
+  return existingClusterAssignmentsFilename
 
 
 # -----------------------------------------------------------------------------

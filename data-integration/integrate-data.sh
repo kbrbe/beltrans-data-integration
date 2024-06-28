@@ -94,7 +94,6 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 # INPUT FILENAMES
 #
 
-INPUT_EXISTING_CLUSTER_KEYS="corpus-versions/2023-12-07/integration/clustering/descriptive-keys-no-uri.csv"
 
 # KBR - translations
 INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-04-26.xml"
@@ -353,6 +352,8 @@ SUFFIX_DATA_PROFILE_KBCODE="kbcode-hierarchy"
 SUFFIX_DATA_PROFILE_CONTRIBUTIONS="manifestation-contributions.csv"
 
 SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS="cluster-assignments-from-correlation-list.csv"
+SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEY_COMPONENTS="cluster-descriptive-key-components-from-correlation-list.csv"
+SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEYS="cluster-descriptive-keys-from-correlation-list.csv"
 
 SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_TARGET="place-of-publications-geonames-target.csv"
 SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_SOURCE="place-of-publications-geonames-source.csv"
@@ -991,15 +992,11 @@ function integrate {
   # 
   echo ""
   echo "Automatically integrate manifestations ..."
-  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
-  #  --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
   time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
     --config $manifestationIntegrationConfig --query-log-dir $queryLogDir
 
   echo ""
   echo "Automatically integrate contributors ..."
-  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
-  #  --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
   time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
     --config $contributorIntegrationConfigPersons --query-log-dir $queryLogDir
 
@@ -1036,11 +1033,16 @@ function integrate {
 
   echo ""
   echo "Perform Clustering ..."
-  # 2023-12-15: this works, but EXISTING_CLUSTER_KEYS is element->key and not cluster->id
-  #existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
-  #python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
-  #clustering "$integrationName" "$existingClusterAssignments" "$INPUT_EXISTING_CLUSTER_KEYS"
-  clustering "$integrationName"
+  existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
+  correlationListDescriptiveKeyComponents="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEY_COMPONENTS"
+  correlationListDescriptiveKeys="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEYS"
+
+  python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
+
+  # 2024-06-28: do not reuse existing keys https://github.com/kbrbe/work-set-clustering/issues/9
+  clustering "$integrationName" "$existingClusterAssignments"
+  # alternative without reusing existing clusters
+  # clustering "$integrationName"
 
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
@@ -1448,7 +1450,7 @@ function clustering {
   local existingClusters=$2
   local existingClusterKeys=$3
 
-  if [ -z $existingClusters ] || [ -z $existingClusterKeys ];
+  if [ -z $existingClusters ] ;
   then
     
     # perform the clustering from scratch
@@ -1470,7 +1472,8 @@ function clustering {
       --id-column "elementID" \
       --key-column "descriptiveKey" \
       --existing-clusters "$existingClusters" \
-      --existing-clusters-keys "$existingClusterKeys"
+      # 2024-06-28: do not reuse existing keys https://github.com/kbrbe/work-set-clustering/issues/9
+      #--existing-clusters-keys "$existingClusterKeys"
 
   fi
 
