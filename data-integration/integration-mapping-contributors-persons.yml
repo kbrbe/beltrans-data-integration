@@ -36,7 +36,7 @@ mappings:
   #
   clusterAssignment:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping links BELTRANS manifestations to their computed work cluster using fabio:manifestationOf."
+    description: "This mapping links BELTRANS persons to their computed data source reocrds."
     sources:
       - access: *integrationClusters
         referenceFormulation: csv
@@ -102,7 +102,7 @@ mappings:
   #
   identifiers:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping links BELTRANS manifestations to their computed work cluster using fabio:manifestationOf."
+    description: "This mapping creates BELTRANS person identifier entities according to BIBFRAME."
     sources:
       - access: *integrationClusters
         referenceFormulation: csv
