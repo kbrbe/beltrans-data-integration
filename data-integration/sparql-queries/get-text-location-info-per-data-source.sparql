@@ -67,6 +67,14 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
       }
 
       OPTIONAL {
+        graph <http://beltrans-manifestations> {
+          ?anyCorrelationActivity a btm:CorrelationActivity ;
+                                  prov:generated ?manifestation .
+        }
+      }
+      FILTER(!BOUND(?anyCorrelationActivity))
+
+      OPTIONAL {
         graph <http://beltrans-manifestations> { ?manifestation schema:locationCreated ?locationCreatedIntegrated . }
       }
 
