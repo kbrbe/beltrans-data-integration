@@ -3165,9 +3165,9 @@ function extractTranslationCorrelationList {
 
   extractSeparatedColumn $correlationList $correlationListAuthors "targetIdentifier" "authorIdentifiers" "id" "authorIdentifier"
   extractSeparatedColumn $correlationList $correlationListTranslators "targetIdentifier" "translatorIdentifiers" "id" "translatorIdentifier"
-  extractSeparatedColumn $correlationList $correlationListTargetPublishers "targetIdentifier" "targetPublisherIdentifiers" "id" "targerPublisherIdentifier"
+  extractSeparatedColumn $correlationList $correlationListTargetPublishers "targetIdentifier" "targetPublisherIdentifiers" "id" "targetPublisherIdentifier"
 
-  extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targerPlaceOfPublication"
+  extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targetPlaceOfPublication"
 
   
   python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListAuthors -o $authorIdentifierLinks -c "authorIdentifier"
