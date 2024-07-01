@@ -34,8 +34,11 @@ def main():
       colValue = row[options.column]
 
       if colValue != '':
-        print(f'"{colValue}"')
-        newValue = re.search(r'.*\((.*)\).*', colValue).group(1)
-        outputWriter.writerow({options.id_column: rowID, options.column: newValue})
+        result = re.search(r'.*\((.*)\).*', colValue)
+        if result:
+          newValue = result.group(1)
+          outputWriter.writerow({options.id_column: rowID, options.column: newValue})
+        else:
+          print(f'No identifier in contributor name string for row {rowID}: "{colValue}"')
 
 main()
