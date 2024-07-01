@@ -384,8 +384,8 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po:
-      - [schema:author, $(authorIdentifier)]
-      - [marcrel:aut, $(authorIdentifier)]
+      - [schema:author, btid:$(authorIdentifier)~iri]
+      - [marcrel:aut, btid:$(authorIdentifier)~iri]
 
   # ---------------------------------------------------------------------------
   #
@@ -396,8 +396,8 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po:
-      - [schema:translator, $(translatorIdentifier)]
-      - [marcrel:trl, $(translatorIdentifier)]
+      - [schema:translator, btid:$(translatorIdentifier)~iri]
+      - [marcrel:trl, btid:$(translatorIdentifier)~iri]
 
   # ---------------------------------------------------------------------------
   #
@@ -408,13 +408,13 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po:
-      - [schema:publisher, $(targetPublisherIdentifier)]
-      - [marcrel:pbl, $(targetPublisherIdentifier)]
+      - [schema:publisher, btid:$(targetPublisherIdentifier)~iri]
+      - [marcrel:pbl, btid:$(targetPublisherIdentifier)~iri]
 
 
   # ---------------------------------------------------------------------------
   #
-  targetPublisherLink:
+  targetPlaceLink:
     sources:
       - access: *sourceContTargetPlace
         referenceFormulation: csv
