@@ -39,7 +39,7 @@ variables:
   sourceContTargetBB: &sourceContTargetBB ${RML_SOURCE_CORRELATION_TRL_TARGET_BB}
   sourceContAuthor: &sourceContAuthor ${RML_SOURCE_CORRELATION_TRL_AUTHOR}
   sourceContTranslator: &sourceContTranslator ${RML_SOURCE_CORRELATION_TRL_TRANSLATOR}
-  sourceContTargetPublisher: &sourceContTranslator ${RML_SOURCE_CORRELATION_TRL_TARGET_PUBLISHER}
+  sourceContTargetPublisher: &sourceContTargetPublisher ${RML_SOURCE_CORRELATION_TRL_TARGET_PUBLISHER}
   sourceContTargetPlace: &sourceContTargetPlace ${RML_SOURCE_CORRELATION_TRL_TARGET_PLACE}
 
 mappings:
@@ -391,7 +391,7 @@ mappings:
   #
   translatorLink:
     sources:
-      - access: *sourceContAuthor
+      - access: *sourceContTranslator
         referenceFormulation: csv
         delimiter: ','
     s: btid:$(id)
