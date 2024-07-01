@@ -125,11 +125,13 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
 
 
 
+    targetType = config['integration']['targetType']
     # (5b) Finalize integration by adding certain data fields via the created sameAs links to the integrated data
     #
     # Iterate over each data source and add properties from it
     for sourceName, configEntry in config['sources'].items():
 
+      sourceType = configEntry['sourceType']
       # Add one property at a time to have a single fast query without OPTIONAL statements
       for propertyConfig in configEntry['properties']:
         queryString = ""
@@ -142,8 +144,8 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
                           sourcePropertyGraph=configEntry[propertyConfig['sourceGraphType']],
                           sourceGraphLinkProperty=propertyConfig['sourceGraphLinkProperty'],
                           linkProperty="schema:sameAs",
-                          targetType=config['integration']['targetType'],
-                          sourceType=configEntry['sourceType']).getQueryString()
+                          targetType=targetType,
+                          sourceType=sourceType).getQueryString()
 
         elif "targetProperty" in propertyConfig and "targetPropertyEntityUUID" in propertyConfig and "targetPropertyEntityPrefix"  in propertyConfig:
           queryString = PropertyUpdatePropertyPathQuery(
@@ -184,7 +186,7 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
           targetPropertyString = '-'.join(propertyConfig['targetProperty'])
           queryFilename = f'property-update-query-{sourceName}-{targetPropertyString}.sparql'
         else:
-          queryFilename = f'property-update-query-{sourceName}-{propertyConfig["targetProperty"]}.sparql'
+          queryFilename = f'property-update-query-{sourceName}-{sourceType}-{targetType}-{propertyConfig["targetProperty"]}.sparql'
         queryFilename = queryFilename.replace(':', '_')
         if queryLogDir:
           logSPARQLQuery(queryLogDir, queryString, queryFilename)

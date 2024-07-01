@@ -66,6 +66,7 @@ SCRIPT_PARSE_UNESCO_HTML="../data-sources/unesco/parse-content.py"
 MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS="tools.csv.count_unique_values"
 MODULE_GROUP_BY="tools.csv.group_by"
 MODULE_EXTRACT_STRING_FROM_COLUMN="tools.csv.extract_string_from_column"
+MODULE_STACK_CSV_FILES="tools.csv.stack_csv_files"
 
 SCRIPT_QUERY_DATAPROFILE="execute_dataprofile_query.py"
 
@@ -304,6 +305,7 @@ DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE="sparql-queries/get-contributions.sparql"
 
 GET_GEO_TEXT_INFO_QUERY_FILE="sparql-queries/get-text-location-info-per-data-source.sparql"
+GET_GEO_TEXT_INFO_CORRELATION_QUERY_FILE="sparql-queries/get-text-location-info-from-correlation.sparql"
 GET_GEO_TEXT_INFO_ORG_QUERY_FILE="sparql-queries/get-text-location-info-org-addresses.sparql"
 GET_GEO_DATA_QUERY_FILE="sparql-queries/get-manifestations-geo-data.sparql"
 
@@ -360,9 +362,11 @@ SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_SOURCE="place-of-publications-geonames-sour
 SUFFIX_UNKNOWN_GEONAMES_MAPPING="missing-geonames-mapping.csv"
 
 SUFFIX_GEO_TEXT="geo-text-information.csv"
+SUFFIX_GEO_TEXT_CORRELATION="geo-text-correlation-information.csv"
 SUFFIX_GEO_TEXT_ORG="geo-text-information-org.csv"
 SUFFIX_GEO_TEXT_ORG_ENRICHED="geo-text-information-org-enriched.csv"
 SUFFIX_GEO_TEXT_COMBINED="geo-text-information-combined.csv"
+SUFFIX_GEO_TEXT_COMBINED_MERGED="geo-text-information-combined-merged-with-correlation.csv"
 SUFFIX_GEO_TEXT_COMBINED_ENRICHED="geo-text-information-combined-enriched.csv"
 SUFFIX_GEO_DATA="geo-data.csv"
 SUFFIX_GEO_DATA_ORG="geo-data-org.csv"
@@ -1136,9 +1140,11 @@ function extractGeoInformation {
   mkdir -p "$integrationName/geo"
   local unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
   local outputFileGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT"
+  local outputFileGeoTextCorrelation="$integrationName/geo/$SUFFIX_GEO_TEXT_CORRELATION"
   local orgGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_ORG"
   local orgGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_ORG_ENRICHED"
   local combinedGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED"
+  local combinedGeoTextMerged="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED_MERGED"
   local combinedGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED_ENRICHED"
   local geoData="$integrationName/geo/$SUFFIX_GEO_DATA"
   local geoDataOrg="$integrationName/geo/$SUFFIX_GEO_DATA_ORG"
@@ -1147,8 +1153,11 @@ function extractGeoInformation {
   echo "Enrich geo information and create RDF descriptions of it"
   echo ""
 
-  echo "Get names of publication places"
+  echo "Get names of publication places (integrated data)"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeoText"
+
+  echo "Get names of publication places (correlation list)"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_CORRELATION_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeoTextCorrelation"
 
   echo "Get names of organization addresses"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_ORG_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$orgGeoText"
@@ -1158,8 +1167,12 @@ function extractGeoInformation {
   python $SCRIPT_POSTPROCESS_LOCATIONS -i "$outputFileGeoText" -o "$combinedGeoText"
 
   echo ""
+  echo "Combine geo text labels from integrated data with geo text labels from the correlation list ..."
+  python -m $MODULE_STACK_CSV_FILES -o "$combinedGeoTextMerged" -c "manifestationID" -c "placeOfPublication" -c "countryOfPublication" "$combinedGeoText" "$outputFileGeoTextCorrelation"
+
+  echo ""
   echo "Derive missing country names from place names - KBR targetPlace ..."
-  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $combinedGeoText -o $combinedGeoTextEnriched \
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $combinedGeoTextMerged -o $combinedGeoTextEnriched \
     -g geonames/ -c "countryOfPublication" -p "placeOfPublication"
 
   echo ""
@@ -3152,9 +3165,9 @@ function extractTranslationCorrelationList {
 
   extractSeparatedColumn $correlationList $correlationListAuthors "targetIdentifier" "authorIdentifiers" "id" "authorIdentifier"
   extractSeparatedColumn $correlationList $correlationListTranslators "targetIdentifier" "translatorIdentifiers" "id" "translatorIdentifier"
-  extractSeparatedColumn $correlationList $correlationListTargetPublishers "targetIdentifier" "targetPublisherIdentifiers" "id" "targerPublisherIdentifier"
+  extractSeparatedColumn $correlationList $correlationListTargetPublishers "targetIdentifier" "targetPublisherIdentifiers" "id" "targetPublisherIdentifier"
 
-  extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targerPlaceOfPublication"
+  extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targetPlaceOfPublication"
 
   
   python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListAuthors -o $authorIdentifierLinks -c "authorIdentifier"

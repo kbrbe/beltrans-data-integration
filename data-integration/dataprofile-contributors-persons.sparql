@@ -51,7 +51,7 @@ WHERE {
                     dcterms:identifier ?contributorID .
   }
 
-  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabel . } }
+  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:name ?contributorLabel . } }
 
   # NATIONALITY
   #
