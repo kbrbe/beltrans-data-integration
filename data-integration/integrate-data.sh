@@ -3170,9 +3170,9 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targetPlaceOfPublication"
 
   
-  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListAuthors -o $authorIdentifierLinks -c "authorIdentifier"
-  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTranslators -o $translatorIdentifierLinks -c "translatorIdentifier"
-  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTargetPublishers -o $targetPublisherIdentifierLinks -c "targetPublisherIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListAuthors -o $authorIdentifierLinks --id-column "id" -c "authorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTranslators -o $translatorIdentifierLinks --id-column "id" -c "translatorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTargetPublishers -o $targetPublisherIdentifierLinks --id-column "id" -c "targetPublisherIdentifier"
 
   # 2023-12-15: we currently have LEXICON codes instead the name of genres
   # if there will be names again, the extra step below to lookup codes is important
