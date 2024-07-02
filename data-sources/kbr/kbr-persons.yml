@@ -40,6 +40,7 @@ mappings:
     po:
       - [a, schema:Person]
       - [dcterms:identifier, $(authorityID)]
+      - [schema:name, $(name)]
       - [rdfs:label, $(name)]
       - [bf:identifiedBy, btid:identifier_kbr_$(authorityID)~iri]
       - p: a
