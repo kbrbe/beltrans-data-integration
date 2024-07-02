@@ -115,7 +115,8 @@ def createCSVPerColumn(outputFilename, baseQueryResultFilename, config, queryLog
         outputRow = row
         if rowID in lookup:
           numberAddedValue += 1
-          outputRow[queryName] = config['valueSeparator'].join(lookup[rowID])
+          # there can be double values due to multiple language tags, merge duplicates
+          outputRow[queryName] = config['valueSeparator'].join(list(set(lookup[rowID])))
         else:
           numberAddedEmpty += 1
           outputRow[queryName] = ""

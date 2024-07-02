@@ -66,7 +66,7 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
   #
   # add organizational contributors such as publishers
   #
-  orgContributors = elem.findall('./marc:datafield[@tag="710"]', ALL_NS)
+  orgContributors = elem.xpath('./marc:datafield[@tag="110" or @tag="710"]', namespaces=ALL_NS)
   for o in orgContributors:
     uncertainty = 'no'
     c = OrganizationalContributor.fromTuple(getContributorData(o))
