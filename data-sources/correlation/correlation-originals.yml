@@ -49,10 +49,16 @@ mappings:
       - [a, schema:CreativeWork]
       - [dcterms:identifier, original_$(targetIdentifier)]
       - [schema:workTranslation, btid:$(targetIdentifier)~iri]
-      - [schema:name, $(sourceTitle)]
       - [rdfs:comment, "Created from correlation list"]
       - [rdfs:label, "BELTRANS original $(targetIdentifier)"]
       - [bf:title, btid:title_original_$(targetIdentifier)~iri]
+      - p: schema:name
+        o: $(sourceTitle)
+        condition:
+          function: idlab-fn:equal
+          parameters:
+            - [grel:valueParameter, $(sourceKBRIdentifier)]
+            - [grel:valueParameter2, ""] 
       - p: schema:datePublished
         o: $(sourceYearOfPublication)
         condition:

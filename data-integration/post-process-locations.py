@@ -32,7 +32,7 @@ def main():
 
     # In the output we only want a single column for the following values
     # thus first remove the respective columns from different data sources
-    placeHeadersToRemove = ['placeOfPublicationKBR', 'placeOfPublicationBnF', 'placeOfPublicationKB', 'placeOfPublicationUnesco']
+    placeHeadersToRemove = ['placeOfPublicationCorrelation', 'placeOfPublicationKBR', 'placeOfPublicationBnF', 'placeOfPublicationKB', 'placeOfPublicationUnesco']
     countryHeadersToRemove = ['countryOfPublicationKBR', 'countryOfPublicationBnF', 'countryOfPublicationKB', 'countryOfPublicationUnesco']
 
 
@@ -51,7 +51,7 @@ def main():
     outputWriter.writeheader()
 
     # used to parse certain columns based on their name, e.g. authorBirthDateKBR and authorBirthDateISNI
-    sources = ['KBR', 'BnF', 'KB', 'Unesco']
+    sources = ['Correlation', 'KBR', 'BnF', 'KB', 'Unesco']
     mismatchLog = {}
 
     # write relevant data to output

@@ -66,6 +66,7 @@ SCRIPT_PARSE_UNESCO_HTML="../data-sources/unesco/parse-content.py"
 MODULE_EXTRACT_UNIQUE_UNESCO_CONTRIBUTORS="tools.csv.count_unique_values"
 MODULE_GROUP_BY="tools.csv.group_by"
 MODULE_EXTRACT_STRING_FROM_COLUMN="tools.csv.extract_string_from_column"
+MODULE_STACK_CSV_FILES="tools.csv.stack_csv_files"
 
 SCRIPT_QUERY_DATAPROFILE="execute_dataprofile_query.py"
 
@@ -94,11 +95,10 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 # INPUT FILENAMES
 #
 
-INPUT_EXISTING_CLUSTER_KEYS="corpus-versions/2023-12-07/integration/clustering/descriptive-keys-no-uri.csv"
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-04-26.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-04-26.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-06-25.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-06-25.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -109,16 +109,16 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-04-26.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-04-26.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-04-26.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-04-26.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-06-25.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-06-25.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-06-25.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-06-25.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-04-26.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-06-25.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -166,10 +166,10 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-04-23_person_contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2024-04-23_org_contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-04-23_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-04-23_translations_removal-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-06-12_person_contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2024-06-12_org_contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-06-12_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-06-12_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -305,6 +305,7 @@ DATA_PROFILE_SOURCE_STATS_QUERY_FILE="source-stats.sparql"
 DATA_PROFILE_CONTRIBUTIONS_QUERY_FILE="sparql-queries/get-contributions.sparql"
 
 GET_GEO_TEXT_INFO_QUERY_FILE="sparql-queries/get-text-location-info-per-data-source.sparql"
+GET_GEO_TEXT_INFO_CORRELATION_QUERY_FILE="sparql-queries/get-text-location-info-from-correlation.sparql"
 GET_GEO_TEXT_INFO_ORG_QUERY_FILE="sparql-queries/get-text-location-info-org-addresses.sparql"
 GET_GEO_DATA_QUERY_FILE="sparql-queries/get-manifestations-geo-data.sparql"
 
@@ -353,15 +354,19 @@ SUFFIX_DATA_PROFILE_KBCODE="kbcode-hierarchy"
 SUFFIX_DATA_PROFILE_CONTRIBUTIONS="manifestation-contributions.csv"
 
 SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS="cluster-assignments-from-correlation-list.csv"
+SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEY_COMPONENTS="cluster-descriptive-key-components-from-correlation-list.csv"
+SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEYS="cluster-descriptive-keys-from-correlation-list.csv"
 
 SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_TARGET="place-of-publications-geonames-target.csv"
 SUFFIX_PLACE_OF_PUBLICATION_GEONAMES_SOURCE="place-of-publications-geonames-source.csv"
 SUFFIX_UNKNOWN_GEONAMES_MAPPING="missing-geonames-mapping.csv"
 
 SUFFIX_GEO_TEXT="geo-text-information.csv"
+SUFFIX_GEO_TEXT_CORRELATION="geo-text-correlation-information.csv"
 SUFFIX_GEO_TEXT_ORG="geo-text-information-org.csv"
 SUFFIX_GEO_TEXT_ORG_ENRICHED="geo-text-information-org-enriched.csv"
 SUFFIX_GEO_TEXT_COMBINED="geo-text-information-combined.csv"
+SUFFIX_GEO_TEXT_COMBINED_MERGED="geo-text-information-combined-merged-with-correlation.csv"
 SUFFIX_GEO_TEXT_COMBINED_ENRICHED="geo-text-information-combined-enriched.csv"
 SUFFIX_GEO_DATA="geo-data.csv"
 SUFFIX_GEO_DATA_ORG="geo-data-org.csv"
@@ -588,6 +593,16 @@ SUFFIX_CORRELATION_TRL_SOURCE_LANG="correlation-trl-source-lang.csv"
 SUFFIX_CORRELATION_TRL_TARGET_LANG="correlation-trl-target-lang.csv"
 SUFFIX_CORRELATION_TRL_TARGET_BB_NAMES="correlation-trl-target-bb-names.csv"
 SUFFIX_CORRELATION_TRL_TARGET_BB_CODES="correlation-trl-target-bb-codes.csv"
+
+SUFFIX_CORRELATION_TRL_AUTHORS="correlation-trl-authors.csv"
+SUFFIX_CORRELATION_TRL_TRANSLATORS="correlation-trl-translators.csv"
+SUFFIX_CORRELATION_TRL_TARGET_PUBLISHERS="correlation-trl-target-publishers.csv"
+
+SUFFIX_CORRELATION_TRL_LINK_AUTHORS="correlation-trl-author-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS="correlation-trl-translator-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS="correlation-trl-target-publisher-links.csv"
+  
+SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE="correlation-trl-target-place-links.csv"
 
 SUFFIX_CORRELATION_ORIG_ISBN10="correlation-orig-isbn10.csv"
 SUFFIX_CORRELATION_ORIG_ISBN13="correlation-orig-isbn13.csv"
@@ -991,15 +1006,11 @@ function integrate {
   # 
   echo ""
   echo "Automatically integrate manifestations ..."
-  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
-  #  --create-queries $createManifestationsQueries --update-queries $updateManifestationsQueries --number-updates 2 --query-log-dir $queryLogDir
   time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
     --config $manifestationIntegrationConfig --query-log-dir $queryLogDir
 
   echo ""
   echo "Automatically integrate contributors ..."
-  #python $SCRIPT_INTERLINK_DATA -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
-  #  --create-queries $createContributorsQueries --update-queries $updateContributorsQueries --number-updates 3 --query-log-dir $queryLogDir
   time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
     --config $contributorIntegrationConfigPersons --query-log-dir $queryLogDir
 
@@ -1036,11 +1047,16 @@ function integrate {
 
   echo ""
   echo "Perform Clustering ..."
-  # 2023-12-15: this works, but EXISTING_CLUSTER_KEYS is element->key and not cluster->id
-  #existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
-  #python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
-  #clustering "$integrationName" "$existingClusterAssignments" "$INPUT_EXISTING_CLUSTER_KEYS"
-  clustering "$integrationName"
+  existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
+  correlationListDescriptiveKeyComponents="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEY_COMPONENTS"
+  correlationListDescriptiveKeys="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEYS"
+
+  python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
+
+  # 2024-06-28: do not reuse existing keys https://github.com/kbrbe/work-set-clustering/issues/9
+  clustering "$integrationName" "$existingClusterAssignments"
+  # alternative without reusing existing clusters
+  # clustering "$integrationName"
 
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
@@ -1124,9 +1140,11 @@ function extractGeoInformation {
   mkdir -p "$integrationName/geo"
   local unknownGeonamesMapping="$SUFFIX_UNKNOWN_GEONAMES_MAPPING"
   local outputFileGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT"
+  local outputFileGeoTextCorrelation="$integrationName/geo/$SUFFIX_GEO_TEXT_CORRELATION"
   local orgGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_ORG"
   local orgGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_ORG_ENRICHED"
   local combinedGeoText="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED"
+  local combinedGeoTextMerged="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED_MERGED"
   local combinedGeoTextEnriched="$integrationName/geo/$SUFFIX_GEO_TEXT_COMBINED_ENRICHED"
   local geoData="$integrationName/geo/$SUFFIX_GEO_DATA"
   local geoDataOrg="$integrationName/geo/$SUFFIX_GEO_DATA_ORG"
@@ -1135,8 +1153,11 @@ function extractGeoInformation {
   echo "Enrich geo information and create RDF descriptions of it"
   echo ""
 
-  echo "Get names of publication places"
+  echo "Get names of publication places (integrated data)"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeoText"
+
+  echo "Get names of publication places (correlation list)"
+  queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_CORRELATION_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeoTextCorrelation"
 
   echo "Get names of organization addresses"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_ORG_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$orgGeoText"
@@ -1146,8 +1167,12 @@ function extractGeoInformation {
   python $SCRIPT_POSTPROCESS_LOCATIONS -i "$outputFileGeoText" -o "$combinedGeoText"
 
   echo ""
+  echo "Combine geo text labels from integrated data with geo text labels from the correlation list ..."
+  python -m $MODULE_STACK_CSV_FILES -o "$combinedGeoTextMerged" -c "manifestationID" -c "placeOfPublication" -c "countryOfPublication" "$combinedGeoText" "$outputFileGeoTextCorrelation"
+
+  echo ""
   echo "Derive missing country names from place names - KBR targetPlace ..."
-  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $combinedGeoText -o $combinedGeoTextEnriched \
+  time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $combinedGeoTextMerged -o $combinedGeoTextEnriched \
     -g geonames/ -c "countryOfPublication" -p "placeOfPublication"
 
   echo ""
@@ -1448,7 +1473,7 @@ function clustering {
   local existingClusters=$2
   local existingClusterKeys=$3
 
-  if [ -z $existingClusters ] || [ -z $existingClusterKeys ];
+  if [ -z $existingClusters ] ;
   then
     
     # perform the clustering from scratch
@@ -1470,7 +1495,8 @@ function clustering {
       --id-column "elementID" \
       --key-column "descriptiveKey" \
       --existing-clusters "$existingClusters" \
-      --existing-clusters-keys "$existingClusterKeys"
+      # 2024-06-28: do not reuse existing keys https://github.com/kbrbe/work-set-clustering/issues/9
+      #--existing-clusters-keys "$existingClusterKeys"
 
   fi
 
@@ -3111,7 +3137,17 @@ function extractTranslationCorrelationList {
   local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
   local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
+
+  local correlationListAuthors="$folderName/$SUFFIX_CORRELATION_TRL_AUTHORS"
+  local correlationListTranslators="$folderName/$SUFFIX_CORRELATION_TRL_TRANSLATORS"
+  local correlationListTargetPublishers="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_PUBLISHERS"
+
+  local authorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_AUTHORS"
+  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS"
+  local targetPublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS"
   
+  local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
+
   echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
   cp $correlationList "$folderName"
   extractSeparatedColumn $correlationList $correlationListISBN10 "targetIdentifier" "targetISBN10" "id" "isbn10"
@@ -3126,7 +3162,17 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListOriginalISBN10 "targetIdentifier" "sourceISBN10" "id" "isbn10"
   extractSeparatedColumn $correlationList $correlationListOriginalISBN13 "targetIdentifier" "sourceISBN13" "id" "isbn13"
   extractSeparatedColumn $correlationList $correlationListOriginalKBRIDs "targetIdentifier" "sourceKBRIdentifier" "id" "KBR"
+
+  extractSeparatedColumn $correlationList $correlationListAuthors "targetIdentifier" "authorIdentifiers" "id" "authorIdentifier"
+  extractSeparatedColumn $correlationList $correlationListTranslators "targetIdentifier" "translatorIdentifiers" "id" "translatorIdentifier"
+  extractSeparatedColumn $correlationList $correlationListTargetPublishers "targetIdentifier" "targetPublisherIdentifiers" "id" "targetPublisherIdentifier"
+
+  extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targetPlaceOfPublication"
+
   
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListAuthors -o $authorIdentifierLinks --id-column "id" -c "authorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTranslators -o $translatorIdentifierLinks --id-column "id" -c "translatorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTargetPublishers -o $targetPublisherIdentifierLinks --id-column "id" -c "targetPublisherIdentifier"
 
   # 2023-12-15: we currently have LEXICON codes instead the name of genres
   # if there will be names again, the extra step below to lookup codes is important
@@ -3347,6 +3393,12 @@ function transformTranslationCorrelationList {
   local correlationListKBRSOURCEIDs="$folderName/$SUFFIX_CORRELATION_TRL_UNESCO"
   local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
+  local authorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_AUTHORS"
+  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS"
+  local targetPublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS"
+  
+  local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
+
   local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
   local correlationOriginalsTurtle="$integrationName/correlation/originals/rdf/$SUFFIX_CORRELATION_TRL_LD"
 
@@ -3364,6 +3416,13 @@ function transformTranslationCorrelationList {
   export RML_SOURCE_CORRELATION_ORIG_ISBN10="$correlationListOriginalISBN10"
   export RML_SOURCE_CORRELATION_ORIG_ISBN13="$correlationListOriginalISBN13"
   export RML_SOURCE_CORRELATION_ORIG_KBR="$correlationListOriginalKBRIDs"
+
+  export RML_SOURCE_CORRELATION_TRL_AUTHOR="$authorIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_TRANSLATOR="$translatorIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_TARGET_PUBLISHER="$targetPublisherIdentifierLinks"
+
+  export RML_SOURCE_CORRELATION_TRL_TARGET_PLACE="$targetPlaceLinks"
+  
  
   echo ""
   echo "Map translations correlation data"

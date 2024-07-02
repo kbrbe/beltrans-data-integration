@@ -32,6 +32,15 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
                      schema:isPartOf btid:beltransCorpus ;
                      dcterms:identifier ?manifestationID .
     }
+    
+    # Ignore publications from the correlation list (https://github.com/kbrbe/beltrans-data-integration/issues/260)
+    OPTIONAL {
+      graph <http://beltrans-manifestations> {
+        ?anyCorrelationActivity a btm:CorrelationActivity ;
+                                prov:generated ?manifestation .
+      }
+    }
+    FILTER(!BOUND(?anyCorrelationActivity))
 
     # KBR
     #

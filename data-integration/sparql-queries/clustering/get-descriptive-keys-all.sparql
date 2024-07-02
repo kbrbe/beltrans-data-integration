@@ -2,6 +2,7 @@ prefix schema: <http://schema.org/>
 prefix btid: <http://kbr.be/id/data/>
 prefix bf: <http://id.loc.gov/ontologies/bibframe/>
 prefix bibo: <http://purl.org/ontology/bibo/>
+prefix prov: <http://www.w3.org/ns/prov#>
 prefix marcrel: <http://id.loc.gov/vocabulary/relators/>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix btm: <http://kbr.be/ns/beltrans/model#>
@@ -16,6 +17,14 @@ WHERE {
        dcterms:identifier ?mID ;
        schema:name|bibo:isbn10|bibo:isbn13 ?keyPart1 .
   }
+
+  OPTIONAL {
+    graph <http://beltrans-manifestations> {
+      ?anyCorrelationActivity a btm:CorrelationActivity ;
+                              prov:generated ?m .
+    }
+  }
+  FILTER( !BOUND(?anyCorrelationActivity))
 
   # schema:name and ISBNs are in the original graph
   # therefore not specifying any graph and using the FROM clause
