@@ -67,7 +67,7 @@ mappings:
           parameters:
             - [grel:valueParameter, $(isImprintFrom)]
             - [grel:valueParameter2, ""] 
-      - p: rdfs:label
+      - p: schema:name
         o:
           - value: $(nameNL)
             language: nl
@@ -76,7 +76,7 @@ mappings:
           parameters:
             - [grel:valueParameter, $(nameNL)]
             - [grel:valueParameter2, ""] 
-      - p: rdfs:label
+      - p: schema:name
         o:
           - value: $(nameEN)
             language: en
@@ -85,7 +85,7 @@ mappings:
           parameters:
             - [grel:valueParameter, $(nameEN)]
             - [grel:valueParameter2, ""] 
-      - p: rdfs:label
+      - p: schema:name
         o:
           - value: $(nameFR)
             language: fr
