@@ -106,6 +106,60 @@ def countRowsWithMultipleValuesForColumn(df, column, delimiter=';'):
   return (myDf[column].str.contains(delimiter)).sum()
 
 # -----------------------------------------------------------------------------
+def countValuesUsedInDifferentRows(df, column, delimiter=';'):
+  """This function returns the number of values that occur in more than one row.
+
+  The identifier '1' and '2' are used in more than one row, so the answer should be 2
+  >>> data1 = pd.DataFrame([{'id': '1', 'value': '1;2'},{'id': '2', 'value': '2'},{'id': '3', 'value': '3'},{'id': '4', 'value': '1;4'}])
+  >>> countValuesUsedInDifferentRows(data1, 'value')
+  2
+  """
+
+  myDf = df.copy()
+  myDf[column] = myDf[column].str.split(delimiter)
+  explodedDf = myDf.explode(column).reset_index()
+
+  groups = explodedDf.groupby([column]).size().reset_index(name='count')
+  return groups[groups['count'] > 1].shape[0]
+
+# -----------------------------------------------------------------------------
+def createCorrelationListPersonMeasurements(correlationList, correlationListDate):
+
+  timestamp = datetime.now()
+
+  measurement = {
+    'date': correlationListDate,
+    'measurementTime': timestamp,
+    'numberEntries': len(correlationList.index),
+    'withGender': countRowsWithValueForColumn(correlationList, 'gender'),
+    'withBirthDate': countRowsWithValueForColumn(correlationList, 'birthDate'),
+    'withDeathDate': countRowsWithValueForColumn(correlationList, 'deathDate'),
+    'withKBRIdentifier': countRowsWithValueForColumn(correlationList, 'kbrIDs'),
+    'withBnFIdentifier': countRowsWithValueForColumn(correlationList, 'bnfIDs'),
+    'withNTAIdentifier': countRowsWithValueForColumn(correlationList, 'ntaIDs'),
+    'withUnescoIdentifier': countRowsWithValueForColumn(correlationList, 'unescoIDs'),
+    'withVIAFIdentifier': countRowsWithValueForColumn(correlationList, 'viafIDs'),
+    'withISNIIdentifier': countRowsWithValueForColumn(correlationList, 'isniIDs'),
+    'withWikidataIdentifier': countRowsWithValueForColumn(correlationList, 'wikidataIDs') if 'wikidataIDs' in correlationList else 0,
+    'withMultipleGender': countRowsWithMultipleValuesForColumn(correlationList, 'gender'),
+    'withMultipleKBR': countRowsWithMultipleValuesForColumn(correlationList, 'kbrIDs'),
+    'withMultipleBnF': countRowsWithMultipleValuesForColumn(correlationList, 'bnfIDs'),
+    'withMultipleNTA': countRowsWithMultipleValuesForColumn(correlationList, 'ntaIDs'),
+    'withMultipleUnesco': countRowsWithMultipleValuesForColumn(correlationList, 'unescoIDs'),
+    'withMultipleVIAF': countRowsWithMultipleValuesForColumn(correlationList, 'viafIDs'),
+    'withMultipleISNI': countRowsWithMultipleValuesForColumn(correlationList, 'isniIDs'),
+    'withMultipleWikidata': countRowsWithMultipleValuesForColumn(correlationList, 'wikidataIDs') if 'wikidataIDs' in correlationList else 0,
+    'duplicateKBR': countValuesUsedInDifferentRows(correlationList, 'kbrIDs'),
+    'duplicateBnF': countValuesUsedInDifferentRows(correlationList, 'bnfIDs'),
+    'duplicateNTA': countValuesUsedInDifferentRows(correlationList, 'ntaIDs'),
+    'duplicateUnesco': countValuesUsedInDifferentRows(correlationList, 'unescoIDs'),
+    'duplicateVIAF': countValuesUsedInDifferentRows(correlationList, 'viafIDs'),
+    'duplicateISNI': countValuesUsedInDifferentRows(correlationList, 'isniIDs'),
+    'duplicateWikidata': countValuesUsedInDifferentRows(correlationList, 'wikidataIDs') if 'wikidataIDs' in correlationList else 0,
+  }
+  return measurement
+
+# -----------------------------------------------------------------------------
 def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
   timestamp = datetime.now()
 
@@ -394,6 +448,18 @@ def redoContributorCorpusMeasurements(config, corpusDirectory, rawDataFilename, 
       createContributorCorpusMeasurements(contributors, corpusVersionDate, corpusVersionComment)
     ])
     measurements.to_csv(outputFile, index=False)
+
+# -----------------------------------------------------------------------------
+def redoCorrelationListPersonsMeasurements(config, correlationDir):
+
+  for correlationListVersion, filename in config.items():
+    filePath = os.path.join(correlationDir, filename)
+    outputFilename = f'./measurements/correlation/{filename}'
+    correlationList = pd.read_csv(filePath, index_col='contributorID', dtype=str)
+    measurements = pd.DataFrame([
+      createCorrelationListPersonMeasurements(correlationList, correlationListVersion)
+    ])
+    measurements.to_csv(outputFilename, index=False)
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
