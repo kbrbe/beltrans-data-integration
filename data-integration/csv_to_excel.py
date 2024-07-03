@@ -53,6 +53,9 @@ def main(output_file, sheet_names, csvFiles):
 
       rowCountReader, colCountReader, inputReader = itertools.tee(csv.reader(inFile, delimiter=','), 3)
 
+      # iterate over files to count the number of rows
+      # reset the file pointer afterwards
+      #
       rowCount = sum(1 for row in rowCountReader)
       header = next(colCountReader)
       colCount = len(header)
@@ -63,12 +66,10 @@ def main(output_file, sheet_names, csvFiles):
       sheet = wb.add_worksheet(sheet_names.pop(0))
 
       headerDict = [ {'header': e} for e in header]
-      table = sheet.add_table(0,0,rowCount,colCount-1, {'style': 'Table Style Light 11', 'header_row': True, 'columns': headerDict})
+      # table should have rowCount-1 rows instead of rowCount, probably because counting was done including header (https://github.com/kbrbe/beltrans-data-integration/issues/259)
+      table = sheet.add_table(0,0,rowCount-1,colCount-1, {'style': 'Table Style Light 11', 'header_row': True, 'columns': headerDict})
+
       for r, row in enumerate(inputReader):
-        #print(f'r {r} and row {row}')
-        #for c, val in enumerate(row):
-        #  sheet.write_row(r, c, row)
-        #sheet.write_row(r, 0, row)
         for c, col in enumerate(row):
           if col.isnumeric():
             # ISNI identifiers start with several zeros, those should not be removed
