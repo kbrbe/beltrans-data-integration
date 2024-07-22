@@ -3032,10 +3032,10 @@ function transformUnesco {
 }
 
 # -----------------------------------------------------------------------------
-function extractContributorCorrelationList {
+function extractContributorPersonCorrelationList {
   local integrationName=$1
 
-  folderName="$integrationName/correlation/contributors"
+  folderName="$integrationName/correlation/contributor-persons"
   mkdir -p "$folderName"
 
   local correlationList="$INPUT_CORRELATION_PERSON"
@@ -3438,7 +3438,12 @@ function transformTranslationCorrelationList {
   mapKBRBookInformationAndContributions "$integrationName/correlation" "translations/kbr" "mixed-lang"
 
   # those two functions already append the subfolder "kbr"
+  echo ""
+  echo "Map extracted person data linked to translations"
   mapKBRLinkedPersonAuthorities "$integrationName/correlation/translations" "kbr" "mixed-lang"
+
+  echo ""
+  echo "Map extracted organization data linked to translations"
   mapKBRLinkedOrgAuthorities "$integrationName/correlation/translations" "kbr" "mixed-lang"
 
   echo ""
@@ -3446,8 +3451,13 @@ function transformTranslationCorrelationList {
   mkdir -p "$integrationName/correlation/originals/kbr/rdf/mixed-lang"
   mapKBRBookInformationAndContributions "$integrationName/correlation" "originals/kbr" "mixed-lang"
 
+  echo ""
+  echo "Map extracted person data linked to originals"
   # those two functions already append the subfolder "kbr"
   mapKBRLinkedPersonAuthorities "$integrationName/correlation/originals" "kbr" "mixed-lang"
+
+  echo ""
+  echo "Map extracted organization data linked to originals"
   mapKBRLinkedOrgAuthorities "$integrationName/correlation/originals" "kbr" "mixed-lang"
 
 }
