@@ -119,9 +119,8 @@ mappings:
   #
   authorsKBRIdentifier:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates descriptions of authorities represented as schema WebPage."
+    description: "This mapping creates the KBR identifier as BIBFRAME identifier."
     sources:
-#      - access: "kbr/2021-10-25-clean-isni-data.csv"
       - access: *sourceKBRPersons
         referenceFormulation: csv
         delimiter: ','
