@@ -38,6 +38,7 @@ mappings:
       - [a, schema:Organization]
       - [dcterms:identifier, $(authorityID)]
       - [skos:prefLabel, $(prefLabel)]
+      - [bf:identifiedBy, btid:identifier_kbr_$(authorityID)~iri]
       - p: schema:name
         o: 
           value: $(name)
@@ -136,6 +137,21 @@ mappings:
           parameters:
             - [grel:valueParameter, $(country_code)]
             - [grel:string_sub, "BE"]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsKBRIdentifier:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates the KBR identifier as BIBFRAME identifier."
+    sources:
+      - access: *sourceKBROrgs
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:identifier_kbr_$(authorityID)
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "KBR"]
+      - [rdf:value, $(authorityID)]
 
 
 
