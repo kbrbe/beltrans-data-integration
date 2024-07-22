@@ -16,7 +16,6 @@ WHERE {
     #
     graph <http://beltrans-originals> {
       ?manifestation a schema:CreativeWork ;
-                     schema:name ?title ;
                      schema:sameAs ?localManifestation .
     } 
 
