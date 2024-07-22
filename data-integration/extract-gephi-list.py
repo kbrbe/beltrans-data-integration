@@ -7,9 +7,19 @@ from itertools import product # needed to create pairs of all sources with all t
 # -----------------------------------------------------------------------------
 def main():
 
-  # Please provide the name of the input file and output file
+  # Please provide the name of the input file and output files
   inputFile = 'corpus-versions/2024-06-28/corpus-data.xlsx'
   edgeListFilename = 'edge-list.csv'
+  nodeListFilename = 'node-list.csv'
+
+  # all beltrans genre prefixes "81|83|84|85|86|900|92|93|95|96|97"
+
+  # Select which genre filter should be used (comment the others with a leading #)
+  #genrePrefixes = "84|900|92|93|95|96|97" # history
+  #genrePrefixes = "85" # Comics
+  #genrePrefixes = "81" # Poetry
+  #genrePrefixes = "86" # juvenile literature
+  genrePrefixes = "83|84" # novels
 
   translationSheetName = 'translations'
   columns = ['sourcePublisherIdentifiers', 'targetPublisherIdentifiers']
@@ -60,12 +70,12 @@ def getIdentifiers(contributorString1, contributorString2):
   if sourceRegex:
     sourceIdentifier = sourceRegex.group(1)
   else:
-    raise Exception(f'wrongly formatted source contributor, could not extract identifier from "{source}", skipping row')
+    raise Exception(f'wrongly formatted source contributor, could not extract identifier from "{sourceRegex}", skipping row')
 
   if targetRegex:
     targetIdentifier = targetRegex.group(1)
   else:
-    raise Exception(f'wrongly formatted target contributor, could not extract identifier from "{source}", skipping row')
+    raise Exception(f'wrongly formatted target contributor, could not extract identifier from "{targetRegex}", skipping row')
    
   return sourceIdentifier, targetIdentifier
 
