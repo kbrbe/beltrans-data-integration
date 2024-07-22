@@ -40,6 +40,14 @@ mappings:
       - [skos:prefLabel, $(prefLabel)]
       - p: schema:name
         o: 
+          value: $(name)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(name)]
+            - [grel:valueParameter2, ""]
+      - p: schema:name
+        o: 
           value: $(nameEN)
           language: en
         condition:

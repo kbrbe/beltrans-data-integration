@@ -17,6 +17,7 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
 
 SELECT DISTINCT
   ?contributorID
+  (group_concat(distinct ?contributorLabel;SEPARATOR=';') AS ?name)
   (group_concat(distinct ?contributorLabelNL;SEPARATOR=';') AS ?nameNL)
   (group_concat(distinct ?contributorLabelFR;SEPARATOR=';') AS ?nameFR)
   (group_concat(distinct ?contributorLabelEN;SEPARATOR=';') AS ?nameEN)
@@ -41,17 +42,22 @@ WHERE {
   }
 
   OPTIONAL { 
-    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelNL . } 
+    graph <http://beltrans-contributors> { ?contributorURI schema:name ?contributorLabelNoLang . } 
+  	FILTER(lang(?contributorLabelNoLang) = "")
+  }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI schema:name ?contributorLabelNL . } 
   	FILTER(lang(?contributorLabelNL) = "nl")
   }
   OPTIONAL { 
-    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelFR . } 
+    graph <http://beltrans-contributors> { ?contributorURI schema:name ?contributorLabelFR . } 
     FILTER(lang(?contributorLabelFR) = "fr")
   }
   OPTIONAL { 
-    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelEN . } 
+    graph <http://beltrans-contributors> { ?contributorURI schema:name ?contributorLabelEN . } 
     FILTER(lang(?contributorLabelEN) = "en")       
   }
+  BIND(COALESCE(?contributorLabelNL, ?contributorLabelFR, ?contributorLabelEN, ?contributorLabelNoLang, "") AS ?contributorLabel)
 
 
 
