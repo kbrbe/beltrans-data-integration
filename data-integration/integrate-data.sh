@@ -9,6 +9,7 @@ SCRIPT_CLEAN_TRANSLATIONS="../data-sources/kbr/clean-marc-slim.py"
 SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
 SCRIPT_EXTRACT_AGENTS_ORGS="../data-sources/kbr/authority-orgs-marc-to-csv.py"
 SCRIPT_EXTRACT_AGENTS_PERSONS="../data-sources/kbr/authority-persons-marc-to-csv.py"
+SCRIPT_EXTRACT_AGENTS="../data-sources/kbr/authority-marc-to-csv.py"
 SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
 MODULE_NORMALIZE_HEADERS="tools.csv.replace-headers"
 SCRIPT_CHANGE_PUBLISHER_NAME="../data-sources/kbr/change-publisher-name.py"
@@ -2576,9 +2577,9 @@ function extractKBRPersons {
 
   echo ""
   echo "Extract person authorities - $language ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS \
+  python $SCRIPT_EXTRACT_AGENTS \
     -i $kbrPersons \
-    -o $kbrPersonsCSV \
+    -p $kbrPersonsCSV \
     -n $kbrPersonsNationalities \
     -l $kbrPersonsLanguages \
     --names-csv $kbrPersonsNames \
@@ -2598,7 +2599,7 @@ function extractKBRPersons {
     # we extracted more KBR identifiers and therefore have to update the list of already fetched contributors
     # the reason we do this in the extraction phase and not after fetching with getKBRAutRecords
     # is that we initially start with an export and do not necessarilly call the fetch function,
-    # but we still want that the initially extracted authorities are note fetched again
+    # but we still want that the initially extracted authorities are not fetched again
     echo ""
     echo "Append $numberExtractedPersons person identifiers to already fetched list (number including header)"
     appendValuesToCSV "$kbrPersonsCSV" "authorityID" "$alreadyFetchedContributors"
@@ -2624,7 +2625,7 @@ function extractKBROrgs {
   echo "Extract authorities $language - Organizations ..."
   if [ -f $kbrOrgs ];
   then
-    python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrOrgs -o $kbrOrgsCSV --identifier-csv $kbrOrgsISNIs
+    python $SCRIPT_EXTRACT_AGENTS -i $kbrOrgs -o $kbrOrgsCSV --identifier-csv $kbrOrgsISNIs
 
     if [ ! -z $alreadyFetchedContributors ];
     then
@@ -3031,10 +3032,10 @@ function transformUnesco {
 }
 
 # -----------------------------------------------------------------------------
-function extractContributorPersonCorrelationList {
+function extractContributorCorrelationList {
   local integrationName=$1
 
-  folderName="$integrationName/correlation/contributor-persons"
+  folderName="$integrationName/correlation/contributors"
   mkdir -p "$folderName"
 
   local correlationList="$INPUT_CORRELATION_PERSON"
@@ -3202,16 +3203,15 @@ function extractTranslationCorrelationList {
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations linked authorities data"
-  kbrTranslationsFetchedPersonsXML="$integrationName/correlation/translations/kbr/agents/fetched-apep.xml"
-  kbrTranslationsFetchedOrgsXML="$integrationName/correlation/translations/kbr/agents/fetched-aorg.xml"
+  kbrTranslationsFetchedAuthoritiesXML="$integrationName/correlation/translations/kbr/agents/fetched-authorities.xml"
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrTranslationsCSVContDedup="$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedPersonsXML"
-  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedOrgsXML"
+  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedAuthoritiesXML"
 
-  extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedOrgsXML" "mixed-lang"
+  echo extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
+  extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
 
 
   echo ""
