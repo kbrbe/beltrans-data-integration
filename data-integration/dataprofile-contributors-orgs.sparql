@@ -32,9 +32,12 @@ SELECT DISTINCT
   (group_concat(distinct ?isni;SEPARATOR=';') AS ?isniIDs)
   (group_concat(distinct ?viaf;SEPARATOR=';') AS ?viafIDs)
   (group_concat(distinct ?wikidata;SEPARATOR=';') AS ?wikidataIDs)
+FROM <http://beltrans-manifestations>
+FROM <http://beltrans-originals>
 WHERE {
 
-  graph <http://beltrans-manifestations> { ?manifestation schema:author|schema:translator|schema:publisher|marcrel:ill|marcrel:sce|marcrel:pbd ?contributorURI . }
+  # query manifestations and originals
+  ?manifestation schema:author|schema:translator|schema:publisher|marcrel:ill|marcrel:sce|marcrel:pbd ?contributorURI .
 
   graph <http://beltrans-contributors> {
     ?contributorURI a schema:Organization ;
