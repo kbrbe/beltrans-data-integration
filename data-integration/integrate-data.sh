@@ -3209,7 +3209,6 @@ function extractTranslationCorrelationList {
 
   getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedAuthoritiesXML"
 
-  echo extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
   extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
   extractKBROrgs "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
 
@@ -3226,16 +3225,14 @@ function extractTranslationCorrelationList {
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR originals linked authorities data"
-  kbrOriginalsFetchedPersonsXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-apep.xml"
-  kbrOriginalsFetchedOrgsXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-aorg.xml"
+  kbrOriginalsFetchedAuthoritiesXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-authorities.xml"
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrOriginalsCSVContDedup="$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedPersonsXML"
-  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedOrgsXML"
+  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedAuthoritiesXML"
 
-  extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+  extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedAuthoritiesXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedAuthoritiesXML" "mixed-lang"
  
 }
 
