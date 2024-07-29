@@ -701,6 +701,9 @@ function fetch {
   if [ "$dataSource" = "kbr" ];
   then
     fetchKBR $integrationFolderName
+  elif [ "$dataSource" = "kbr-aorg" ];
+  then
+    fetchKBRAuthorityData "TYPN='AORG'" "$integrationFolderName/aorg.xml"
   fi
 
 }
@@ -723,6 +726,9 @@ function extract {
   if [ "$dataSource" = "kbr" ];
   then
     extractKBR $integrationFolderName
+  elif [ "$dataSource" = "kbr-aorg" ];
+  then
+    extractKBROrgs "$integrationFolderName" "$integrationFolderName/aorg.xml" "aorg.csv" "aorg-identifiers.csv"
   elif [ "$dataSource" = "kbr-originals" ];
   then
     extractKBROriginals $integrationFolderName
@@ -1695,8 +1701,9 @@ function extractKBR {
   extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
   extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
 
-  extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_FR" "fr-nl" "$alreadyFetchedContributors"
-  extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_NL" "nl-fr" "$alreadyFetchedContributors"
+  # 2024-07-29: Provide full path as parameter instead of parts of the path
+  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
@@ -1731,11 +1738,12 @@ function extractKBR {
   extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
 
   echo ""
-  echo "Fetch KBR originals - persons"
+  echo "Fetch KBR originals - orgs"
   getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
+
   echo ""
   echo "Extract CSV data from fetched linked original authorities - orgs"
-  extractKBROrgs "$integrationName" "kbr" "$kbrOriginalsFetchedOrgsXML" "linked-originals" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName/kbr/agents/linked-originals" "$kbrOriginalsFetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
 
 }
 
@@ -2167,7 +2175,7 @@ function extractOriginalLinksKBR {
   getKBRAutRecords "$linkedContributors" "contributorID" "$fetchedOrgsXML"
 
   extractKBRPersons "$integrationName" "$dataSourceName" "$fetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName" "$dataSourceName" "$fetchedOrgsXML" "mixed-lang"
+  extractKBROrgs "$integrationName/$dataSourceName/agents/mixed-lang" "$fetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
 
 
 
@@ -2610,22 +2618,22 @@ function extractKBRPersons {
 # -----------------------------------------------------------------------------
 function extractKBROrgs {
 
-  local integrationName=$1
-  local dataSourceName=$2
-  local kbrOrgs=$3
-  local language=$4
+  local outputFilePath=$1
+  local inputFilePath=$2
+  local outputFilenameOrgs=$3
+  local outputFilenameIdentifiers=$4
   local alreadyFetchedContributors=$5
 
-  kbrOrgsCSV="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
-  kbrOrgsISNIs="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  kbrOrgsCSV="$outputFilePath/$outputFilenameOrgs"
+  kbrOrgsISNIs="$outputFilePath/$outputFilenameIdentifiers"
 
   source py-integration-env/bin/activate
 
   echo ""
-  echo "Extract authorities $language - Organizations ..."
-  if [ -f $kbrOrgs ];
+  echo "Extract authorities - Organizations ($outputFilePath) ..."
+  if [ -f $inputFilePath ];
   then
-    python $SCRIPT_EXTRACT_AGENTS -i $kbrOrgs -o $kbrOrgsCSV --identifier-csv $kbrOrgsISNIs
+    python $SCRIPT_EXTRACT_AGENTS -i $inputFilePath -o $kbrOrgsCSV --identifier-csv $kbrOrgsISNIs
 
     if [ ! -z $alreadyFetchedContributors ];
     then
@@ -3107,7 +3115,7 @@ function extractContributorOrgCorrelationList {
   kbrOriginalsFetchedOrgsXML="$folderName/kbr/fetched-aorg.xml"
 
   getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedOrgsXML"
-  extractKBROrgs "$folderName" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+  extractKBROrgs "$folderName/kbr/agents/mixed-lang" "$kbrOriginalsFetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
 
 }
 
@@ -3210,7 +3218,7 @@ function extractTranslationCorrelationList {
   getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedAuthoritiesXML"
 
   extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/translations/kbr/agents/mixed-lang" "$kbrTranslationsFetchedAuthoritiesXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
 
 
   echo ""
@@ -3232,7 +3240,7 @@ function extractTranslationCorrelationList {
   getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedAuthoritiesXML"
 
   extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedAuthoritiesXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedAuthoritiesXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/originals/kbr/agents/mixed-lang" "$kbrOriginalsFetchedAuthoritiesXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
  
 }
 

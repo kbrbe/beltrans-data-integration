@@ -65,10 +65,10 @@ def main():
     frenchNames = dict()
 
     for row in lookupReader:
-      authorityID = row['KBRID']
-      nolangName = utils.getNormalizedString(row['name-without-lang'])
-      dutchName = utils.getNormalizedString(row['name-dutch'])
-      frenchName = utils.getNormalizedString(row['name-french'])
+      authorityID = row['authorityID']
+      nolangName = utils.getNormalizedString(row['name'])
+      dutchName = utils.getNormalizedString(row['nameNL'])
+      frenchName = utils.getNormalizedString(row['nameFR'])
 
       addLookupRecord(authorityID, nolangName, nolangNames)
       addLookupRecord(authorityID, dutchName, dutchNames)
