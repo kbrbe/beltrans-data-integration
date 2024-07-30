@@ -280,6 +280,7 @@ CREATE_QUERY_BIBFRAME_TITLES="sparql-queries/create-bibframe-titles.sparql"
 CREATE_QUERY_SCHEMA_TITLES="sparql-queries/derive-single-title-from-bibframe-titles.sparql"
 
 ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
+ANNOTATE_QUERY_BELTRANS_GENRE="sparql-queries/annotate-beltrans-genre.sparql"
 ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP="sparql-queries/annotate-found-originals-contributor-overlap.sparql"
 
 CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
@@ -1063,6 +1064,10 @@ function integrate {
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
+
+  echo ""
+  echo "Annotate manifestations relevant for BELTRANS based on genre ..."
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
