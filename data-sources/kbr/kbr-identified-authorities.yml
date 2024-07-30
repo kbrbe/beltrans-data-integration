@@ -37,8 +37,10 @@ mappings:
     po:
       - [a, schema:Organization]
       - [skos:prefLabel, $(contributorName)]
+      - [schema:name, $(contributorName)]
       - [dcterms:identifier, $(contributorID)]
       - [prov:wasGeneratedBy, btid:authority_prov_$(contributorID)~iri]
+      - [bf:identifiedBy, btid:identifier_kbr_$(contributorID)~iri]
       - [foaf:isPrimaryTopicOf, btabout:authority_$(contributorID)~iri]
 
 
@@ -55,6 +57,22 @@ mappings:
     po:
       - [a, schema:WebPage]
       - [foaf:primaryTopic, btid:authority_$(contributorID)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  authorsKBRIdentifier:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates the KBR identifier as BIBFRAME identifier."
+    sources:
+      - access: *sourceKBRIdentifiedOrgs
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:identifier_kbr_$(contributorID)
+    po:
+      - [a, bf:Identifier]
+      - [rdfs:label, "KBR"]
+      - [rdf:value, $(contributorID)]
+
 
   # ---------------------------------------------------------------------------
   #
