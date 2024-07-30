@@ -1054,15 +1054,10 @@ function integrate {
 
   echo ""
   echo "Perform Clustering ..."
-  existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
-  correlationListDescriptiveKeyComponents="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEY_COMPONENTS"
-  correlationListDescriptiveKeys="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEYS"
 
-  python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
-
-  # 2024-06-28: do not reuse existing keys https://github.com/kbrbe/work-set-clustering/issues/9
+  # 2024-06-28: do not reuse existing descriptive keys, only cluster assignments https://github.com/kbrbe/work-set-clustering/issues/9
   clustering "$integrationName" "$existingClusterAssignments"
-  # alternative without reusing existing clusters
+  # alternative without reusing existing clusters at all:
   # clustering "$integrationName"
 
   echo ""
@@ -1442,7 +1437,6 @@ function postprocess {
 function clustering {
   local integrationName=$1
   local existingClusters=$2
-  local existingClusterKeys=$3
 
   local outputDir="$integrationName/integration/clustering"
   local fileKeyComponents="$outputDir/key-components.csv"
@@ -1450,6 +1444,14 @@ function clustering {
   clusterInput="$outputDir/descriptive-keys.csv"
   clusters="$outputDir/found-clusters.csv"
   clustersTurtle="$outputDir/found-clusters.ttl"
+
+  if [ "$existingClusters" = true ];
+  then
+    # First get existing cluster assignments from the correlation list
+    existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
+    echo python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
+    python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
+  fi
 
   #keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys.sparql"
   keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys-all.sparql"
@@ -1477,10 +1479,8 @@ function clustering {
     --column "keyPart1" \
     --column "keyPart2"
 
-  local existingClusters=$2
-  local existingClusterKeys=$3
 
-  if [ -z $existingClusters ] ;
+  if [ -z $existingClusterAssignments ] ;
   then
     
     # perform the clustering from scratch
@@ -1501,8 +1501,8 @@ function clustering {
       -o $clusters \
       --id-column "elementID" \
       --key-column "descriptiveKey" \
-      --existing-clusters "$existingClusters" \
-      # 2024-06-28: do not reuse existing keys https://github.com/kbrbe/work-set-clustering/issues/9
+      --existing-clusters "$existingClusterAssignments" \
+      # 2024-06-28: do not reuse existing descriptive keys https://github.com/kbrbe/work-set-clustering/issues/9
       #--existing-clusters-keys "$existingClusterKeys"
 
   fi
@@ -3835,6 +3835,8 @@ function loadKBRLinkedOrgAuthorities {
   # upload newly identified authorities to the linked authorities named graph
   echo ""
   echo "Load org authorities - $language ..."
+  echo python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrOrgs"
+
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
     "$kbrOrgs"
 
@@ -4600,7 +4602,7 @@ else
 
   elif [ "$1" = "c" ];
   then
-    clustering $3
+    clustering $3 true
 
   else
     echo "uknown command, please use different combinations of extract (e) transform (t) load (l) query (q) and postprocess (p): 'etl', 'etlq', 'etlqp', 'e', 'et', 't', 'l', 'tl', 'q' etc"
