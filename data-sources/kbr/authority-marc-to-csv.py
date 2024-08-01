@@ -330,7 +330,7 @@ def main():
 
           # Parse record based on its type (person or organization)
           authorityID = utils.getElementValue(elem.find('./marc:controlfield[@tag="001"]', ALL_NS))
-          authorityType = utils.getElementValue(elem.xpath('./marc:datafield[@tag="075"]/marc:subfield[@code="a"]', namespaces=ALL_NS))
+          authorityType = utils.getUniqueValue(utils.getElementValue(elem.xpath('./marc:datafield[@tag="075"]/marc:subfield[@code="a"]', namespaces=ALL_NS)))
 
           if authorityType == 'p':
             # TYPE PERSON
