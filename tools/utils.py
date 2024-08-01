@@ -1,6 +1,6 @@
 import time
 import lxml.etree as ET
-#import pandas as pd
+import pandas as pd
 import csv
 import os
 import re
@@ -217,7 +217,26 @@ def checkIfColumnsExist(inputColumnNames, outputColumnNames):
     Traceback (most recent call last):
         ...
     Exception: The following requested column is not in the input: {'d'}
+
+    If inputColumnNames is None throw an exception
+    >>> checkIfColumnsExist(None,['a','c'])
+    Traceback (most recent call last):
+        ...
+    Exception: "None" instead of list of input columns given!
+
+    If outputColumnNames is None, throw an exception
+    >>> checkIfColumnsExist(['a','c'], None)
+    Traceback (most recent call last):
+        ...
+    Exception: "None" instead of list of output columns given!
+
+
     """
+    if not inputColumnNames:
+      raise Exception(f'"None" instead of list of input columns given!')
+    if not outputColumnNames:
+      raise Exception(f'"None" instead of list of output columns given!')
+
     inputColumns = set(inputColumnNames)
     outputColumns = set(outputColumnNames)
     nonExistentColumns = outputColumns.difference(inputColumns)
