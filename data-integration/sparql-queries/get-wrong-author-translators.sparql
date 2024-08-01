@@ -61,6 +61,7 @@ WHERE {
   FILTER(lang(?genreLabel) = 'en')
   #FILTER(STRSTARTS(?genreLabel, "85"))
 
+
   #
   # Use the information from the data source graphs to verify that originally there was no translator
   #
@@ -68,9 +69,13 @@ WHERE {
          dcterms:identifier ?localID .
   OPTIONAL { ?local schema:author ?localAuthor ; dcterms:identifier ?localAuthorID . }
   OPTIONAL { ?local schema:translator ?localTranslator ; dcterms:identifier ?localTranslatorID . }
-  FILTER(BOUND(?localAuthor))
-  FILTER(!BOUND(?localTranslator))
+
+  # Filtering here simply removes part of the group, this is unwanted behavior
+  # use the HAVING clause on the whole group instead (see end of query)
+  #FILTER(BOUND(?localAuthor))
+  #FILTER(!BOUND(?localTranslator))
               
 }
 GROUP BY ?mID
+HAVING (?localTranslatorIDs = "")
 
