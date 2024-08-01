@@ -25,6 +25,10 @@
         {"targetProperty": ["schema:address", "schema:addressCountry"],
          "targetPropertyEntityUUID": "dcterms:identifier",
          "targetPropertyEntityType": "schema:PostalAddress",
+         "targetPropertyEntityPrefix": "address" },
+        {"targetProperty": ["schema:address", "schema:addressRegion"],
+         "targetPropertyEntityUUID": "dcterms:identifier",
+         "targetPropertyEntityType": "schema:PostalAddress",
          "targetPropertyEntityPrefix": "address" }
       ]
     },
