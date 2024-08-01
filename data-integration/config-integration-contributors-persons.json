@@ -24,6 +24,7 @@
         {"targetProperty": "schema:nationality"},
         {"targetProperty": "schema:gender"},
         {"targetProperty": "rdfs:label"},
+        {"targetProperty": "schema:knowsLanguage"},
         {"targetProperty": "schema:familyName"},
         {"targetProperty": "schema:givenName"}
       ]

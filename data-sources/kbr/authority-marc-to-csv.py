@@ -157,7 +157,7 @@ def addPersonAuthorityFieldsToCSV(elem, writer, natWriter, langWriter, nameWrite
   namePerson = utils.getElementValue(elem.find('./marc:datafield[@tag="100"]/marc:subfield[@code="a"]', ALL_NS))
   nameOrg = utils.getElementValue(elem.find('./marc:datafield[@tag="110"]/marc:subfield[@code="a"]', ALL_NS))
   nationalities = utils.getElementValue(elem.findall('./marc:datafield[@tag="370"]/marc:subfield[@code="c"]', ALL_NS))
-  languages = utils.getElementValue(elem.findall('./marc:datafield[@tag="377"]/subfield[@code="a"]', ALL_NS))
+  languages = utils.getElementValue(elem.findall('./marc:datafield[@tag="377"]/marc:subfield[@code="a"]', ALL_NS))
   gender = utils.getElementValue(elem.find('./marc:datafield[@tag="375"]/marc:subfield[@code="a"]', ALL_NS))
   birthDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="f"]', ALL_NS))
   deathDateRaw = utils.getElementValue(elem.find('./marc:datafield[@tag="046"]/marc:subfield[@code="g"]', ALL_NS))
