@@ -82,6 +82,7 @@ SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION="add_coordinates.py"
 MODULE_POSTPROCESS_SORT_COLUMN_VALUES="tools.csv.sort_values_in_columns"
 SCRIPT_POSTPROCESS_LOCATIONS="post-process-locations.py"
 SCRIPT_POSTPROCESS_DATES="post-process-dates.py"
+SCRIPT_POSTPROCESS_AUTHOR_TRANSLATOR="add_author_translator_count.py"
 
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
@@ -341,6 +342,7 @@ SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE="translations-per-country.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 SUFFIX_DATA_PROFILE_DTYPES="dataprofile-dtypes.csv"
 
+SUFFIX_DATA_PROFILE_FILE_AUTHOR_TRANSLATORS="integrated-data-author-translators.csv"
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
 SUFFIX_DATA_PROFILE_FILE_ALL="integrated-data-all-info.csv"
 SUFFIX_DATA_PROFILE_FILE_ENRICHED="integrated-data-enriched.csv"
@@ -1360,6 +1362,7 @@ function postprocess {
   local integrationName=$1
 
   integratedAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
+  integratedDataAuthorTranslators="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_AUTHOR_TRANSLATORS"
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
   integratedDataEnrichedSorted="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED_SORTED"
@@ -1403,36 +1406,50 @@ function postprocess {
   #time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
   #  -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonamesTarget
 
+  echo ""
   echo "Postprocess manifestation data ..."
   #time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedDataEnriched -c $manifestationContributions
   # 2024-06-25: other data analysis scripts need "integrated-data-enriched.csv"
   cp $integratedData $integratedDataEnriched
   
+  echo ""
   echo "Sort certain columns in the contributors CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $contributorsPersonsAllData -o $contributorsPersonsAllDataSorted \
        -c "nationalities" -c "gender" -c "languages"
 
+  echo ""
   echo "Postprocess contributor data - persons ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedData -o $contributorsPersons -t "persons"
 
+  echo ""
   echo "Postprocess contributor data - orgs ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedData -o $contributorsOrgs -t "orgs"
 
+  echo ""
   echo "Postprocess contributor data -persons (keep non-contributors)..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedData -o $allPersons --keep-non-contributors -t "persons"
 
+  echo ""
   echo "Postprocess contributor data - orgs (keep non-contributors)..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedData -o $allOrgs --keep-non-contributors -t "orgs"
 
+  echo ""
+  echo "Add information about author-translators to the manifestation CSV"
+  time python $SCRIPT_POSTPROCESS_AUTHOR_TRANSLATOR -c $allPersons -m $integratedData -o $integratedDataAuthorTranslators
+
+  echo ""
   echo "Sort delimited values in certain columns in the manifestation CSV"
-  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedData -o $integratedDataEnrichedSorted \
+  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataAuthorTranslators -o $integratedDataEnrichedSorted \
        -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication" -c "targetThesaurusBB" -c "sourceThesaurusBB" -c "sourcePlaceOfPublication" -c "sourceCountryOfPublication"
 
+
+  echo ""
   echo "Reorder columns for translation sheet"
   time python -m $MODULE_REORDER_COLUMNS -i "$integratedDataEnrichedSorted" -c "$DATAPROFILE_TRL_COL_ORDER" -o "$integratedDataOrderedColumns"
 
   oldestManifestations="$integrationName/csv/$SUFFIX_DATA_PROFILE_OLDEST_MANIFESTATIONS"
 
+  echo ""
   echo "Create Excel sheet for data ..."
   time python $SCRIPT_CSV_TO_EXCEL $integratedDataOrderedColumns $oldestManifestations $contributorsPersons $contributorsOrgs $outputFileGeo $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "clusters" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
 
