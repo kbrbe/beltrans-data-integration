@@ -77,11 +77,13 @@ def main():
     manifestationTranslatorCol = 'translatorIdentifiers'
     manifestationAuthoredByAT = 'authoredByAuthorTranslator'
     manifestationTranslatedByAT = 'translatedByAuthorTranslator'
+    manifestationAuthorNat = 'authorNationalities'
     manifestationTranslatorNat = 'translatorNationalities'
 
     # and then add the single columns we want
     headers.insert(13, manifestationAuthoredByAT)
     headers.insert(14, manifestationTranslatedByAT)
+    headers.insert(50, manifestationAuthorNat)
     headers.insert(50, manifestationTranslatorNat)
 
     outputWriter = csv.DictWriter(outFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, fieldnames=headers)
@@ -89,7 +91,7 @@ def main():
 
     authorTranslators = set()
 
-    translatorNationalities = {}
+    contributorNationalities = {}
 
     for row in contributorsReader:
 
@@ -102,7 +104,7 @@ def main():
       else:
         nationalities = [row['nationalities']]
 
-      translatorNationalities[row['name']] = nationalities
+      contributorNationalities[row['name']] = nationalities
 
       #
       # store information about the roles of the person contributor
@@ -116,7 +118,8 @@ def main():
        
       addColumn(row, manifestationAuthorCol, manifestationAuthoredByAT, True, False, authorTranslators, personDelimiter=';')
       addColumn(row, manifestationTranslatorCol, manifestationTranslatedByAT, True, False, authorTranslators, personDelimiter=';')
-      addColumn(row, manifestationTranslatorCol, manifestationTranslatorNat, '', '', translatorNationalities, personDelimiter=';')
+      addColumn(row, manifestationAuthorCol, manifestationAuthorNat, '', '', contributorNationalities, personDelimiter=';')
+      addColumn(row, manifestationTranslatorCol, manifestationTranslatorNat, '', '', contributorNationalities, personDelimiter=';')
       
       outputWriter.writerow(row)
       
