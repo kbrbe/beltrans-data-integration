@@ -36,6 +36,12 @@ Via the script `get-isni-stats.py` we can compute the statistics of the collecte
 python get-isni-stats.py --input-folder .
 ```
 
+Those statistics are saved in the subfolder `stats`. 
+
+Please note that previously the script only created text output for human consumption.
+The script `reformat-stats.py` is used to convert those statistics to CSV.
+Afterwards the script `visualize-isni-stats.py` is used to create a single Python Pandas dataframe and create one stats file and a graph pdf file.
+
 ## 2024-08-02
 unique unformatted ISNI numbers 47958
 ISNIAssigned

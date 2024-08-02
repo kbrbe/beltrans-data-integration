@@ -1,0 +1,52 @@
+ISNIAssigned
+	45813
+ISNINotAssigned
+	14751
+assignedConfidence
+	min 30.0, max 99.0, avg 54.571322550367796, amount 45911.0
+multipleAssociatedCountries
+	min 0.0, max 1.0, avg 0.7554387282513456, amount 39944.0
+multipleGenders
+	min 0.0, max 1.0, avg 0.09330329202653649, amount 39945.0
+multipleNationalities
+	min 0.0, max 1.0, avg 0.05382400801101515, amount 39944.0
+organisation
+	20610
+person-associated-BE
+	58054
+person-associated-DE
+	11969
+person-associated-FR
+	30313
+person-associated-NL
+	14407
+person-associated-US
+	6855
+person-gender-female
+	7883
+person-gender-male
+	29575
+person-gender-unknown
+	227
+person-nationality-BE
+	47775
+person-nationality-DE
+	1331
+person-nationality-FR
+	2171
+person-nationality-NL
+	2265
+person-nationality-be
+	4932
+person-nationality-belgië
+	42
+person-nationality-flemish
+	1
+person-nationality-fr
+	162
+personOrFiction
+	39954
+responseRecord
+	60564
+unformattedISNINumbers
+	45813
