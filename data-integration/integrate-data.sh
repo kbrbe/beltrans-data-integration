@@ -1426,7 +1426,7 @@ function postprocess {
 
   echo "Sort delimited values in certain columns in the manifestation CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedData -o $integratedDataEnrichedSorted \
-       -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication"
+       -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication" -c "targetThesaurusBB" -c "sourceThesaurusBB" -c "sourcePlaceOfPublication" -c "sourceCountryOfPublication"
 
   echo "Reorder columns for translation sheet"
   time python -m $MODULE_REORDER_COLUMNS -i "$integratedDataEnrichedSorted" -c "$DATAPROFILE_TRL_COL_ORDER" -o "$integratedDataOrderedColumns"
