@@ -1410,7 +1410,7 @@ function postprocess {
   
   echo "Sort certain columns in the contributors CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $contributorsPersonsAllData -o $contributorsPersonsAllDataSorted \
-       -c "nationalities" -c "gender"
+       -c "nationalities" -c "gender" -c "languages"
 
   echo "Postprocess contributor data - persons ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedData -o $contributorsPersons -t "persons"
