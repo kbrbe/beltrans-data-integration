@@ -17,6 +17,7 @@ PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
 
 SELECT DISTINCT
   ?contributorID
+  (group_concat(distinct ?contributorLabel;SEPARATOR=';') AS ?name)
   (group_concat(distinct ?contributorLabelNL;SEPARATOR=';') AS ?nameNL)
   (group_concat(distinct ?contributorLabelFR;SEPARATOR=';') AS ?nameFR)
   (group_concat(distinct ?contributorLabelEN;SEPARATOR=';') AS ?nameEN)
@@ -31,9 +32,12 @@ SELECT DISTINCT
   (group_concat(distinct ?isni;SEPARATOR=';') AS ?isniIDs)
   (group_concat(distinct ?viaf;SEPARATOR=';') AS ?viafIDs)
   (group_concat(distinct ?wikidata;SEPARATOR=';') AS ?wikidataIDs)
+FROM <http://beltrans-manifestations>
+FROM <http://beltrans-originals>
 WHERE {
 
-  graph <http://beltrans-manifestations> { ?manifestation schema:author|schema:translator|schema:publisher|marcrel:ill|marcrel:sce|marcrel:pbd ?contributorURI . }
+  # query manifestations and originals
+  ?manifestation schema:author|schema:translator|schema:publisher|marcrel:ill|marcrel:sce|marcrel:pbd ?contributorURI .
 
   graph <http://beltrans-contributors> {
     ?contributorURI a schema:Organization ;
@@ -41,23 +45,31 @@ WHERE {
   }
 
   OPTIONAL { 
-    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelNL . } 
+    graph <http://beltrans-contributors> { ?contributorURI schema:name ?contributorLabelNoLang . } 
+  	FILTER(lang(?contributorLabelNoLang) = "")
+  }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI schema:name ?contributorLabelNL . } 
   	FILTER(lang(?contributorLabelNL) = "nl")
   }
   OPTIONAL { 
-    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelFR . } 
+    graph <http://beltrans-contributors> { ?contributorURI schema:name ?contributorLabelFR . } 
     FILTER(lang(?contributorLabelFR) = "fr")
   }
   OPTIONAL { 
-    graph <http://beltrans-contributors> { ?contributorURI rdfs:label ?contributorLabelEN . } 
+    graph <http://beltrans-contributors> { ?contributorURI schema:name ?contributorLabelEN . } 
     FILTER(lang(?contributorLabelEN) = "en")       
   }
+  BIND(COALESCE(?contributorLabelNL, ?contributorLabelFR, ?contributorLabelEN, ?contributorLabelNoLang, "") AS ?contributorLabel)
 
 
 
   OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:isPartOf/dcterms:identifier ?imprintOwner . } }
 
-  OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:address/schema:addressRegion ?contributorRegion . } }
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI schema:address/schema:addressRegion ?contributorRegion . } 
+    FILTER(CONTAINS(STR(?contributorRegion), "-"))
+  }
   OPTIONAL { 
     graph <http://beltrans-contributors> { 
       ?contributorURI schema:address/schema:addressCountry ?contributorCountryURI . 

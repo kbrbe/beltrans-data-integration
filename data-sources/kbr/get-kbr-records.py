@@ -9,6 +9,9 @@ from tools.xml.KBRZ3950APIHandler import KBRZ3950APIHandler as kbrAPI
 import lxml.etree as ET
 from tqdm import tqdm
 
+NS_MARCSLIM = 'http://www.loc.gov/MARC21/slim'
+ALL_NS = {'marc': NS_MARCSLIM}
+
 # -----------------------------------------------------------------------------
 def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delimiter):
   """This script reads KBR identifiers from a specified column in a CSV file and requests their bibliographic KBR records from the Z3950 API."""
@@ -49,6 +52,7 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
 
   with open(outputFilename, 'wb') as outFile:
 
+    # the output collection will have the MARC namespace
     outFile.write(b'<collection xmlns="http://www.loc.gov/MARC21/slim">')
 
     # send API requests for batches of KBR identifiers
@@ -56,7 +60,11 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
     # this maximum is roughly 176 KBR identifiers per query
     #
     kbrIdentifiersList = list(kbrIdentifiers)
-    for i in tqdm(range(0, len(kbrIdentifiers), batchSize), position=0, desc='Batches'):
+    allUnknownIDs = set()
+    atLeastOneBatchUnknownIdentifiers = False
+    pbar = tqdm(range(0, len(kbrIdentifiers), batchSize), position=0, desc='Batches')
+    for i in pbar:
+      pbar.set_description(f'Processed records: {i}, from which unknown IDs: {len(allUnknownIDs)}')
       batch = kbrIdentifiersList[i:i+batchSize]
 
       # Create the query string, but only take KBR identifiers of valid length
@@ -66,15 +74,37 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
       apiHandler.query(query)
       numberOfResults = apiHandler.numberResults() # this should be equal to the number of items the batch
 
+      unknownIdentifiers = False
+      retrievedRecordIDs = set()
+
+      if numberOfResults < len(batch):
+        atLeastOneBatchUnknownIdentifiers = True
+        unknownIdentifiers = True
+
       # iterate over all records in that batch
       #
       # with the following line you can enable a second progress bar for records in a batch
       # however, this second progress bar usually is finished before initialized properly, so it might seem that nothing is happening
       # for record in tqdm(apiHandler.getRecords(), total=numberOfResults, position=1, leave=False, desc='Records in batch'):
       for record in apiHandler.getRecords():
+        if unknownIdentifiers:
+          # there is no namespace yet
+          recordID = utils.getElementValue(record.find('./controlfield[@tag="001"]', ALL_NS))
+          if recordID:
+            retrievedRecordIDs.add(recordID)
         outFile.write(ET.tostring(record))
 
+      if unknownIdentifiers:
+        unknownIDs = set(batch) - retrievedRecordIDs
+        allUnknownIDs.update(unknownIDs)
+        numberUnknownIdentifiers = len(unknownIDs)
+        #pbar.set_description(f'Processed records: {i}, from which unknown IDs: {len(allUnknownIDs)}')
+        #print(f'{numberUnknownIdentifiers} unknown identifiers in batch {i}. Unknown identifiers: {unknownIDs}')
+
     outFile.write(b'</collection>')
+
+    if atLeastOneBatchUnknownIdentifiers:
+      print(f'{len(allUnknownIDs)} unknown identifiers in total. Unknown identifiers: {allUnknownIDs}')
 
 def parseArguments():
 

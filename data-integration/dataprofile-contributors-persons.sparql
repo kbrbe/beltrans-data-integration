@@ -26,6 +26,8 @@ SELECT DISTINCT
   (group_concat(distinct ?otherIdentityIdentifier;SEPARATOR=';') as ?realNameOf)
   (group_concat(distinct ?nationalityLabel;SEPARATOR=';') AS ?nationalities)
   (group_concat(distinct ?nationality;SEPARATOR=';') AS ?nationalityCountryCodes)
+  (group_concat(distinct ?languageLabel;SEPARATOR=';') AS ?languages)
+  (group_concat(distinct ?language;SEPARATOR=';') AS ?languagesCodes)
   (group_concat(distinct ?genderLabel;SEPARATOR=';') AS ?gender)
   (group_concat(distinct ?kbrBirthDate;SEPARATOR=';') AS ?birthDateKBR)
   (group_concat(distinct ?bnfBirthDate;SEPARATOR=';') AS ?birthDateBnF)
@@ -60,6 +62,16 @@ WHERE {
     graph <http://master-data> { ?nationality mads:authoritativeLabel ?nationalityLabel . }
     FILTER (lang(?nationalityLabel) = 'en')
   }
+
+  # LANGUAGE
+  #
+  OPTIONAL {
+    graph <http://beltrans-contributors> { ?contributorURI schema:knowsLanguage ?language . } 
+    graph <http://master-data> { ?language mads:authoritativeLabel ?languageLabel . }
+    FILTER (lang(?languageLabel) = 'en')
+  }
+
+
 
   #
   # GENDER

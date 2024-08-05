@@ -16,7 +16,6 @@ import utils
 import stdnum
 
 NS_MARCSLIM = 'http://www.loc.gov/MARC21/slim'
-
 ALL_NS = {'marc': NS_MARCSLIM}
 
 # -----------------------------------------------------------------------------

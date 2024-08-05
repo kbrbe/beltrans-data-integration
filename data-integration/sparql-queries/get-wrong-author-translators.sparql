@@ -1,0 +1,81 @@
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix schema: <http://schema.org/>
+prefix btid: <http://kbr.be/id/data/>
+prefix bibo: <http://purl.org/ontology/bibo/>
+prefix btm: <http://kbr.be/ns/beltrans/model#>
+prefix prov: <http://www.w3.org/ns/prov#>
+
+SELECT DISTINCT
+  ?mID
+  (group_concat(DISTINCT ?title;SEPARATOR=";") AS ?titles)
+  (group_concat(DISTINCT ?isbn;SEPARATOR=";") AS ?isbn)
+  (group_concat(DISTINCT ?autLabel;SEPARATOR=";") AS ?authors)
+  (group_concat(DISTINCT ?translatorLabel;SEPARATOR=";") AS ?translators)
+  (group_concat(DISTINCT ?genreLabel;SEPARATOR=";") AS ?genres)
+  (group_concat(DISTINCT ?localID;SEPARATOR=";") AS ?localIDs)
+  (group_concat(DISTINCT ?unescoID;SEPARATOR=";") AS ?unescoIDs)
+  (group_concat(DISTINCT ?localAuthorID;SEPARATOR=";") AS ?localAuthorIDs)
+  (group_concat(DISTINCT ?localTranslatorID;SEPARATOR=";") AS ?localTranslatorIDs)
+FROM <http://kbr-syracuse>
+FROM <http://kb-publications>
+FROM <http://bnf-publications>
+FROM <http://unesco>
+FROM <http://kbr-linked-authorities>
+FROM <http://kb-linked-authorities>
+FROM <http://bnf-contributors>
+FROM <http://unesco-linked-authorities>
+WHERE {
+
+  graph <http://beltrans-manifestations> {
+
+    ?m a schema:CreativeWork ;
+         dcterms:identifier ?mID ;
+         schema:name ?title ;
+         schema:isPartOf btid:beltransCorpus ;
+         schema:isPartOf btid:beltransGenre ;
+         schema:about ?genre ;
+         schema:author ?aut ;
+         schema:translator ?translator ;
+         schema:sameAs ?local .
+
+    ?activity a btm:CorrelationActivity ;
+              prov:generated ?m .
+
+  }
+
+  OPTIONAL { graph <http://beltrans-manifestations> { ?m bibo:isbn13 ?isbn . } }
+         
+  #
+  # We are interested in translations for which the integrated data has the same author and translator
+  #
+  graph <http://beltrans-contributors> { ?aut schema:name ?autLabel . } 
+  graph <http://beltrans-contributors> { ?translator schema:name ?translatorLabel . } 
+  FILTER(?aut = ?translator)
+
+  #
+  # Use this statement to filter for genres, 85 is Comics
+  # Uncomment FILTER statement for no genre filter
+  #
+  graph <http://master-data> { ?genre skos:prefLabel ?genreLabel . } 
+  FILTER(lang(?genreLabel) = 'en')
+  #FILTER(STRSTARTS(?genreLabel, "85"))
+
+
+  #
+  # Use the information from the data source graphs to verify that originally there was no translator
+  #
+  ?local a schema:CreativeWork ; 
+         dcterms:identifier ?localID .
+  OPTIONAL { ?local schema:author ?localAuthor ; dcterms:identifier ?localAuthorID . }
+  OPTIONAL { ?local schema:translator ?localTranslator ; dcterms:identifier ?localTranslatorID . }
+
+  # Filtering here simply removes part of the group, this is unwanted behavior
+  # use the HAVING clause on the whole group instead (see end of query)
+  #FILTER(BOUND(?localAuthor))
+  #FILTER(!BOUND(?localTranslator))
+              
+}
+GROUP BY ?mID
+HAVING (?localTranslatorIDs = "")
+

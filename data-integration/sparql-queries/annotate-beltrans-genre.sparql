@@ -1,0 +1,32 @@
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix schema: <http://schema.org/>
+prefix btid: <http://kbr.be/id/data/>
+
+INSERT {
+  graph <http://beltrans-manifestations> { ?m schema:isPartOf btid:beltransGenre . }
+}
+WHERE {
+ 
+  graph <http://beltrans-manifestations> {
+    ?m a schema:CreativeWork ;
+       schema:about ?bbGenre .
+  }
+        
+  graph <http://master-data> { ?bbGenre skos:prefLabel ?bbGenreLabelEN . }
+  FILTER(lang(?bbGenreLabelEN) = 'en')
+        
+  FILTER(
+    STRSTARTS(STR(?bbGenreLabelEN), "81") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "83") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "84") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "85") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "86") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "900") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "92") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "93") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "95") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "96") ||
+    STRSTARTS(STR(?bbGenreLabelEN), "97") 
+    
+  )
+}

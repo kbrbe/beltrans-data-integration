@@ -1,5 +1,6 @@
 from datetime import datetime
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
+import lxml.etree as ET
 import unicodedata as ud
 import enchant
 import re
@@ -13,7 +14,7 @@ def getListOfIdentifiers(authorityID, rawString, identifierName, stats):
   >>> getListOfIdentifiers('1', '0000000000000001', 'ISNI', {})
   ['0000000000000001']
   >>> getListOfIdentifiers('1', '0000000000000001;0000 0000 0000 0002', 'ISNI', {})
-  ['0000000000000001','0000000000000002']
+  ['0000000000000001', '0000000000000002']
   >>> getListOfIdentifiers('1', '1234', 'VIAF', {})
   ['1234']
   """
@@ -849,6 +850,34 @@ def getNormalizedISBN13(inputISBN):
       raise
   else:
     return ''
+
+# -----------------------------------------------------------------------------
+def getUniqueValue(value, sep=';'):
+  """Returns the unique values of a possibly value-separated list, see https://github.com/kbrbe/beltrans-data-integration/issues/276
+
+  It returns p if only p values were given
+  >>> getUniqueValue('p')
+  'p'
+  >>> getUniqueValue('p;p')
+  'p'
+
+  It returns an empty string if an empty string was given
+  >>> getUniqueValue('')
+  ''
+
+  It returns a sep-separated string with the unique values
+  >>> getUniqueValue('p;c;p;p')
+  'c;p'
+  """
+
+  if value == '':
+    return ''
+  else:
+    if sep in value:
+      types = set(value.split(sep))
+      return sep.join(sorted(types))
+    else:
+      return value
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ SCRIPT_CLEAN_TRANSLATIONS="../data-sources/kbr/clean-marc-slim.py"
 SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
 SCRIPT_EXTRACT_AGENTS_ORGS="../data-sources/kbr/authority-orgs-marc-to-csv.py"
 SCRIPT_EXTRACT_AGENTS_PERSONS="../data-sources/kbr/authority-persons-marc-to-csv.py"
+SCRIPT_EXTRACT_AGENTS="../data-sources/kbr/authority-marc-to-csv.py"
 SCRIPT_TRANSFORM_TRANSLATIONS="../data-sources/kbr/marc-to-csv.py"
 MODULE_NORMALIZE_HEADERS="tools.csv.replace-headers"
 SCRIPT_CHANGE_PUBLISHER_NAME="../data-sources/kbr/change-publisher-name.py"
@@ -81,6 +82,7 @@ SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION="add_coordinates.py"
 MODULE_POSTPROCESS_SORT_COLUMN_VALUES="tools.csv.sort_values_in_columns"
 SCRIPT_POSTPROCESS_LOCATIONS="post-process-locations.py"
 SCRIPT_POSTPROCESS_DATES="post-process-dates.py"
+SCRIPT_POSTPROCESS_AUTHOR_TRANSLATOR="add_author_translator_count.py"
 
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
@@ -279,6 +281,7 @@ CREATE_QUERY_BIBFRAME_TITLES="sparql-queries/create-bibframe-titles.sparql"
 CREATE_QUERY_SCHEMA_TITLES="sparql-queries/derive-single-title-from-bibframe-titles.sparql"
 
 ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
+ANNOTATE_QUERY_BELTRANS_GENRE="sparql-queries/annotate-beltrans-genre.sparql"
 ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP="sparql-queries/annotate-found-originals-contributor-overlap.sparql"
 
 CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
@@ -339,6 +342,7 @@ SUFFIX_DATA_PROFILE_PUBS_PER_COUNTRY_FILE="translations-per-country.csv"
 SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 SUFFIX_DATA_PROFILE_DTYPES="dataprofile-dtypes.csv"
 
+SUFFIX_DATA_PROFILE_FILE_AUTHOR_TRANSLATORS="integrated-data-author-translators.csv"
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
 SUFFIX_DATA_PROFILE_FILE_ALL="integrated-data-all-info.csv"
 SUFFIX_DATA_PROFILE_FILE_ENRICHED="integrated-data-enriched.csv"
@@ -700,6 +704,9 @@ function fetch {
   if [ "$dataSource" = "kbr" ];
   then
     fetchKBR $integrationFolderName
+  elif [ "$dataSource" = "kbr-aorg" ];
+  then
+    fetchKBRAuthorityData "TYPN='AORG'" "$integrationFolderName/aorg.xml"
   fi
 
 }
@@ -722,6 +729,9 @@ function extract {
   if [ "$dataSource" = "kbr" ];
   then
     extractKBR $integrationFolderName
+  elif [ "$dataSource" = "kbr-aorg" ];
+  then
+    extractKBROrgs "$integrationFolderName" "$integrationFolderName/aorg.xml" "aorg.csv" "aorg-identifiers.csv"
   elif [ "$dataSource" = "kbr-originals" ];
   then
     extractKBROriginals $integrationFolderName
@@ -1047,20 +1057,19 @@ function integrate {
 
   echo ""
   echo "Perform Clustering ..."
-  existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
-  correlationListDescriptiveKeyComponents="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEY_COMPONENTS"
-  correlationListDescriptiveKeys="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_DESCRIPTIVE_KEYS"
 
-  python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
-
-  # 2024-06-28: do not reuse existing keys https://github.com/kbrbe/work-set-clustering/issues/9
+  # 2024-06-28: do not reuse existing descriptive keys, only cluster assignments https://github.com/kbrbe/work-set-clustering/issues/9
   clustering "$integrationName" "$existingClusterAssignments"
-  # alternative without reusing existing clusters
+  # alternative without reusing existing clusters at all:
   # clustering "$integrationName"
 
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
   python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
+
+  echo ""
+  echo "Annotate manifestations relevant for BELTRANS based on genre ..."
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
@@ -1353,6 +1362,7 @@ function postprocess {
   local integrationName=$1
 
   integratedAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
+  integratedDataAuthorTranslators="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_AUTHOR_TRANSLATORS"
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
   integratedDataEnrichedSorted="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED_SORTED"
@@ -1396,36 +1406,50 @@ function postprocess {
   #time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
   #  -i $integratedDataEnriched -m $unknownGeonamesMapping -g geonames/ -p targetPlaceOfPublication -o $placeOfPublicationsGeonamesTarget
 
+  echo ""
   echo "Postprocess manifestation data ..."
   #time python $SCRIPT_POSTPROCESS_AGG_QUERY_RESULT -i $integratedAllData -o $integratedDataEnriched -c $manifestationContributions
   # 2024-06-25: other data analysis scripts need "integrated-data-enriched.csv"
   cp $integratedData $integratedDataEnriched
   
+  echo ""
   echo "Sort certain columns in the contributors CSV"
   time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $contributorsPersonsAllData -o $contributorsPersonsAllDataSorted \
-       -c "nationalities" -c "gender"
+       -c "nationalities" -c "gender" -c "languages"
 
+  echo ""
   echo "Postprocess contributor data - persons ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedData -o $contributorsPersons -t "persons"
 
+  echo ""
   echo "Postprocess contributor data - orgs ..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedData -o $contributorsOrgs -t "orgs"
 
+  echo ""
   echo "Postprocess contributor data -persons (keep non-contributors)..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsPersonsAllDataSorted -m $integratedData -o $allPersons --keep-non-contributors -t "persons"
 
+  echo ""
   echo "Postprocess contributor data - orgs (keep non-contributors)..."
   time python $SCRIPT_POSTPROCESS_QUERY_CONT_RESULT -c $contributorsOrgsAllData -m $integratedData -o $allOrgs --keep-non-contributors -t "orgs"
 
-  echo "Sort delimited values in certain columns in the manifestation CSV"
-  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedData -o $integratedDataEnrichedSorted \
-       -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication"
+  echo ""
+  echo "Add information about author-translators to the manifestation CSV"
+  time python $SCRIPT_POSTPROCESS_AUTHOR_TRANSLATOR -c $allPersons -m $integratedData -o $integratedDataAuthorTranslators
 
+  echo ""
+  echo "Sort delimited values in certain columns in the manifestation CSV"
+  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataAuthorTranslators -o $integratedDataEnrichedSorted \
+       -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication" -c "targetThesaurusBB" -c "sourceThesaurusBB" -c "sourcePlaceOfPublication" -c "sourceCountryOfPublication"
+
+
+  echo ""
   echo "Reorder columns for translation sheet"
   time python -m $MODULE_REORDER_COLUMNS -i "$integratedDataEnrichedSorted" -c "$DATAPROFILE_TRL_COL_ORDER" -o "$integratedDataOrderedColumns"
 
   oldestManifestations="$integrationName/csv/$SUFFIX_DATA_PROFILE_OLDEST_MANIFESTATIONS"
 
+  echo ""
   echo "Create Excel sheet for data ..."
   time python $SCRIPT_CSV_TO_EXCEL $integratedDataOrderedColumns $oldestManifestations $contributorsPersons $contributorsOrgs $outputFileGeo $allPersons $allOrgs $kbCodeHierarchy -s "translations" -s "clusters" -s "person contributors" -s "org contributors" -s "geonames" -s "all persons" -s "all orgs" -s "KBCode" -o $excelData
 
@@ -1435,7 +1459,6 @@ function postprocess {
 function clustering {
   local integrationName=$1
   local existingClusters=$2
-  local existingClusterKeys=$3
 
   local outputDir="$integrationName/integration/clustering"
   local fileKeyComponents="$outputDir/key-components.csv"
@@ -1443,6 +1466,14 @@ function clustering {
   clusterInput="$outputDir/descriptive-keys.csv"
   clusters="$outputDir/found-clusters.csv"
   clustersTurtle="$outputDir/found-clusters.ttl"
+
+  if [ "$existingClusters" = true ];
+  then
+    # First get existing cluster assignments from the correlation list
+    existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
+    echo python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
+    python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
+  fi
 
   #keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys.sparql"
   keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys-all.sparql"
@@ -1470,10 +1501,8 @@ function clustering {
     --column "keyPart1" \
     --column "keyPart2"
 
-  local existingClusters=$2
-  local existingClusterKeys=$3
 
-  if [ -z $existingClusters ] ;
+  if [ -z $existingClusterAssignments ] ;
   then
     
     # perform the clustering from scratch
@@ -1494,8 +1523,8 @@ function clustering {
       -o $clusters \
       --id-column "elementID" \
       --key-column "descriptiveKey" \
-      --existing-clusters "$existingClusters" \
-      # 2024-06-28: do not reuse existing keys https://github.com/kbrbe/work-set-clustering/issues/9
+      --existing-clusters "$existingClusterAssignments" \
+      # 2024-06-28: do not reuse existing descriptive keys https://github.com/kbrbe/work-set-clustering/issues/9
       #--existing-clusters-keys "$existingClusterKeys"
 
   fi
@@ -1694,8 +1723,9 @@ function extractKBR {
   extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
   extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
 
-  extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_FR" "fr-nl" "$alreadyFetchedContributors"
-  extractKBROrgs "$integrationName" "kbr" "$INPUT_KBR_LA_ORG_NL" "nl-fr" "$alreadyFetchedContributors"
+  # 2024-07-29: Provide full path as parameter instead of parts of the path
+  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
@@ -1730,11 +1760,12 @@ function extractKBR {
   extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
 
   echo ""
-  echo "Fetch KBR originals - persons"
+  echo "Fetch KBR originals - orgs"
   getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
+
   echo ""
   echo "Extract CSV data from fetched linked original authorities - orgs"
-  extractKBROrgs "$integrationName" "kbr" "$kbrOriginalsFetchedOrgsXML" "linked-originals" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName/kbr/agents/linked-originals" "$kbrOriginalsFetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
 
 }
 
@@ -2166,7 +2197,7 @@ function extractOriginalLinksKBR {
   getKBRAutRecords "$linkedContributors" "contributorID" "$fetchedOrgsXML"
 
   extractKBRPersons "$integrationName" "$dataSourceName" "$fetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName" "$dataSourceName" "$fetchedOrgsXML" "mixed-lang"
+  extractKBROrgs "$integrationName/$dataSourceName/agents/mixed-lang" "$fetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
 
 
 
@@ -2576,9 +2607,9 @@ function extractKBRPersons {
 
   echo ""
   echo "Extract person authorities - $language ..."
-  python $SCRIPT_EXTRACT_AGENTS_PERSONS \
+  python $SCRIPT_EXTRACT_AGENTS \
     -i $kbrPersons \
-    -o $kbrPersonsCSV \
+    -p $kbrPersonsCSV \
     -n $kbrPersonsNationalities \
     -l $kbrPersonsLanguages \
     --names-csv $kbrPersonsNames \
@@ -2598,7 +2629,7 @@ function extractKBRPersons {
     # we extracted more KBR identifiers and therefore have to update the list of already fetched contributors
     # the reason we do this in the extraction phase and not after fetching with getKBRAutRecords
     # is that we initially start with an export and do not necessarilly call the fetch function,
-    # but we still want that the initially extracted authorities are note fetched again
+    # but we still want that the initially extracted authorities are not fetched again
     echo ""
     echo "Append $numberExtractedPersons person identifiers to already fetched list (number including header)"
     appendValuesToCSV "$kbrPersonsCSV" "authorityID" "$alreadyFetchedContributors"
@@ -2609,22 +2640,22 @@ function extractKBRPersons {
 # -----------------------------------------------------------------------------
 function extractKBROrgs {
 
-  local integrationName=$1
-  local dataSourceName=$2
-  local kbrOrgs=$3
-  local language=$4
+  local outputFilePath=$1
+  local inputFilePath=$2
+  local outputFilenameOrgs=$3
+  local outputFilenameIdentifiers=$4
   local alreadyFetchedContributors=$5
 
-  kbrOrgsCSV="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_CLEANED"
-  kbrOrgsISNIs="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  kbrOrgsCSV="$outputFilePath/$outputFilenameOrgs"
+  kbrOrgsISNIs="$outputFilePath/$outputFilenameIdentifiers"
 
   source py-integration-env/bin/activate
 
   echo ""
-  echo "Extract authorities $language - Organizations ..."
-  if [ -f $kbrOrgs ];
+  echo "Extract authorities - Organizations ($outputFilePath) ..."
+  if [ -f $inputFilePath ];
   then
-    python $SCRIPT_EXTRACT_AGENTS_ORGS -i $kbrOrgs -o $kbrOrgsCSV --identifier-csv $kbrOrgsISNIs
+    python $SCRIPT_EXTRACT_AGENTS -i $inputFilePath -o $kbrOrgsCSV --identifier-csv $kbrOrgsISNIs
 
     if [ ! -z $alreadyFetchedContributors ];
     then
@@ -3106,7 +3137,7 @@ function extractContributorOrgCorrelationList {
   kbrOriginalsFetchedOrgsXML="$folderName/kbr/fetched-aorg.xml"
 
   getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedOrgsXML"
-  extractKBROrgs "$folderName" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+  extractKBROrgs "$folderName/kbr/agents/mixed-lang" "$kbrOriginalsFetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
 
 }
 
@@ -3202,16 +3233,14 @@ function extractTranslationCorrelationList {
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations linked authorities data"
-  kbrTranslationsFetchedPersonsXML="$integrationName/correlation/translations/kbr/agents/fetched-apep.xml"
-  kbrTranslationsFetchedOrgsXML="$integrationName/correlation/translations/kbr/agents/fetched-aorg.xml"
+  kbrTranslationsFetchedAuthoritiesXML="$integrationName/correlation/translations/kbr/agents/fetched-authorities.xml"
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrTranslationsCSVContDedup="$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedPersonsXML"
-  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedOrgsXML"
+  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedAuthoritiesXML"
 
-  extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedOrgsXML" "mixed-lang"
+  extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/translations/kbr/agents/mixed-lang" "$kbrTranslationsFetchedAuthoritiesXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
 
 
   echo ""
@@ -3226,16 +3255,14 @@ function extractTranslationCorrelationList {
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR originals linked authorities data"
-  kbrOriginalsFetchedPersonsXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-apep.xml"
-  kbrOriginalsFetchedOrgsXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-aorg.xml"
+  kbrOriginalsFetchedAuthoritiesXML="$integrationName/correlation/originals/kbr/agents/mixed-lang/fetched-authorities.xml"
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrOriginalsCSVContDedup="$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedPersonsXML"
-  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedOrgsXML"
+  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedAuthoritiesXML"
 
-  extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedOrgsXML" "mixed-lang"
+  extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedAuthoritiesXML" "mixed-lang"
+  extractKBROrgs "$integrationName/correlation/originals/kbr/agents/mixed-lang" "$kbrOriginalsFetchedAuthoritiesXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
  
 }
 
@@ -3438,7 +3465,12 @@ function transformTranslationCorrelationList {
   mapKBRBookInformationAndContributions "$integrationName/correlation" "translations/kbr" "mixed-lang"
 
   # those two functions already append the subfolder "kbr"
+  echo ""
+  echo "Map extracted person data linked to translations"
   mapKBRLinkedPersonAuthorities "$integrationName/correlation/translations" "kbr" "mixed-lang"
+
+  echo ""
+  echo "Map extracted organization data linked to translations"
   mapKBRLinkedOrgAuthorities "$integrationName/correlation/translations" "kbr" "mixed-lang"
 
   echo ""
@@ -3446,8 +3478,13 @@ function transformTranslationCorrelationList {
   mkdir -p "$integrationName/correlation/originals/kbr/rdf/mixed-lang"
   mapKBRBookInformationAndContributions "$integrationName/correlation" "originals/kbr" "mixed-lang"
 
+  echo ""
+  echo "Map extracted person data linked to originals"
   # those two functions already append the subfolder "kbr"
   mapKBRLinkedPersonAuthorities "$integrationName/correlation/originals" "kbr" "mixed-lang"
+
+  echo ""
+  echo "Map extracted organization data linked to originals"
   mapKBRLinkedOrgAuthorities "$integrationName/correlation/originals" "kbr" "mixed-lang"
 
 }
@@ -3820,6 +3857,8 @@ function loadKBRLinkedOrgAuthorities {
   # upload newly identified authorities to the linked authorities named graph
   echo ""
   echo "Load org authorities - $language ..."
+  echo python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrOrgs"
+
   python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
     "$kbrOrgs"
 
@@ -4585,7 +4624,7 @@ else
 
   elif [ "$1" = "c" ];
   then
-    clustering $3
+    clustering $3 true
 
   else
     echo "uknown command, please use different combinations of extract (e) transform (t) load (l) query (q) and postprocess (p): 'etl', 'etlq', 'etlqp', 'e', 'et', 't', 'l', 'tl', 'q' etc"
