@@ -1,0 +1,55 @@
+{
+  "datePatterns": ["%Y", "(%Y)", "[%Y]", "%Y-%m-%d", "%d/%m/%Y", "%Y%m%d"],
+  "recordTag": "ISNIAssigned",
+  "recordFilter": {
+    "expression": "./ISNIMetadata/identity/organisation",
+    "condition": "exists"
+  },
+  "recordIDExpression": "./isniUnformatted",
+  "recordIDColumnName": "autID",
+  "dataFields": [
+    {
+      "columnName": "dataConfidence",
+      "expression": "./dataConfidence",
+      "valueType": "text"
+    },
+    {
+      "columnName": "name",
+      "expression": "./ISNIMetadata/identity/organisation/organisationName/mainName",
+      "valueType": "text"
+    },
+    {
+      "columnName": "nameVariant",
+      "expression": "./ISNIMetadata/identity/organisation/organisationNameVariant/mainName",
+      "valueType": "text"
+    },
+    {
+      "columnName": "location",
+      "expression": "./ISNIMetadata/identity/organisation/additionalInformation/location",
+      "valueType": "json",
+      "subfields": [
+        {
+          "columnName": "countryCode",
+          "expression": "./countryCode",
+          "valueType": "text"
+        },
+        {
+          "columnName": "locode",
+          "expression": "./locode",
+          "valueType": "text"
+        },
+        {
+          "columnName": "regionOrState",
+          "expression": "./regionOrState",
+          "valueType": "text"
+        },
+        {
+          "columnName": "city",
+          "expression": "./city",
+          "valueType": "text"
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,40 @@
+{
+  "datePatterns": ["%Y", "(%Y)", "[%Y]", "%Y-%m-%d", "%d/%m/%Y", "%Y%m%d"],
+  "recordTag": "ISNIAssigned",
+  "recordFilter": {
+    "expression": "./ISNIMetadata/identity/personOrFiction",
+    "condition": "exists"
+  },
+  "recordIDExpression": "./isniUnformatted",
+  "recordIDColumnName": "autID",
+  "dataFields": [
+    {
+      "columnName": "nationality",
+      "expression": "./ISNIMetadata/identity/personOrFiction/additionalInformation/nationality",
+      "valueType": "text"
+    },
+    {
+      "columnName": "dataConfidence",
+      "expression": "./dataConfidence",
+      "valueType": "text"
+    },
+    {
+      "columnName": "names",
+      "expression": "./ISNIMetadata/identity/personOrFiction/personalName",
+      "valueType": "json",
+      "subfields": [
+        {
+          "columnName": "surname",
+          "expression": "./surname",
+          "valueType": "text"
+        },
+        {
+          "columnName": "forename",
+          "expression": "./forename",
+          "valueType": "text"
+        }
+      ]
+    }
+  ]
+}
+
