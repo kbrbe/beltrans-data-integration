@@ -99,8 +99,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-06-25.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-06-25.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-08-08.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-08-08.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -111,16 +111,16 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-06-25.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-06-25.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-06-25.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-06-25.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-08-08.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-08-08.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-08-08.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-08-08.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-06-25.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-08-08.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -707,6 +707,10 @@ function fetch {
   elif [ "$dataSource" = "kbr-aorg" ];
   then
     fetchKBRAuthorityData "TYPN='AORG'" "$integrationFolderName/aorg.xml"
+  elif [ "$dataSource" = "kbr-originals" ];
+  then
+    fetchKBRData "LAND='frans' AND TYPN=('LIVR','ACQU','KBRD','VUB2','PREC')" "$INPUT_KBR_TRL_ORIG_FR_NL"
+    fetchKBRData "LAND='nederlands' AND TYPN=('LIVR','ACQU','KBRD','VUB2','PREC')" "$INPUT_KBR_TRL_ORIG_NL_FR"
   fi
 
 }
@@ -1577,9 +1581,9 @@ function fetchKBR {
 function fetchKBRTranslations {
   local integrationName=$1
 
-  local queryFRNL="H041=('*fre*','*frm*','*fro*') AND LAND='*dut*' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
+  local queryFRNL="H041=('fre','frm','fro') AND LAND='nederlands*' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
 
-  local queryNLFR="H041=('*dut*','*dum*') AND LAND='*fre*' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
+  local queryNLFR="H041=('dut','dum') AND LAND='frans' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
 
   local date=`date +"%Y-%m-%d"`
   local dataFRNL="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
