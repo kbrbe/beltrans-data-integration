@@ -43,7 +43,8 @@ class KBRZ3950APIHandler:
           return None
 
         for i in range(startRecord, maxRecord, self._batchSize):
-            response = requests.get(self._queryURL + '&rows=' + str(self._batchSize) + '&start=' + str(i))
+            requestURL = self._queryURL + '&rows=' + str(self._batchSize) + '&start=' + str(i)
+            response = requests.get(requestURL)
             tree = ET.fromstring(response.content)
             records = tree.findall('./result/record')
             for record in records:
