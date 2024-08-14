@@ -26,6 +26,10 @@ adapterIdentifiers
 illustratorIdentifiers
 scenaristIdentifiers
 publishingDirectorIdentifiers
+authoredByAuthorTranslator
+translatedByAuthorTranslator
+authorNationalities
+translatorNationalities
 targetKBRResponsibilityStatement
 targetBnFResponsibilityStatement
 targetKBResponsibilityStatement
