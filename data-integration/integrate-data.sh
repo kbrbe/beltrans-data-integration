@@ -145,6 +145,7 @@ INPUT_KB_ORGS_DIR="../data-sources/kb/orgs"
 # MASTER DATA
 
 INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
+INPUT_MASTER_MARC_ISO_COUNTRY_MAPPING="../data-sources/master-data/country-code-mapping-iso-marc.csv"
 INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
 INPUT_MASTER_MARC_BOOK_FORMATS="../data-sources/master-data/book-formats.csv"
 INPUT_MASTER_COUNTRIES="../data-sources/master-data/countries.nt"
@@ -534,6 +535,7 @@ SUFFIX_BNF_ISBN10_HYPHEN_NT="bnf-fixed-isbn10.nt"
 # DATA SOURCE - MASTER DATA
 #
 SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
+SUFFIX_MASTER_MARC_ISO_COUNTRY_MAPPING="marc-iso-country-mapping.csv"
 SUFFIX_MASTER_BINDING_TYPES="binding-types.csv"
 SUFFIX_MASTER_BOOK_FORMATS="book-formats.csv"
 SUFFIX_MASTER_COUNTRIES="countries.nt"
@@ -2241,6 +2243,7 @@ function extractMasterData {
 
   echo "EXTRACTION - Nothing to extract from master data, copying files"
   cp "$INPUT_MASTER_MARC_ROLES" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
+  cp "$INPUT_MASTER_MARC_ISO_COUNTRY_MAPPING" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ISO_COUNTRY_MAPPING"
   cp "$INPUT_MASTER_MARC_BINDING_TYPES" "$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
   cp "$INPUT_MASTER_MARC_BOOK_FORMATS" "$integrationName/master-data/$SUFFIX_MASTER_BOOK_FORMATS"
   cp "$INPUT_MASTER_COUNTRIES" "$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
@@ -3031,6 +3034,7 @@ function mapMasterData {
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
   export RML_SOURCE_MASTER_MARC_ROLES="$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
+  export RML_SOURCE_MASTER_COUNTRY_CODE_MAPPING="$integrationName/master-data/$SUFFIX_MASTER_MARC_ISO_COUNTRY_MAPPING"
   export RML_SOURCE_MASTER_BINDING_TYPES="$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
   export RML_SOURCE_MASTER_BOOK_FORMATS="$integrationName/master-data/$SUFFIX_MASTER_BOOK_FORMATS"
   export RML_SOURCE_MASTER_THES_EN="$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
