@@ -102,8 +102,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-08-08.xml"
 INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-08-08.xml"
 
-INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
-INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
+INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
+INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
 
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
@@ -168,10 +168,10 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-06-12_person_contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2024-06-12_org_contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-06-12_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-06-12_translations_removal-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-08-06_person_contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2024-08-06_org_contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-08-06_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-08-06_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -3675,7 +3675,7 @@ function loadKBR {
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "nl-fr" "$linkedAuthoritiesNamedGraph"
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "linked-originals" "$linkedAuthoritiesNamedGraph"
 
-  loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
+  #loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
 }
 
 # -----------------------------------------------------------------------------
@@ -4209,6 +4209,8 @@ function fetchKBRData {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
+  echo ""
+  echo "Fetching KBR data and saving to '$outputFile'"
   python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950" -q "$query" -o "$outputFile" -b 500
 }
 
