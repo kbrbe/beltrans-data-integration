@@ -67,7 +67,17 @@ WHERE {
 
   OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:isPartOf/dcterms:identifier ?imprintOwner . } }
 
-  
+
+
+  # place info from geo named graph, because of multilingual city names
+  #
+  OPTIONAL { 
+    graph <http://beltrans-geo> { 
+      ?contributorURI schema:address/schema:addressLocality/rdfs:label ?contributorPlace . }
+  }
+
+
+
   
   # ISNI
   #
@@ -115,18 +125,15 @@ WHERE {
               dcterms:identifier ?kbrID .
     }
 
+
     #
-    # location info from KBR AORG
+    # some location info from KBR AORG graph
     #
     OPTIONAL { 
       graph <http://kbr-aorg> { ?kbrURI schema:address/schema:addressRegion ?contributorRegion . } 
       FILTER(CONTAINS(STR(?contributorRegion), "-"))
     }
-
-    OPTIONAL { 
-      graph <http://kbr-aorg> { ?kbrURI schema:address/schema:addressLocality ?contributorPlace . } 
-    }
-
+    
     OPTIONAL { 
       graph <http://kbr-aorg> { 
         ?kbrURI schema:address/schema:addressRegion ?contributorCountryISOCode . 
