@@ -192,6 +192,7 @@ TRIPLE_STORE_GRAPH_INT_REMOVAL="http://beltrans-removal"
 TRIPLE_STORE_GRAPH_INT_GEO="http://beltrans-geo"
 
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
+TRIPLE_STORE_GRAPH_KBR_AORG="http://kbr-aorg"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
 
@@ -818,6 +819,10 @@ function transform {
   elif [ "$dataSource" = "kbr-originals" ];
   then
     transformKBROriginals $integrationFolderName
+  elif [ "$dataSource" = "kbr-aorg" ];
+  then
+    mapKBROrgs "$integrationFolderName/aorg.csv" "$integrationFolderName/aorg.ttl"
+    mapKBRLinkedIdentifiers "$integrationFolderName/aorg-identifiers.csv" "$integrationFolderName/aorg-identifiers.ttl"
   elif [ "$dataSource" = "master-data" ];
   then
     transformMasterData $integrationFolderName
@@ -890,6 +895,11 @@ function load {
   elif [ "$dataSource" = "kbr-originals" ];
   then
     loadKBROriginals $integrationFolderName
+  elif [ "$dataSource" = "kbr-aorg" ];
+  then
+    local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+    python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_AORG" \
+    "$integrationFolderName/aorg.ttl" "$integrationFolderName/aorg-identifiers.ttl"
   elif [ "$dataSource" = "master-data" ];
   then
     loadMasterData $integrationFolderName
