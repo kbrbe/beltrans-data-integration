@@ -102,8 +102,11 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-08-26.xml"
 INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-08-26.xml"
 
-INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
-INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
+INPUT_KBR_TRL_ORIG="/data/beltrans/data-sources/kbr/kbr-originals"
+SUFFIX_KBR_TRL_ORIG_NL_FR="BELTRANS_NL-FR_NL-documents.xml"
+SUFFIX_KBR_TRL_ORIG_FR_NL="BELTRANS_FR-NL_FR-documents.xml"
+INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/$SUFFIX_KBR_TRL_ORIG_FR_NL"
+INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/$SUFFIX_KBR_TRL_ORIG_NL_FR"
 
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
@@ -712,8 +715,8 @@ function fetch {
     fetchKBRAuthorityData "TYPN='AORG'" "$integrationFolderName/aorg.xml"
   elif [ "$dataSource" = "kbr-originals" ];
   then
-    fetchKBRData "LAND='frans' AND TYPN=('LIVR','ACQU','KBRD','VUB2','PREC')" "$INPUT_KBR_TRL_ORIG_FR_NL"
-    fetchKBRData "LAND='nederlands' AND TYPN=('LIVR','ACQU','KBRD','VUB2','PREC')" "$INPUT_KBR_TRL_ORIG_NL_FR"
+    fetchKBRData "LAND='frans' AND TYPN=('LIVR','ACQU','KBRD','VUB2','PREC')" "$integrationFolderName/$SUFFIX_KBR_TRL_ORIG_FR_NL"
+    fetchKBRData "LAND='nederlands' AND TYPN=('LIVR','ACQU','KBRD','VUB2','PREC')" "$integrationFolderName/$SUFFIX_KBR_TRL_ORIG_NL_FR"
   fi
 
 }
@@ -741,7 +744,7 @@ function extract {
     extractKBROrgs "$integrationFolderName" "$integrationFolderName/aorg.xml" "aorg.csv" "aorg-identifiers.csv"
   elif [ "$dataSource" = "kbr-originals" ];
   then
-    extractKBROriginals $integrationFolderName
+    extractKBROriginals $INPUT_KBR_TRL_ORIG
   elif [ "$dataSource" = "master-data" ];
   then
     extractMasterData $integrationFolderName
@@ -762,7 +765,7 @@ function extract {
     extractWikidata $integrationFolderName
   elif [ "$dataSource" = "original-links-kbr" ];
   then
-    extractOriginalLinksKBR $integrationFolderName "original-links-kbr" "kbr" "kbr-originals"
+    extractOriginalLinksKBR $integrationFolderName "original-links-kbr" "kbr" "$INPUT_KBR_TRL_ORIG"
   elif [ "$dataSource" = "bnfisni" ];
   then
     extractNationalityFromBnFViaISNI $integrationFolderName
@@ -1788,21 +1791,21 @@ function extractKBR {
 # -----------------------------------------------------------------------------
 function extractKBROriginals {
 
-  local integrationName=$1
+  local originalsFolder=$1
 
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
-  local dataSourceName="kbr-originals"
 
   # create the folders to place the extracted translations and agents
-  mkdir -p $integrationName/$dataSourceName/book-data-and-contributions/fr-nl
-  mkdir -p $integrationName/$dataSourceName/book-data-and-contributions/nl-fr
-  mkdir -p $integrationName/$dataSourceName/agents/fr-nl
-  mkdir -p $integrationName/$dataSourceName/agents/nl-fr
+  mkdir -p $originalsFolder/book-data-and-contributions/fr-nl
+  mkdir -p $originalsFolder/book-data-and-contributions/nl-fr
+  mkdir -p $originalsFolder/agents/fr-nl
+  mkdir -p $originalsFolder/agents/nl-fr
 
   echo "EXTRACTION - Extract and clean KBR originals translations data"
-  extractKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$INPUT_KBR_TRL_ORIG_FR_NL" "fr-nl"
-  extractKBRTranslationsAndContributions "$integrationName" "$dataSourceName" "$INPUT_KBR_TRL_ORIG_NL_FR" "nl-fr"
+  # second parameter empty, because 'originalsFolder' is already the full path to the folder
+  extractKBRTranslationsAndContributions "$originalsFolder" "" "$INPUT_KBR_TRL_ORIG_FR_NL" "fr-nl"
+  extractKBRTranslationsAndContributions "$originalsFolder" "" "$INPUT_KBR_TRL_ORIG_NL_FR" "nl-fr"
 
 }
 
@@ -2143,7 +2146,7 @@ function extractOriginalLinksKBR {
 
   local similarityThreshold="0.9"
 
-  local kbrOriginalsNLFR="$integrationName/$originalsSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
+  local kbrOriginalsNLFR="$originalsSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
   local kbrTranslationsNLFR="$integrationName/$translationsSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
   local titleMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
   local titleDuplicatesMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
@@ -2151,7 +2154,7 @@ function extractOriginalLinksKBR {
   local similarityDuplicatesMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_NL_FR"
   local similarityMultipleMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR"
 
-  local kbrOriginalsFRNL="$integrationName/$originalsSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
+  local kbrOriginalsFRNL="$originalsSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   local kbrTranslationsFRNL="$integrationName/$translationsSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   local titleMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
   local titleDuplicatesMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
@@ -2354,15 +2357,13 @@ function transformKBROriginals {
 
   local integrationName=$1
 
-  local dataSourceName="kbr-originals"
-
   # create the folder to place the transformed data
-  mkdir -p $integrationName/$dataSourceName/rdf/fr-nl
-  mkdir -p $integrationName/$dataSourceName/rdf/nl-fr
+  mkdir -p $integrationName/rdf/fr-nl
+  mkdir -p $integrationName/rdf/nl-fr
 
   echo "TRANSFORMATION - Map KBR translation data to RDF"
-  mapKBRBookInformationAndContributions $integrationName "$dataSourceName" "fr-nl"
-  mapKBRBookInformationAndContributions $integrationName "$dataSourceName" "nl-fr"
+  mapKBRBookInformationAndContributions $integrationName "" "fr-nl"
+  mapKBRBookInformationAndContributions $integrationName "" "nl-fr"
 
 }
 
@@ -3696,7 +3697,6 @@ function loadKBR {
 function loadKBROriginals {
   local integrationName=$1
 
-  local dataSourceName="kbr-originals"
 
   local translationsNamedGraph="$TRIPLE_STORE_GRAPH_KBR_ORIG_MATCH_TRL"
   local linkedAuthoritiesNamedGraph="$TRIPLE_STORE_GRAPH_KBR_ORIG_MATCH_LA"
@@ -3712,8 +3712,8 @@ function loadKBROriginals {
   deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$linkedAuthoritiesNamedGraph"
 
   # only load book information, no translation-specific triples
-  loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "fr-nl"
-  loadKBRBookInformationAndContributions "$integrationName" "$dataSourceName" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "nl-fr"
+  loadKBRBookInformationAndContributions "$integrationName" "" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "fr-nl"
+  loadKBRBookInformationAndContributions "$integrationName" "" "$translationsNamedGraph" "$linkedAuthoritiesNamedGraph" "nl-fr"
 }
 
 # -----------------------------------------------------------------------------
