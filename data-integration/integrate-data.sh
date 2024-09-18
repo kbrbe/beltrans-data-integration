@@ -99,8 +99,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-08-08.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-08-08.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-08-26.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-08-26.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
@@ -111,16 +111,16 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-08-08.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-08-08.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-08-08.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-08-08.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-08-26.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-08-26.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-08-26.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-08-26.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-08-08.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-08-26.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -2162,7 +2162,7 @@ function extractOriginalLinksKBR {
   source ./py-integration-env/bin/activate
 
   echo ""
-  echo "EXTRACTION - find originals NL-FR"
+  echo "EXTRACTION - looking up originals NL-FR based on KBR translations export"
 
   time python $SCRIPT_FIND_ORIGINALS \
   --original-works $kbrOriginalsNLFR \
@@ -2176,7 +2176,7 @@ function extractOriginalLinksKBR {
   --output-file-similarity-multiple-matches $similarityMultipleMatchesNLFR
 
   echo ""
-  echo "EXTRACTION - find originals FR-NL"
+  echo "EXTRACTION - looking up originals FR-NL based on KBR translations export"
 
   time python $SCRIPT_FIND_ORIGINALS \
   --original-works $kbrOriginalsFRNL \
