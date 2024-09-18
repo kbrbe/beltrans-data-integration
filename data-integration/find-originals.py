@@ -30,7 +30,7 @@ def main(original_works, translations, similarityThreshold, output_file_clear_ma
     # count number of rows to show a progress bar with total
     with open(translations, newline='', encoding='utf-8') as csvFile:
       trlReader = csv.reader(csvFile)
-      numberOfTranslations = sum(1 for row in trlReader)
+      numberOfTranslations = sum(1 for row in trlReader) - 1
 
     print()
     print(f'Looking up {numberOfTranslations} from {translations} in {original_works}')
