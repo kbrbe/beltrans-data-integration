@@ -99,11 +99,11 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-06-25.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-06-25.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-08-26.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-08-26.xml"
 
-INPUT_KBR_TRL_ORIG_NL_FR="../data-sources/kbr/translations/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
-INPUT_KBR_TRL_ORIG_FR_NL="../data-sources/kbr/translations/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
+INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
+INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
 
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
@@ -111,16 +111,16 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-06-25.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-06-25.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-06-25.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-06-25.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-08-26.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-08-26.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-08-26.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-08-26.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-06-25.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-08-26.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -145,6 +145,7 @@ INPUT_KB_ORGS_DIR="../data-sources/kb/orgs"
 # MASTER DATA
 
 INPUT_MASTER_MARC_ROLES="../data-sources/master-data/marc-roles.csv"
+INPUT_MASTER_MARC_ISO_COUNTRY_MAPPING="../data-sources/master-data/country-code-mapping-iso-marc.csv"
 INPUT_MASTER_MARC_BINDING_TYPES="../data-sources/master-data/binding-types.csv"
 INPUT_MASTER_MARC_BOOK_FORMATS="../data-sources/master-data/book-formats.csv"
 INPUT_MASTER_COUNTRIES="../data-sources/master-data/countries.nt"
@@ -168,10 +169,10 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-06-12_person_contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2024-06-12_org_contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-06-12_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-06-12_translations_removal-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-08-06_person_contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2024-08-06_org_contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-08-06_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-08-06_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -192,6 +193,7 @@ TRIPLE_STORE_GRAPH_INT_REMOVAL="http://beltrans-removal"
 TRIPLE_STORE_GRAPH_INT_GEO="http://beltrans-geo"
 
 TRIPLE_STORE_GRAPH_KBR_TRL="http://kbr-syracuse"
+TRIPLE_STORE_GRAPH_KBR_AORG="http://kbr-aorg"
 TRIPLE_STORE_GRAPH_KBR_LA="http://kbr-linked-authorities"
 TRIPLE_STORE_GRAPH_KBR_BELGIANS="http://kbr-belgians"
 
@@ -533,6 +535,7 @@ SUFFIX_BNF_ISBN10_HYPHEN_NT="bnf-fixed-isbn10.nt"
 # DATA SOURCE - MASTER DATA
 #
 SUFFIX_MASTER_MARC_ROLES="marc-roles.csv"
+SUFFIX_MASTER_MARC_ISO_COUNTRY_MAPPING="marc-iso-country-mapping.csv"
 SUFFIX_MASTER_BINDING_TYPES="binding-types.csv"
 SUFFIX_MASTER_BOOK_FORMATS="book-formats.csv"
 SUFFIX_MASTER_COUNTRIES="countries.nt"
@@ -707,6 +710,10 @@ function fetch {
   elif [ "$dataSource" = "kbr-aorg" ];
   then
     fetchKBRAuthorityData "TYPN='AORG'" "$integrationFolderName/aorg.xml"
+  elif [ "$dataSource" = "kbr-originals" ];
+  then
+    fetchKBRData "LAND='frans' AND TYPN=('LIVR','ACQU','KBRD','VUB2','PREC')" "$INPUT_KBR_TRL_ORIG_FR_NL"
+    fetchKBRData "LAND='nederlands' AND TYPN=('LIVR','ACQU','KBRD','VUB2','PREC')" "$INPUT_KBR_TRL_ORIG_NL_FR"
   fi
 
 }
@@ -814,6 +821,10 @@ function transform {
   elif [ "$dataSource" = "kbr-originals" ];
   then
     transformKBROriginals $integrationFolderName
+  elif [ "$dataSource" = "kbr-aorg" ];
+  then
+    mapKBROrgs "$integrationFolderName/aorg.csv" "$integrationFolderName/aorg.ttl"
+    mapKBRLinkedIdentifiers "$integrationFolderName/aorg-identifiers.csv" "$integrationFolderName/aorg-identifiers.ttl"
   elif [ "$dataSource" = "master-data" ];
   then
     transformMasterData $integrationFolderName
@@ -886,6 +897,11 @@ function load {
   elif [ "$dataSource" = "kbr-originals" ];
   then
     loadKBROriginals $integrationFolderName
+  elif [ "$dataSource" = "kbr-aorg" ];
+  then
+    local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
+    python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_AORG" \
+    "$integrationFolderName/aorg.ttl" "$integrationFolderName/aorg-identifiers.ttl"
   elif [ "$dataSource" = "master-data" ];
   then
     loadMasterData $integrationFolderName
@@ -1577,9 +1593,9 @@ function fetchKBR {
 function fetchKBRTranslations {
   local integrationName=$1
 
-  local queryFRNL="H041=('*fre*','*frm*','*fro*') AND LAND='*dut*' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
+  local queryFRNL="H041=('fre','frm','fro') AND LAND='nederlands*' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
 
-  local queryNLFR="H041=('*dut*','*dum*') AND LAND='*fre*' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
+  local queryNLFR="H041=('dut','dum') AND LAND='frans' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
 
   local date=`date +"%Y-%m-%d"`
   local dataFRNL="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
@@ -2146,7 +2162,7 @@ function extractOriginalLinksKBR {
   source ./py-integration-env/bin/activate
 
   echo ""
-  echo "EXTRACTION - find originals NL-FR"
+  echo "EXTRACTION - looking up originals NL-FR based on KBR translations export"
 
   time python $SCRIPT_FIND_ORIGINALS \
   --original-works $kbrOriginalsNLFR \
@@ -2160,7 +2176,7 @@ function extractOriginalLinksKBR {
   --output-file-similarity-multiple-matches $similarityMultipleMatchesNLFR
 
   echo ""
-  echo "EXTRACTION - find originals FR-NL"
+  echo "EXTRACTION - looking up originals FR-NL based on KBR translations export"
 
   time python $SCRIPT_FIND_ORIGINALS \
   --original-works $kbrOriginalsFRNL \
@@ -2227,6 +2243,7 @@ function extractMasterData {
 
   echo "EXTRACTION - Nothing to extract from master data, copying files"
   cp "$INPUT_MASTER_MARC_ROLES" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
+  cp "$INPUT_MASTER_MARC_ISO_COUNTRY_MAPPING" "$integrationName/master-data/$SUFFIX_MASTER_MARC_ISO_COUNTRY_MAPPING"
   cp "$INPUT_MASTER_MARC_BINDING_TYPES" "$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
   cp "$INPUT_MASTER_MARC_BOOK_FORMATS" "$integrationName/master-data/$SUFFIX_MASTER_BOOK_FORMATS"
   cp "$INPUT_MASTER_COUNTRIES" "$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
@@ -3017,6 +3034,7 @@ function mapMasterData {
 
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
   export RML_SOURCE_MASTER_MARC_ROLES="$integrationName/master-data/$SUFFIX_MASTER_MARC_ROLES"
+  export RML_SOURCE_MASTER_COUNTRY_CODE_MAPPING="$integrationName/master-data/$SUFFIX_MASTER_MARC_ISO_COUNTRY_MAPPING"
   export RML_SOURCE_MASTER_BINDING_TYPES="$integrationName/master-data/$SUFFIX_MASTER_BINDING_TYPES"
   export RML_SOURCE_MASTER_BOOK_FORMATS="$integrationName/master-data/$SUFFIX_MASTER_BOOK_FORMATS"
   export RML_SOURCE_MASTER_THES_EN="$integrationName/master-data/$SUFFIX_MASTER_THES_EN"
@@ -3671,7 +3689,7 @@ function loadKBR {
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "nl-fr" "$linkedAuthoritiesNamedGraph"
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "linked-originals" "$linkedAuthoritiesNamedGraph"
 
-  loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
+  #loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
 }
 
 # -----------------------------------------------------------------------------
@@ -4205,6 +4223,8 @@ function fetchKBRData {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
+  echo ""
+  echo "Fetching KBR data and saving to '$outputFile'"
   python -m $MODULE_FETCH_KBR_DATA -u "$ENV_KBR_API_Z3950" -q "$query" -o "$outputFile" -b 500
 }
 

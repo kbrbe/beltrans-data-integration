@@ -64,9 +64,9 @@ mappings:
 
   # ---------------------------------------------------------------------------
   #
-  locationLinks:
+  placeLinks:
     creator: <https://sven-lieber.org/profile#me>
-    description: "This mapping creates links between organizations and their address entities."
+    description: "This mapping creates links between address entities and place names."
     sources:
       - access: *sourceGeo
         referenceFormulation: csv
@@ -78,5 +78,20 @@ mappings:
         - [grel:valueParameter, $(placeGeonamesIdentifier)]
         - [grel:valueParameter2, ""] 
     po:
+      - [a, schema:PostalAddress~iri]
       - [schema:addressLocality, btid:place_$(placeGeonamesIdentifier)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  orgLocationLinks:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates links between organizations and their addresses."
+    sources:
+      - access: *sourceGeo
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(beltransID)
+    po:
+      - [schema:address, btid:address_$(beltransID)~iri]
 

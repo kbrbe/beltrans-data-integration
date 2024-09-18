@@ -23,6 +23,7 @@ variables:
   marcRoles: &marcRoles ${RML_SOURCE_MASTER_MARC_ROLES}
   bindingTypes: &bindingTypes ${RML_SOURCE_MASTER_BINDING_TYPES}
   bookFormats: &bookFormats ${RML_SOURCE_MASTER_BOOK_FORMATS}
+  countryCodeMapping: &countryCodeMapping ${RML_SOURCE_MASTER_COUNTRY_CODE_MAPPING}
   thesaurusEN: &thesaurusEN ${RML_SOURCE_MASTER_THES_EN}
   thesaurusNL: &thesaurusNL ${RML_SOURCE_MASTER_THES_NL}
   thesaurusFR: &thesaurusFR ${RML_SOURCE_MASTER_THES_FR}
@@ -55,6 +56,20 @@ mappings:
     s: marcrel:$(code)
     po:
       - [rdfs:label, $(title), en~lang]
+
+  # ---------------------------------------------------------------------------
+  #
+  marcCountryMapping:
+    creator: <https://sven-lieber.org/profile#me>
+    description: "This mapping creates a mapping between MARC country codes and ISO country codes. The CSV is the result of a Wikidata query."
+    sources:
+      - access: *countryCodeMapping
+        referenceFormulation: csv
+        delimiter: ','
+    s: countries:$(marcCountryCode)
+    po:
+      - [btm:isoCode, $(isoCode)]
+
 
 
 

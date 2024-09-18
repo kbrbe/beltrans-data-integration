@@ -1,0 +1,19 @@
+SELECT ?countryLabel ?marcCountryCode ?isoCode
+WHERE {
+  
+  ?country wdt:P4801 ?marcCode .
+  
+  { ?country wdt:P297 ?isoCode . }
+  UNION
+  {
+    # For the netherlands entity the iso property is deprecated, still take it
+    ?country p:P297 ?isoCodeStatement .
+    ?isoCodeStatement ps:P297 ?isoCode ;
+                       pq:P8327 ?intendedSubject ;
+                       wikibase:rank wikibase:DeprecatedRank .
+  }
+  
+  BIND(STRAFTER(STR(?marcCode), "countries/") AS ?marcCountryCode)
+  FILTER(STRSTARTS(str(?marcCode), "countries"))
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
+}

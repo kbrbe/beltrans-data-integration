@@ -194,6 +194,7 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withBBThesaurusID': countRowsWithValueForColumn(corpus, 'targetThesaurusBB'),
     'withSourceBBThesaurusID': countRowsWithValueForColumn(corpus, 'sourceThesaurusBB') if 'sourceThesaurusBB' in corpus else 0,
     'withSourceKBRIdentifier': countRowsWithValueForColumn(corpus, 'sourceKBRIdentifier'),
+    'withMultipleSourceKBRIdentifiers': countRowsWithMultipleValuesForColumn(corpus, 'sourceKBRIdentifier'),
     'withSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitle') if 'sourceTitle' in corpus else 0,
     'withKBRSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKBR'),
     'withKBSourceTitle': countRowsWithValueForColumn(corpus, 'sourceTitleKB') if 'sourceTitleKB' in corpus else 0,

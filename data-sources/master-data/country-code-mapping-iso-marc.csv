@@ -1,0 +1,245 @@
+countryLabel,marcCountryCode,isoCode
+Canada,xxc,CA
+Norway,no,NO
+Hungary,hu,HU
+Belgium,be,BE
+Luxembourg,lu,LU
+Finland,fi,FI
+Switzerland,sz,CH
+Austria,au,AT
+Greece,gr,GR
+Turkey,tu,TR
+Portugal,po,PT
+Kenya,ke,KE
+France,fr,FR
+People's Republic of China,ch,CN
+Brazil,bl,BR
+Russia,ru,RU
+Germany,gw,DE
+Iceland,ic,IS
+Estonia,er,EE
+Slovenia,xv,SI
+Romania,rm,RO
+Bulgaria,bu,BG
+North Macedonia,xn,MK
+Albania,aa,AL
+Greenland,gl,GL
+Bosnia and Herzegovina,bn,BA
+Malta,mm,MT
+Monaco,mc,MC
+Montenegro,mo,ME
+Vatican City,vc,VA
+Indonesia,io,ID
+South Africa,sa,ZA
+Algeria,ae,DZ
+Chile,cl,CL
+Singapore,si,SG
+Bahrain,ba,BH
+North Korea,kn,KP
+New Zealand,nz,NZ
+Tonga,to,TO
+Solomon Islands,bp,SB
+Vanuatu,nn,VU
+Papua New Guinea,pp,PG
+Nauru,nu,NR
+Marshall Islands,xe,MH
+Kiribati,gb,KI
+Mongolia,mp,MN
+Venezuela,ve,VE
+Saint Vincent and the Grenadines,xm,VC
+Saint Lucia,xk,LC
+Grenada,gd,GD
+Dominica,dq,DM
+Spain,sp,ES
+Sweden,sw,SE
+Denmark,dk,DK
+Poland,pl,PL
+Lithuania,li,LT
+Mexico,mx,MX
+United Kingdom,xxk,GB
+Belarus,bw,BY
+Latvia,lv,LV
+Ukraine,un,UA
+Czech Republic,xr,CZ
+Slovakia,xo,SK
+Moldova,mv,MD
+Croatia,ci,HR
+Azerbaijan,aj,AZ
+Georgia,gs,GE
+San Marino,sm,SM
+Cuba,cu,CU
+Belize,bh,BZ
+Barbados,bb,BB
+Liechtenstein,lh,LI
+Armenia,ai,AM
+Serbia,rb,RS
+Argentina,ag,AR
+Peru,pe,PE
+Cambodia,cb,KH
+East Timor,em,TL
+India,ii,IN
+Tuvalu,tv,TV
+Palau,pw,PW
+Federated States of Micronesia,fm,FM
+Suriname,sr,SR
+Colombia,ck,CO
+Bolivia,bo,BO
+Trinidad and Tobago,tr,TT
+Saint Kitts and Nevis,xd,KN
+Guatemala,gt,GT
+The Bahamas,bf,BS
+Antigua and Barbuda,aq,AG
+Honduras,ho,HN
+Jersey,je,JE
+El Salvador,es,SV
+Iraq,iq,IQ
+Jordan,jo,JO
+Nicaragua,nq,NI
+Kyrgyzstan,kg,KG
+Malaysia,my,MY
+Myanmar,br,MM
+Pakistan,pk,PK
+Qatar,qa,QA
+Saudi Arabia,su,SA
+Vietnam,vm,VN
+Japan,ja,JP
+Republic of Ireland,ie,IE
+United States of America,xxu,US
+Italy,it,IT
+Uruguay,uy,UY
+Egypt,ua,EG
+Ethiopia,et,ET
+Ghana,gh,GH
+Andorra,an,AD
+Cyprus,cy,CY
+Kazakhstan,kz,KZ
+Uzbekistan,uz,UZ
+Australia,at,AU
+Chad,cd,TD
+Samoa,ws,WS
+Fiji,fj,FJ
+Paraguay,py,PY
+Guyana,gy,GY
+Ecuador,ec,EC
+Jamaica,jm,JM
+Dominican Republic,dr,DO
+Haiti,ht,HT
+Iran,ir,IR
+Yemen,ye,YE
+Kuwait,ku,KW
+Maldives,xc,MV
+Nepal,np,NP
+Oman,mk,OM
+Sri Lanka,ce,LK
+Turkmenistan,tk,TM
+Tanzania,tz,TZ
+Central African Republic,cx,CF
+Zimbabwe,rh,ZW
+Botswana,bs,BW
+Burkina Faso,uv,BF
+Republic of the Congo,cf,CG
+Djibouti,ft,DJ
+Eritrea,ea,ER
+Guinea,gv,GN
+Cameroon,cm,CM
+Madagascar,mg,MG
+Malawi,mw,MW
+Western Sahara,ss,EH
+Northern Mariana Islands,nw,MP
+German Democratic Republic,ge,DD
+Martinique,mq,MQ
+Sint Maarten,sn,SX
+New Caledonia,nl,NC
+Saint-Martin,st,MF
+Heard Island and McDonald Islands,hm,HM
+Afghanistan,af,AF
+Philippines,ph,PH
+Zambia,za,ZM
+Comoros,cq,KM
+Democratic Republic of the Congo,cg,CD
+Equatorial Guinea,eg,GQ
+Gabon,go,GA
+Guinea-Bissau,pg,GW
+Lesotho,lo,LS
+Libya,ly,LY
+Mauritius,mf,MU
+Mozambique,mz,MZ
+Namibia,sx,NA
+Nigeria,nr,NG
+Uganda,ug,UG
+Rwanda,rw,RW
+Senegal,sg,SN
+Seychelles,se,SC
+Eswatini,sq,SZ
+Faroe Islands,fa,FO
+Cayman Islands,cj,KY
+Hong Kong,hk,HK
+Falkland Islands,fk,FK
+Isle of Man,im,IM
+Macau,mh,MO
+Guam,gu,GU
+American Samoa,as,AS
+Guadeloupe,gp,GP
+Mayotte,ot,YT
+Aruba,aw,AW
+Bouvet Island,bv,BV
+Anguilla,am,AI
+Bailiwick of Guernsey,gg,GG
+Curaçao,co,CW
+British Virgin Islands,vb,VG
+Cook Islands,cw,CK
+Caribbean Netherlands,ca,BQ
+Niue,xh,NU
+Saint Pierre and Miquelon,xl,PM
+South Georgia and the South Sandwich Islands,xs,GS
+Wallis and Futuna,wf,WF
+Cocos (Keeling) Islands,xb,CC
+Tokelau,tl,TK
+British Indian Ocean Territory,bi,IO
+French Southern and Antarctic Lands,fs,TF
+Costa Rica,cr,CR
+Israel,is,IL
+Panama,pn,PA
+Laos,ls,LA
+Lebanon,le,LB
+Syria,sy,SY
+Tajikistan,ta,TJ
+Thailand,th,TH
+United Arab Emirates,ts,AE
+South Korea,ko,KR
+Bangladesh,bg,BD
+Mali,ml,ML
+Angola,ao,AO
+Bhutan,bt,BT
+Brunei,bx,BN
+Togo,tg,TG
+Tunisia,ti,TN
+South Sudan,sd,SS
+Benin,dm,BJ
+Burundi,bd,BI
+The Gambia,gm,GM
+Ivory Coast,iv,CI
+Cape Verde,cv,CV
+Liberia,lb,LR
+Mauritania,mu,MR
+Morocco,mr,MA
+Niger,ng,NE
+São Tomé and Príncipe,sf,ST
+Sierra Leone,sl,SL
+Somalia,so,SO
+Sudan,sj,SD
+Puerto Rico,pr,PR
+Gibraltar,gi,GI
+French Guiana,fg,GF
+United States Virgin Islands,vi,VI
+Montserrat,mj,MS
+Réunion,re,RE
+Turks and Caicos Islands,tc,TC
+Bermuda,bm,BM
+Netherlands Antilles,na,AN
+Saint Barthélemy,sc,BL
+French Polynesia,fp,PF
+Norfolk Island,nx,NF
+Christmas Island,xa,CX
+Trust Territory of the Pacific Islands,tt,PC
+Netherlands,ne,NL

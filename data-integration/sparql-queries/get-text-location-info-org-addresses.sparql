@@ -23,20 +23,46 @@ WHERE {
 
   graph <http://beltrans-contributors> {
     ?org a schema:Organization ;
-         dcterms:identifier ?beltransID ;
-         schema:address ?orgAddress .
-
-    ?orgAddress a schema:PostalAddress .
+         dcterms:identifier ?beltransID .
   }
-  
-  OPTIONAL { graph <http://beltrans-contributors> { ?orgAddress schema:addressLocality ?orgCity . } }
-  OPTIONAL { 
-    graph <http://beltrans-contributors> { ?orgAddress schema:addressCountry ?orgCountryCode . } 
 
-    graph <http://master-data> { ?orgCountryCode mads:authoritativeLabel ?orgCountryLabel . }
-    FILTER (lang(?orgCountryLabel) = 'en')
+  {
+    graph <http://beltrans-contributors> {
+      ?org schema:address ?orgAddress .
+      ?orgAddress a schema:PostalAddress .
+    }
+  
+    OPTIONAL { graph <http://beltrans-contributors> { ?orgAddress schema:addressLocality ?orgCity . } }
+    OPTIONAL { 
+      graph <http://beltrans-contributors> { ?orgAddress schema:addressCountry ?orgCountryCode . } 
+
+      graph <http://master-data> { ?orgCountryCode mads:authoritativeLabel ?orgCountryLabel . }
+      FILTER (lang(?orgCountryLabel) = 'en')
+    }
   }
-  
+  UNION
+  {
+    graph <http://beltrans-contributors> { ?org schema:sameAs ?kbrOrg . }
+    graph <http://kbr-aorg> {
+      ?kbrOrg a schema:Organization ;
+              schema:address ?orgAddress .
 
+      ?orgAddress a schema:PostalAddress .
+    }
+
+    OPTIONAL { 
+      graph <http://kbr-aorg> { ?kbrOrg schema:address/schema:addressLocality ?orgCity . } 
+    }
+
+    OPTIONAL { 
+      graph <http://kbr-aorg> { 
+        ?kbrOrg schema:address/schema:addressRegion ?contributorCountryISOCode . 
+      } 
+      FILTER(!CONTAINS(STR(?contributorCountryISOCode), "-"))
+      graph <http://master-data> { ?contributorCountryURI btm:isoCode ?contributorCountryISOCode ; skos:prefLabel ?orgCountryLabel . }
+      FILTER(lang(?orgCountryLabel) = "en")
+    }
+
+  }
          
 }

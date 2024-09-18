@@ -24,6 +24,7 @@ SELECT DISTINCT
   (group_concat(distinct ?imprintOwner;SEPARATOR=';') AS ?isImprintFrom)
   (group_concat(distinct ?countryLabel;SEPARATOR=';') AS ?country)
   (group_concat(distinct ?contributorRegion;SEPARATOR=';') AS ?region)
+  (group_concat(distinct ?contributorPlace;SEPARATOR=';') AS ?place)
   (group_concat(distinct ?kbrID;SEPARATOR=';') AS ?kbrIDs)
   (group_concat(distinct ?bnfID;SEPARATOR=';') AS ?bnfIDs)
   (group_concat(distinct ?ntaID;SEPARATOR=';') AS ?ntaIDs)
@@ -66,18 +67,18 @@ WHERE {
 
   OPTIONAL { graph <http://beltrans-contributors> { ?contributorURI schema:isPartOf/dcterms:identifier ?imprintOwner . } }
 
+
+
+  # place info from geo named graph, because of multilingual city names
+  #
   OPTIONAL { 
-    graph <http://beltrans-contributors> { ?contributorURI schema:address/schema:addressRegion ?contributorRegion . } 
-    FILTER(CONTAINS(STR(?contributorRegion), "-"))
+    graph <http://beltrans-geo> { 
+      ?contributorURI schema:address/schema:addressLocality/rdfs:label ?contributorPlace . }
   }
-  OPTIONAL { 
-    graph <http://beltrans-contributors> { 
-      ?contributorURI schema:address/schema:addressCountry ?contributorCountryURI . 
-    } 
-    graph <http://master-data> { ?contributorCountryURI skos:prefLabel ?countryLabel . }
-    FILTER(lang(?countryLabel) = "en")
-  }
- 
+
+
+
+  
   # ISNI
   #
   OPTIONAL {
@@ -123,6 +124,25 @@ WHERE {
       ?kbrURI a schema:Organization ;
               dcterms:identifier ?kbrID .
     }
+
+
+    #
+    # some location info from KBR AORG graph
+    #
+    OPTIONAL { 
+      graph <http://kbr-aorg> { ?kbrURI schema:address/schema:addressRegion ?contributorRegion . } 
+      FILTER(CONTAINS(STR(?contributorRegion), "-"))
+    }
+    
+    OPTIONAL { 
+      graph <http://kbr-aorg> { 
+        ?kbrURI schema:address/schema:addressRegion ?contributorCountryISOCode . 
+      } 
+      FILTER(!CONTAINS(STR(?contributorCountryISOCode), "-"))
+      graph <http://master-data> { ?contributorCountryURI btm:isoCode ?contributorCountryISOCode ; skos:prefLabel ?countryLabel . }
+      FILTER(lang(?countryLabel) = "en")
+    }
+
   }
 
   # SOURCE DATA: BnF
