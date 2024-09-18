@@ -7,11 +7,142 @@
 import csv
 from rapidfuzz.distance import Indel
 import pandas as pd
+from tqdm import tqdm
 from optparse import OptionParser
 
 from utils_string import getNormalizedString
 from book_title_lookup import BookTitleLookup
 from csv_to_excel import main as to_excel
+
+# -----------------------------------------------------------------------------
+def main(original_works, translations, similarityThreshold, output_file_clear_matches,
+         output_file_duplicate_id_matches, output_file_similarity_matches,
+         output_file_similarity_duplicate_id_matches, output_file_similarity_multiple_matches,
+         candidateFilter, candidateDelimiter=';'):
+
+    column_names = ['KBRID', 'title', 'originalTitle', 'candidates', 'candidatesIDs']
+
+    # Create lookup data structure
+    sourceLookup = BookTitleLookup(original_works, 'KBRID', 'title', similarityThreshold)
+
+    """Open target file. If 'source title' is empty, search normalized 'original title' in the dictionary that we just named 'sources' """
+
+    # count number of rows to show a progress bar with total
+    with open(translations, newline='', encoding='utf-8') as csvFile:
+      trlReader = csv.reader(csvFile)
+      numberOfTranslations = sum(1 for row in trlReader)
+
+    print()
+    print(f'Looking up {numberOfTranslations} from {translations} in {original_works}')
+    print()
+
+    with open(translations, newline='', encoding='utf-8') as csvfile, \
+         open(output_file_clear_matches, 'w', encoding='utf-8') as outFileClearMatches, \
+         open(output_file_duplicate_id_matches, 'w', encoding='utf-8') as outFileDuplicateIDMatches, \
+         open(output_file_similarity_matches, 'w', encoding='utf-8') as outFileSimilarityMatches, \
+         open(output_file_similarity_duplicate_id_matches, 'w', encoding='utf-8') as outFileSimilarityDuplicateIDMatches, \
+         open(output_file_similarity_multiple_matches, 'w', encoding='utf-8') as outFileSimilarityMultipleMatches:
+
+        targetreader = csv.DictReader(csvfile)
+
+        clearMatchesWriter = csv.DictWriter(outFileClearMatches, fieldnames=column_names)
+        clearMatchesWriter.writeheader()
+
+        duplicateIDMatchesWriter = csv.DictWriter(outFileDuplicateIDMatches, fieldnames=column_names)
+        duplicateIDMatchesWriter.writeheader()
+
+        similarityMatchesWriter = csv.DictWriter(outFileSimilarityMatches, fieldnames=column_names)
+        similarityMatchesWriter.writeheader()
+
+        similarityDuplicateIDMatchesWriter = csv.DictWriter(outFileSimilarityDuplicateIDMatches, fieldnames=column_names)
+        similarityDuplicateIDMatchesWriter.writeheader()
+
+        similarityMultipleMatchesWriter = csv.DictWriter(outFileSimilarityMultipleMatches, fieldnames=column_names)
+        similarityMultipleMatchesWriter.writeheader()
+
+        numberTargetRecords = 0
+        numberTargetRecordsWithOriginalTitle = 0
+        numberClearMatches = 0
+
+        titleMatchCounter = {'singleMatch': 0, 'duplicateMatch': 0, 'reducedDuplicates': 0,
+                             'singleMatchAfterDuplicateRemoving': 0, 'noCandidatesLeft': 0}
+        similarityMatchCounter = {'singleMatch': 0, 'duplicateMatch': 0, 'reducedDuplicates': 0,
+                                  'singleMatchAfterDuplicateRemoving': 0, 'multipleMatches': 0, 'noCandidatesLeft': 0}
+
+        similarityMatches = {}
+
+
+        pbar = tqdm(total=numberOfTranslations)
+        for target in targetreader:
+            original_title_normalized = getNormalizedString(target['originalTitle'])
+            targetKBRID = target['KBRID']
+            targetTitle = target['title']
+            targetOriginalTitle = target['originalTitle']
+
+            currentOutputWriter = None
+            outputRowCandidates = ''
+            outputRowCandidateIDs = ''
+
+            if target['sourceTitle'] == '' and target['originalTitle'] != '':
+                numberTargetRecordsWithOriginalTitle += 1
+                # we found a matching title
+                if sourceLookup.contains(original_title_normalized):
+
+                    # we actually found only one matching title (best case)
+                    if sourceLookup.containsSingleIdentifier(original_title_normalized):
+                        KBRID = next(iter(sourceLookup.getIdentifier(original_title_normalized)))
+                        outputRowCandidates = createCandidateString(original_title_normalized, str(KBRID))
+                        outputRowCandidateIDs = str(KBRID)
+                        currentOutputWriter = clearMatchesWriter
+                        titleMatchCounter['singleMatch'] = titleMatchCounter['singleMatch'] + 1
+
+                    # there are several book identifiers with the given title, further checks needed
+                    else:
+                        duplicateIDs = sourceLookup.getIdentifier(original_title_normalized)
+                        (outputRowCandidates,
+                         outputRowCandidateIDs,
+                         currentOutputWriter) = handleMultipleCandidates(sourceLookup, target, original_title_normalized,
+                                                                         duplicateIDs, candidateDelimiter, clearMatchesWriter,
+                                                                         duplicateIDMatchesWriter, candidateFilter,
+                                                                         titleMatchCounter)
+
+                # no matching title found, let's try titles with high similarity
+                else:
+                    (outputRowCandidates,
+                     outputRowCandidateIDs,
+                     currentOutputWriter) = performSimilarityMatching(sourceLookup, target, original_title_normalized,
+                                                                      candidateDelimiter, similarityMatchesWriter,
+                                                                      similarityDuplicateIDMatchesWriter,
+                                                                      similarityMultipleMatchesWriter, candidateFilter,
+                                                                      similarityMatchCounter, similarityThreshold)
+
+
+            if currentOutputWriter != None:
+                outputRow = {'KBRID': targetKBRID, 'title': targetTitle, 'originalTitle': targetOriginalTitle,
+                             'candidates': outputRowCandidates, 'candidatesIDs': outputRowCandidateIDs}
+                currentOutputWriter.writerow(outputRow)
+            numberTargetRecords += 1
+
+            pbar.set_description(f'with lookup value {numberTargetRecordsWithOriginalTitle}; title match {titleMatchCounter["singleMatch"]} (after filter {titleMatchCounter["singleMatchAfterDuplicateRemoving"]}); multiple title matches {titleMatchCounter["duplicateMatch"]}; sim match {similarityMatchCounter["singleMatch"]}; multiple sim matches {similarityMatchCounter["multipleMatches"]}')
+            pbar.update()
+
+
+    print(f'Number of target records: {numberTargetRecords}')
+    print(f'Number of target records with original title (and missing identifier): {numberTargetRecordsWithOriginalTitle}')
+
+    print(f'Number of original records: {sourceLookup.getNumberTitles()}')
+    print(f'Number of duplicate records: {sourceLookup.getNumberOfDuplicates()}')
+    print(f'Max number of duplicates: {sourceLookup.getMaxNumberOfDuplicates()}')
+    print(f'Average: {sourceLookup.getAverageNumberOfDuplicates()}')
+    print(f'Median: {sourceLookup.getMedianNumberOfDuplicates()}')
+
+    print('Exact title match:')
+    print(titleMatchCounter)
+    print(f'Similarity-based match (threshold {similarityThreshold}):')
+    print(similarityMatchCounter)
+    print(f'Number of clear matches: {numberClearMatches}')
+
+
 
 # -----------------------------------------------------------------------------
 def checkArguments():
@@ -151,122 +282,6 @@ def performSimilarityMatching(sourceLookup, target, original_title_normalized, c
         pass
 
     return (outputRowCandidates, outputRowCandidateIDs, outputRowWriter)
-
-# -----------------------------------------------------------------------------
-def main(original_works, translations, similarityThreshold, output_file_clear_matches,
-         output_file_duplicate_id_matches, output_file_similarity_matches,
-         output_file_similarity_duplicate_id_matches, output_file_similarity_multiple_matches,
-         candidateFilter, candidateDelimiter=';'):
-
-    column_names = ['KBRID', 'title', 'originalTitle', 'candidates', 'candidatesIDs']
-
-    """Open source file. Create a dictionary with normalized 'title' as key and 'KBRID' as value"""
-
-    sourceLookup = BookTitleLookup(original_works, 'KBRID', 'title', similarityThreshold)
-
-    """Open target file. If 'source title' is empty, search normalized 'original title' in the dictionary that we just named 'sources' """
-
-
-    with open(translations, newline='', encoding='utf-8') as csvfile, \
-         open(output_file_clear_matches, 'w', encoding='utf-8') as outFileClearMatches, \
-         open(output_file_duplicate_id_matches, 'w', encoding='utf-8') as outFileDuplicateIDMatches, \
-         open(output_file_similarity_matches, 'w', encoding='utf-8') as outFileSimilarityMatches, \
-         open(output_file_similarity_duplicate_id_matches, 'w', encoding='utf-8') as outFileSimilarityDuplicateIDMatches, \
-         open(output_file_similarity_multiple_matches, 'w', encoding='utf-8') as outFileSimilarityMultipleMatches:
-
-        targetreader = csv.DictReader(csvfile)
-
-        clearMatchesWriter = csv.DictWriter(outFileClearMatches, fieldnames=column_names)
-        clearMatchesWriter.writeheader()
-
-        duplicateIDMatchesWriter = csv.DictWriter(outFileDuplicateIDMatches, fieldnames=column_names)
-        duplicateIDMatchesWriter.writeheader()
-
-        similarityMatchesWriter = csv.DictWriter(outFileSimilarityMatches, fieldnames=column_names)
-        similarityMatchesWriter.writeheader()
-
-        similarityDuplicateIDMatchesWriter = csv.DictWriter(outFileSimilarityDuplicateIDMatches, fieldnames=column_names)
-        similarityDuplicateIDMatchesWriter.writeheader()
-
-        similarityMultipleMatchesWriter = csv.DictWriter(outFileSimilarityMultipleMatches, fieldnames=column_names)
-        similarityMultipleMatchesWriter.writeheader()
-
-        numberTargetRecords = 0
-        numberTargetRecordsWithOriginalTitle = 0
-        numberClearMatches = 0
-
-        titleMatchCounter = {'singleMatch': 0, 'duplicateMatch': 0, 'reducedDuplicates': 0,
-                             'singleMatchAfterDuplicateRemoving': 0, 'noCandidatesLeft': 0}
-        similarityMatchCounter = {'singleMatch': 0, 'duplicateMatch': 0, 'reducedDuplicates': 0,
-                                  'singleMatchAfterDuplicateRemoving': 0, 'multipleMatches': 0, 'noCandidatesLeft': 0}
-
-        similarityMatches = {}
-
-        for target in targetreader:
-            original_title_normalized = getNormalizedString(target['originalTitle'])
-            targetKBRID = target['KBRID']
-            targetTitle = target['title']
-            targetOriginalTitle = target['originalTitle']
-
-            currentOutputWriter = None
-            outputRowCandidates = ''
-            outputRowCandidateIDs = ''
-
-            if target['sourceTitle'] == '' and target['originalTitle'] != '':
-                numberTargetRecordsWithOriginalTitle += 1
-                # we found a matching title
-                if sourceLookup.contains(original_title_normalized):
-
-                    # we actually found only one matching title (best case)
-                    if sourceLookup.containsSingleIdentifier(original_title_normalized):
-                        KBRID = next(iter(sourceLookup.getIdentifier(original_title_normalized)))
-                        outputRowCandidates = createCandidateString(original_title_normalized, str(KBRID))
-                        outputRowCandidateIDs = str(KBRID)
-                        currentOutputWriter = clearMatchesWriter
-                        titleMatchCounter['singleMatch'] = titleMatchCounter['singleMatch'] + 1
-
-                    # there are several book identifiers with the given title, further checks needed
-                    else:
-                        duplicateIDs = sourceLookup.getIdentifier(original_title_normalized)
-                        (outputRowCandidates,
-                         outputRowCandidateIDs,
-                         currentOutputWriter) = handleMultipleCandidates(sourceLookup, target, original_title_normalized,
-                                                                         duplicateIDs, candidateDelimiter, clearMatchesWriter,
-                                                                         duplicateIDMatchesWriter, candidateFilter,
-                                                                         titleMatchCounter)
-
-                # no matching title found, let's try titles with high similarity
-                else:
-                    (outputRowCandidates,
-                     outputRowCandidateIDs,
-                     currentOutputWriter) = performSimilarityMatching(sourceLookup, target, original_title_normalized,
-                                                                      candidateDelimiter, similarityMatchesWriter,
-                                                                      similarityDuplicateIDMatchesWriter,
-                                                                      similarityMultipleMatchesWriter, candidateFilter,
-                                                                      similarityMatchCounter, similarityThreshold)
-
-
-            if currentOutputWriter != None:
-                outputRow = {'KBRID': targetKBRID, 'title': targetTitle, 'originalTitle': targetOriginalTitle,
-                             'candidates': outputRowCandidates, 'candidatesIDs': outputRowCandidateIDs}
-                currentOutputWriter.writerow(outputRow)
-            numberTargetRecords += 1
-
-
-    print(f'Number of target records: {numberTargetRecords}')
-    print(f'Number of target records with original title (and missing identifier): {numberTargetRecordsWithOriginalTitle}')
-
-    print(f'Number of original records: {sourceLookup.getNumberTitles()}')
-    print(f'Number of duplicate records: {sourceLookup.getNumberOfDuplicates()}')
-    print(f'Max number of duplicates: {sourceLookup.getMaxNumberOfDuplicates()}')
-    print(f'Average: {sourceLookup.getAverageNumberOfDuplicates()}')
-    print(f'Median: {sourceLookup.getMedianNumberOfDuplicates()}')
-
-    print('Exact title match:')
-    print(titleMatchCounter)
-    print(f'Similarity-based match (threshold {similarityThreshold}):')
-    print(similarityMatchCounter)
-    print(f'Number of clear matches: {numberClearMatches}')
 
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
