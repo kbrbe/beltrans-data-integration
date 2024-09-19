@@ -35,3 +35,5 @@ geonames/
 !*stats.csv
 !config-integration*
 !translations-column-order.csv
+!originals_fr-nl_filter.csv
+!originals_nl-fr_filter.csv

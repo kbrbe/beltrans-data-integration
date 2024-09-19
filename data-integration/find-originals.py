@@ -16,41 +16,64 @@ from book_title_lookup import BookTitleLookup
 from csv_to_excel import main as to_excel
 
 # -----------------------------------------------------------------------------
-def main(original_works, translations, similarityThreshold, output_file_clear_matches,
+def main(original_works, translationFiles, similarityThreshold, output_file_clear_matches,
          output_file_duplicate_id_matches, output_file_similarity_matches,
          output_file_similarity_duplicate_id_matches, output_file_similarity_multiple_matches,
          candidateFilter, candidateDelimiter=';'):
 
-    requiredTranslationColumns = ['KBRID', 'title', 'originalTitle']
-    column_names = ['KBRID', 'title', 'originalTitle', 'candidates', 'candidatesIDs']
+    requiredTranslationColumns = ['translationID', 'title', 'originalTitle']
+    column_names = ['translationID', 'title', 'originalTitle', 'candidates', 'candidatesIDs']
 
     # check if all input files contain the necessary columns
-    with open(translations, 'r') as inFile:
-      inputReader = csv.DictReader(inFile)
-      utils.checkIfColumnsExist(inputReader.fieldnames, requiredTranslationColumns)
+    for inputFile in translationFiles:
+      with open(inputFile, 'r') as inFile:
+        inputReader = csv.DictReader(inFile)
+        utils.checkIfColumnsExist(inputReader.fieldnames, requiredTranslationColumns)
+
+    # consolidate input: merge by translation identifier
+    allInputTranslations = {}
+    atLeastOneInconsistency = False
+    for inputFile in translationFiles:
+      with open(inputFile, 'r') as inFile:
+        inputReader = csv.DictReader(inFile)
+        for row in inputReader:
+          if 'sourceTitle' in row and row['sourceTitle'] != '':
+            continue
+          if row['originalTitle'] != '':
+            targetID = row['translationID']
+            title = row['title']
+            originalTitle = row['originalTitle']
+            if targetID in allInputTranslations:
+              atLeastOneInconsistency = True
+              allInputTranslations[targetID]['title'].add(title)
+              allInputTranslations[targetID]['originalTitle'].add(originalTitle)
+            else:
+              allInputTranslations[targetID] = {'title': set([title]), 'originalTitle': set([originalTitle])}
+
+    # Emit error if input consolidation resulted in inconsistencies
+    if atLeastOneInconsistency:
+      print(f'Inconsistencies between input files with lookup values')
+      for trlID, info in allInputTranslations.items():
+        if len(info['originalTitle']) > 1:
+          print(f'\t{trlID} - conflicting original lookup titles?: {info["originalTitle"]}; translation titles: {info["title"]}')
+      exit(1)
+    
 
     # Create lookup data structure
     sourceLookup = BookTitleLookup(original_works, 'KBRID', 'title', similarityThreshold)
 
     """Open target file. If 'source title' is empty, search normalized 'original title' in the dictionary that we just named 'sources' """
 
-    # count number of rows to show a progress bar with total
-    with open(translations, newline='', encoding='utf-8') as csvFile:
-      trlReader = csv.reader(csvFile)
-      numberOfTranslations = sum(1 for row in trlReader) - 1
-
     print()
-    print(f'Looking up {numberOfTranslations} from {translations} in {original_works}')
+    print(f'Looking up {len(allInputTranslations)} original titles from the files {translationFiles} in the file {original_works}')
     print()
 
-    with open(translations, newline='', encoding='utf-8') as csvfile, \
-         open(output_file_clear_matches, 'w', encoding='utf-8') as outFileClearMatches, \
+    with open(output_file_clear_matches, 'w', encoding='utf-8') as outFileClearMatches, \
          open(output_file_duplicate_id_matches, 'w', encoding='utf-8') as outFileDuplicateIDMatches, \
          open(output_file_similarity_matches, 'w', encoding='utf-8') as outFileSimilarityMatches, \
          open(output_file_similarity_duplicate_id_matches, 'w', encoding='utf-8') as outFileSimilarityDuplicateIDMatches, \
          open(output_file_similarity_multiple_matches, 'w', encoding='utf-8') as outFileSimilarityMultipleMatches:
 
-        targetreader = csv.DictReader(csvfile)
 
         clearMatchesWriter = csv.DictWriter(outFileClearMatches, fieldnames=column_names)
         clearMatchesWriter.writeheader()
@@ -79,10 +102,11 @@ def main(original_works, translations, similarityThreshold, output_file_clear_ma
         similarityMatches = {}
 
 
-        pbar = tqdm(total=numberOfTranslations)
-        for target in targetreader:
+        pbar = tqdm(total=len(allInputTranslations))
+        for trlID, trlInfo in allInputTranslations.items():
+            target = {'translationID': trlID, 'title': next(iter(trlInfo['title'])), 'originalTitle': next(iter(trlInfo['originalTitle']))}
             original_title_normalized = getNormalizedString(target['originalTitle'])
-            targetKBRID = target['KBRID']
+            targetKBRID = target['translationID']
             targetTitle = target['title']
             targetOriginalTitle = target['originalTitle']
 
@@ -128,12 +152,12 @@ def main(original_works, translations, similarityThreshold, output_file_clear_ma
 
 
             if currentOutputWriter != None:
-                outputRow = {'KBRID': targetKBRID, 'title': targetTitle, 'originalTitle': targetOriginalTitle,
+                outputRow = {'translationID': targetKBRID, 'title': targetTitle, 'originalTitle': targetOriginalTitle,
                              'candidates': outputRowCandidates, 'candidatesIDs': outputRowCandidateIDs}
                 currentOutputWriter.writerow(outputRow)
             numberTargetRecords += 1
 
-            pbar.set_description(f'with lookup value {numberTargetRecordsWithOriginalTitle}; title match {titleMatchCounter["singleMatch"]} (after filter {titleMatchCounter["singleMatchAfterDuplicateRemoving"]}); multiple title matches {titleMatchCounter["duplicateMatch"]}; sim match {similarityMatchCounter["singleMatch"]}; multiple sim matches {similarityMatchCounter["multipleMatches"]}')
+            pbar.set_description(f'title match {titleMatchCounter["singleMatch"]} (after filter {titleMatchCounter["singleMatchAfterDuplicateRemoving"]}); multiple title matches {titleMatchCounter["duplicateMatch"]}; sim match {similarityMatchCounter["singleMatch"]}; multiple sim matches {similarityMatchCounter["multipleMatches"]}')
             pbar.update()
 
 
@@ -269,7 +293,7 @@ def checkArguments():
 
     parser = OptionParser(usage="usage: %prog [options]")
     parser.add_option('-w', '--original-works', action='store', help='CSV containing original works')
-    parser.add_option('-t', '--translations', action='store', help='CSV containing translations')
+    parser.add_option('-t', '--translations', action='append', help='CSV containing translations')
     parser.add_option('-d', '--candidate-delimiter', action='store', default=';', help='The delimiter used to separate multiple candidates, default is a semicolon')
     parser.add_option('-s', '--similarity', action='store', default=0.9, type='float', help='A length-normalized title similarity (used if no direct match can be found)')
     parser.add_option('--apply-candidate-filter', action='store_true', default=False, help='A flag indicating that the number of match candidates (if more than 1) should be tried to reduced automatically, e.g. by checking publication years')
@@ -311,5 +335,3 @@ if __name__ == '__main__':
          options.apply_candidate_filter,
          candidateDelimiter=options.candidate_delimiter)
 
-# python find-originals.py -w Original_works/fr-nl_fr-works.csv -t Translations/fr-nl_translations-works.csv -o fr-nl.csv
-# python find-originals.py -w Original_works/nl-fr_nl-works.csv -t Translations/nl-fr_translations-works.csv -o nl-fr.csv
