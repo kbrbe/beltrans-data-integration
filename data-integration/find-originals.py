@@ -9,6 +9,7 @@ from rapidfuzz.distance import Indel
 import pandas as pd
 from tqdm import tqdm
 from optparse import OptionParser
+from tools import utils as utils
 
 from utils_string import getNormalizedString
 from book_title_lookup import BookTitleLookup
@@ -20,7 +21,13 @@ def main(original_works, translations, similarityThreshold, output_file_clear_ma
          output_file_similarity_duplicate_id_matches, output_file_similarity_multiple_matches,
          candidateFilter, candidateDelimiter=';'):
 
+    requiredTranslationColumns = ['KBRID', 'title', 'originalTitle']
     column_names = ['KBRID', 'title', 'originalTitle', 'candidates', 'candidatesIDs']
+
+    # check if all input files contain the necessary columns
+    with open(translations, 'r') as inFile:
+      inputReader = csv.DictReader(inFile)
+      utils.checkIfColumnsExist(inputReader.fieldnames, requiredTranslationColumns)
 
     # Create lookup data structure
     sourceLookup = BookTitleLookup(original_works, 'KBRID', 'title', similarityThreshold)
@@ -83,7 +90,10 @@ def main(original_works, translations, similarityThreshold, output_file_clear_ma
             outputRowCandidates = ''
             outputRowCandidateIDs = ''
 
-            if target['sourceTitle'] == '' and target['originalTitle'] != '':
+            if 'sourceTitle' in target and target['sourceTitle'] != '':
+              pbar.update()
+              continue
+            if target['originalTitle'] != '':
                 numberTargetRecordsWithOriginalTitle += 1
                 # we found a matching title
                 if sourceLookup.contains(original_title_normalized):
@@ -143,35 +153,6 @@ def main(original_works, translations, similarityThreshold, output_file_clear_ma
     print(f'Number of clear matches: {numberClearMatches}')
 
 
-
-# -----------------------------------------------------------------------------
-def checkArguments():
-
-    parser = OptionParser(usage="usage: %prog [options]")
-    parser.add_option('-w', '--original-works', action='store', help='CSV containing original works')
-    parser.add_option('-t', '--translations', action='store', help='CSV containing translations')
-    parser.add_option('-d', '--candidate-delimiter', action='store', default=';', help='The delimiter used to separate multiple candidates, default is a semicolon')
-    parser.add_option('-s', '--similarity', action='store', default=0.9, type='float', help='A length-normalized title similarity (used if no direct match can be found)')
-    parser.add_option('--apply-candidate-filter', action='store_true', default=False, help='A flag indicating that the number of match candidates (if more than 1) should be tried to reduced automatically, e.g. by checking publication years')
-    parser.add_option('--output-file-clear-matches', action='store',
-                      help='A CSV file containing matches based on title, match with a single record')
-    parser.add_option('--output-file-duplicate-id-matches', action='store',
-                      help='A CSV file containing matches based on title, match with duplicate ID records (same title)')
-    parser.add_option('--output-file-similarity-duplicate-id-matches', action='store',
-                      help='A CSV file containing matches based on similarity, match with duplicate ID records (same title)')
-    parser.add_option('--output-file-similarity-multiple-matches', action='store',
-                      help='A CSV file containing matches based on similarity, matches with several different originals')
-    parser.add_option('--output-file-similarity-matches', action='store',
-                      help='A CSV file with matches based on similarity, matches with a single original')
-    (options, args) = parser.parse_args()
-
-    if( (not options.original_works) or (not options.translations) or (not options.output_file_clear_matches)
-        or (not options.output_file_duplicate_id_matches) or (not options.output_file_similarity_duplicate_id_matches)
-        or (not options.output_file_similarity_multiple_matches) or (not options.output_file_similarity_matches)):
-      parser.print_help()
-      exit(1)
-
-    return options
 
 # -----------------------------------------------------------------------------
 def createCandidateString(title, identifiers):
@@ -282,6 +263,37 @@ def performSimilarityMatching(sourceLookup, target, original_title_normalized, c
         pass
 
     return (outputRowCandidates, outputRowCandidateIDs, outputRowWriter)
+
+# -----------------------------------------------------------------------------
+def checkArguments():
+
+    parser = OptionParser(usage="usage: %prog [options]")
+    parser.add_option('-w', '--original-works', action='store', help='CSV containing original works')
+    parser.add_option('-t', '--translations', action='store', help='CSV containing translations')
+    parser.add_option('-d', '--candidate-delimiter', action='store', default=';', help='The delimiter used to separate multiple candidates, default is a semicolon')
+    parser.add_option('-s', '--similarity', action='store', default=0.9, type='float', help='A length-normalized title similarity (used if no direct match can be found)')
+    parser.add_option('--apply-candidate-filter', action='store_true', default=False, help='A flag indicating that the number of match candidates (if more than 1) should be tried to reduced automatically, e.g. by checking publication years')
+    parser.add_option('--output-file-clear-matches', action='store',
+                      help='A CSV file containing matches based on title, match with a single record')
+    parser.add_option('--output-file-duplicate-id-matches', action='store',
+                      help='A CSV file containing matches based on title, match with duplicate ID records (same title)')
+    parser.add_option('--output-file-similarity-duplicate-id-matches', action='store',
+                      help='A CSV file containing matches based on similarity, match with duplicate ID records (same title)')
+    parser.add_option('--output-file-similarity-multiple-matches', action='store',
+                      help='A CSV file containing matches based on similarity, matches with several different originals')
+    parser.add_option('--output-file-similarity-matches', action='store',
+                      help='A CSV file with matches based on similarity, matches with a single original')
+    (options, args) = parser.parse_args()
+
+    if( (not options.original_works) or (not options.translations) or (not options.output_file_clear_matches)
+        or (not options.output_file_duplicate_id_matches) or (not options.output_file_similarity_duplicate_id_matches)
+        or (not options.output_file_similarity_multiple_matches) or (not options.output_file_similarity_matches)):
+      parser.print_help()
+      exit(1)
+
+    return options
+
+
 
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
