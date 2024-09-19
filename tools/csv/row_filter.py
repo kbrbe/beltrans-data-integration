@@ -18,6 +18,9 @@ class RowFilter():
         if criterion == '=':
           if row[column] != value:
             filterPass = False
+        elif criterion == 'stringContains':
+          if value not in row[column]:
+            filterPass = False
 
     if filterPass:
       self.numberPassed += 1
