@@ -1,0 +1,66 @@
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+  prefix dcterms: <http://purl.org/dc/terms/>
+  prefix schema: <http://schema.org/>
+  prefix lang: <http://id.loc.gov/vocabulary/languages/>
+  PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+  prefix prov: <http://www.w3.org/ns/prov#>
+  prefix btm: <http://kbr.be/ns/beltrans/model#>
+  PREFIX btid: <http://kbr.be/id/data/>
+
+  SELECT 
+?mID 
+(group_concat(distinct ?sourceLang; separator=';') as ?sourceLanguage) 
+(group_concat(distinct ?targetLang; separator=';') as ?targetLanguage)  
+(group_concat(distinct ?title; separator=';') as ?title) 
+(group_concat(distinct ?originalTitle; separator=';') as ?originalTitle)
+  WHERE {
+
+    # get French manifestations with KBR identifier
+    #
+    graph <http://beltrans-manifestations> {
+      ?m a schema:CreativeWork ;
+         schema:isPartOf btid:beltransCorpus ;
+         dcterms:identifier ?mID ;
+         schema:translationOfWork ?original ;
+         schema:inLanguage ?targetLangURI ;
+         schema:name ?title .    
+    }
+
+    # the manifestation should not come from the correlation list
+    #
+    OPTIONAL { 
+      graph <http://beltrans-manifestations> {
+        ?activity a btm:CorrelationActivity ; 
+                  prov:generated ?m .
+      }
+    }
+    FILTER(!BOUND(?activity))
+
+    # also get the title of the original
+    #
+    graph <http://beltrans-originals> {
+      ?original a schema:CreativeWork ;
+                schema:inLanguage ?sourceLangURI ;
+                schema:name ?originalTitle .
+    }
+
+    # only fetch translations whose original does not have a KBR identifier yet
+    #
+    OPTIONAL { 
+      graph <http://beltrans-originals> { 
+        ?original bf:identifiedBy ?kbrEntity .
+        ?kbrEntity a bf:Identifier ;
+                   rdfs:label "KBR" ;
+                   rdf:value ?kbrID
+      } 
+    }
+    FILTER(!BOUND(?kbrEntity) || !STRSTARTS(STR(?kbrID), "source"))
+          
+    graph <http://master-data> {
+      ?targetLangURI skos:prefLabel ?targetLang .
+      ?sourceLangURI skos:prefLabel ?sourceLang .
+    }
+    FILTER(lang(?targetLang) = 'en')
+    FILTER(lang(?sourceLang) = 'en')
+  }
+group by ?mID

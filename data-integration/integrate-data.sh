@@ -468,6 +468,9 @@ SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL="similarity-matches_fr-nl.csv"
 SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL="similarity-duplicates-matches_fr-nl.csv"
 SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_FR_NL="similarity-multiple-matches_fr-nl.csv"
 
+SUFFIX_ORIG_WITHOUT_KBR_ID="translations-without-original-KBR-ID.csv"
+GET_ORIG_WITHOUT_KBR_ID_QUERY="sparql-queries/get-originals-without-KBR-id.sparql"
+
 # DATA SOURCE - KBR BELGIANS
 #
 SUFFIX_KBR_BELGIANS_CLEANED="belgians-cleaned.csv"
@@ -2148,11 +2151,13 @@ function extractOriginalLinksKBR {
 
   mkdir -p "$integrationName/$dataSourceName/fr-nl"
   mkdir -p "$integrationName/$dataSourceName/nl-fr"
+  mkdir -p "$integrationName/$dataSourceName/mixed-lang"
 
   local similarityThreshold="0.9"
 
+  local kbrTranslations="$integrationName/$dataSourceName/mixed-lang/$SUFFIX_ORIG_WITHOUT_KBR_ID"
+
   local kbrOriginalsNLFR="$originalsSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
-  local kbrTranslationsNLFR="$integrationName/$translationsSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
   local titleMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_TITLE_MATCHES_NL_FR"
   local titleDuplicatesMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_NL_FR"
   local similarityMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_MATCHES_NL_FR"
@@ -2160,7 +2165,6 @@ function extractOriginalLinksKBR {
   local similarityMultipleMatchesNLFR="$integrationName/$dataSourceName/nl-fr/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_NL_FR"
 
   local kbrOriginalsFRNL="$originalsSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
-  local kbrTranslationsFRNL="$integrationName/$translationsSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   local titleMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
   local titleDuplicatesMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
   local similarityMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_MATCHES_FR_NL"
@@ -2174,34 +2178,41 @@ function extractOriginalLinksKBR {
 
   source ./py-integration-env/bin/activate
 
+  python -m tools.sparql.query_data \
+    -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
+    -q $GET_ORIG_WITHOUT_KBR_ID_QUERY \
+    -o $kbrTranslations
+
+
   echo ""
-  echo "EXTRACTION - extract FR-NL translations from correlation list for lookup"
+  echo "EXTRACTION - extract FR-NL translations from KBR export for lookup (via SPARQL query to get needed BELTRANS identifiers)"
   python -m $MODULE_EXTRACT_COLUMNS \
     -o $lookupValuesKBRExportFRNL \
-    -c "KBRID" \
+    -c "mID" \
     -c "title" \
     -c "originalTitle" \
     --output-column "translationID" \
     --output-column "title" \
     --output-column "originalTitle" \
     --filter-file "originals_fr-nl_filter.csv" \
-    $kbrTranslationsFRNL
+    $kbrTranslations
 
   echo ""
-  echo "EXTRACTION - extract NL-FR translations from correlation list for lookup"
+  echo "EXTRACTION - extract NL-FR translations from KBR export for lookup (via SPARQL query to get needed BELTRANS identifiers)"
   python -m $MODULE_EXTRACT_COLUMNS \
     -o $lookupValuesKBRExportNLFR \
-    -c "KBRID" \
+    -c "mID" \
     -c "title" \
     -c "originalTitle" \
     --output-column "translationID" \
     --output-column "title" \
     --output-column "originalTitle" \
     --filter-file "originals_nl-fr_filter.csv" \
-    $kbrTranslationsNLFR
+    $kbrTranslations
+
 
   echo ""
-  echo "EXTRACTION - extract FR-NL translations from KBR export for lookup"
+  echo "EXTRACTION - extract FR-NL translations from correlation list for lookup"
   python -m $MODULE_EXTRACT_COLUMNS \
     -o $lookupValuesCorrelationListFRNL \
     -c "targetIdentifier" \
@@ -2210,10 +2221,11 @@ function extractOriginalLinksKBR {
     --output-column "translationID" \
     --output-column "title" \
     --output-column "originalTitle" \
+    --filter-file "originals_fr-nl_filter.csv" \
     $INPUT_CORRELATION_TRANSLATIONS
 
   echo ""
-  echo "EXTRACTION - extract NL-FR translations from KBR export for lookup"
+  echo "EXTRACTION - extract NL-FR translations from correlation list for lookup"
   python -m $MODULE_EXTRACT_COLUMNS \
     -o $lookupValuesCorrelationListNLFR \
     -c "targetIdentifier" \
