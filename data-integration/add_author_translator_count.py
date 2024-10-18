@@ -10,45 +10,6 @@ import pandas as pd
 import json
 
 # -----------------------------------------------------------------------------
-def addColumn(row, inputCol, outputCol, trueValue, falseValue, lookup, personDelimiter=';'):
-  """
-  Checking for each contributor in inputCol (delimited by personDelimiter) if the contributor
-  is present in lookup. If yes, trueValue will be put in outputCol, otherwise falseValue.
-  If trueValue is a string, it is interpreted as a key for lookup, if it is a boolean value,
-  the boolean value will be added.
-  >>> row0 = {'authorIdentifiers': 'Lieber, Sven (123)'}
-  >>> addColumn(row0, 'authorIdentifiers', 'authorIsAuthorTranslator', True, False, {'Lieber, Sven'})
-  >>> row0['authorIsAuthorTranslator']
-  True
-  >>> addColumn(row0, 'authorIdentifiers', 'authorIsAuthorTranslator', True, False, {'Other', 'Persons'})
-  >>> row0['authorIsAuthorTranslator']
-  False
-  >>> row1 = {'translatorIdentifiers': 'Doe, John (123)'}
-  >>> addColumn(row1, 'translatorIdentifiers', 'translatorNationalities', 'nationalities', '', {'Doe, John': ['Germany','Belgium']})
-  >>> row1['translatorNationalities']
-  'Belgium;Germany'
-  >>> addColumn(row1, 'translatorIdentifiers', 'translatorNationalities', 'nationalities', '', {'Doe, John': ['Belgium']})
-  >>> row1['translatorNationalities']
-  'Belgium'
-  """
-
-  contributors = []
-  if personDelimiter in row[inputCol]:
-    contributors = row[inputCol].split(personDelimiter)
-  else:
-    contributors = [row[inputCol]]
-
-  for c in contributors:
-    contributorName = utils_stats.getContributorName(c)
-    if contributorName in lookup:
-      if type(trueValue) == bool:
-        row[outputCol] = trueValue
-      else:
-        row[outputCol] = personDelimiter.join(sorted(lookup[contributorName]))
-    else:
-      row[outputCol] = falseValue
-
-# -----------------------------------------------------------------------------
 def main():
   """This script checks for each translation of a translation sheet if the author and/or translator is someone who authored at least one book AND translated at least one book."""
 
@@ -123,6 +84,46 @@ def main():
       
       outputWriter.writerow(row)
       
+# -----------------------------------------------------------------------------
+def addColumn(row, inputCol, outputCol, trueValue, falseValue, lookup, personDelimiter=';'):
+  """
+  Checking for each contributor in inputCol (delimited by personDelimiter) if the contributor
+  is present in lookup. If yes, trueValue will be put in outputCol, otherwise falseValue.
+  If trueValue is a string, it is interpreted as a key for lookup, if it is a boolean value,
+  the boolean value will be added.
+  >>> row0 = {'authorIdentifiers': 'Lieber, Sven (123)'}
+  >>> addColumn(row0, 'authorIdentifiers', 'authorIsAuthorTranslator', True, False, {'Lieber, Sven'})
+  >>> row0['authorIsAuthorTranslator']
+  True
+  >>> addColumn(row0, 'authorIdentifiers', 'authorIsAuthorTranslator', True, False, {'Other', 'Persons'})
+  >>> row0['authorIsAuthorTranslator']
+  False
+  >>> row1 = {'translatorIdentifiers': 'Doe, John (123)'}
+  >>> addColumn(row1, 'translatorIdentifiers', 'translatorNationalities', 'nationalities', '', {'Doe, John': ['Germany','Belgium']})
+  >>> row1['translatorNationalities']
+  'Belgium;Germany'
+  >>> addColumn(row1, 'translatorIdentifiers', 'translatorNationalities', 'nationalities', '', {'Doe, John': ['Belgium']})
+  >>> row1['translatorNationalities']
+  'Belgium'
+  """
+
+  contributors = []
+  if personDelimiter in row[inputCol]:
+    contributors = row[inputCol].split(personDelimiter)
+  else:
+    contributors = [row[inputCol]]
+
+  for c in contributors:
+    contributorName = utils_stats.getContributorName(c)
+    if contributorName in lookup:
+      if type(trueValue) == bool:
+        row[outputCol] = trueValue
+      else:
+        row[outputCol] = personDelimiter.join(sorted(lookup[contributorName]))
+    else:
+      row[outputCol] = falseValue
+
+
      
 
 if __name__ == '__main__':

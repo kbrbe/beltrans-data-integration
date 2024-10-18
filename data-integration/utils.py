@@ -4,8 +4,78 @@ import requests
 import rdflib
 import os
 import pandas as pd
+import utils_stats
 
+# -----------------------------------------------------------------------------
+def addGenderInfoColumn(row, inputCol, outputCol, lookup, personDelimiter=';'):
+  """
+  Checking the gender info for each contributor in inputCol (delimited by personDelimiter)
+  is present in lookup. If yes, trueValue will be put in outputCol, otherwise falseValue.
+  If trueValue is a string, it is interpreted as a key for lookup, if it is a boolean value,
+  the boolean value will be added.
 
+  Single male contributor leads to FALSE
+  >>> row0 = {'authorIdentifiers': 'Lieber, Sven (123)'}
+  >>> addGenderInfoColumn(row0, 'authorIdentifiers', 'femaleAuthor', {'123': 'Male'})
+  >>> row0['femaleAuthor']
+  'FALSE'
+
+  Multiple male contributors lead to FALSE
+  >>> row1 = {'authorIdentifiers': 'Lieber, Sven (123);Doe, John (456)'}
+  >>> addGenderInfoColumn(row1, 'authorIdentifiers', 'femaleAuthor', {'123': 'Male', '456': 'Male'})
+  >>> row1['femaleAuthor']
+  'FALSE'
+
+  Multiple contributors with mix of male and unknown lead to UNKNOWN
+  >>> row2 = {'authorIdentifiers': 'Lieber, Sven (123);Doe, John (456)'}
+  >>> addGenderInfoColumn(row2, 'authorIdentifiers', 'femaleAuthor', {'123': 'Male', '456': ''})
+  >>> row2['femaleAuthor']
+  'UNKNOWN'
+
+  Single female contributor leads to TRUE
+  >>> row3 = {'authorIdentifiers': 'Doe, Jane (789)'}
+  >>> addGenderInfoColumn(row3, 'authorIdentifiers', 'femaleAuthor', {'789': 'Female'})
+  >>> row3['femaleAuthor']
+  'TRUE'
+
+  Multiple female contributors lead to TRUE
+  >>> row4 = {'authorIdentifiers': 'Doe, Jane (789);Doe, Sarah (100)'}
+  >>> addGenderInfoColumn(row4, 'authorIdentifiers', 'femaleAuthor', {'789': 'Female', '100': 'Female'})
+  >>> row4['femaleAuthor']
+  'TRUE'
+
+  Multiple contributors wiht mix of female and unknown lead to TRUE
+  >>> row5 = {'authorIdentifiers': 'Doe, Jane (789);Doe, Sarah (100)'}
+  >>> addGenderInfoColumn(row5, 'authorIdentifiers', 'femaleAuthor', {'789': 'Female', '100': ''})
+  >>> row5['femaleAuthor']
+  'TRUE'
+  """
+
+  contributors = []
+  if personDelimiter in row[inputCol]:
+    contributors = row[inputCol].split(personDelimiter)
+  else:
+    contributors = [row[inputCol]]
+
+  atLeastOneFemale = False
+  atLeastOneUnknown = False
+
+  for c in contributors:
+    contributorID = utils_stats.getContributorID(c)
+    if contributorID in lookup:
+      if lookup[contributorID] == 'Female':
+        atLeastOneFemale = True
+   
+      if lookup[contributorID] == '':
+        atLeastOneUnknown = True
+      
+  if atLeastOneFemale == True:
+    row[outputCol] = 'TRUE'
+  elif atLeastOneUnknown == True:
+    row[outputCol] = 'UNKNOWN'
+  else:
+    row[outputCol] = 'FALSE'
+     
 
 # -----------------------------------------------------------------------------
 def addCombinedCounting(row, contributions, roleMapping, firstRole, secondRole, combinedRole):
