@@ -83,6 +83,7 @@ MODULE_POSTPROCESS_SORT_COLUMN_VALUES="tools.csv.sort_values_in_columns"
 SCRIPT_POSTPROCESS_LOCATIONS="post-process-locations.py"
 SCRIPT_POSTPROCESS_DATES="post-process-dates.py"
 SCRIPT_POSTPROCESS_AUTHOR_TRANSLATOR="add_author_translator_count.py"
+SCRIPT_POSTPROCESS_AUTHOR_TRANSLATOR_GENDER="add_author_translator_gender_info.py"
 
 
 BNF_FILTER_CONFIG_CONTRIBUTORS="../data-sources/bnf/filter-config-beltrans-contributor-nationality.csv"
@@ -345,6 +346,7 @@ SUFFIX_DATA_PROFILE_PUBS_PER_PBL_FILE="translations-per-publisher.csv"
 SUFFIX_DATA_PROFILE_DTYPES="dataprofile-dtypes.csv"
 
 SUFFIX_DATA_PROFILE_FILE_AUTHOR_TRANSLATORS="integrated-data-author-translators.csv"
+SUFFIX_DATA_PROFILE_FILE_AUTHOR_TRANSLATOR_GENDER="integrated-data-author-translator_gender.csv"
 SUFFIX_DATA_PROFILE_FILE_PROCESSED="integrated-data.csv"
 SUFFIX_DATA_PROFILE_FILE_ALL="integrated-data-all-info.csv"
 SUFFIX_DATA_PROFILE_FILE_ENRICHED="integrated-data-enriched.csv"
@@ -1379,6 +1381,7 @@ function postprocess {
 
   integratedAllData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ALL"
   integratedDataAuthorTranslators="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_AUTHOR_TRANSLATORS"
+  integratedDataAuthorTranslatorGender="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_AUTHOR_TRANSLATOR_GENDER"
   integratedData="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_PROCESSED"
   integratedDataEnriched="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED"
   integratedDataEnrichedSorted="$integrationName/csv/$SUFFIX_DATA_PROFILE_FILE_ENRICHED_SORTED"
@@ -1454,8 +1457,12 @@ function postprocess {
   time python $SCRIPT_POSTPROCESS_AUTHOR_TRANSLATOR -c $allPersons -m $integratedData -o $integratedDataAuthorTranslators
 
   echo ""
+  echo "Add information about author and translator gender to the manifestation CSV"
+  time python $SCRIPT_POSTPROCESS_AUTHOR_TRANSLATOR_GENDER -c $allPersons -m $integratedDataAuthorTranslators -o $integratedDataAuthorTranslatorGender
+
+  echo ""
   echo "Sort delimited values in certain columns in the manifestation CSV"
-  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataAuthorTranslators -o $integratedDataEnrichedSorted \
+  time python -m $MODULE_POSTPROCESS_SORT_COLUMN_VALUES -i $integratedDataAuthorTranslatorGender -o $integratedDataEnrichedSorted \
        -c "sourceLanguage" -c "targetLanguage" -c "targetPlaceOfPublication" -c "targetCountryOfPublication" -c "targetThesaurusBB" -c "sourceThesaurusBB" -c "sourcePlaceOfPublication" -c "sourceCountryOfPublication"
 
 
