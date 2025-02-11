@@ -20,8 +20,8 @@ prefixes:
   schema: "http://schema.org/"
 
 variables:
-  authorities: &authorities "/data/beltrans/data-sources/isni-sru/2024-08-02_isni-sru-authorities.csv"
-  authorityLinks: &authorityLinks "/data/beltrans/data-sources/isni-sru/2024-08-02_isni-sru-identifier-links.csv"
+  authorities: &authorities ${RML_ISNI_AUTHORITY_FILE}
+  authorityLinks: &authorityLinks ${RML_ISNI_LINKS_FILE}
 
 mappings:
 
