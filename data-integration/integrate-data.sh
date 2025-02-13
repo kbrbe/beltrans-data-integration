@@ -1023,9 +1023,9 @@ function integrate {
   #
   echo ""
   echo "Create BELTRANS translations based on correlation list"
-  extractTranslationCorrelationList "$integrationName"
-  exit
+  #extractTranslationCorrelationList "$integrationName"
   transformTranslationCorrelationList "$integrationName"
+  exit
   loadTranslationCorrelationList "$integrationName"
 
   # Translations removal
@@ -3481,6 +3481,7 @@ function transformTranslationCorrelationList {
   local scenaristIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SCENARISTS"
   local publishingDirectorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_PUBLISHING_DIRECTORS"
   local targetPublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS"
+  local sourcePublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS"
   
   local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
 
@@ -3508,6 +3509,7 @@ function transformTranslationCorrelationList {
   export RML_SOURCE_CORRELATION_TRL_SCENARIST="$scenaristIdentifierLinks"
   export RML_SOURCE_CORRELATION_TRL_PUBLISHING_DIRECTOR="$publishingDirectorIdentifierLinks"
   export RML_SOURCE_CORRELATION_TRL_TARGET_PUBLISHER="$targetPublisherIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_SOURCE_PUBLISHER="$sourcePublisherIdentifierLinks"
 
   export RML_SOURCE_CORRELATION_TRL_TARGET_PLACE="$targetPlaceLinks"
   

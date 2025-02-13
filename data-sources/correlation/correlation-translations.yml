@@ -422,7 +422,7 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po:
-      - [marcrel:ill, btid:$(scenaristIdentifier)~iri]
+      - [marcrel:sce, btid:$(scenaristIdentifier)~iri]
 
 
   # ---------------------------------------------------------------------------
@@ -434,7 +434,7 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po:
-      - [marcrel:ill, btid:$(publishingDirectorIdentifier)~iri]
+      - [marcrel:pbd, btid:$(publishingDirectorIdentifier)~iri]
 
 
 

@@ -32,6 +32,7 @@ variables:
   sourceOriginalContISBN10: &sourceOriginalContISBN10 ${RML_SOURCE_CORRELATION_ORIG_ISBN10}
   sourceOriginalContISBN13: &sourceOriginalContISBN13 ${RML_SOURCE_CORRELATION_ORIG_ISBN13}
   sourceContSourceLang: &sourceContSourceLang ${RML_SOURCE_CORRELATION_TRL_SOURCE_LANG}
+  sourceOriginalContSourcePublisher: &sourceOriginalContSourcePublisher ${RML_SOURCE_CORRELATION_TRL_SOURCE_PUBLISHER}
 
 mappings:
 
@@ -258,6 +259,20 @@ mappings:
       - [a, bf:Identifier]
       - [rdfs:label, "ISBN-13"]
       - [rdf:value, $(isbn13)]
+
+  # ---------------------------------------------------------------------------
+  #
+  sourcePublisherLink:
+    sources:
+      - access: *sourceOriginalContSourcePublisher
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - [schema:publisher, btid:$(sourcePublisherIdentifier)~iri]
+      - [marcrel:pbl, btid:$(sourcePublisherIdentifier)~iri]
+
+
 
 
   # ---------------------------------------------------------------------------
