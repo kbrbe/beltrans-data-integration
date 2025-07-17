@@ -85,6 +85,7 @@ mappings:
     s: btid:$(id)
     po:
       - [a, skos:Concept]
+      - [skos:inScheme, btid:belgianBibliography~iri]
       - [skos:prefLabel, $(name), en~lang]
       - p: skos:broaderTransitive
         o: btid:$(parentID)~iri
@@ -107,6 +108,7 @@ mappings:
     s: btid:$(id)
     po:
       - [skos:prefLabel, $(name), nl~lang]
+      - [skos:inScheme, btid:belgianBibliography~iri]
       - p: skos:broaderTransitive
         o: btid:$(parentID)~iri
         condition:
@@ -128,6 +130,7 @@ mappings:
     s: btid:$(id)
     po:
       - [skos:prefLabel, $(name), fr~lang]
+      - [skos:inScheme, btid:belgianBibliography~iri]
       - p: skos:broaderTransitive
         o: btid:$(parentID)~iri
         condition:

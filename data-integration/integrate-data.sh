@@ -100,11 +100,11 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2024-08-26.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2024-08-26.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2025-02-10.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2025-02-10.xml"
 
-INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
-INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
+INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-documents.xml"
+INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-documents.xml"
 
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
@@ -112,16 +112,16 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2024-08-26.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2024-08-26.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2024-08-26.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2024-08-26.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2025-02-10.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2025-02-10.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2025-02-10.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2025-02-10.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2024-08-26.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2025-02-10.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -170,10 +170,10 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2024-08-06_person_contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2024-08-06_org_contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2024-08-06_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2024-08-06_translations_removal-list.csv"
+INPUT_CORRELATION_PERSON="../data-sources/correlation/2025-02-10_person_contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="../data-sources/correlation/2025-02-10_org_contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2025-02-10_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2025-02-10_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -605,11 +605,19 @@ SUFFIX_CORRELATION_TRL_TARGET_BB_CODES="correlation-trl-target-bb-codes.csv"
 
 SUFFIX_CORRELATION_TRL_AUTHORS="correlation-trl-authors.csv"
 SUFFIX_CORRELATION_TRL_TRANSLATORS="correlation-trl-translators.csv"
+SUFFIX_CORRELATION_TRL_ILLUSTRATORS="correlation-trl-illustrators.csv"
+SUFFIX_CORRELATION_TRL_SCENARISTS="correlation-trl-scenarists.csv"
+SUFFIX_CORRELATION_TRL_PUBLISHING_DIRECTORS="correlation-trl-publishing-directors.csv"
 SUFFIX_CORRELATION_TRL_TARGET_PUBLISHERS="correlation-trl-target-publishers.csv"
+SUFFIX_CORRELATION_TRL_SOURCE_PUBLISHERS="correlation-trl-source-publishers.csv"
 
 SUFFIX_CORRELATION_TRL_LINK_AUTHORS="correlation-trl-author-links.csv"
-SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS="correlation-trl-translator-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_TRANSLATORS="correlation-trl-translator-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_ILLUSTRATORS="correlation-trl-illustrator-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_SCENARISTS="correlation-trl-scenarist-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_PUBLISHING_DIRECTORS="correlation-trl-publishing-director-links.csv"
 SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS="correlation-trl-target-publisher-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS="correlation-trl-source-publisher-links.csv"
   
 SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE="correlation-trl-target-place-links.csv"
 
@@ -1037,6 +1045,7 @@ function integrate {
   time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
     --config $manifestationIntegrationConfig --query-log-dir $queryLogDir
 
+
   echo ""
   echo "Automatically integrate contributors ..."
   time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "contributors" --target-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
@@ -1077,9 +1086,10 @@ function integrate {
   echo "Perform Clustering ..."
 
   # 2024-06-28: do not reuse existing descriptive keys, only cluster assignments https://github.com/kbrbe/work-set-clustering/issues/9
-  clustering "$integrationName" "$existingClusterAssignments"
+  clustering "$integrationName" "true"
   # alternative without reusing existing clusters at all:
   # clustering "$integrationName"
+
 
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
@@ -1734,33 +1744,33 @@ function extractKBR {
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data FR-NL"
-  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
+  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data NL-FR"
-  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
+  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "$alreadyFetchedContributors"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
+  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "$alreadyFetchedContributors"
+  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
+  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
 
   # 2024-07-29: Provide full path as parameter instead of parts of the path
-  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
-  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  #extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  #extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
   kbrTranslationsCSVFRNL="$integrationName/kbr/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   kbrTranslationsCSVNLFR="$integrationName/kbr/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
   kbrLinkedOriginalsXML="$integrationName/kbr/book-data-and-contributions/linked-originals/fetched-originals.xml"
-  python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
-    --identifier-column "sourceKBRID" \
-    -b "150" \
-    -u "$ENV_KBR_API_Z3950" \
-    "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
-  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$kbrLinkedOriginalsXML" "linked-originals"
+  #python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
+  #  --identifier-column "sourceKBRID" \
+  #  -b "150" \
+  #  -u "$ENV_KBR_API_Z3950" \
+  #  "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
+  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$kbrLinkedOriginalsXML" "linked-originals"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals linked authorities data"
@@ -1772,19 +1782,19 @@ function extractKBR {
 
   # Use filters to extract different types of authorities from the same contribution CSV file
   #
-  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsPersonContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_PERSON
-  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
+  #python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsPersonContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_PERSON
+  #python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
 
   echo ""
   echo "Fetch KBR originals - persons"
-  getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
+  #getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
   echo ""
   echo "Extract CSV data from fetched linked original authorities - persons"
-  extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
+  #extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
 
   echo ""
   echo "Fetch KBR originals - orgs"
-  getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
+  #getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
 
   echo ""
   echo "Extract CSV data from fetched linked original authorities - orgs"
@@ -2316,41 +2326,40 @@ function transformKBR {
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - fr-nl"
-  mapKBRBookInformationAndContributions $integrationName "kbr" "fr-nl"
+  #mapKBRBookInformationAndContributions $integrationName "kbr" "fr-nl"
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - nl-fr"
-  mapKBRBookInformationAndContributions $integrationName "kbr" "nl-fr"
+  #mapKBRBookInformationAndContributions $integrationName "kbr" "nl-fr"
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - linked-originals"
-  mapKBRBookInformationAndContributions $integrationName "kbr" "linked-originals"
-
+  #mapKBRBookInformationAndContributions $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR translation data to RDF - FR-NL"
-  mapKBRTranslationsAndContributions $integrationName "kbr" "fr-nl"
+  #mapKBRTranslationsAndContributions $integrationName "kbr" "fr-nl"
 
   echo ""
   echo "TRANSFORMATION - Map KBR translation data to RDF - NL-FR"
-  mapKBRTranslationsAndContributions $integrationName "kbr" "nl-fr"
+  #mapKBRTranslationsAndContributions $integrationName "kbr" "nl-fr"
 
   echo ""
   echo "TRANSFORMATION - Map KBR (limited) original information to RDF (FR-NL and NL-FR)"
-  mapKBRTranslationLimitedOriginals $integrationName "kbr"
+  #mapKBRTranslationLimitedOriginals $integrationName "kbr"
 
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked person authorities data to RDF"
-  mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
-  mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
-  mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
-  mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
+  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
+  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
+  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
+  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked org authorities data to RDF"
-  mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
-  mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
+  #mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
+  #mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
   mapKBRLinkedOrgAuthorities $integrationName "kbr" "linked-originals"
 
 
@@ -3196,11 +3205,19 @@ function extractTranslationCorrelationList {
 
   local correlationListAuthors="$folderName/$SUFFIX_CORRELATION_TRL_AUTHORS"
   local correlationListTranslators="$folderName/$SUFFIX_CORRELATION_TRL_TRANSLATORS"
+  local correlationListIllustrators="$folderName/$SUFFIX_CORRELATION_TRL_ILLUSTRATORS"
+  local correlationListScenarists="$folderName/$SUFFIX_CORRELATION_TRL_SCENARISTS"
+  local correlationListPublishingDirectors="$folderName/$SUFFIX_CORRELATION_TRL_PUBLISHING_DIRECTORS"
   local correlationListTargetPublishers="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_PUBLISHERS"
+  local correlationListSourcePublishers="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_PUBLISHERS"
 
   local authorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_AUTHORS"
-  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS"
+  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLATORS"
+  local illustratorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_ILLUSTRATORS"
+  local scenaristIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SCENARISTS"
+  local publishingDirectorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_PUBLISHING_DIRECTORS"
   local targetPublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS"
+  local sourcePublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS"
   
   local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
 
@@ -3219,16 +3236,29 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListOriginalISBN13 "targetIdentifier" "sourceISBN13" "id" "isbn13"
   extractSeparatedColumn $correlationList $correlationListOriginalKBRIDs "targetIdentifier" "sourceKBRIdentifier" "id" "KBR"
 
+  # extract authors, translators and targePublisherIdentifiers from the correlation list
+  # https://github.com/kbrbe/beltrans-data-integration/issues/228
   extractSeparatedColumn $correlationList $correlationListAuthors "targetIdentifier" "authorIdentifiers" "id" "authorIdentifier"
   extractSeparatedColumn $correlationList $correlationListTranslators "targetIdentifier" "translatorIdentifiers" "id" "translatorIdentifier"
   extractSeparatedColumn $correlationList $correlationListTargetPublishers "targetIdentifier" "targetPublisherIdentifiers" "id" "targetPublisherIdentifier"
+
+  # 2025-02-12: also extract other contributor roles from the correlation list 
+  # https://github.com/kbrbe/beltrans-data-integration/issues/228
+  extractSeparatedColumn $correlationList $correlationListIllustrators "targetIdentifier" "illustratorIdentifiers" "id" "illustratorIdentifier"
+  extractSeparatedColumn $correlationList $correlationListScenarists "targetIdentifier" "scenaristIdentifiers" "id" "scenaristIdentifier"
+  extractSeparatedColumn $correlationList $correlationListPublishingDirectors "targetIdentifier" "publishingDirectorIdentifiers" "id" "publishingDirectorIdentifier"
+  extractSeparatedColumn $correlationList $correlationListSourcePublishers "targetIdentifier" "sourcePublisherIdentifiers" "id" "sourcePublisherIdentifier"
 
   extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targetPlaceOfPublication"
 
   
   python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListAuthors -o $authorIdentifierLinks --id-column "id" -c "authorIdentifier"
   python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTranslators -o $translatorIdentifierLinks --id-column "id" -c "translatorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListIllustrators -o $illustratorIdentifierLinks --id-column "id" -c "illustratorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListScenarists -o $scenaristIdentifierLinks --id-column "id" -c "scenaristIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListPublishingDirectors -o $publishingDirectorIdentifierLinks --id-column "id" -c "publishingDirectorIdentifier"
   python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTargetPublishers -o $targetPublisherIdentifierLinks --id-column "id" -c "targetPublisherIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListSourcePublishers -o $sourcePublisherIdentifierLinks --id-column "id" -c "sourcePublisherIdentifier"
 
   # 2023-12-15: we currently have LEXICON codes instead the name of genres
   # if there will be names again, the extra step below to lookup codes is important
@@ -3446,8 +3476,12 @@ function transformTranslationCorrelationList {
   local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
   local authorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_AUTHORS"
-  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS"
+  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLATORS"
+  local illustratorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_ILLUSTRATORS"
+  local scenaristIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SCENARISTS"
+  local publishingDirectorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_PUBLISHING_DIRECTORS"
   local targetPublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS"
+  local sourcePublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS"
   
   local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
 
@@ -3471,7 +3505,11 @@ function transformTranslationCorrelationList {
 
   export RML_SOURCE_CORRELATION_TRL_AUTHOR="$authorIdentifierLinks"
   export RML_SOURCE_CORRELATION_TRL_TRANSLATOR="$translatorIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_ILLUSTRATOR="$illustratorIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_SCENARIST="$scenaristIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_PUBLISHING_DIRECTOR="$publishingDirectorIdentifierLinks"
   export RML_SOURCE_CORRELATION_TRL_TARGET_PUBLISHER="$targetPublisherIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_SOURCE_PUBLISHER="$sourcePublisherIdentifierLinks"
 
   export RML_SOURCE_CORRELATION_TRL_TARGET_PLACE="$targetPlaceLinks"
   
@@ -3696,7 +3734,7 @@ function loadKBR {
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "nl-fr" "$linkedAuthoritiesNamedGraph"
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "linked-originals" "$linkedAuthoritiesNamedGraph"
 
-  #loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
+  loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
 }
 
 # -----------------------------------------------------------------------------

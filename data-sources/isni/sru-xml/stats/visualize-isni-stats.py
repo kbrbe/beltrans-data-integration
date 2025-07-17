@@ -18,7 +18,7 @@ def plotNumberTimeline(df, columns, title):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('files', nargs='+', help="Input text file containing statistics that need to be reformatted")
+parser.add_argument('files', nargs='+', help="Input CSV file containing statistics that need to be visualized")
 options = parser.parse_args()
 
 # Create a single pandas dataframe from all CSV measurement files

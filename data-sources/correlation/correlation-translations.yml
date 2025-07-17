@@ -39,6 +39,9 @@ variables:
   sourceContTargetBB: &sourceContTargetBB ${RML_SOURCE_CORRELATION_TRL_TARGET_BB}
   sourceContAuthor: &sourceContAuthor ${RML_SOURCE_CORRELATION_TRL_AUTHOR}
   sourceContTranslator: &sourceContTranslator ${RML_SOURCE_CORRELATION_TRL_TRANSLATOR}
+  sourceContIllustrator: &sourceContIllustrator ${RML_SOURCE_CORRELATION_TRL_ILLUSTRATOR}
+  sourceContScenarist: &sourceContScenarist ${RML_SOURCE_CORRELATION_TRL_SCENARIST}
+  sourceContPublishingDirector: &sourceContPublishingDirector ${RML_SOURCE_CORRELATION_TRL_PUBLISHING_DIRECTOR}
   sourceContTargetPublisher: &sourceContTargetPublisher ${RML_SOURCE_CORRELATION_TRL_TARGET_PUBLISHER}
   sourceContTargetPlace: &sourceContTargetPlace ${RML_SOURCE_CORRELATION_TRL_TARGET_PLACE}
 
@@ -398,6 +401,43 @@ mappings:
     po:
       - [schema:translator, btid:$(translatorIdentifier)~iri]
       - [marcrel:trl, btid:$(translatorIdentifier)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  illustratorLink:
+    sources:
+      - access: *sourceContIllustrator
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - [marcrel:ill, btid:$(illustratorIdentifier)~iri]
+
+  # ---------------------------------------------------------------------------
+  #
+  scenaristLink:
+    sources:
+      - access: *sourceContScenarist
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - [marcrel:sce, btid:$(scenaristIdentifier)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  publishingDirectorLink:
+    sources:
+      - access: *sourceContPublishingDirector
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:$(id)
+    po:
+      - [marcrel:pbd, btid:$(publishingDirectorIdentifier)~iri]
+
+
+
 
   # ---------------------------------------------------------------------------
   #
