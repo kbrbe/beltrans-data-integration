@@ -103,8 +103,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2025-02-10.xml"
 INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2025-02-10.xml"
 
-INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-gelinkte-documenten.xml"
-INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-gelinkte-documenten.xml"
+INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-documents.xml"
+INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-documents.xml"
 
 INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
 
@@ -114,7 +114,7 @@ INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_
 # KBR - linked authorities
 INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2025-02-10.xml"
 INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2025-02-10.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2025-01-10.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2025-02-10.xml"
 INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2025-02-10.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
@@ -605,11 +605,19 @@ SUFFIX_CORRELATION_TRL_TARGET_BB_CODES="correlation-trl-target-bb-codes.csv"
 
 SUFFIX_CORRELATION_TRL_AUTHORS="correlation-trl-authors.csv"
 SUFFIX_CORRELATION_TRL_TRANSLATORS="correlation-trl-translators.csv"
+SUFFIX_CORRELATION_TRL_ILLUSTRATORS="correlation-trl-illustrators.csv"
+SUFFIX_CORRELATION_TRL_SCENARISTS="correlation-trl-scenarists.csv"
+SUFFIX_CORRELATION_TRL_PUBLISHING_DIRECTORS="correlation-trl-publishing-directors.csv"
 SUFFIX_CORRELATION_TRL_TARGET_PUBLISHERS="correlation-trl-target-publishers.csv"
+SUFFIX_CORRELATION_TRL_SOURCE_PUBLISHERS="correlation-trl-source-publishers.csv"
 
 SUFFIX_CORRELATION_TRL_LINK_AUTHORS="correlation-trl-author-links.csv"
-SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS="correlation-trl-translator-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_TRANSLATORS="correlation-trl-translator-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_ILLUSTRATORS="correlation-trl-illustrator-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_SCENARISTS="correlation-trl-scenarist-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_PUBLISHING_DIRECTORS="correlation-trl-publishing-director-links.csv"
 SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS="correlation-trl-target-publisher-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS="correlation-trl-source-publisher-links.csv"
   
 SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE="correlation-trl-target-place-links.csv"
 
@@ -978,21 +986,21 @@ function integrate {
   source ./py-integration-env/bin/activate
 
   # first delete content of the named graph in case it already exists
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_ORIG"
-  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_REMOVAL"
+  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
+  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
+  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_ORIG"
+  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_REMOVAL"
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology for records which do not yet have those"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
   #
   # schema:name properties have to exist as they are required in the triple pattern for the data integration
   #
   echo ""
   echo "Create schema:name properties based on BIBFRAME titles/subtitles for records which do not yet have schema:name"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
 
   #
   # CREATE CORRELATION LIST ENTRIES BEFORE THE AUTOMATIC INTEGRATION
@@ -1001,22 +1009,23 @@ function integrate {
   #
   echo ""
   echo "Create BELTRANS person contributors based on correlation list"
-  extractContributorPersonCorrelationList "$integrationName"
-  transformContributorPersonCorrelationList "$integrationName"
-  loadContributorPersonCorrelationList "$integrationName"
+  #extractContributorPersonCorrelationList "$integrationName"
+  #transformContributorPersonCorrelationList "$integrationName"
+  #loadContributorPersonCorrelationList "$integrationName"
 
   echo ""
   echo "Create BELTRANS org contributors based on correlation list"
-  extractContributorOrgCorrelationList "$integrationName"
-  transformContributorOrgCorrelationList "$integrationName"
-  loadContributorOrgCorrelationList "$integrationName"
+  #extractContributorOrgCorrelationList "$integrationName"
+  #transformContributorOrgCorrelationList "$integrationName"
+  #loadContributorOrgCorrelationList "$integrationName"
 
   # Translations
   #
   echo ""
   echo "Create BELTRANS translations based on correlation list"
-  extractTranslationCorrelationList "$integrationName"
+  #extractTranslationCorrelationList "$integrationName"
   transformTranslationCorrelationList "$integrationName"
+  exit
   loadTranslationCorrelationList "$integrationName"
 
   # Translations removal
@@ -3196,11 +3205,19 @@ function extractTranslationCorrelationList {
 
   local correlationListAuthors="$folderName/$SUFFIX_CORRELATION_TRL_AUTHORS"
   local correlationListTranslators="$folderName/$SUFFIX_CORRELATION_TRL_TRANSLATORS"
+  local correlationListIllustrators="$folderName/$SUFFIX_CORRELATION_TRL_ILLUSTRATORS"
+  local correlationListScenarists="$folderName/$SUFFIX_CORRELATION_TRL_SCENARISTS"
+  local correlationListPublishingDirectors="$folderName/$SUFFIX_CORRELATION_TRL_PUBLISHING_DIRECTORS"
   local correlationListTargetPublishers="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_PUBLISHERS"
+  local correlationListSourcePublishers="$folderName/$SUFFIX_CORRELATION_TRL_SOURCE_PUBLISHERS"
 
   local authorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_AUTHORS"
-  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS"
+  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLATORS"
+  local illustratorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_ILLUSTRATORS"
+  local scenaristIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SCENARISTS"
+  local publishingDirectorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_PUBLISHING_DIRECTORS"
   local targetPublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS"
+  local sourcePublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS"
   
   local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
 
@@ -3219,16 +3236,29 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListOriginalISBN13 "targetIdentifier" "sourceISBN13" "id" "isbn13"
   extractSeparatedColumn $correlationList $correlationListOriginalKBRIDs "targetIdentifier" "sourceKBRIdentifier" "id" "KBR"
 
+  # extract authors, translators and targePublisherIdentifiers from the correlation list
+  # https://github.com/kbrbe/beltrans-data-integration/issues/228
   extractSeparatedColumn $correlationList $correlationListAuthors "targetIdentifier" "authorIdentifiers" "id" "authorIdentifier"
   extractSeparatedColumn $correlationList $correlationListTranslators "targetIdentifier" "translatorIdentifiers" "id" "translatorIdentifier"
   extractSeparatedColumn $correlationList $correlationListTargetPublishers "targetIdentifier" "targetPublisherIdentifiers" "id" "targetPublisherIdentifier"
+
+  # 2025-02-12: also extract other contributor roles from the correlation list 
+  # https://github.com/kbrbe/beltrans-data-integration/issues/228
+  extractSeparatedColumn $correlationList $correlationListIllustrators "targetIdentifier" "illustratorIdentifiers" "id" "illustratorIdentifier"
+  extractSeparatedColumn $correlationList $correlationListScenarists "targetIdentifier" "scenaristIdentifiers" "id" "scenaristIdentifier"
+  extractSeparatedColumn $correlationList $correlationListPublishingDirectors "targetIdentifier" "publishingDirectorIdentifiers" "id" "publishingDirectorIdentifier"
+  extractSeparatedColumn $correlationList $correlationListSourcePublishers "targetIdentifier" "sourcePublisherIdentifiers" "id" "sourcePublisherIdentifier"
 
   extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targetPlaceOfPublication"
 
   
   python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListAuthors -o $authorIdentifierLinks --id-column "id" -c "authorIdentifier"
   python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTranslators -o $translatorIdentifierLinks --id-column "id" -c "translatorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListIllustrators -o $illustratorIdentifierLinks --id-column "id" -c "illustratorIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListScenarists -o $scenaristIdentifierLinks --id-column "id" -c "scenaristIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListPublishingDirectors -o $publishingDirectorIdentifierLinks --id-column "id" -c "publishingDirectorIdentifier"
   python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListTargetPublishers -o $targetPublisherIdentifierLinks --id-column "id" -c "targetPublisherIdentifier"
+  python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListSourcePublishers -o $sourcePublisherIdentifierLinks --id-column "id" -c "sourcePublisherIdentifier"
 
   # 2023-12-15: we currently have LEXICON codes instead the name of genres
   # if there will be names again, the extra step below to lookup codes is important
@@ -3446,8 +3476,12 @@ function transformTranslationCorrelationList {
   local correlationListTargetBBCodes="$folderName/$SUFFIX_CORRELATION_TRL_TARGET_BB_CODES"
 
   local authorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_AUTHORS"
-  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLTORS"
+  local translatorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TRANSLATORS"
+  local illustratorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_ILLUSTRATORS"
+  local scenaristIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SCENARISTS"
+  local publishingDirectorIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_PUBLISHING_DIRECTORS"
   local targetPublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS"
+  local sourcePublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS"
   
   local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
 
@@ -3471,7 +3505,11 @@ function transformTranslationCorrelationList {
 
   export RML_SOURCE_CORRELATION_TRL_AUTHOR="$authorIdentifierLinks"
   export RML_SOURCE_CORRELATION_TRL_TRANSLATOR="$translatorIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_ILLUSTRATOR="$illustratorIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_SCENARIST="$scenaristIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_PUBLISHING_DIRECTOR="$publishingDirectorIdentifierLinks"
   export RML_SOURCE_CORRELATION_TRL_TARGET_PUBLISHER="$targetPublisherIdentifierLinks"
+  export RML_SOURCE_CORRELATION_TRL_SOURCE_PUBLISHER="$sourcePublisherIdentifierLinks"
 
   export RML_SOURCE_CORRELATION_TRL_TARGET_PLACE="$targetPlaceLinks"
   
