@@ -341,6 +341,8 @@ def getContributorID(nameIDString):
   '123'
   >>> getContributorID('Lieber, Sven ')
   ''
+  >>> getContributorID('writehi(s)story (3c49e2c2-df3b-457f-b41a-fbe7833bd4d5)')
+  '3c49e2c2-df3b-457f-b41a-fbe7833bd4d5'
   """
   if '(' in nameIDString:
     contributorIDs = re.findall(r'\((.*)\)', nameIDString)
@@ -369,6 +371,9 @@ def countContributionBasedOnIdentifier(value, counter, valueDelimiter=';'):
   2
   >>> countContributionBasedOnIdentifier('"_$C(128)_"y!"_$C(138,139"', counter)
   >>> counter['128']
+  1
+  >>> countContributionBasedOnIdentifier('writehi(s)story (3c49e2c2-df3b-457f-b41a-fbe7833bd4d5)', counter)
+  >>> counter['3c49e2c2-df3b-457f-b41a-fbe7833bd4d5']
   1
   """
   if value != '':
