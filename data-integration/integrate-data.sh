@@ -4480,6 +4480,35 @@ function uploadData {
 }
 
 # -----------------------------------------------------------------------------
+function uploadRDFData {
+  local endpointURL=$1
+  local namespace=$2
+  local namedGraph=$3
+  local format=$4
+  shift 4
+  files=($"$@")
+
+  if [[ "$format" == "$FORMAT_SPARQL_UPDATE" ]];
+  then
+    # call to python script
+  else
+    props="$(mktemp)"
+    cat > "$props" <<EOF
+com.bigdata.rdf.store.AbstractTripleStore.quads=true
+com.bigdata.rdf.store.DataLoader.commit=Each
+EOF
+
+    java -Xm4g -cp /opt/blazegraph.jar \
+      com.bigdata.rdf.store.DataLoader \
+      -namespace "$namespace" \
+      -defaultGraph "$namedGraph" \
+      "$props" \
+      "${files[@]}"
+    rm -f "$props"
+  fi
+}
+
+# -----------------------------------------------------------------------------
 function deleteNamedGraph {
   local namespace=$1
   local endpoint=$2
