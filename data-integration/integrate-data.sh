@@ -986,21 +986,21 @@ function integrate {
   source ./py-integration-env/bin/activate
 
   # first delete content of the named graph in case it already exists
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_ORIG"
-  #deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_REMOVAL"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_TRL"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_CONT"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_ORIG"
+  deleteNamedGraph "$TRIPLE_STORE_NAMESPACE" "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_GRAPH_INT_REMOVAL"
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology for records which do not yet have those"
-  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
   #
   # schema:name properties have to exist as they are required in the triple pattern for the data integration
   #
   echo ""
   echo "Create schema:name properties based on BIBFRAME titles/subtitles for records which do not yet have schema:name"
-  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
+  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
 
   #
   # CREATE CORRELATION LIST ENTRIES BEFORE THE AUTOMATIC INTEGRATION
@@ -1009,23 +1009,22 @@ function integrate {
   #
   echo ""
   echo "Create BELTRANS person contributors based on correlation list"
-  #extractContributorPersonCorrelationList "$integrationName"
-  #transformContributorPersonCorrelationList "$integrationName"
-  #loadContributorPersonCorrelationList "$integrationName"
+  extractContributorPersonCorrelationList "$integrationName"
+  transformContributorPersonCorrelationList "$integrationName"
+  loadContributorPersonCorrelationList "$integrationName"
 
   echo ""
   echo "Create BELTRANS org contributors based on correlation list"
-  #extractContributorOrgCorrelationList "$integrationName"
-  #transformContributorOrgCorrelationList "$integrationName"
-  #loadContributorOrgCorrelationList "$integrationName"
+  extractContributorOrgCorrelationList "$integrationName"
+  transformContributorOrgCorrelationList "$integrationName"
+  loadContributorOrgCorrelationList "$integrationName"
 
   # Translations
   #
   echo ""
   echo "Create BELTRANS translations based on correlation list"
-  #extractTranslationCorrelationList "$integrationName"
+  extractTranslationCorrelationList "$integrationName"
   transformTranslationCorrelationList "$integrationName"
-  exit
   loadTranslationCorrelationList "$integrationName"
 
   # Translations removal
@@ -1045,6 +1044,7 @@ function integrate {
   echo "Automatically integrate manifestations ..."
   time python $SCRIPT_INTERLINK_DATA_CLUSTERING -u "$integrationNamespace" --query-type "manifestations" --target-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
     --config $manifestationIntegrationConfig --query-log-dir $queryLogDir
+
 
   echo ""
   echo "Automatically integrate contributors ..."
@@ -1086,9 +1086,10 @@ function integrate {
   echo "Perform Clustering ..."
 
   # 2024-06-28: do not reuse existing descriptive keys, only cluster assignments https://github.com/kbrbe/work-set-clustering/issues/9
-  clustering "$integrationName" "$existingClusterAssignments"
+  clustering "$integrationName" "true"
   # alternative without reusing existing clusters at all:
   # clustering "$integrationName"
+
 
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
@@ -1743,33 +1744,33 @@ function extractKBR {
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data FR-NL"
-  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
+  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data NL-FR"
-  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
+  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "$alreadyFetchedContributors"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
+  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "$alreadyFetchedContributors"
+  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
+  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
 
   # 2024-07-29: Provide full path as parameter instead of parts of the path
-  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
-  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  #extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  #extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
   kbrTranslationsCSVFRNL="$integrationName/kbr/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   kbrTranslationsCSVNLFR="$integrationName/kbr/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
   kbrLinkedOriginalsXML="$integrationName/kbr/book-data-and-contributions/linked-originals/fetched-originals.xml"
-  python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
-    --identifier-column "sourceKBRID" \
-    -b "150" \
-    -u "$ENV_KBR_API_Z3950" \
-    "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
-  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$kbrLinkedOriginalsXML" "linked-originals"
+  #python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
+  #  --identifier-column "sourceKBRID" \
+  #  -b "150" \
+  #  -u "$ENV_KBR_API_Z3950" \
+  #  "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
+  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$kbrLinkedOriginalsXML" "linked-originals"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals linked authorities data"
@@ -1781,19 +1782,19 @@ function extractKBR {
 
   # Use filters to extract different types of authorities from the same contribution CSV file
   #
-  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsPersonContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_PERSON
-  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
+  #python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsPersonContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_PERSON
+  #python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
 
   echo ""
   echo "Fetch KBR originals - persons"
-  getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
+  #getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
   echo ""
   echo "Extract CSV data from fetched linked original authorities - persons"
-  extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
+  #extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
 
   echo ""
   echo "Fetch KBR originals - orgs"
-  getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
+  #getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
 
   echo ""
   echo "Extract CSV data from fetched linked original authorities - orgs"
@@ -2325,41 +2326,40 @@ function transformKBR {
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - fr-nl"
-  mapKBRBookInformationAndContributions $integrationName "kbr" "fr-nl"
+  #mapKBRBookInformationAndContributions $integrationName "kbr" "fr-nl"
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - nl-fr"
-  mapKBRBookInformationAndContributions $integrationName "kbr" "nl-fr"
+  #mapKBRBookInformationAndContributions $integrationName "kbr" "nl-fr"
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - linked-originals"
-  mapKBRBookInformationAndContributions $integrationName "kbr" "linked-originals"
-
+  #mapKBRBookInformationAndContributions $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR translation data to RDF - FR-NL"
-  mapKBRTranslationsAndContributions $integrationName "kbr" "fr-nl"
+  #mapKBRTranslationsAndContributions $integrationName "kbr" "fr-nl"
 
   echo ""
   echo "TRANSFORMATION - Map KBR translation data to RDF - NL-FR"
-  mapKBRTranslationsAndContributions $integrationName "kbr" "nl-fr"
+  #mapKBRTranslationsAndContributions $integrationName "kbr" "nl-fr"
 
   echo ""
   echo "TRANSFORMATION - Map KBR (limited) original information to RDF (FR-NL and NL-FR)"
-  mapKBRTranslationLimitedOriginals $integrationName "kbr"
+  #mapKBRTranslationLimitedOriginals $integrationName "kbr"
 
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked person authorities data to RDF"
-  mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
-  mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
-  mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
-  mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
+  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
+  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
+  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
+  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked org authorities data to RDF"
-  mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
-  mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
+  #mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
+  #mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
   mapKBRLinkedOrgAuthorities $integrationName "kbr" "linked-originals"
 
 
@@ -3734,7 +3734,7 @@ function loadKBR {
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "nl-fr" "$linkedAuthoritiesNamedGraph"
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "linked-originals" "$linkedAuthoritiesNamedGraph"
 
-  #loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
+  loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
 }
 
 # -----------------------------------------------------------------------------
