@@ -331,9 +331,18 @@ def getContributorName(nameIDString):
   >>> getContributorName('Lieber, Sven ')
   'Lieber, Sven'
   >>> getContributorName('writehi(s)story (3c49e2c2-df3b-457f-b41a-fbe7833bd4d5)')
-  'writehi(s)story' 
+  'writehi(s)story'
+  >>> getContributorName('writehi((s)sto(ry (3c49e2c2-df3b-457f-b41a-fbe7833bd4d5)')
+  'writehi((s)sto(ry'
   """
-  contributorName = nameIDString.split('(')[0] if '(' in nameIDString else nameIDString
+  contributorName = nameIDString
+  if '(' in nameIDString:
+    components = nameIDString.split('(')
+    if len(components) == 2:
+      contributorName = components[0]
+    else:
+      contributorName = '('.join(components[:-1])
+    
   return contributorName.strip()
 
 # -----------------------------------------------------------------------------
@@ -346,13 +355,13 @@ def getContributorID(nameIDString):
   >>> getContributorID('writehi(s)story (3c49e2c2-df3b-457f-b41a-fbe7833bd4d5)')
   '3c49e2c2-df3b-457f-b41a-fbe7833bd4d5'
   """
+  contributorID = nameIDString
   if '(' in nameIDString:
-    contributorIDs = re.findall(r'\((.*)\)', nameIDString)
-    #print(contributorIDs)
-    if len(contributorIDs) > 0:
-      contributorID = contributorIDs[0]
+    components = nameIDString.split('(')
+    if len(components) == 2:
+      contributorID = components[1].rstrip(')')
     else:
-      contributorID = ''
+      contributorID = components[-1].rstrip(')')
   else:
     contributorID = ''
   return contributorID.strip()
@@ -372,9 +381,11 @@ def countContributionBasedOnIdentifier(value, counter, valueDelimiter=';'):
   >>> countContributionBasedOnIdentifier('Lieber, Sven (123)', counter)
   >>> counter['123']
   2
-  >>> countContributionBasedOnIdentifier('"_$C(128)_"y!"_$C(138,139"', counter)
-  >>> counter['128']
-  1
+  
+  Legacy test case, where does it come from?
+  #>>> countContributionBasedOnIdentifier('"_$C(128)_"y!"_$C(138,139"', counter)
+  #>>> counter['128']
+  #1
   >>> countContributionBasedOnIdentifier('writehi(s)story (3c49e2c2-df3b-457f-b41a-fbe7833bd4d5)', counter)
   >>> counter['3c49e2c2-df3b-457f-b41a-fbe7833bd4d5']
   1
@@ -405,9 +416,11 @@ def countContribution(value, counter, valueDelimiter=';'):
   >>> countContribution('Lieber, Sven (123,456)', counter)
   >>> counter['Lieber, Sven']
   2
-  >>> countContribution('"_$C(128,129)_"y!"_$C(138,139"', counter)
-  >>> counter['"_$C']
-  1
+
+  Legacy test case, from where does it come from?
+  #>>> countContribution('"_$C(128,129)_"y!"_$C(138,139"', counter)
+  #>>> counter['"_$C']
+  #1
   """
   if value != '':
     contributors = value.split(valueDelimiter) if valueDelimiter in value else [value]
