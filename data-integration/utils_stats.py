@@ -330,6 +330,8 @@ def getContributorName(nameIDString):
   'Lieber, Sven'
   >>> getContributorName('Lieber, Sven ')
   'Lieber, Sven'
+  >>> getContributorName('writehi(s)story (3c49e2c2-df3b-457f-b41a-fbe7833bd4d5)')
+  'writehi(s)story' 
   """
   contributorName = nameIDString.split('(')[0] if '(' in nameIDString else nameIDString
   return contributorName.strip()
@@ -346,6 +348,7 @@ def getContributorID(nameIDString):
   """
   if '(' in nameIDString:
     contributorIDs = re.findall(r'\((.*)\)', nameIDString)
+    #print(contributorIDs)
     if len(contributorIDs) > 0:
       contributorID = contributorIDs[0]
     else:
