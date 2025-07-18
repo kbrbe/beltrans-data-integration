@@ -4491,11 +4491,14 @@ function uploadRDFData {
   if [[ "$format" == "$FORMAT_SPARQL_UPDATE" ]];
   then
     # call to python script
+    local uploadURL="$endpointURL/namespace/$namespace/sparql"
+    python upload_data.py -u "$uploadURL" --content-type "$format" --named-graph "$namedGraph" $files
   else
     props="$(mktemp)"
     cat > "$props" <<EOF
 com.bigdata.rdf.store.AbstractTripleStore.quads=true
-com.bigdata.rdf.store.DataLoader.commit=Each
+com.bigdata.rdf.store.DataLoader.commit=Batch
+com.bigdata.rdf.store.DataLoader.flush=false
 EOF
 
     java -Xm4g -cp /opt/blazegraph.jar \
