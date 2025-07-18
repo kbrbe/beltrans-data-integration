@@ -1,0 +1,4 @@
+SELECT *
+WHERE {
+  graph <http://test> { ?s ?p ?o . }
+}
