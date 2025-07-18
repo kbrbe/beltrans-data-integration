@@ -5,6 +5,8 @@ cd ..
 export PYTHONPATH=$(pwd)
 cd -
 
+. integration-functions.sh
+
 SCRIPT_CLEAN_TRANSLATIONS="../data-sources/kbr/clean-marc-slim.py"
 SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
 SCRIPT_EXTRACT_AGENTS_ORGS="../data-sources/kbr/authority-orgs-marc-to-csv.py"
@@ -4477,38 +4479,6 @@ function uploadData {
 
   echo . $SCRIPT_UPLOAD_DATA "$namespace" "$fileToUpload" "$format" "$endpoint" "$namedGraph"
   . $SCRIPT_UPLOAD_DATA "$namespace" "$fileToUpload" "$format" "$endpoint" "$namedGraph"
-}
-
-# -----------------------------------------------------------------------------
-function uploadRDFData {
-  local endpointURL=$1
-  local namespace=$2
-  local namedGraph=$3
-  local format=$4
-  shift 4
-  files=($"$@")
-
-  if [[ "$format" == "$FORMAT_SPARQL_UPDATE" ]];
-  then
-    # call to python script
-    local uploadURL="$endpointURL/namespace/$namespace/sparql"
-    python upload_data.py -u "$uploadURL" --content-type "$format" --named-graph "$namedGraph" $files
-  else
-    props="$(mktemp)"
-    cat > "$props" <<EOF
-com.bigdata.rdf.store.AbstractTripleStore.quads=true
-com.bigdata.rdf.store.DataLoader.commit=Batch
-com.bigdata.rdf.store.DataLoader.flush=false
-EOF
-
-    java -Xm4g -cp /opt/blazegraph.jar \
-      com.bigdata.rdf.store.DataLoader \
-      -namespace "$namespace" \
-      -defaultGraph "$namedGraph" \
-      "$props" \
-      "${files[@]}"
-    rm -f "$props"
-  fi
 }
 
 # -----------------------------------------------------------------------------
