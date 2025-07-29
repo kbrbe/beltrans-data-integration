@@ -912,7 +912,8 @@ function load {
   elif [ "$dataSource" = "kbr-aorg" ];
   then
     local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
-    python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_AORG" \
+    #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_AORG" \
+    uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KBR_AORG" "$FORMAT_TURTLE" \
     "$integrationFolderName/aorg.ttl" "$integrationFolderName/aorg-identifiers.ttl"
   elif [ "$dataSource" = "master-data" ];
   then
@@ -995,14 +996,16 @@ function integrate {
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology for records which do not yet have those"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
   #
   # schema:name properties have to exist as they are required in the triple pattern for the data integration
   #
   echo ""
   echo "Create schema:name properties based on BIBFRAME titles/subtitles for records which do not yet have schema:name"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
 
   #
   # CREATE CORRELATION LIST ENTRIES BEFORE THE AUTOMATIC INTEGRATION
@@ -1066,23 +1069,28 @@ function integrate {
 
   echo ""
   echo "Delete translations from the manually curated removal list"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_REMOVAL_LIST"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_REMOVAL_LIST"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_REMOVAL_LIST"
 
   echo ""
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists, publishing directors, and publishers) ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
 
   echo ""
   echo "Delete duplicate more generic schema:author role if we have a more specific role"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
 
   echo ""
   echo "Create BELTRANS original manifestation records"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BELTRANS_ORIGINALS"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BELTRANS_ORIGINALS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BELTRANS_ORIGINALS"
 
   echo ""
   echo "Establish links between integrated originals and contributors ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS_ORIG"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS_ORIG"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS_ORIG"
 
   echo ""
   echo "Perform Clustering ..."
@@ -1095,19 +1103,23 @@ function integrate {
 
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
 
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on genre ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBRAME_TITLES"
 
   echo ""
   echo "Add BB genre classification to integrated records ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BB"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BB"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BB"
 
   echo ""
   echo "Create integrated geo information"
@@ -1306,7 +1318,8 @@ function loadDateInformation {
 
   echo ""
   echo "LOAD dates data"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_TRL" "$FORMAT_TURTLE" \
     "$dateDataTurtle"
 
 }
@@ -1324,7 +1337,8 @@ function loadGeoInformation {
 
   echo ""
   echo "LOAD geo data of publications"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_GEO" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_GEO" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_GEO" "$FORMAT_TURTLE" \
     "$geoDataTurtle" "$geoDataOrgTurtle"
 
 
@@ -1579,10 +1593,11 @@ function clustering {
     --named-graph "$TRIPLE_STORE_GRAPH_WORKS"
 
   echo "CLUSTERING - Upload new data"
-  python -m tools.sparql.upload_data \
-    -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
-    --content-type "text/turtle" \
-    --named-graph "$TRIPLE_STORE_GRAPH_WORKS" \
+  #python -m tools.sparql.upload_data \
+  #  -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
+  #  --content-type "text/turtle" \
+  #  --named-graph "$TRIPLE_STORE_GRAPH_WORKS" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_WORKS" "$FORMAT_TURTLE" \
     $clustersTurtle
 
 }
@@ -1953,7 +1968,8 @@ function extractKBCode {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "EXTRACT, TRANSFORM and LOAD the KBCode hierarchy with a federated SPARQL UPDATE query"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$INSERT_KBCODE_QUERY_FILE"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$INSERT_KBCODE_QUERY_FILE"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$INSERT_KBCODE_QUERY_FILE"
   
 }
 
@@ -1966,7 +1982,9 @@ function extractRameau {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "EXTRACT, TRANSFORM and LOAD the RAMEAU entities from the BnF dumps"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_RAMEAU" $INPUT_BNF_RAMEAU_FILENAME_PATTERN
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_RAMEAU" $INPUT_BNF_RAMEAU_FILENAME_PATTERN
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_RAMEAU" "$FORMAT_TURTLE" \
+    $INPUT_BNF_RAMEAU_FILENAME_PATTERN
 }
 
 # -----------------------------------------------------------------------------
@@ -3607,7 +3625,8 @@ function loadContributorPersonCorrelationList {
 
   echo ""
   echo "Load persons correlation list"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_CONT" "$FORMAT_TURTLE" \
     "$correlationTurtle"
 
   echo ""
@@ -3628,7 +3647,8 @@ function loadContributorOrgCorrelationList {
 
   echo ""
   echo "Load org correlation list"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_CONT" "$FORMAT_TURTLE" \
     "$correlationTurtle"
 
   echo ""
@@ -3654,11 +3674,13 @@ function loadTranslationCorrelationList {
   local originalsTurtle="$integrationName/correlation/originals/rdf/mixed-lang"
 
   echo "Load translations correlation list"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_TRL" "$FORMAT_TURTLE" \
     "$correlationTurtle"
 
   echo "Load translations correlation list - original data"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_ORIG" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_ORIG" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_ORIG" "$FORMAT_TURTLE" \
     "$correlationOriginalsTurtle"
 
 
@@ -3687,7 +3709,8 @@ function loadTranslationRemovalList {
   local correlationTurtle="$integrationName/correlation/removal/rdf/$SUFFIX_CORRELATION_TRL_LD"
 
   echo "Load translations correlation removal list"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_REMOVAL" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_REMOVAL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_REMOVAL" "$FORMAT_TURTLE" \
     "$correlationTurtle"
 
 }
@@ -3779,7 +3802,8 @@ function loadOriginalLinksKBR {
   # and only "promote" links to the actual KBR graph after they survived a test based on overlapping contributors with SPARQL
   echo ""
   echo "Load KBR links to identified originals ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KBR_TRL" "$FORMAT_TURTLE" \
     "$kbrOriginalLinksTurtleFRNL" "$kbrOriginalLinksTurtleNLFR"
 
   echo ""
@@ -3793,23 +3817,28 @@ function loadOriginalLinksKBR {
 
   echo ""
   echo "Annotate identified originals with overlapping contributors ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP"
 
   echo ""
   echo "Delete links to originals which are not verified by overlapping contributors ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
 
   echo ""
   echo "Add links between translations and originals that not only match with title, but also have overlapping contributors ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KBR_IDENTIFIED_ORIGINAL_LINKS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KBR_IDENTIFIED_ORIGINAL_LINKS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KBR_IDENTIFIED_ORIGINAL_LINKS"
 
   echo ""
   echo "Delete wrongly identified originals that are no longer linked to any translation ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
 
   echo ""
   echo "Delete redundant limited originals (after identifying and adding link to a real original) ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_REDUNDANT_ORIGINALS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_REDUNDANT_ORIGINALS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_REDUNDANT_ORIGINALS"
 }
 
 # -----------------------------------------------------------------------------
@@ -3826,7 +3855,8 @@ function loadKBRTranslationsAndContributions {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load KBR translations and contributions ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNameGraph" "$FORMAT_TURTLE" \
     "$kbrTranslations"
 }
 
@@ -3852,12 +3882,14 @@ function loadKBRBookInformationAndContributions {
 
 
   echo "Load KBR book information and contributions, BB assignments, countries, places, ISBN10/ISBN13 - $language ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNamedGraph" "$FORMAT_TURTLE" \
     "$kbrBookInformationAndContributions" "$kbrTranslationsBB" "$kbrTranslationsPubCountries" "$kbrTranslationsPubPlaces" "$kbrTranslationsISBNTurtle"
 
   # upload newly identified authorities to the linked authorities named graph
   echo "Load newly identified KBR linked authorities $language ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
     "$kbrIdentifiedAuthorities"
 
 }
@@ -3876,7 +3908,8 @@ function loadKBRLimitedOriginalInfo {
 
   echo ""
   echo "Load KBR (limited) original information ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$originalsNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$originalsNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$originalsNamedGraph" "$FORMAT_TURTLE" \
     "$kbrLimitedOriginalsTurtle"
 }
 
@@ -3899,7 +3932,8 @@ function loadKBRLinkedPersonAuthorities {
   # upload newly identified authorities to the linked authorities named graph
   echo ""
   echo "Load person authorities - $language ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
     "$kbrPersons" "$kbrPersonsIdentifiersTurtle" "$kbrPersonsNamesTurtle"
 }
 
@@ -3922,23 +3956,25 @@ function loadKBRLinkedOrgAuthorities {
   # upload newly identified authorities to the linked authorities named graph
   echo ""
   echo "Load org authorities - $language ..."
-  echo python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrOrgs"
-
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
     "$kbrOrgs"
 
   if [ -f "$kbrOrgsIdentifiersTurtle" ];
   then
     echo ""
     echo "Load org authorities identifiers - $language ..."
-    python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrOrgsIdentifiersTurtle"
+    #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrOrgsIdentifiersTurtle"
+    uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
+    "$kbrOrgsIdentifiersTurtle"
   fi
   
 
   if [ -f "$kbrOrgMatchesTurtle" ];
   then
     echo "Load possible KBR publisher matches ..."
-    python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES \
+    #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES \
+    uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES" "$FORMAT_TURTLE" \
       "$kbrOrgMatchesTurtle"
   fi
 
@@ -3971,25 +4007,39 @@ function loadKB {
 
 
   echo "Load KB translations and contributions ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL" "$kbTranslationsAndContributions"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_TRL" "$FORMAT_TURTLE" \
+  "$kbTranslationsAndContributions"
 
   echo "Load KB (limited) original information ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG" "$kbOriginalsTurtle"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG" "$FORMAT_TURTLE" \
+  "$kbOriginalsTurtle"
 
   echo "Load KB linked authorities ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_LA" "$kbLinkedAuthorities"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_LA" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_LA" "$FORMAT_TURTLE" \
+  "$kbLinkedAuthorities"
 
   echo "Load KB publisher data FR-NL ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL "$kbPublishersFRNL"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_PBL" "$FORMAT_RDF_XML" \
+  "$kbPublishersFRNL"
 
   echo "Load KB publisher data NL-FR ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL "$kbPublishersNLFR"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_PBL" "$FORMAT_RDF_XML" \
+  "$kbPublishersNLFR"
 
   echo "Link KB translations to publisher authority records ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KB_TRL_PBL"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$CREATE_QUERY_KB_TRL_PBL"
 
   echo "Create dcterms:identifier properties for KB publishers ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KB_PBL_IDENTIFIERS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$CREATE_QUERY_KB_PBL_IDENTIFIERS"
 
 }
 
@@ -4049,37 +4099,60 @@ function loadBnF {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load BNF translations FR-NL ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL" "$bnfTranslationsFRNL"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL" "$bnfTranslationsFRNL"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL" "$FORMAT_RDF_XML" \
+  "$bnfTranslationsFRNL"
 
   echo "Load BNF translations NL-FR ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR" "$bnfTranslationsNLFR"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR" "$FORMAT_RDF_XML" \
+  "$bnfTranslationsNLFR"
 
   echo "Load BnF contributors persons and organizations ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData" "$bnfContributorDataOrgs"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT" "$FORMAT_RDF_XML" \
+  "$bnfContributorData" "$bnfContributorDataOrgs"
 
   echo "Load BnF publication-rameau links ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS" "$bnfRameauClassifications"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS" "$FORMAT_RDF_XML" \
+  "$bnfRameauClassifications"
 
   echo "Load BnF publication-contributor links ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS" "$bnfContributionLinksData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS" "$FORMAT_RDF_XML" \
+  "$bnfContributionLinksData"
 
   echo "Load external links of BnF contributors - ISNI ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$bnfContributorIsniData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$FORMAT_RDF_XML" \
+  "$bnfContributorIsniData"
 
   echo "Load external links of BnF contributors - VIAF ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$bnfContributorVIAFData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$FORMAT_RDF_XML" \
+  "$bnfContributorVIAFData"
 
   echo "Load external links of BnF contributors - WIKIDATA ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$bnfContributorWikidataData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$FORMAT_RDF_XML" \
+  "$bnfContributorWikidataData"
 
   echo "Load BnF publication data to a single named graph"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$TRANSFORM_QUERY_BNF_TRL_FR_NL" "$TRANSFORM_QUERY_BNF_TRL_NL_FR"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$TRANSFORM_QUERY_BNF_TRL_FR_NL"
+  "$TRANSFORM_QUERY_BNF_TRL_NL_FR"
 
   echo "Load BnF limited originals into separate named graph ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_ORIG" "$bnfLimitedOriginalInformationTurtle"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_ORIG" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_ORIG" "$FORMAT_TURTLE" \
+  "$bnfLimitedOriginalInformationTurtle"
 
   echo "Load BnF original links into the single BnF named graph ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" "$bnfLimitedOriginalInformationLinksTurtle"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL" "$FORMAT_TURTLE" \
+  "$bnfLimitedOriginalInformationLinksTurtle"
 
 
   bnfISBN10ISBN13="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN10_ISBN13_CSV"
@@ -4102,10 +4175,14 @@ function loadBnF {
   time python $SCRIPT_BNF_ADD_ISBN_10_13 -i $bnfISBN10ISBN13 -o $bnfISBN10ISBN13Enriched
 
   echo "Delete existing BnF ISBN10 and ISBN13 identifiers ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BNF_ISBN"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$DELETE_QUERY_BNF_ISBN"
 
   echo "Add normalized BnF ISBN10 and ISBN13 identifiers ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_NT" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" "$bnfISBN10ISBN13Enriched"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_NT" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL" "$FORMAT_NT" \
+  "$bnfISBN10ISBN13Enriched"
 
   #echo "Fix BnF ISBN13 identifiers without hyphen - get malformed ISBN identifiers"
   #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN13MissingHyphen"
@@ -4135,7 +4212,8 @@ function loadBnF {
 
 
   echo "Add dcterms:identifier to BnF contributors, manifestations as well as add ISNI/VIAF/Wikidata identifier according to the bibframe vocabulary"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" \
     "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA" "$CREATE_QUERY_BNF_GENDER" \
     "$CREATE_QUERY_BNF_MANIFESTATIONS_BIBFRAME" "$CREATE_QUERY_BNF_ORIGINALS"
@@ -4161,15 +4239,18 @@ function loadUnesco {
   local authorityTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_AUTHORITIES_LD"
 
   echo "Load Unesco Index Translationum translation data (translations, contributions and ISBN relationships)"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_UNESCO" "$FORMAT_TURTLE" \
     "$translationTurtle" "$isbnTurtle"
 
   echo "Load Unesco Index Translationum original information"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_ORIG \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_ORIG \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_UNESCO_ORIG" "$FORMAT_TURTLE" \
     "$translationOriginalTurtle"
 
   echo "Load Unesco authority records"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_LA \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_LA \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_UNESCO_LA" "$FORMAT_TURTLE" \
     "$authorityTurtle"
 }
 
@@ -4188,7 +4269,8 @@ function loadWikidata {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load wikidata data"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_WIKIDATA $wikidataTurtle
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_WIKIDATA $wikidataTurtle
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_WIKIDATA" "$FORMAT_TURTLE" "$wikidataTurtle"
 }
 
 # -----------------------------------------------------------------------------
@@ -4210,7 +4292,8 @@ function loadMasterData {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load master data (mapped content, countries, languages and gender information)"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_MASTER" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_MASTER" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_MASTER" "$FORMAT_TURTLE" \
     "$masterDataTurtle" "$masterDataCountries" "$masterDataLanguages" "$masterDataGender"
 
 }
@@ -4234,20 +4317,25 @@ function loadNationalityFromBnFViaISNI {
   # this step simply adds other data to the BnF contributors
 
   echo "Load newly identified BnF contributors to provide missing nationalities ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT" "$FORMAT_TURTLE" "$bnfContributorData"
 
 
   echo "Load external links of newly identified BnF contributors - ISNI ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$bnfContributorIsniData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$bnfContributorIsniData"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$FORMAT_TURTLE" "$bnfContributorIsniData"
 
   echo "Load external links of newly identified BnF contributors - VIAF ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$bnfContributorVIAFData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$bnfContributorVIAFData"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$FORMAT_TURTLE" "$bnfContributorVIAFData"
 
   echo "Load external links of newly identified BnF contributors - WIKIDATA ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$bnfContributorWikidataData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$bnfContributorWikidataData"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$FORMAT_TURTLE" "$bnfContributorWikidataData"
 
   echo "Add dcterms:identifier to newly identified BnF contributors and add ISNI/VIAF/Wikidata identifier according to the bibframe vocabulary"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_ISNI" \
     "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA"
 
