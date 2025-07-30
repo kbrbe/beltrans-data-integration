@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import lxml.etree as ET
 import requests
 import time
@@ -96,9 +97,11 @@ def deleteNamedGraph(url, namedGraph, auth=None):
     statusCode = he.response.status_code
     print(f'{statusCode} error while deleting named graph {namedGraph} (first 100 characters): ' + he.response.content.decode('utf-8')[0:100])
     #print(he.response.content.decode('utf-8'))
+    sys.exit(1)
   except Exception as e:
     print(f'Error while trying to delete named graph {namedGraph} with url {url}')
     print(e)
+    sys.exit(1)
 
 
 # -----------------------------------------------------------------------------
