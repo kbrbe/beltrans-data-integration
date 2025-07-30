@@ -132,9 +132,11 @@ def sparqlSelectToString(url, queryFilename, acceptFormat, auth=None, httpMethod
       statusCode = he.response.status_code
       print(f'{statusCode} error while updating {queryFilename} (first 40 characters): ' + he.response.content.decode('utf-8')[0:40])
       print(he.response.content.decode('utf-8'))
+      sys.exit(1)
     except Exception as e:
       print(f'Error while querying {url} with {queryFilename} and acceptFormat {acceptFormat}')
       print(e)
+      sys.exit(1)
 
 
 
@@ -182,14 +184,17 @@ def sparqlUpdate(url, queryString, fileFormat, queryName, auth=None):
         print(f'Unexpected answer, first 200 characters of answer:' + response[0:200])
         print(e)
         print(response)
+        sys.exit(1)
 
   except requests.HTTPError as he:
     statusCode = he.response.status_code
     print(f'{statusCode} error while updating {queryName}: ' + he.response.content.decode('utf-8')[0:40])
     print(he.response.content.decode('utf-8'))
+    sys.exit(1)
   except Exception as e:
     print(f'Error while updating {url} with query {queryName} and type {fileFormat}')
     print(e)
+    sys.exit(1)
 
 
 # -----------------------------------------------------------------------------
