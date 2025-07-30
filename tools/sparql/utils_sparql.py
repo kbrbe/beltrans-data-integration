@@ -93,7 +93,7 @@ def deleteNamedGraph(url, namedGraph, auth=None):
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     r = requests.post(url, data=payload, headers=headers, auth=auth)
     r.raise_for_status()
-  except requests.HTTPError as he:
+  except requests.exceptions.HTTPError as he:
     statusCode = he.response.status_code
     print(f'{statusCode} error while deleting named graph {namedGraph} (first 100 characters): ' + he.response.content.decode('utf-8')[0:100])
     #print(he.response.content.decode('utf-8'))
@@ -128,7 +128,7 @@ def sparqlSelectToString(url, queryFilename, acceptFormat, auth=None, httpMethod
       print(f'successfully queried in time {queryTime}')
       return r.content.decode('utf-8')
 
-    except requests.HTTPError as he:
+    except requests.exceptions.HTTPError as he:
       statusCode = he.response.status_code
       print(f'{statusCode} error while updating {queryFilename} (first 40 characters): ' + he.response.content.decode('utf-8')[0:40])
       print(he.response.content.decode('utf-8'))
