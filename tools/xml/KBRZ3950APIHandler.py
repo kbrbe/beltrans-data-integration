@@ -1,5 +1,6 @@
 import requests
 import urllib.parse
+import sys
 import time
 import lxml.etree as ET
 
@@ -24,12 +25,19 @@ class KBRZ3950APIHandler:
         # query 0 records, because we are only interested in the header mentioning the total number of records
         numberURL = self._queryURL + '&rows=0'
 
-        response = requests.get(numberURL)
-        if response:
+        try:
+          response = requests.get(numberURL)
+          response.raise_for_status()
           tree = ET.fromstring(response.content)
           self._numberResults = int(tree.find('./result').get('numFound'))
-        else:
-          self._numberResults = 0
+        except requests.exceptions.HTTPError as he:
+          statusCode = he.response.status_code
+          print(f'{statusCode} error while trying to determine the number of query results for base URL: "{self._baseURL}"')
+          sys.exit(1)
+        except Exception as e:
+          print(f'Error while trying to determine the number of query results with base URL: "{self._baseURL}"')
+          print(e)
+          sys.exit(1)
 
     def numberResults(self):
         return self._numberResults
