@@ -2682,7 +2682,7 @@ function extractKBRPersons {
     --identifier-column "authorityID" \
     --sequence-number-column "sequence_number"
 
-  if [ ! -z $alreadyFetchedContributors ];
+  if [ ! -z "$alreadyFetchedContributors" ];
   then
     numberExtractedPersons=`wc -l $kbrPersonsCSV`
     # we extracted more KBR identifiers and therefore have to update the list of already fetched contributors
@@ -3160,10 +3160,13 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
+  local alreadyFetchedContributors="$folderName/kbr/agents/mixed-lang/$SUFFIX_KBR_LIST_FETCHED_CONTRIBUTORS"
+  touch $alreadyFetchedContributors
+
   # 2025-07-30: do not use the 'alreadyFetchedIdentifiers' file, in the context of getting correlation list authorities during integration we only call it once
   # In case we also did a seperate KBR data extraction step before we in theory could reuse the alreadyFetchedIdentifiers list, but then we would need a single global list
-  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML" ""
-  extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
+  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
+  extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang" "$alreadyFetchedContributors"
 }
 
 # -----------------------------------------------------------------------------
