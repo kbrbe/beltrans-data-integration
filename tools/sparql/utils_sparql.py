@@ -3,7 +3,7 @@ import re
 import lxml.etree as ET
 import requests
 import time
-import rdflib
+#import rdflib
 import pandas as pd
 from io import StringIO
 
@@ -87,7 +87,10 @@ def deleteNamedGraph(url, namedGraph, auth=None):
 
   try:
     #namedGraphURL = f'{url}?context-uri=<{}>'
-    r = requests.delete(url, params={'c': f'<{namedGraph}>'}, auth=auth)
+    #r = requests.delete(url, params={'c': f'<{namedGraph}>'}, auth=auth)
+    payload = {'update': f'DROP GRAPH <{namedGraph}>;'}
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    r = requests.post(url, data=payload, headers=headers, auth=auth)
     r.raise_for_status()
   except requests.HTTPError as he:
     statusCode = he.response.status_code

@@ -4576,10 +4576,10 @@ function deleteNamedGraph {
   local namedGraph=$3
 
   local url="$endpoint/namespace/$namespace/sparql"
-  echo "Delete existing content in namespace <$namedGraph> (url $url)"
+  echo "Delete existing content of the named graph <$namedGraph> in namespace '$namespace' (url $url)"
 
   source ./py-integration-env/bin/activate
-  python delete_named_graph.py -u "$url" --named-graph "$namedGraph"
+  python -m tools.sparql.delete_named_graph -u "$url" --named-graph "$namedGraph"
 
   #. $SCRIPT_DELETE_NAMED_GRAPH "$namespace" "$endpoint" "$namedGraph"
 }
