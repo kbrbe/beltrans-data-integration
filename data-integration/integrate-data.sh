@@ -1761,36 +1761,39 @@ function extractKBR {
   mkdir -p $integrationName/kbr/agents/nl-fr
 
   local alreadyFetchedContributors="$integrationName/kbr/$SUFFIX_KBR_LIST_FETCHED_CONTRIBUTORS"
+  echo ""
+  echo "List of contributor identifiers that were already fetched: '$alreadyFetchedContributors'"
+  echo ""
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data FR-NL"
-  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
+  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data NL-FR"
-  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
+  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "$alreadyFetchedContributors"
-  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
-  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "$alreadyFetchedContributors"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
 
   # 2024-07-29: Provide full path as parameter instead of parts of the path
-  #extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
-  #extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
   kbrTranslationsCSVFRNL="$integrationName/kbr/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   kbrTranslationsCSVNLFR="$integrationName/kbr/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
   kbrLinkedOriginalsXML="$integrationName/kbr/book-data-and-contributions/linked-originals/fetched-originals.xml"
-  #python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
-  #  --identifier-column "sourceKBRID" \
-  #  -b "150" \
-  #  -u "$ENV_KBR_API_Z3950" \
-  #  "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
-  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$kbrLinkedOriginalsXML" "linked-originals"
+  python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
+    --identifier-column "sourceKBRID" \
+    -b "150" \
+   -u "$ENV_KBR_API_Z3950" \
+    "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
+  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$kbrLinkedOriginalsXML" "linked-originals"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals linked authorities data"
@@ -1802,19 +1805,19 @@ function extractKBR {
 
   # Use filters to extract different types of authorities from the same contribution CSV file
   #
-  #python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsPersonContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_PERSON
-  #python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
+  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsPersonContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_PERSON
+  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
 
   echo ""
   echo "Fetch KBR originals - persons"
-  #getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
+  getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
   echo ""
   echo "Extract CSV data from fetched linked original authorities - persons"
-  #extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
+  extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
 
   echo ""
   echo "Fetch KBR originals - orgs"
-  #getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
+  getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
 
   echo ""
   echo "Extract CSV data from fetched linked original authorities - orgs"
@@ -3157,7 +3160,9 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
-  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML"
+  # 2025-07-30: do not use the 'alreadyFetchedIdentifiers' file, in the context of getting correlation list authorities during integration we only call it once
+  # In case we also did a seperate KBR data extraction step before we in theory could reuse the alreadyFetchedIdentifiers list, but then we would need a single global list
+  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML" ""
   extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
 }
 
@@ -4400,23 +4405,23 @@ function getKBRAutRecords {
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  if [ -z $alreadyFetchedContributors ];
+  if [ -z "$alreadyFetchedContributors" ];
   then
     echo ""
     echo "Fetch KBR authority data"
     python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "$idColumn" -b "150" -u "$ENV_KBR_API_Z3950_AUT" "$inputFile"
 
   else
-    local currentTime=`date +"%Y-%m-%d_%H-%M-%S"`
-    local inputFileFolder=$(dirname $inputFile)
-    local notYetFetched="$inputFileFolder/diff-authorities-to-fetch-$currentTime.csv"
+    local currentTime=`date +"%Y-%m-%d_%H-%M-%S_%6N"`
+    local inputFileFolder=$(dirname "$inputFile")
+    local notYetFetched="$inputFileFolder/diff-authorities-to-fetch-$currentTime-process-$$.csv"
 
-    python -m $MODULE_CSV_SET_DIFFERENCE -o $notYetFetched --minus-rest --column "$idColumn" --column "authorityID" --output-column "authorityID" "$inputFile" "$alreadyFetchedContributors"
+    python -m $MODULE_CSV_SET_DIFFERENCE -o "$notYetFetched" --minus-rest --column "$idColumn" --column "authorityID" --output-column "authorityID" "$inputFile" "$alreadyFetchedContributors"
     local numberRows=`wc -l $inputFile`
     local numberRowsDiff=`wc -l $notYetFetched`
 
     echo ""
-    echo "Fetch KBR authority data (records we do not have already: $numberRowsDiff from $numberRowsDiff)"
+    echo "Fetch KBR authority data (records we do not have already: $numberRowsDiff from $numberRows)"
     python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "authorityID" -b "150" -u "$ENV_KBR_API_Z3950_AUT" "$notYetFetched"
 
   fi
