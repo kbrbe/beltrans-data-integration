@@ -1,5 +1,8 @@
 #!/bin/bash
 
+trap 'echo ""; echo "ERROR: Integration stopped unexpectedly, one of the pipeline scripts returned an error. ($0:$LINENO): $(sed -n "${LINENO}p" "$0")"' ERR
+set -Eeuo pipefail
+
 # Make the locally developed python package accessible via python -m 
 cd ..
 export PYTHONPATH=$(pwd)
