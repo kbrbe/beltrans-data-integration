@@ -4,7 +4,7 @@ import sys
 import lxml.etree as ET
 import requests
 import time
-#import rdflib
+import rdflib
 import pandas as pd
 from io import StringIO
 
