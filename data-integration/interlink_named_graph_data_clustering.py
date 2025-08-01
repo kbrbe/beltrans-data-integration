@@ -47,6 +47,7 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
 
     # (1) Create descriptive keys for each data source
     #
+    print(f'\t1. Create descriptive keys')
     targetTypeString = config['integration']['targetType'].replace(':','_')
     descriptiveKeysFilenames = []
     for sourceName, configEntry in config['sources'].items():
@@ -61,6 +62,7 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
     # (2) get initial cluster information from already existing records created from correlation list
     #
     #(existingClusterAssignment, existingDescriptiveKeys) = getExistingClusters(url, targetGraph, config, "elementID", "descriptiveKey", auth)
+    print(f'\t2. Get initial cluster information')
     existingClusterAssignment = getExistingClusters(url, targetGraph, config, "elementID", "descriptiveKey", auth)
 
     clusterFilename=os.path.join(queryLogDir, f'integration-clusters-{targetTypeString}.csv')
@@ -68,6 +70,7 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
 
     # (3) perform the clustering to integrate the data
     #
+    print(f'\t3. Perform the clustering')
     updateClusters(
       inputFilenames=descriptiveKeysFilenames,
       outputFilename=clusterFilename,
@@ -91,6 +94,7 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
 
     # (4) Build and upload RDF data of integrated data based on clustering result
     #
+    print(f'\t4.1 Generate RDF data')
     mappingFilename = config['integration']['mappingFile']
     integratedDataTurtleFilename = os.path.join(queryLogDir, f'integrated-data-{targetTypeString}.ttl')
     myEnv = os.environ.copy()
@@ -99,10 +103,17 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
 
     integratedDataNamedGraph = config['integration']['namedGraph']
     uploadNamedGraphURL = url + '?context-uri=' + integratedDataNamedGraph
-    utils_sparql.sparqlUpdateFile(uploadNamedGraphURL, integratedDataTurtleFilename, 'text/turtle', f'file "{integratedDataTurtleFilename} uploaded (named graph: {integratedDataNamedGraph})', auth)
+
+    # 2025-08-01: use the Blazegraph data loader instead of utils_sparql.sparqlUpdateFile  (as we also do in the general integrate-data.sh script)
+    #utils_sparql.sparqlUpdateFile(uploadNamedGraphURL, integratedDataTurtleFilename, 'text/turtle', f'file "{integratedDataTurtleFilename} uploaded (named graph: {integratedDataNamedGraph})', auth)
+
+    print(f'\t4.2 Upload RDF data')
+    uploadIntegratedDataCommand = f'source ./integration-functions.sh && uploadRDFData "{myEnv["ENV_SPARQL_ENDPOINT"]}" "integration" "{integratedDataNamedGraph}" "text/turtle" "{integratedDataTurtleFilename}"'
+    subprocess.run([f'bash', '-c', uploadIntegratedDataCommand], env=myEnv, check=True)
 
     # (5a) Finalize integration by adding integration identifiers (descipritve keys) via the created sameAs links to the integrated data
     # this will use the bf:identifiedBy property
+    print(f'\t5.1 adding integration identifiers')
     for sourceName, configEntry in config['sources'].items():
       queryString = ClustersDescriptiveKeysSameAsQuery(
                       targetGraph=targetGraph,
@@ -112,6 +123,8 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
                       targetType=config['integration']['targetType'],
                       sourceType=configEntry['sourceType']).getQueryString()
 
+      # the following is a SPARQL UPDATE query, it's fine to use utils_sparql.sparqlUpdateFile directly 
+      # instead of bash script that eventually would also call the same Python script for SPARQL UPDATE queries
       queryFilename = f'add-identifiers-query-{sourceName}-{config["integration"]["targetType"]}.sparql'
       queryFilename = queryFilename.replace(':', '_')
       if queryLogDir:
@@ -129,6 +142,7 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
     # (5b) Finalize integration by adding certain data fields via the created sameAs links to the integrated data
     #
     # Iterate over each data source and add properties from it
+    print(f'\t5.2 Adding data fields via sameAs links')
     for sourceName, configEntry in config['sources'].items():
 
       sourceType = configEntry['sourceType']
@@ -200,6 +214,7 @@ def main(url, queryType, targetGraph, configFilename, queryLogDir=None):
     # (6) Finalize integration by running postprocessing queries
     #
     # Iterate over each query and execute it
+    print(f'\t6. Running postprocess queries')
     if 'postIntegrationQueries' in config['integration']:
       for postQueryFilename in config['integration']['postIntegrationQueries']:
         
@@ -435,6 +450,10 @@ def getUpdateQueryString(queryType, sourceName, sourceGraph, targetGraph, origin
 
   return queryString
 
+
+# -----------------------------------------------------------------------------
+def uploadData():
+  pass
 
 # -----------------------------------------------------------------------------
 def logSPARQLQuery(queryLogDir, queryString, queryFilename):
