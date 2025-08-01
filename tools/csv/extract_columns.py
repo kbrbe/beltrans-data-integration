@@ -3,6 +3,7 @@
 # KBR Brussels
 #
 import csv
+import os
 from tools import utils
 from argparse import ArgumentParser
 from tools.csv.row_filter import RowFilter
@@ -31,10 +32,14 @@ def main(inputFilenames, outputFilename, columns, delimiter, filterFilename=None
     colMapping = dict(zip(columns, outputColumns))
 
   outputMode = 'a' if appendData else 'w'
+  outputFileExists = os.path.isfile(outputFilename)
   with open(outputFilename, outputMode, newline='') as outFile:
     outputFieldnames = outputColumns if outputColumns else columns
     outputWriter = csv.DictWriter(outFile, fieldnames=outputFieldnames)
-    outputWriter.writeheader()
+
+    # Write a CSV header if either file existed but was empty or file did not exist before
+    if (outputFileExists and os.path.getsize(outputFilename) == 0) or not outputFileExists:
+      outputWriter.writeheader()
 
     for inputFilename in inputFilenames:
       with open(inputFilename, 'r') as inFile:
