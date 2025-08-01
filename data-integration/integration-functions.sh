@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 FORMAT_RDF_XML="application/rdf+xml"
 FORMAT_TURTLE="text/turtle"
 FORMAT_NT="text/rdf+n3"
