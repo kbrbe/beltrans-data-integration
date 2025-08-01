@@ -45,7 +45,8 @@ def main(inputFilenames, outputFilename, identifierColumn, batchSize, url, delim
     print(f'Starting to fetch the data in batches of {batchSize} ...')
   else:
     print(f'No valid KBR identifiers found, nothing to fetch!')
-    exit(1)
+    # 2025-08-01: we should exit with code 0, technically nothing wrong, otherwise the integration script stops
+    exit(0)
 
   apiHandler = kbrAPI(url)
   apiHandler.setBatchSize(batchSize)
