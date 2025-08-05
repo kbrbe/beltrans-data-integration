@@ -1,0 +1,9 @@
+PREFIX ex: <http://example.org/ns/>
+
+INSERT {
+  graph <http://test> { ex:test1 ex:label "Test1" . }
+}
+WHERE {
+  graph <http://test> { ex:test1 a ex:Test . }
+}
+  

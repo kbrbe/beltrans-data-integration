@@ -341,7 +341,7 @@ def preprocessISBNString(inputISBN):
   ''
   """
 
-  inputISBNNorm = re.sub('\D', '', inputISBN)
+  inputISBNNorm = re.sub(r'\D', '', inputISBN)
 
   if len(inputISBNNorm) == 0:
     return ''
@@ -535,11 +535,17 @@ def replaceDictKeys(dictionary, mapping):
   >>> replaceDictKeys(dict0, {"oldA": "newA", "oldB": "newB"})
   >>> dict0
   {'oldC': 'c', 'newA': 'a', 'newB': 'b'}
+
+  >>> dict1 = {"oldA": "a", "oldB": "b", "oldC": "c"}
+  >>> replaceDictKeys(dict1, {"oldA": "oldA", "oldB": "oldB"})
+  >>> dict1
+  {'oldA': 'a', 'oldB': 'b', 'oldC': 'c'}
   """
   for oldKey, newKey in mapping.items():
-    if oldKey in dictionary:
-      dictionary[newKey] = dictionary[oldKey]
-      del dictionary[oldKey]
+    if oldKey != newKey:
+      if oldKey in dictionary:
+        dictionary[newKey] = dictionary[oldKey]
+        del dictionary[oldKey]
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":

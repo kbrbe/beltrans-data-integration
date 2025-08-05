@@ -1,9 +1,14 @@
 #!/bin/bash
 
+trap 'echo ""; echo "ERROR: Integration stopped unexpectedly, one of the pipeline scripts returned an error. ($0:$LINENO): $(sed -n "${LINENO}p" "$0")"' ERR
+set -Eeuo pipefail
+
 # Make the locally developed python package accessible via python -m 
 cd ..
 export PYTHONPATH=$(pwd)
 cd -
+
+. integration-functions.sh
 
 SCRIPT_CLEAN_TRANSLATIONS="../data-sources/kbr/clean-marc-slim.py"
 SCRIPT_CLEAN_AGENTS="../data-sources/kbr/pre-process-kbr-authors.py"
@@ -415,7 +420,8 @@ SUFFIX_KBR_TRL_CONT_AORG="linked-orgs.csv"
 SUFFIX_KBR_PBL_NO_MATCHES="publishers-no-matches.csv"
 SUFFIX_KBR_PBL_MULTIPLE_MATCHES="publishers-multiple-matches.csv"
 
-SUFFIX_KBR_LIST_FETCHED_CONTRIBUTORS="already-fetched-contributors.csv"
+SUFFIX_KBR_LIST_FETCHED_AUT="already-fetched-aut.csv"
+SUFFIX_KBR_LIST_FETCHED_BIB="already-fetched-bib.csv"
 
 SUFFIX_KBR_TRL_ISBN10="isbn10.csv"
 SUFFIX_KBR_TRL_ISBN13="isbn13.csv"
@@ -748,7 +754,7 @@ function extract {
     extractKBR $integrationFolderName
   elif [ "$dataSource" = "kbr-aorg" ];
   then
-    extractKBROrgs "$integrationFolderName" "$integrationFolderName/aorg.xml" "aorg.csv" "aorg-identifiers.csv"
+    extractKBROrgs "$integrationFolderName" "$integrationFolderName/aorg.xml" "aorg.csv" "aorg-identifiers.csv" "authorityID" false
   elif [ "$dataSource" = "kbr-originals" ];
   then
     extractKBROriginals $integrationFolderName
@@ -910,7 +916,8 @@ function load {
   elif [ "$dataSource" = "kbr-aorg" ];
   then
     local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
-    python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_AORG" \
+    #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_AORG" \
+    uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KBR_AORG" "$FORMAT_TURTLE" \
     "$integrationFolderName/aorg.ttl" "$integrationFolderName/aorg-identifiers.ttl"
   elif [ "$dataSource" = "master-data" ];
   then
@@ -993,14 +1000,16 @@ function integrate {
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology for records which do not yet have those"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
   #
   # schema:name properties have to exist as they are required in the triple pattern for the data integration
   #
   echo ""
   echo "Create schema:name properties based on BIBFRAME titles/subtitles for records which do not yet have schema:name"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_SCHEMA_TITLES"
 
   #
   # CREATE CORRELATION LIST ENTRIES BEFORE THE AUTOMATIC INTEGRATION
@@ -1064,23 +1073,28 @@ function integrate {
 
   echo ""
   echo "Delete translations from the manually curated removal list"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_REMOVAL_LIST"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_REMOVAL_LIST"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_REMOVAL_LIST"
 
   echo ""
   echo "Establish links between integrated manifestations and contributors (authors, translators, illustrators, scenarists, publishing directors, and publishers) ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS"
 
   echo ""
   echo "Delete duplicate more generic schema:author role if we have a more specific role"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BELTRANS_DUPLICATE_ROLE"
 
   echo ""
   echo "Create BELTRANS original manifestation records"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BELTRANS_ORIGINALS"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BELTRANS_ORIGINALS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BELTRANS_ORIGINALS"
 
   echo ""
   echo "Establish links between integrated originals and contributors ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS_ORIG"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS_ORIG"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$LINK_QUERY_CONTRIBUTORS_ORIG"
 
   echo ""
   echo "Perform Clustering ..."
@@ -1093,19 +1107,23 @@ function integrate {
 
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on nationality ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_CORPUS"
 
   echo ""
   echo "Annotate manifestations relevant for BELTRANS based on genre ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
   echo ""
   echo "Add BB genre classification to integrated records ..."
-  python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BB"
+  #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BB"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BB"
 
   echo ""
   echo "Create integrated geo information"
@@ -1304,7 +1322,8 @@ function loadDateInformation {
 
   echo ""
   echo "LOAD dates data"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_TRL" "$FORMAT_TURTLE" \
     "$dateDataTurtle"
 
 }
@@ -1322,7 +1341,8 @@ function loadGeoInformation {
 
   echo ""
   echo "LOAD geo data of publications"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_GEO" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_GEO" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_GEO" "$FORMAT_TURTLE" \
     "$geoDataTurtle" "$geoDataOrgTurtle"
 
 
@@ -1503,6 +1523,7 @@ function clustering {
   if [ "$existingClusters" = true ];
   then
     # First get existing cluster assignments from the correlation list
+    mkdir -p "$integrationName/integration/clustering"
     existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
     echo python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
     python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
@@ -1577,10 +1598,11 @@ function clustering {
     --named-graph "$TRIPLE_STORE_GRAPH_WORKS"
 
   echo "CLUSTERING - Upload new data"
-  python -m tools.sparql.upload_data \
-    -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
-    --content-type "text/turtle" \
-    --named-graph "$TRIPLE_STORE_GRAPH_WORKS" \
+  #python -m tools.sparql.upload_data \
+  #  -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
+  #  --content-type "text/turtle" \
+  #  --named-graph "$TRIPLE_STORE_GRAPH_WORKS" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_WORKS" "$FORMAT_TURTLE" \
     $clustersTurtle
 
 }
@@ -1662,19 +1684,19 @@ function fetchKBRLinkedAuthorities {
 
   echo ""
   echo "FETCH - Download KBR translations FR-NL linked authorities - person"
-  getKBRAutRecords $personsFRNLIdentifiers "contributorID" $personsFRNLXML 
+  getKBRAutRecords "$personsFRNLIdentifiers" "contributorID" "$personsFRNLXML" "$integrationName" true
 
   echo ""
   echo "FETCH - Download KBR translations FR-NL linked authorities - orgs"
-  getKBRAutRecords $orgsFRNLIdentifiers "contributorID" $orgsFRNLXML 
+  getKBRAutRecords "$orgsFRNLIdentifiers" "contributorID" $orgsFRNLXML "$integrationName" true
 
   echo ""
   echo "FETCH - Download KBR translations NL-FR linked authorities - persons"
-  getKBRAutRecords $personsNLFRIdentifiers "contributorID" $personsNLFRXML 
+  getKBRAutRecords "$personsNLFRIdentifiers" "contributorID" "$personsNLFRXML" "$integrationName" true
 
   echo ""
   echo "FETCH - Download KBR translations NL-FR linked authorities - orgs"
-  getKBRAutRecords $orgsNLFRIdentifiers "contributorID" $orgsNLFRXML 
+  getKBRAutRecords "$orgsNLFRIdentifiers" "contributorID" "$orgsNLFRXML" "$integrationName" true
 
   echo ""
   echo "FETCH - Download KBR Belgians"
@@ -1740,37 +1762,41 @@ function extractKBR {
   mkdir -p $integrationName/kbr/agents/fr-nl
   mkdir -p $integrationName/kbr/agents/nl-fr
 
-  local alreadyFetchedContributors="$integrationName/kbr/$SUFFIX_KBR_LIST_FETCHED_CONTRIBUTORS"
+  local alreadyFetchedAut="$integrationName/$SUFFIX_KBR_LIST_FETCHED_AUT"
+  local alreadyFetchedBib="$integrationName/$SUFFIX_KBR_LIST_FETCHED_BIB"
+  echo ""
+  echo "List of contributor identifiers that were already fetched: '$alreadyFetchedAut'"
+  echo ""
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data FR-NL"
-  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
+  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_FR" "fr-nl"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR translations data NL-FR"
-  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
+  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$INPUT_KBR_TRL_NL" "nl-fr"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "$alreadyFetchedContributors"
-  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "$alreadyFetchedContributors"
-  #extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "$alreadyFetchedContributors"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "contributorID" "$alreadyFetchedAut"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "contributorID" "$alreadyFetchedAut"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "contributorID" "$alreadyFetchedAut"
 
   # 2024-07-29: Provide full path as parameter instead of parts of the path
-  #extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
-  #extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "contributorID" "$alreadyFetchedAut"
+  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "contributorID" "$alreadyFetchedAut"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
   kbrTranslationsCSVFRNL="$integrationName/kbr/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   kbrTranslationsCSVNLFR="$integrationName/kbr/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
   kbrLinkedOriginalsXML="$integrationName/kbr/book-data-and-contributions/linked-originals/fetched-originals.xml"
-  #python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
-  #  --identifier-column "sourceKBRID" \
-  #  -b "150" \
-  #  -u "$ENV_KBR_API_Z3950" \
-  #  "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
-  #extractKBRTranslationsAndContributions "$integrationName" "kbr" "$kbrLinkedOriginalsXML" "linked-originals"
+  python $SCRIPT_GET_KBR_RECORDS -o "$kbrLinkedOriginalsXML" \
+    --identifier-column "sourceKBRID" \
+    -b "150" \
+   -u "$ENV_KBR_API_Z3950" \
+    "$kbrTranslationsCSVFRNL" "$kbrTranslationsCSVNLFR"
+  extractKBRTranslationsAndContributions "$integrationName" "kbr" "$kbrLinkedOriginalsXML" "linked-originals"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals linked authorities data"
@@ -1782,23 +1808,23 @@ function extractKBR {
 
   # Use filters to extract different types of authorities from the same contribution CSV file
   #
-  #python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsPersonContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_PERSON
-  #python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
+  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsPersonContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_PERSON
+  python -m $MODULE_EXTRACT_COLUMNS -o "$kbrOriginalsOrgContributorIDList" -c "contributorID" "$kbrOriginalsCSVContDedup" --filter-file $KBR_CONT_FILTER_FILE_ORG
 
   echo ""
   echo "Fetch KBR originals - persons"
-  #getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$alreadyFetchedContributors"
+  getKBRAutRecords "$kbrOriginalsPersonContributorIDList" "contributorID" "$kbrOriginalsFetchedPersonsXML" "$integrationName" "$alreadyFetchedAut"
   echo ""
   echo "Extract CSV data from fetched linked original authorities - persons"
-  #extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "$alreadyFetchedContributors"
+  extractKBRPersons "$integrationName" "kbr" "$kbrOriginalsFetchedPersonsXML" "linked-originals" "authorityID" "$alreadyFetchedAut"
 
   echo ""
   echo "Fetch KBR originals - orgs"
-  #getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$alreadyFetchedContributors"
+  getKBRAutRecords "$kbrOriginalsOrgContributorIDList" "contributorID" "$kbrOriginalsFetchedOrgsXML" "$integrationName" "$alreadyFetchedAut"
 
   echo ""
   echo "Extract CSV data from fetched linked original authorities - orgs"
-  extractKBROrgs "$integrationName/kbr/agents/linked-originals" "$kbrOriginalsFetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "$alreadyFetchedContributors"
+  extractKBROrgs "$integrationName/kbr/agents/linked-originals" "$kbrOriginalsFetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "authorityID" "$alreadyFetchedAut"
 
 }
 
@@ -1951,7 +1977,8 @@ function extractKBCode {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "EXTRACT, TRANSFORM and LOAD the KBCode hierarchy with a federated SPARQL UPDATE query"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$INSERT_KBCODE_QUERY_FILE"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$INSERT_KBCODE_QUERY_FILE"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$INSERT_KBCODE_QUERY_FILE"
   
 }
 
@@ -1964,7 +1991,9 @@ function extractRameau {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "EXTRACT, TRANSFORM and LOAD the RAMEAU entities from the BnF dumps"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_RAMEAU" $INPUT_BNF_RAMEAU_FILENAME_PATTERN
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_RAMEAU" $INPUT_BNF_RAMEAU_FILENAME_PATTERN
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_RAMEAU" "$FORMAT_TURTLE" \
+    $INPUT_BNF_RAMEAU_FILENAME_PATTERN
 }
 
 # -----------------------------------------------------------------------------
@@ -2176,6 +2205,8 @@ function extractOriginalLinksKBR {
   local similarityDuplicatesMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_DUPLICATES_MATCHES_FR_NL"
   local similarityMultipleMatchesFRNL="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_SIMILARITY_MULTIPLE_MATCHES_FR_NL"
 
+  local alreadyFetchedAut="$integrationName/$SUFFIX_KBR_LIST_FETCHED_AUT"
+
   source ./py-integration-env/bin/activate
 
   echo ""
@@ -2226,11 +2257,11 @@ function extractOriginalLinksKBR {
   linkedContributors="$integrationName/$dataSourceName/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
   fetchedPersonsXML="$integrationName/$dataSourceName/agents/fetched-apep.xml"
   fetchedOrgsXML="$integrationName/$dataSourceName/agents/fetched-aorg.xml"
-  getKBRAutRecords "$linkedContributors" "contributorID" "$fetchedPersonsXML"
-  getKBRAutRecords "$linkedContributors" "contributorID" "$fetchedOrgsXML"
+  getKBRAutRecords "$linkedContributors" "contributorID" "$fetchedPersonsXML" "$integrationName" true
+  getKBRAutRecords "$linkedContributors" "contributorID" "$fetchedOrgsXML" "$integrationName" true
 
-  extractKBRPersons "$integrationName" "$dataSourceName" "$fetchedPersonsXML" "mixed-lang"
-  extractKBROrgs "$integrationName/$dataSourceName/agents/mixed-lang" "$fetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  extractKBRPersons "$integrationName" "$dataSourceName" "$fetchedPersonsXML" "mixed-lang" "authorityID" "$alreadyFetchedAut"
+  extractKBROrgs "$integrationName/$dataSourceName/agents/mixed-lang" "$fetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "authorityID" "$alreadyFetchedAut"
 
 
 
@@ -2627,7 +2658,8 @@ function extractKBRPersons {
   local dataSourceName=$2
   local kbrPersons=$3
   local language=$4
-  local alreadyFetchedContributors=$5
+  local kbrIDColumn=$5
+  local alreadyFetchedContributors=$6
 
   kbrPersonsCSV="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_CLEANED"
   kbrPersonsNationalities="$integrationName/$dataSourceName/agents/$language/$SUFFIX_KBR_LA_PERSONS_NAT"
@@ -2653,10 +2685,10 @@ function extractKBRPersons {
   python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS \
     -i $kbrPersonsNames \
     -o $kbrPersonsNamesComplete \
-    --identifier-column "authorityID" \
+    --identifier-column "$kbrIDColumn" \
     --sequence-number-column "sequence_number"
 
-  if [ ! -z $alreadyFetchedContributors ];
+  if [ ! -z "$alreadyFetchedContributors" ];
   then
     numberExtractedPersons=`wc -l $kbrPersonsCSV`
     # we extracted more KBR identifiers and therefore have to update the list of already fetched contributors
@@ -2665,7 +2697,7 @@ function extractKBRPersons {
     # but we still want that the initially extracted authorities are not fetched again
     echo ""
     echo "Append $numberExtractedPersons person identifiers to already fetched list (number including header)"
-    appendValuesToCSV "$kbrPersonsCSV" "authorityID" "$alreadyFetchedContributors"
+    appendValuesToCSV "$kbrPersonsCSV" "$kbrIDColumn" "KBR" "$alreadyFetchedContributors"
   fi
 
 }
@@ -2677,7 +2709,8 @@ function extractKBROrgs {
   local inputFilePath=$2
   local outputFilenameOrgs=$3
   local outputFilenameIdentifiers=$4
-  local alreadyFetchedContributors=$5
+  local kbrIDColumn=$5
+  local alreadyFetchedContributors=$6
 
   kbrOrgsCSV="$outputFilePath/$outputFilenameOrgs"
   kbrOrgsISNIs="$outputFilePath/$outputFilenameIdentifiers"
@@ -2699,7 +2732,7 @@ function extractKBROrgs {
       # but we still want that the initially extracted authorities are note fetched again
       echo ""
       echo "Append $numberExtractedOrgs org identifiers to already fetched list (number including header)"
-      appendValuesToCSV "$kbrOrgsCSV" "authorityID" "$alreadyFetchedContributors"
+      appendValuesToCSV "$kbrOrgsCSV" "$kbrIDColumn" "KBR" "$alreadyFetchedContributors"
     fi
   else
     echo ""
@@ -3134,8 +3167,9 @@ function extractContributorPersonCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedPersonsXML="$folderName/kbr/fetched-apep.xml"
 
-  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML"
-  extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang"
+  # 2025-07-31: both getKBRAutRecords and extractKBRPersons should operate on the same "alreadyFetched" list
+  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedPersonsXML" "$integrationName" true
+  extractKBRPersons "$folderName" "kbr" "$kbrOriginalsFetchedPersonsXML" "mixed-lang" "authorityID" "$integrationName/$SUFFIX_KBR_LIST_FETCHED_AUT"
 }
 
 # -----------------------------------------------------------------------------
@@ -3170,8 +3204,8 @@ function extractContributorOrgCorrelationList {
   mkdir -p "$folderName/kbr/agents/mixed-lang"
   kbrOriginalsFetchedOrgsXML="$folderName/kbr/fetched-aorg.xml"
 
-  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedOrgsXML"
-  extractKBROrgs "$folderName/kbr/agents/mixed-lang" "$kbrOriginalsFetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  getKBRAutRecords "$correlationListKBRIDs" "KBR" "$kbrOriginalsFetchedOrgsXML" "$integrationName" true
+  extractKBROrgs "$folderName/kbr/agents/mixed-lang" "$kbrOriginalsFetchedOrgsXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "authorityID" "$integrationName/$SUFFIX_KBR_LIST_FETCHED_AUT"
 
 }
 
@@ -3220,6 +3254,8 @@ function extractTranslationCorrelationList {
   local sourcePublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS"
   
   local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
+
+  local alreadyFetchedAut="$integrationName/$SUFFIX_KBR_LIST_FETCHED_AUT"
 
   echo "Extract 1:n relationships of different translation correlation list columns from '$correlationList'"
   cp $correlationList "$folderName"
@@ -3282,7 +3318,7 @@ function extractTranslationCorrelationList {
   mkdir -p "$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang"
   mkdir -p "$integrationName/correlation/translations/kbr/agents/mixed-lang"
   local correlationListKBRTranslationXML="$integrationName/correlation/translations/kbr/$SUFFIX_CORRELATION_TRL_KBR_TRL_XML"
-  getKBRRecords $correlationList "targetKBRIdentifier" $correlationListKBRTranslationXML 
+  getKBRBibRecords "$correlationListKBRIDs" "KBR" "$correlationListKBRTranslationXML" "$integrationName" true
 
   extractKBRTranslationsAndContributions "$integrationName/correlation/translations" "kbr" "$correlationListKBRTranslationXML" "mixed-lang"
 
@@ -3292,10 +3328,10 @@ function extractTranslationCorrelationList {
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrTranslationsCSVContDedup="$integrationName/correlation/translations/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedAuthoritiesXML"
+  getKBRAutRecords "$kbrTranslationsCSVContDedup" "contributorID" "$kbrTranslationsFetchedAuthoritiesXML" "$integrationName" true
 
-  extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/translations/kbr/agents/mixed-lang" "$kbrTranslationsFetchedAuthoritiesXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  extractKBRPersons "$integrationName/correlation/translations" "kbr" "$kbrTranslationsFetchedAuthoritiesXML" "mixed-lang" "authorityID" "$alreadyFetchedAut"
+  extractKBROrgs "$integrationName/correlation/translations/kbr/agents/mixed-lang" "$kbrTranslationsFetchedAuthoritiesXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "authorityID" "$alreadyFetchedAut"
 
 
   echo ""
@@ -3303,7 +3339,7 @@ function extractTranslationCorrelationList {
   mkdir -p "$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang"
   mkdir -p "$integrationName/correlation/originals/kbr/agents/mixed-lang"
   local correlationListKBROriginalXML="$integrationName/correlation/originals/kbr/$SUFFIX_CORRELATION_TRL_KBR_ORIGINAL_XML"
-  getKBRRecords $correlationList "sourceKBRIdentifier" $correlationListKBROriginalXML 
+  getKBRBibRecords "$correlationList" "sourceKBRIdentifier" "$correlationListKBROriginalXML" "$integrationName" true
 
   extractKBRTranslationsAndContributions "$integrationName/correlation/originals" "kbr" "$correlationListKBROriginalXML" "mixed-lang"
 
@@ -3314,10 +3350,10 @@ function extractTranslationCorrelationList {
   # This CSV file will be created by the extractKBRTranslationsAndContributions function above
   kbrOriginalsCSVContDedup="$integrationName/correlation/originals/kbr/book-data-and-contributions/mixed-lang/$SUFFIX_KBR_TRL_CONT_DEDUP"
 
-  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedAuthoritiesXML"
+  getKBRAutRecords "$kbrOriginalsCSVContDedup" "contributorID" "$kbrOriginalsFetchedAuthoritiesXML" "$integrationName" true
 
-  extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedAuthoritiesXML" "mixed-lang"
-  extractKBROrgs "$integrationName/correlation/originals/kbr/agents/mixed-lang" "$kbrOriginalsFetchedAuthoritiesXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS"
+  extractKBRPersons "$integrationName/correlation/originals" "kbr" "$kbrOriginalsFetchedAuthoritiesXML" "mixed-lang" "authorityID" "$alreadyFetchedAut"
+  extractKBROrgs "$integrationName/correlation/originals/kbr/agents/mixed-lang" "$kbrOriginalsFetchedAuthoritiesXML" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "authorityID" "$alreadyFetchedAut"
  
 }
 
@@ -3605,12 +3641,13 @@ function loadContributorPersonCorrelationList {
 
   echo ""
   echo "Load persons correlation list"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_CONT" "$FORMAT_TURTLE" \
     "$correlationTurtle"
 
   echo ""
   echo "Load fetched correlation KBR person contributors"
-  loadKBRLinkedPersonAuthorities "$integrationName" "correlation/contributor-persons/kbr" "mixed-lang" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedPersonAuthorities "$integrationName" "correlation/contributor-persons/kbr" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
 
 }
 
@@ -3626,12 +3663,13 @@ function loadContributorOrgCorrelationList {
 
   echo ""
   echo "Load org correlation list"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_CONT" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_CONT" "$FORMAT_TURTLE" \
     "$correlationTurtle"
 
   echo ""
   echo "Load fetched correlation KBR org contributors"
-  loadKBRLinkedOrgAuthorities "$integrationName" "correlation/contributor-orgs/kbr" "mixed-lang" "$linkedAuthoritiesNamedGraph"
+  loadKBRLinkedOrgAuthorities "$integrationName" "correlation/contributor-orgs/kbr" "mixed-lang" "$TRIPLE_STORE_GRAPH_KBR_LA"
 
 }
   
@@ -3652,11 +3690,13 @@ function loadTranslationCorrelationList {
   local originalsTurtle="$integrationName/correlation/originals/rdf/mixed-lang"
 
   echo "Load translations correlation list"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_TRL" "$FORMAT_TURTLE" \
     "$correlationTurtle"
 
   echo "Load translations correlation list - original data"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_ORIG" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_ORIG" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_ORIG" "$FORMAT_TURTLE" \
     "$correlationOriginalsTurtle"
 
 
@@ -3685,7 +3725,8 @@ function loadTranslationRemovalList {
   local correlationTurtle="$integrationName/correlation/removal/rdf/$SUFFIX_CORRELATION_TRL_LD"
 
   echo "Load translations correlation removal list"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_REMOVAL" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_INT_REMOVAL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_INT_REMOVAL" "$FORMAT_TURTLE" \
     "$correlationTurtle"
 
 }
@@ -3777,7 +3818,8 @@ function loadOriginalLinksKBR {
   # and only "promote" links to the actual KBR graph after they survived a test based on overlapping contributors with SPARQL
   echo ""
   echo "Load KBR links to identified originals ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KBR_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KBR_TRL" "$FORMAT_TURTLE" \
     "$kbrOriginalLinksTurtleFRNL" "$kbrOriginalLinksTurtleNLFR"
 
   echo ""
@@ -3791,23 +3833,28 @@ function loadOriginalLinksKBR {
 
   echo ""
   echo "Annotate identified originals with overlapping contributors ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP"
 
   echo ""
   echo "Delete links to originals which are not verified by overlapping contributors ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
 
   echo ""
   echo "Add links between translations and originals that not only match with title, but also have overlapping contributors ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KBR_IDENTIFIED_ORIGINAL_LINKS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KBR_IDENTIFIED_ORIGINAL_LINKS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KBR_IDENTIFIED_ORIGINAL_LINKS"
 
   echo ""
   echo "Delete wrongly identified originals that are no longer linked to any translation ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_WRONG_ORIGINAL_LINKS"
 
   echo ""
   echo "Delete redundant limited originals (after identifying and adding link to a real original) ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_REDUNDANT_ORIGINALS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_REDUNDANT_ORIGINALS"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_KBR_REDUNDANT_ORIGINALS"
 }
 
 # -----------------------------------------------------------------------------
@@ -3824,7 +3871,8 @@ function loadKBRTranslationsAndContributions {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load KBR translations and contributions ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNameGraph" "$FORMAT_TURTLE" \
     "$kbrTranslations"
 }
 
@@ -3850,12 +3898,14 @@ function loadKBRBookInformationAndContributions {
 
 
   echo "Load KBR book information and contributions, BB assignments, countries, places, ISBN10/ISBN13 - $language ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNamedGraph" "$FORMAT_TURTLE" \
     "$kbrBookInformationAndContributions" "$kbrTranslationsBB" "$kbrTranslationsPubCountries" "$kbrTranslationsPubPlaces" "$kbrTranslationsISBNTurtle"
 
   # upload newly identified authorities to the linked authorities named graph
   echo "Load newly identified KBR linked authorities $language ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
     "$kbrIdentifiedAuthorities"
 
 }
@@ -3874,7 +3924,8 @@ function loadKBRLimitedOriginalInfo {
 
   echo ""
   echo "Load KBR (limited) original information ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$originalsNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$originalsNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$originalsNamedGraph" "$FORMAT_TURTLE" \
     "$kbrLimitedOriginalsTurtle"
 }
 
@@ -3897,7 +3948,8 @@ function loadKBRLinkedPersonAuthorities {
   # upload newly identified authorities to the linked authorities named graph
   echo ""
   echo "Load person authorities - $language ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
     "$kbrPersons" "$kbrPersonsIdentifiersTurtle" "$kbrPersonsNamesTurtle"
 }
 
@@ -3920,23 +3972,25 @@ function loadKBRLinkedOrgAuthorities {
   # upload newly identified authorities to the linked authorities named graph
   echo ""
   echo "Load org authorities - $language ..."
-  echo python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrOrgs"
-
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
     "$kbrOrgs"
 
   if [ -f "$kbrOrgsIdentifiersTurtle" ];
   then
     echo ""
     echo "Load org authorities identifiers - $language ..."
-    python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrOrgsIdentifiersTurtle"
+    #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" "$kbrOrgsIdentifiersTurtle"
+    uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
+    "$kbrOrgsIdentifiersTurtle"
   fi
   
 
   if [ -f "$kbrOrgMatchesTurtle" ];
   then
     echo "Load possible KBR publisher matches ..."
-    python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES \
+    #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES \
+    uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KBR_PBL_MATCHES" "$FORMAT_TURTLE" \
       "$kbrOrgMatchesTurtle"
   fi
 
@@ -3969,25 +4023,39 @@ function loadKB {
 
 
   echo "Load KB translations and contributions ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL" "$kbTranslationsAndContributions"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_TRL" "$FORMAT_TURTLE" \
+  "$kbTranslationsAndContributions"
 
   echo "Load KB (limited) original information ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG" "$kbOriginalsTurtle"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_TRL_ORIG" "$FORMAT_TURTLE" \
+  "$kbOriginalsTurtle"
 
   echo "Load KB linked authorities ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_LA" "$kbLinkedAuthorities"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_KB_LA" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_LA" "$FORMAT_TURTLE" \
+  "$kbLinkedAuthorities"
 
   echo "Load KB publisher data FR-NL ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL "$kbPublishersFRNL"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_PBL" "$FORMAT_RDF_XML" \
+  "$kbPublishersFRNL"
 
   echo "Load KB publisher data NL-FR ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL "$kbPublishersNLFR"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph $TRIPLE_STORE_GRAPH_KB_PBL \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_KB_PBL" "$FORMAT_RDF_XML" \
+  "$kbPublishersNLFR"
 
   echo "Link KB translations to publisher authority records ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KB_TRL_PBL"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$CREATE_QUERY_KB_TRL_PBL"
 
   echo "Create dcterms:identifier properties for KB publishers ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_KB_PBL_IDENTIFIERS"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$CREATE_QUERY_KB_PBL_IDENTIFIERS"
 
 }
 
@@ -4047,37 +4115,60 @@ function loadBnF {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load BNF translations FR-NL ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL" "$bnfTranslationsFRNL"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL" "$bnfTranslationsFRNL"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_FR_NL" "$FORMAT_RDF_XML" \
+  "$bnfTranslationsFRNL"
 
   echo "Load BNF translations NL-FR ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR" "$bnfTranslationsNLFR"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_NL_FR" "$FORMAT_RDF_XML" \
+  "$bnfTranslationsNLFR"
 
   echo "Load BnF contributors persons and organizations ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData" "$bnfContributorDataOrgs"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT" "$FORMAT_RDF_XML" \
+  "$bnfContributorData" "$bnfContributorDataOrgs"
 
   echo "Load BnF publication-rameau links ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS" "$bnfRameauClassifications"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_RAMEAU_LINKS" "$FORMAT_RDF_XML" \
+  "$bnfRameauClassifications"
 
   echo "Load BnF publication-contributor links ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS" "$bnfContributionLinksData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_CONT_LINKS" "$FORMAT_RDF_XML" \
+  "$bnfContributionLinksData"
 
   echo "Load external links of BnF contributors - ISNI ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$bnfContributorIsniData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$FORMAT_RDF_XML" \
+  "$bnfContributorIsniData"
 
   echo "Load external links of BnF contributors - VIAF ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$bnfContributorVIAFData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$FORMAT_RDF_XML" \
+  "$bnfContributorVIAFData"
 
   echo "Load external links of BnF contributors - WIKIDATA ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$bnfContributorWikidataData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$FORMAT_RDF_XML" \
+  "$bnfContributorWikidataData"
 
   echo "Load BnF publication data to a single named graph"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$TRANSFORM_QUERY_BNF_TRL_FR_NL" "$TRANSFORM_QUERY_BNF_TRL_NL_FR"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$TRANSFORM_QUERY_BNF_TRL_FR_NL"
+  "$TRANSFORM_QUERY_BNF_TRL_NL_FR"
 
   echo "Load BnF limited originals into separate named graph ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_ORIG" "$bnfLimitedOriginalInformationTurtle"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL_ORIG" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL_ORIG" "$FORMAT_TURTLE" \
+  "$bnfLimitedOriginalInformationTurtle"
 
   echo "Load BnF original links into the single BnF named graph ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" "$bnfLimitedOriginalInformationLinksTurtle"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL" "$FORMAT_TURTLE" \
+  "$bnfLimitedOriginalInformationLinksTurtle"
 
 
   bnfISBN10ISBN13="$integrationName/bnf/translations/$SUFFIX_BNF_ISBN10_ISBN13_CSV"
@@ -4100,10 +4191,14 @@ function loadBnF {
   time python $SCRIPT_BNF_ADD_ISBN_10_13 -i $bnfISBN10ISBN13 -o $bnfISBN10ISBN13Enriched
 
   echo "Delete existing BnF ISBN10 and ISBN13 identifiers ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" "$DELETE_QUERY_BNF_ISBN"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$DELETE_QUERY_BNF_ISBN"
 
   echo "Add normalized BnF ISBN10 and ISBN13 identifiers ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_NT" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" "$bnfISBN10ISBN13Enriched"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_NT" --named-graph "$TRIPLE_STORE_GRAPH_BNF_TRL" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_TRL" "$FORMAT_NT" \
+  "$bnfISBN10ISBN13Enriched"
 
   #echo "Fix BnF ISBN13 identifiers without hyphen - get malformed ISBN identifiers"
   #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_BNF_ISBN13_WITHOUT_HYPHEN_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$bnfISBN13MissingHyphen"
@@ -4133,7 +4228,8 @@ function loadBnF {
 
 
   echo "Add dcterms:identifier to BnF contributors, manifestations as well as add ISNI/VIAF/Wikidata identifier according to the bibframe vocabulary"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_IDENTIFIER_MANIFESTATIONS" \
     "$CREATE_QUERY_BNF_ISNI" "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA" "$CREATE_QUERY_BNF_GENDER" \
     "$CREATE_QUERY_BNF_MANIFESTATIONS_BIBFRAME" "$CREATE_QUERY_BNF_ORIGINALS"
@@ -4159,15 +4255,18 @@ function loadUnesco {
   local authorityTurtle="$integrationName/unesco/rdf/$SUFFIX_UNESCO_AUTHORITIES_LD"
 
   echo "Load Unesco Index Translationum translation data (translations, contributions and ISBN relationships)"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_UNESCO" "$FORMAT_TURTLE" \
     "$translationTurtle" "$isbnTurtle"
 
   echo "Load Unesco Index Translationum original information"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_ORIG \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_ORIG \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_UNESCO_ORIG" "$FORMAT_TURTLE" \
     "$translationOriginalTurtle"
 
   echo "Load Unesco authority records"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_LA \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_UNESCO_LA \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_UNESCO_LA" "$FORMAT_TURTLE" \
     "$authorityTurtle"
 }
 
@@ -4186,7 +4285,8 @@ function loadWikidata {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load wikidata data"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_WIKIDATA $wikidataTurtle
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph $TRIPLE_STORE_GRAPH_WIKIDATA $wikidataTurtle
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_WIKIDATA" "$FORMAT_TURTLE" "$wikidataTurtle"
 }
 
 # -----------------------------------------------------------------------------
@@ -4208,7 +4308,8 @@ function loadMasterData {
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 
   echo "Load master data (mapped content, countries, languages and gender information)"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_MASTER" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_MASTER" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_MASTER" "$FORMAT_TURTLE" \
     "$masterDataTurtle" "$masterDataCountries" "$masterDataLanguages" "$masterDataGender"
 
 }
@@ -4232,20 +4333,25 @@ function loadNationalityFromBnFViaISNI {
   # this step simply adds other data to the BnF contributors
 
   echo "Load newly identified BnF contributors to provide missing nationalities ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT" "$bnfContributorData"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT" "$FORMAT_TURTLE" "$bnfContributorData"
 
 
   echo "Load external links of newly identified BnF contributors - ISNI ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$bnfContributorIsniData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$bnfContributorIsniData"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_ISNI" "$FORMAT_TURTLE" "$bnfContributorIsniData"
 
   echo "Load external links of newly identified BnF contributors - VIAF ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$bnfContributorVIAFData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$bnfContributorVIAFData"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_VIAF" "$FORMAT_TURTLE" "$bnfContributorVIAFData"
 
   echo "Load external links of newly identified BnF contributors - WIKIDATA ..."
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$bnfContributorWikidataData"
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_RDF_XML" --named-graph "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$bnfContributorWikidataData"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_BNF_CONT_WIKIDATA" "$FORMAT_TURTLE" "$bnfContributorWikidataData"
 
   echo "Add dcterms:identifier to newly identified BnF contributors and add ISNI/VIAF/Wikidata identifier according to the bibframe vocabulary"
-  python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_SPARQL_UPDATE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
     "$CREATE_QUERY_BNF_IDENTIFIER_CONT" "$CREATE_QUERY_BNF_ISNI" \
     "$CREATE_QUERY_BNF_VIAF" "$CREATE_QUERY_BNF_WIKIDATA"
 
@@ -4287,14 +4393,16 @@ function fetchKBRAuthorityData {
 
 
 # -----------------------------------------------------------------------------
-function getKBRRecords {
+function getKBRBibRecords {
   local inputFile=$1
   local idColumn=$2
   local outputFile=$3
+  local folderName=$4
+  local useAlreadyFetchedList=$5
 
-  # get environment variables
-  export $(cat .env | sed 's/#.*//g' | xargs)
-  python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "$idColumn" -b "150" -u "$ENV_KBR_API_Z3950" "$inputFile"
+  local alreadyFetchedFilename=$(determineAlreadyFetchedFilename "$useAlreadyFetchedList" "$folderName" "$SUFFIX_KBR_LIST_FETCHED_BIB")
+  echo "DETERMINED BIB: '$alreadyFetchedFilename'"
+  getKBRRecords "$inputFile" "$idColumn" "$outputFile" "$ENV_KBR_API_Z3950" "$alreadyFetchedFilename"
 }
 
 # -----------------------------------------------------------------------------
@@ -4302,52 +4410,113 @@ function getKBRAutRecords {
   local inputFile=$1
   local idColumn=$2
   local outputFile=$3
-  local alreadyFetchedContributors=$4
+  local folderName=$4
+  local useAlreadyFetchedList=$5
+
+  local alreadyFetchedFilename=$(determineAlreadyFetchedFilename "$useAlreadyFetchedList" "$folderName" "$SUFFIX_KBR_LIST_FETCHED_AUT")
+  echo "DETERMINED AUT: '$alreadyFetchedFilename'"
+  getKBRRecords "$inputFile" "$idColumn" "$outputFile" "$ENV_KBR_API_Z3950_AUT" "$alreadyFetchedFilename"
+}
+
+
+# -----------------------------------------------------------------------------
+function determineAlreadyFetchedFilename {
+  local value=$1
+  local folderName=$2
+  local globalDefault=$3
+
+  # determine if a list of already fetched identifiers should be used
+  if [[ "$value" == "false" ]];
+  then
+    # if not, then keep false and let getKBRRecords handle it
+    local alreadyFetchedFile=false
+  elif [[ "$value" == "true" ]];
+  then
+    # if yes, set the file to a global file for all already fetched BIB identifiers
+    local alreadyFetchedFile="$folderName/$globalDefault"
+  elif [[ -z "$value" ]];
+  then
+    # if empty value given abort, we expect either true, false or an alternative name
+    echo "getKBRRecords called with 'useAlreadyFetchdList', but empty string given: should either be true, false or an alternative filename"
+    exit 1
+  else
+    # if alternative file is given, use that one
+    local alreadyFetchedFile="$value"
+  fi
+
+  echo "$alreadyFetchedFile"
+
+}
+
+
+# -----------------------------------------------------------------------------
+function getKBRRecords {
+  local inputFile=$1
+  local idColumn=$2
+  local outputFile=$3
+  local url=$4
+  # this parameter is supposed to be a file path or the value 'false'
+  local alreadyFetchedIdentifiersFile=$5
+
 
   # get environment variables
   export $(cat .env | sed 's/#.*//g' | xargs)
 
-  if [ -z $alreadyFetchedContributors ];
+  if [[ "$alreadyFetchedIdentifiersFile" == "false" ]];
   then
     echo ""
-    echo "Fetch KBR authority data"
-    python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "$idColumn" -b "150" -u "$ENV_KBR_API_Z3950_AUT" "$inputFile"
-
-  else
-    local currentTime=`date +"%Y-%m-%d_%H-%M-%S"`
-    local inputFileFolder=$(dirname $inputFile)
-    local notYetFetched="$inputFileFolder/diff-authorities-to-fetch-$currentTime.csv"
-
-    python -m $MODULE_CSV_SET_DIFFERENCE -o $notYetFetched --minus-rest --column "$idColumn" --column "authorityID" --output-column "authorityID" "$inputFile" "$alreadyFetchedContributors"
-    local numberRows=`wc -l $inputFile`
-    local numberRowsDiff=`wc -l $notYetFetched`
-
-    echo ""
-    echo "Fetch KBR authority data (records we do not have already: $numberRowsDiff from $numberRowsDiff)"
-    python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "authorityID" -b "150" -u "$ENV_KBR_API_Z3950_AUT" "$notYetFetched"
-
+    echo "Fetch KBR records"
+    python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "$idColumn" -b "150" -u "$url" "$inputFile"
+    return
   fi
 
+  local currentTime=`date +"%Y-%m-%d_%H-%M-%S_%6N"`
+  local inputFileFolder=$(dirname "$inputFile")
+  local notYetFetched="$inputFileFolder/diff-authorities-to-fetch-$currentTime-process-$$.csv"
+
+
+  if [ ! -f "$alreadyFetchedIdentifiersFile" ];
+  then
+    printf "$idColumn\n" > "$alreadyFetchedIdentifiersFile"
+  fi
+
+  echo "python -m $MODULE_CSV_SET_DIFFERENCE -o "$notYetFetched" --minus-rest --column "$idColumn" --column "KBR" --output-column "KBR" "$inputFile" "$alreadyFetchedIdentifiersFile""
+  python -m $MODULE_CSV_SET_DIFFERENCE -o "$notYetFetched" --minus-rest --column "$idColumn" --column "KBR" --output-column "KBR" "$inputFile" "$alreadyFetchedIdentifiersFile"
+  local numberRows=`wc -l $inputFile`
+  local numberRowsDiff=`wc -l $notYetFetched`
+
+  echo ""
+  echo "Fetch KBR records (only records we do not have already: $numberRowsDiff from $numberRows)"
+  python $SCRIPT_GET_KBR_RECORDS -o "$outputFile" --identifier-column "KBR" -b "150" -u "$url" "$notYetFetched"
+
+  # We want to add the not-yet-fetched ideas (after fetching) to the general list
+  # at this point, the column name is KBR (see python call to MODULE_CSV_SET_DIFFERENCE here above)
+  appendValuesToCSV "$notYetFetched" "KBR" "KBR" "$alreadyFetchedIdentifiersFile"
 }
 
 # -----------------------------------------------------------------------------
 function appendValuesToCSV {
   local inputFile=$1
   local inputFileIDColumn=$2
-  local outputFile=$3
+  local outputFileIDColumn=$3
+  local outputFile=$4
 
   echo ""
   echo "Store extracted and thus already fetched identifiers"
   # using extract columns, but with append mode
-  if [ $inputFileIDColumn != "authorityID" ];
-  then
-    local currentTime=`date +"%Y-%m-%d_%H-%M-%S"`
-    local tempOutput="/tmp/append-values-$currentTime.csv"
-    python -m $MODULE_NORMALIZE_HEADERS -i $inputFile --delimiter ',' --header-mapping-file $KBR_CONTRIBUTOR_HEADER_CONVERSION -o $tempOutput
-    python -m $MODULE_EXTRACT_COLUMNS -o "$outputFile" --column "$inputFileIDColumn" --append "$tempOutput" 
-  else
-    python -m $MODULE_EXTRACT_COLUMNS -o "$outputFile" --column "$inputFileIDColumn" --append "$inputFile" 
-  fi
+
+  # 2025-07-31: not needed, function is only called with 'authorityID'
+  #if [ $inputFileIDColumn != "authorityID" ];
+  #then
+  #  local currentTime=`date +"%Y-%m-%d_%H-%M-%S"`
+  #  local tempOutput="/tmp/append-values-$currentTime.csv"
+  #  python -m $MODULE_NORMALIZE_HEADERS -i $inputFile --delimiter ',' --header-mapping-file $KBR_CONTRIBUTOR_HEADER_CONVERSION -o $tempOutput
+  #  python -m $MODULE_EXTRACT_COLUMNS -o "$outputFile" --column "$inputFileIDColumn" --append "$tempOutput" 
+  #else
+  #  python -m $MODULE_EXTRACT_COLUMNS -o "$outputFile" --column "$inputFileIDColumn" --append "$inputFile" 
+  #fi
+  echo "python -m $MODULE_EXTRACT_COLUMNS -o "$outputFile" --column "$inputFileIDColumn" --output-column "$outputFileIDColumn" --append "$inputFile" "
+  python -m $MODULE_EXTRACT_COLUMNS -o "$outputFile" --column "$inputFileIDColumn" --output-column "$outputFileIDColumn" --append "$inputFile" 
 
 }
 
@@ -4486,10 +4655,10 @@ function deleteNamedGraph {
   local namedGraph=$3
 
   local url="$endpoint/namespace/$namespace/sparql"
-  echo "Delete existing content in namespace <$namedGraph> (url $url)"
+  echo "Delete existing content of the named graph <$namedGraph> in namespace '$namespace' (url $url)"
 
   source ./py-integration-env/bin/activate
-  python delete_named_graph.py -u "$url" --named-graph "$namedGraph"
+  python -m tools.sparql.delete_named_graph -u "$url" --named-graph "$namedGraph"
 
   #. $SCRIPT_DELETE_NAMED_GRAPH "$namespace" "$endpoint" "$namedGraph"
 }

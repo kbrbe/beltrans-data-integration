@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import lxml.etree as ET
 import requests
 import time
@@ -87,15 +88,20 @@ def deleteNamedGraph(url, namedGraph, auth=None):
 
   try:
     #namedGraphURL = f'{url}?context-uri=<{}>'
-    r = requests.delete(url, params={'c': f'<{namedGraph}>'}, auth=auth)
+    #r = requests.delete(url, params={'c': f'<{namedGraph}>'}, auth=auth)
+    payload = {'update': f'DROP GRAPH <{namedGraph}>;'}
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    r = requests.post(url, data=payload, headers=headers, auth=auth)
     r.raise_for_status()
-  except requests.HTTPError as he:
+  except requests.exceptions.HTTPError as he:
     statusCode = he.response.status_code
     print(f'{statusCode} error while deleting named graph {namedGraph} (first 100 characters): ' + he.response.content.decode('utf-8')[0:100])
     #print(he.response.content.decode('utf-8'))
+    sys.exit(1)
   except Exception as e:
     print(f'Error while trying to delete named graph {namedGraph} with url {url}')
     print(e)
+    sys.exit(1)
 
 
 # -----------------------------------------------------------------------------
@@ -122,13 +128,15 @@ def sparqlSelectToString(url, queryFilename, acceptFormat, auth=None, httpMethod
       print(f'successfully queried in time {queryTime}')
       return r.content.decode('utf-8')
 
-    except requests.HTTPError as he:
+    except requests.exceptions.HTTPError as he:
       statusCode = he.response.status_code
       print(f'{statusCode} error while updating {queryFilename} (first 40 characters): ' + he.response.content.decode('utf-8')[0:40])
       print(he.response.content.decode('utf-8'))
+      sys.exit(1)
     except Exception as e:
       print(f'Error while querying {url} with {queryFilename} and acceptFormat {acceptFormat}')
       print(e)
+      sys.exit(1)
 
 
 
@@ -176,14 +184,17 @@ def sparqlUpdate(url, queryString, fileFormat, queryName, auth=None):
         print(f'Unexpected answer, first 200 characters of answer:' + response[0:200])
         print(e)
         print(response)
+        sys.exit(1)
 
   except requests.HTTPError as he:
     statusCode = he.response.status_code
     print(f'{statusCode} error while updating {queryName}: ' + he.response.content.decode('utf-8')[0:40])
     print(he.response.content.decode('utf-8'))
+    sys.exit(1)
   except Exception as e:
     print(f'Error while updating {url} with query {queryName} and type {fileFormat}')
     print(e)
+    sys.exit(1)
 
 
 # -----------------------------------------------------------------------------
