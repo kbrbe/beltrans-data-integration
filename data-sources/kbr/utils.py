@@ -749,13 +749,15 @@ def preprocessISBNString(inputISBN):
   '9791023513936'
   >>> preprocessISBNString('90-295-3453-2 (Deel 1)')
   '9029534532'
+  >>> preprocessISBNString('90-229-0251-X')
+  '902290251X'
   >>> preprocessISBNString('I am not a ISBN number')
   ''
   >>> preprocessISBNString('')
   ''
   """
 
-  inputISBNNorm = re.sub('\D', '', inputISBN)
+  inputISBNNorm = re.sub(r'[^0-9X]', '', inputISBN)
 
   if len(inputISBNNorm) == 0:
     return ''
