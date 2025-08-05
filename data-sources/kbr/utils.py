@@ -749,13 +749,15 @@ def preprocessISBNString(inputISBN):
   '9791023513936'
   >>> preprocessISBNString('90-295-3453-2 (Deel 1)')
   '9029534532'
+  >>> preprocessISBNString('90-229-0251-X')
+  '902290251X'
   >>> preprocessISBNString('I am not a ISBN number')
   ''
   >>> preprocessISBNString('')
   ''
   """
 
-  inputISBNNorm = re.sub('\D', '', inputISBN)
+  inputISBNNorm = re.sub(r'[^0-9X]', '', inputISBN)
 
   if len(inputISBNNorm) == 0:
     return ''
@@ -796,6 +798,10 @@ def getNormalizedISBN10(inputISBN):
   '90-314-1151-5'
   >>> getNormalizedISBN10('9791032305690')
   ''
+  >>> getNormalizedISBN10('90-229-0251-X')
+  '90-229-0251-X'
+  >>> getNormalizedISBN10('2-204-02631-X')
+  '2-204-02631-X'
   >>> getNormalizedISBN10('')
   ''
   >>> getNormalizedISBN10('979-10-235-1393-613')
@@ -834,6 +840,8 @@ def getNormalizedISBN13(inputISBN):
   '978-90-8558-138-3'
   >>> getNormalizedISBN13('9031411515')
   '978-90-314-1151-1'
+  >>> getNormalizedISBN13('9782020306287')
+  '978-2-02-030628-7'
   >>> getNormalizedISBN13('')
   ''
   """
