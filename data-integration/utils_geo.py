@@ -13,7 +13,7 @@ def extractLocationFromLocationCountryString(value):
   '(Belgium)'
   """
   if value.endswith(')') and not value.startswith('('):
-    found = re.search('^(.*)\(.*', value)
+    found = re.search(r'^(.*)\(.*', value)
     if found:
       return found.group(1).strip()
   else:

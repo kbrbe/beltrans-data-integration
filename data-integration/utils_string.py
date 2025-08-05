@@ -65,9 +65,9 @@ def extractStringFromBrackets(value):
   """
   found = None
   if value.startswith('('):
-    found = re.search('^\((.*)\)', value)
+    found = re.search(r'^\((.*)\)', value)
   elif value.startswith('['):
-    found = re.search('\[(.*)\]', value)
+    found = re.search(r'\[(.*)\]', value)
   else:
     return value
 
