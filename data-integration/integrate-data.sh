@@ -1118,7 +1118,7 @@ function integrate {
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
   #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
-  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBRAME_TITLES"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
 
   echo ""
   echo "Add BB genre classification to integrated records ..."
@@ -1523,6 +1523,7 @@ function clustering {
   if [ "$existingClusters" = true ];
   then
     # First get existing cluster assignments from the correlation list
+    mkdir -p "$integrationName/integration/clustering"
     existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
     echo python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
     python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
