@@ -1523,12 +1523,17 @@ function clustering {
   if [ "$existingClusters" = true ];
   then
     # First get existing cluster assignments from the correlation list
+    # If a correlation list entry does not have a cluster identifier it simply won't be taken (this is what we want: https://github.com/kbrbe/beltrans-data-integration/issues/293)
+    # However, we have to ensure that later on, those entries won't be excluded from clustering simply because "they are from the correlation list" 
     mkdir -p "$integrationName/integration/clustering"
     existingClusterAssignments="$integrationName/integration/clustering/$SUFFIX_EXISTING_CLUSTER_ASSIGNMENTS"
     echo python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
     python -m tools.csv.extract_columns "$INPUT_CORRELATION_TRANSLATIONS" -o "$existingClusterAssignments" -c "targetIdentifier" -c "workClusterIdentifier" --output-column "elementID" --output-column "clusterID"
   fi
 
+  #
+  # SPARQL query to create desriptive keys for all manifestations that DO NOT HAVE a hard coded cluster already
+  #
   #keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys.sparql"
   keyComponentsSPARQLQuery="sparql-queries/clustering/get-descriptive-keys-all.sparql"
    
@@ -4658,7 +4663,7 @@ function deleteNamedGraph {
   echo "Delete existing content of the named graph <$namedGraph> in namespace '$namespace' (url $url)"
 
   source ./py-integration-env/bin/activate
-  python -m tools.sparql.delete_named_graph -u "$url" --named-graph "$namedGraph"
+  time python -m tools.sparql.delete_named_graph -u "$url" --named-graph "$namedGraph"
 
   #. $SCRIPT_DELETE_NAMED_GRAPH "$namespace" "$endpoint" "$namedGraph"
 }

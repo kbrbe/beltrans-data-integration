@@ -40,10 +40,10 @@ function uploadRDFData {
     if [ -z "$namedGraph" ];
     then
       echo python upload_data.py -u "$uploadURL" --content-type "$format" $files
-      python upload_data.py -u "$uploadURL" --content-type "$format" $files
+      time python upload_data.py -u "$uploadURL" --content-type "$format" $files
     else
       echo python upload_data.py -u "$uploadURL" --content-type "$format" --named-graph "$namedGraph" $files
-      python upload_data.py -u "$uploadURL" --content-type "$format" --named-graph "$namedGraph" $files
+      time python upload_data.py -u "$uploadURL" --content-type "$format" --named-graph "$namedGraph" $files
     fi
   else
 
