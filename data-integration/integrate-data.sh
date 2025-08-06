@@ -2442,7 +2442,7 @@ function transformOriginalLinksKBR {
   # 2) execute the mapping
   echo ""
   echo "Map KBR original linking NL-FR ..."
-  . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleFRNL
+  . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleNLFR
 
   export RML_SOURCE_TITLE_MATCHES="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_MATCHES_FR_NL"
   export RML_SOURCE_TITLE_DUPLICATES_MATCHES="$integrationName/$dataSourceName/fr-nl/$SUFFIX_KBR_TITLE_DUPLICATES_MATCHES_FR_NL"
@@ -2452,7 +2452,7 @@ function transformOriginalLinksKBR {
   # 2) execute the mapping
   echo ""
   echo "Map KBR original linking FR-NL ..."
-  . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleNLFR
+  . map.sh ../data-sources/kbr/kbr-original-linking.yml $originalLinksTurtleFRNL
 
   echo ""
   echo "Map extracted data about fetched KBR originals"
