@@ -5,6 +5,7 @@ prefixes:
   http: "http://www.w3.org/2011/http#"
   grel: "http://users.ugent.be/~bjdmeest/function/grel.ttl#"  
   bf: "http://id.loc.gov/ontologies/bibframe/"
+  oa: "http://www.w3.org/ns/oa#"
   owl: "http://www.w3.org/2002/07/owl#"
   xsd: "http://www.w3.org/2001/XMLSchema#"
   edm: "http://www.europeana.eu/schemas/edm/"
@@ -69,6 +70,25 @@ mappings:
           parameters:
             - [grel:valueParameter, $(targetYearOfPublication)]
             - [grel:valueParameter2, ""] 
+
+  # ---------------------------------------------------------------------------
+  #
+  clusters:
+    sources:
+      - access: *sourceCont
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:annot_cluster_$(targetIdentifier)_$(workClusterIdentifier)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(workClusterIdentifier)]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, oa:Annotation]
+      - [oa:hasTarget, btid:$(targetIdentifier)~iri]
+      - [oa:hasBody, btid:cluster_$(workClusterIdentifier)~iri]
+      - [oa:motivatedBy, oa:classifying~iri]
 
 
   # ---------------------------------------------------------------------------
