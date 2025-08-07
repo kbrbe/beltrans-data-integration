@@ -69,13 +69,25 @@ WHERE {
 
 
 
-  # place info from geo named graph, because of multilingual city names
+  # place info from geo named graph
   #
   OPTIONAL { 
     graph <http://beltrans-geo> { 
-      ?contributorURI schema:address/schema:addressLocality/rdfs:label ?contributorPlace . }
-  }
+      ?contributorURI schema:address ?contributorAddress .
+    }
 
+    OPTIONAL {
+      graph <http://beltrans-geo> { ?contributorAddress schema:addressLocality/rdfs:label ?contributorPlace . }
+
+    OPTIONAL { 
+      graph <http://beltrans-geo> { ?contributorAddress schema:addressRegion ?contributorRegion . } 
+      FILTER(CONTAINS(STR(?contributorRegion), "-"))
+    }
+  
+    OPTIONAL { 
+      graph <http://beltrans-geo> { ?contributorAddress schema:addressLocality/rdfs:comment ?countryLabel . } 
+    }
+  }
 
 
   
@@ -124,25 +136,6 @@ WHERE {
       ?kbrURI a schema:Organization ;
               dcterms:identifier ?kbrID .
     }
-
-
-    #
-    # some location info from KBR AORG graph
-    #
-    OPTIONAL { 
-      graph <http://kbr-aorg> { ?kbrURI schema:address/schema:addressRegion ?contributorRegion . } 
-      FILTER(CONTAINS(STR(?contributorRegion), "-"))
-    }
-    
-    OPTIONAL { 
-      graph <http://kbr-aorg> { 
-        ?kbrURI schema:address/schema:addressRegion ?contributorCountryISOCode . 
-      } 
-      FILTER(!CONTAINS(STR(?contributorCountryISOCode), "-"))
-      graph <http://master-data> { ?contributorCountryURI btm:isoCode ?contributorCountryISOCode ; skos:prefLabel ?countryLabel . }
-      FILTER(lang(?countryLabel) = "en")
-    }
-
   }
 
   # SOURCE DATA: BnF
