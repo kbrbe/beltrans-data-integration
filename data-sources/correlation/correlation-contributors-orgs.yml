@@ -94,6 +94,52 @@ mappings:
           parameters:
             - [grel:valueParameter, $(nameFR)]
             - [grel:valueParameter2, ""] 
+      - p: schema:address
+        o: btid:address_$(contributorID)~iri
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, "$(region)$(place)$(country)"]
+            - [grel:valueParameter2, ""]
+
+
+
+  # ---------------------------------------------------------------------------
+  #
+  places:
+    sources:
+      - access: *sourceCont
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:address_$(contributorID)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, "$(region)$(place)$(country)"]
+        - [grel:valueParameter2, ""]
+    po:
+      - [a, schema:PostalAddress]
+      - p: schema:addressLocality
+        o: $(place) 
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, "$(place)"]
+            - [grel:valueParameter2, ""]
+      - p: schema:addressCountry
+        o: $(country) 
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, "$(country)"]
+            - [grel:valueParameter2, ""]
+      - p: schema:addressRegion
+        o: $(region) 
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, "$(region)"]
+            - [grel:valueParameter2, ""]
 
 
 
