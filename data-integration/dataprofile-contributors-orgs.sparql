@@ -78,17 +78,18 @@ WHERE {
 
     OPTIONAL {
       graph <http://beltrans-geo> { ?contributorAddress schema:addressLocality/rdfs:label ?contributorPlace . }
-
-    OPTIONAL { 
-      graph <http://beltrans-geo> { ?contributorAddress schema:addressRegion ?contributorRegion . } 
-      FILTER(CONTAINS(STR(?contributorRegion), "-"))
     }
+
   
     OPTIONAL { 
       graph <http://beltrans-geo> { ?contributorAddress schema:addressLocality/rdfs:comment ?countryLabel . } 
     }
   }
 
+  OPTIONAL { 
+    graph <http://beltrans-contributors> { ?contributorURI schema:address/schema:addressRegion ?contributorRegion . } 
+    FILTER(CONTAINS(STR(?contributorRegion), "-"))
+  }
 
   
   # ISNI
