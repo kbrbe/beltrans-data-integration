@@ -1786,13 +1786,13 @@ function extractKBR {
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "contributorID" "$alreadyFetchedAut"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "contributorID" "$alreadyFetchedAut"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "contributorID" "$alreadyFetchedAut"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "authorityID" "$alreadyFetchedAut"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "authorityID" "$alreadyFetchedAut"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "authorityID" "$alreadyFetchedAut"
 
   # 2024-07-29: Provide full path as parameter instead of parts of the path
-  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "contributorID" "$alreadyFetchedAut"
-  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "contributorID" "$alreadyFetchedAut"
+  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "authorityID" "$alreadyFetchedAut"
+  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "authorityID" "$alreadyFetchedAut"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
@@ -2690,6 +2690,7 @@ function extractKBRPersons {
 
   echo ""
   echo "Complete author names sequence numbers - $language ..."
+  echo "python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS -i $kbrPersonsNames -o $kbrPersonsNamesComplete --identifier-column "$kbrIDColumn" --sequence-number-column "sequence_number""
   python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS \
     -i $kbrPersonsNames \
     -o $kbrPersonsNamesComplete \
