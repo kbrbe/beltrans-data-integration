@@ -1627,10 +1627,13 @@ function folderHasToExist {
 function fetchKBR {
   local integrationName=$1
 
+  # create folder, because already fetched file needs to be created
+  mkdir -p "$integrationName"
+
   echo ""
   echo "FETCH - Download KBR data"
   fetchKBRTranslations "$1"
-  fetchKBRLinkedAuthorities
+  fetchKBRLinkedAuthorities "$1"
 }
 
 # -----------------------------------------------------------------------------
