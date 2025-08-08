@@ -1,6 +1,6 @@
 source .env
 
-DOWNLOAD_DATE="2025-02-11"
+DOWNLOAD_DATE="2025-08-08"
 NUMBER_ISNI_RECORDS=""
 
 NAMED_GRAPH="http://isni-sru"
