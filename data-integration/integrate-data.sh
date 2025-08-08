@@ -4485,7 +4485,7 @@ function getKBRRecords {
 
   if [ ! -f "$alreadyFetchedIdentifiersFile" ];
   then
-    printf "$idColumn\n" > "$alreadyFetchedIdentifiersFile"
+    printf "KBR\n" > "$alreadyFetchedIdentifiersFile"
   fi
 
   echo "python -m $MODULE_CSV_SET_DIFFERENCE -o "$notYetFetched" --minus-rest --column "$idColumn" --column "KBR" --output-column "KBR" "$inputFile" "$alreadyFetchedIdentifiersFile""
