@@ -23,6 +23,7 @@ options = parser.parse_args()
 
 # Create a single pandas dataframe from all CSV measurement files
 allDfs = []
+print(f'Processing {len(options.files)} input files ...')
 for inputFile in options.files:
 
   dateString = re.findall(r'\d{4}-\d{2}-\d{2}', os.path.basename(inputFile))[0]
