@@ -2938,7 +2938,6 @@ function mapKBRBookInformationAndContributions {
 function mapKBRTranslationLimitedOriginals {
   local integrationName=$1
   local dataSourceName=$2
-  local language=$3
 
   # output is a file with information to create limited original records
   # for example to make proper schema:translationOfWork links to dummy records
@@ -3788,7 +3787,6 @@ function loadKBR {
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "nl-fr" "$linkedAuthoritiesNamedGraph"
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "linked-originals" "$linkedAuthoritiesNamedGraph"
 
-  loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
 }
 
 # -----------------------------------------------------------------------------
@@ -3885,7 +3883,7 @@ function loadKBRTranslationsAndContributions {
 
   echo "Load KBR translations and contributions ..."
   #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
-  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNameGraph" "$FORMAT_TURTLE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNamedGraph" "$FORMAT_TURTLE" \
     "$kbrTranslations"
 }
 
