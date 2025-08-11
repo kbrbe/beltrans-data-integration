@@ -103,30 +103,31 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 # INPUT FILENAMES
 #
 
+exportDate="2025-08-11"
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2025-02-10.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2025-02-10.xml"
+INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_$exportDate.xml"
+INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$exportDate.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-documents.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-documents.xml"
 
-INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
+INPUT_KBR_ORGS_LOOKUP="/data/beltrans/data-sources/kbr/agents/aorg.csv"
 
 INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_APEP.xml"
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2025-02-10.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2025-02-10.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2025-02-10.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2025-02-10.xml"
+INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$exportDate.xml"
+INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$exportDate.xml"
+INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$exportDate.xml"
+INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$exportDate.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2025-02-10.xml"
+INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_$exportDate.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -2365,40 +2366,40 @@ function transformKBR {
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - fr-nl"
-  #mapKBRBookInformationAndContributions $integrationName "kbr" "fr-nl"
+  mapKBRBookInformationAndContributions $integrationName "kbr" "fr-nl"
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - nl-fr"
-  #mapKBRBookInformationAndContributions $integrationName "kbr" "nl-fr"
+  mapKBRBookInformationAndContributions $integrationName "kbr" "nl-fr"
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - linked-originals"
-  #mapKBRBookInformationAndContributions $integrationName "kbr" "linked-originals"
+  mapKBRBookInformationAndContributions $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR translation data to RDF - FR-NL"
-  #mapKBRTranslationsAndContributions $integrationName "kbr" "fr-nl"
+  mapKBRTranslationsAndContributions $integrationName "kbr" "fr-nl"
 
   echo ""
   echo "TRANSFORMATION - Map KBR translation data to RDF - NL-FR"
-  #mapKBRTranslationsAndContributions $integrationName "kbr" "nl-fr"
+  mapKBRTranslationsAndContributions $integrationName "kbr" "nl-fr"
 
   echo ""
   echo "TRANSFORMATION - Map KBR (limited) original information to RDF (FR-NL and NL-FR)"
-  #mapKBRTranslationLimitedOriginals $integrationName "kbr"
+  mapKBRTranslationLimitedOriginals $integrationName "kbr"
 
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked person authorities data to RDF"
-  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
-  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
-  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
-  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked org authorities data to RDF"
-  #mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
-  #mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
   mapKBRLinkedOrgAuthorities $integrationName "kbr" "linked-originals"
 
 
@@ -2939,10 +2940,13 @@ function mapKBRTranslationLimitedOriginals {
   local dataSourceName=$2
   local language=$3
 
+  # output is a file with information to create limited original records
+  # for example to make proper schema:translationOfWork links to dummy records
   kbrLimitedOriginalsTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_LIMITED_ORIG_LD"
 
   # map the translations
 
+  # Input are the regular translation info from both language directions
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
   export RML_SOURCE_WORKS_FR="$integrationName/$dataSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   export RML_SOURCE_WORKS_NL="$integrationName/$dataSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
