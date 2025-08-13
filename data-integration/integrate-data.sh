@@ -176,10 +176,11 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2025-02-10_person_contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2025-02-10_org_contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2025-02-10_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2025-02-10_translations_removal-list.csv"
+correlationListDate='2025-07-17'
+INPUT_CORRELATION_PERSON="/data/beltrans/data-sources/correlation/$correlationListDate""_person_contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="/data/beltrans/data-sources/correlation/$correlationListDate""_org_contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="/data/beltrans/data-sources/correlation/$correlationListDate""_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="/data/beltrans/data-sources/correlation/$correlationListDate""_translations_removal-list.csv"
 
 
 # #############################################################################
