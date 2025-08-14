@@ -103,11 +103,11 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 # INPUT FILENAMES
 #
 
-exportDate="2025-08-11"
+exportDate="2025-08-14"
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_$exportDate.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$exportDate.xml"
+INPUT_KBR_TRL_NL="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_NL-FR_$exportDate.xml"
+INPUT_KBR_TRL_FR="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_FR-NL_$exportDate.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-documents.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-documents.xml"
@@ -1647,8 +1647,8 @@ function fetchKBRTranslations {
   local queryNLFR="H041=('dut','dum') AND LAND='frans' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
 
   local date=`date +"%Y-%m-%d"`
-  local dataFRNL="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
-  local dataNLFR="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
+  local dataFRNL="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
+  local dataNLFR="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
   
   echo ""
   echo "FETCH - Download KBR translations FR-NL"
@@ -1664,22 +1664,22 @@ function fetchKBRLinkedAuthorities {
   local integrationName=$1
 
   local date=`date +"%Y-%m-%d"`
-  local dataFRNL="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
-  local dataNLFR="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
+  local dataFRNL="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
+  local dataNLFR="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
 
-  local personsFRNLXML="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.xml"
-  local personsNLFRXML="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.xml"
+  local personsFRNLXML="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.xml"
+  local personsNLFRXML="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.xml"
 
-  local orgsFRNLXML="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.xml"
-  local orgsNLFRXML="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.xml"
+  local orgsFRNLXML="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.xml"
+  local orgsNLFRXML="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.xml"
 
-  local belgiansXML="../data-sources/kbr/agents/ANAT-belg_$date.xml"
+  local belgiansXML="/data/beltrans/data-sources/kbr/agents/ANAT-belg_$date.xml"
 
-  local personsFRNLIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.csv"
-  local personsNLFRIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.csv"
+  local personsFRNLIdentifiers="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.csv"
+  local personsNLFRIdentifiers="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.csv"
 
-  local orgsFRNLIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.csv"
-  local orgsNLFRIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.csv"
+  local orgsFRNLIdentifiers="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.csv"
+  local orgsNLFRIdentifiers="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.csv"
 
   checkFile $dataFRNL
   checkFile $dataNLFR
