@@ -2631,12 +2631,16 @@ function extractKBRTranslationsAndContributions {
   echo "Extract CSV from $language translations XML..."
   extractCSVFromXMLTranslations "$kbrTranslationsCleaned" "$kbrTranslationsCSVWorks" "$kbrTranslationsCSVCont" "$kbrTranslationsCollectionLinks"
 
-  echo "Replace publisher names to support deduplication - $language"
-  python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrTranslationsCSVCont -o $kbrTranslationsCSVContReplaced
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus this step is no longer needed
+  #echo "Replace publisher names to support deduplication - $language"
+  #python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrTranslationsCSVCont -o $kbrTranslationsCSVContReplaced
 
-  echo "Deduplicate newly identified contributors - $language"
-  echo ""
-  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrTranslationsCSVContReplaced -o $kbrTranslationsCSVContDedup --no-matches-log $kbrNoMatches --multiple-matches-log $kbrMultipleMatches
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus this step is no longer needed
+  #echo "Deduplicate newly identified contributors - $language"
+  #echo ""
+  #python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrTranslationsCSVContReplaced -o $kbrTranslationsCSVContDedup --no-matches-log $kbrNoMatches --multiple-matches-log $kbrMultipleMatches
 
   echo "Extract BB assignments for $language translations ..."
   extractBBEntries "$kbrTranslationsCSVWorks" "$kbrTranslationsCSVBB"
@@ -2655,9 +2659,11 @@ function extractKBRTranslationsAndContributions {
   extractISBN13 "$kbrTranslationsCSVWorks" "$kbrTranslationsISBN13"
 
 
-  echo "Extract newly identified contributors $language ..."
-  echo ""
-  extractIdentifiedAuthorities "$kbrTranslationsCSVContDedup" "$kbrTranslationsIdentifiedAuthorities"
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus this step is no longer needed
+  #echo "Extract newly identified contributors $language ..."
+  #echo ""
+  #extractIdentifiedAuthorities "$kbrTranslationsCSVContDedup" "$kbrTranslationsIdentifiedAuthorities"
 
 }
 
@@ -2882,13 +2888,15 @@ function mapKBRBookInformationAndContributions {
 
   # map newly identified publishers
 
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus these steps 1) and 2) are no longer needed
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_CONT_IDENTIFIED="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_NEWAUT"
+  #export RML_SOURCE_KBR_CONT_IDENTIFIED="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_NEWAUT"
 
-  # 2) execute the mapping
-  echo ""
-  echo "Map KBR newly identified contributors - $language ..."
-  . map.sh ../data-sources/kbr/kbr-identified-authorities.yml $kbrBookDataIdentifiedAuthorities
+  ## 2) execute the mapping
+  #echo ""
+  #echo "Map KBR newly identified contributors - $language ..."
+  #. map.sh ../data-sources/kbr/kbr-identified-authorities.yml $kbrBookDataIdentifiedAuthorities
 
   # map belgian bibliography assignments
 
@@ -3914,11 +3922,12 @@ function loadKBRBookInformationAndContributions {
   uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNamedGraph" "$FORMAT_TURTLE" \
     "$kbrBookInformationAndContributions" "$kbrTranslationsBB" "$kbrTranslationsPubCountries" "$kbrTranslationsPubPlaces" "$kbrTranslationsISBNTurtle"
 
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus this step is no longer needed
   # upload newly identified authorities to the linked authorities named graph
-  echo "Load newly identified KBR linked authorities $language ..."
-  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
-  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
-    "$kbrIdentifiedAuthorities"
+  #echo "Load newly identified KBR linked authorities $language ..."
+  #uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
+  #  "$kbrIdentifiedAuthorities"
 
 }
 
