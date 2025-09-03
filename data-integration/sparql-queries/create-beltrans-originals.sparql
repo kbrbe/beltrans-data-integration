@@ -24,6 +24,7 @@ INSERT {
                               dcterms:identifier ?originalManifestationID ;
                               schema:name ?originalTitle ;
                               schema:inLanguage ?originalLanguage ;
+                              schema:datePublished ?kbrOriginalYearOfPublication ;
                               bibo:isbn10 ?kbrOriginalISBN10 ;
                               bibo:isbn13 ?kbrOriginalISBN13 ;
                               schema:workTranslation ?manifestation ;
@@ -85,7 +86,7 @@ WHERE {
                    dcterms:identifier ?kbrOriginalID .
     }
     
-    
+    OPTIONAL { graph <http://kbr-originals> { ?kbrOriginal schema:datePublished ?kbrOriginalYearOfPublication . } }
     OPTIONAL { graph <http://kbr-originals> { ?kbrOriginal schema:name ?kbrOriginalTitle . } }
     OPTIONAL { graph <http://kbr-originals> { ?kbrOriginal bibo:isbn10 ?kbrOriginalISBN10 . } }
     OPTIONAL { graph <http://kbr-originals> { ?kbrOriginal bibo:isbn13 ?kbrOriginalISBN13 . } }
