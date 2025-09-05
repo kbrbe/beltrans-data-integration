@@ -3,7 +3,10 @@ prefix schema: <http://schema.org/>
 prefix btid: <http://kbr.be/id/data/>
 
 INSERT {
-  graph <http://beltrans-manifestations> { ?m schema:isPartOf btid:beltransGenre . }
+  graph <http://beltrans-manifestations> { 
+    ?m schema:isPartOf btid:beltransGenre ;
+       a btid:BeltransGenreTranslation .
+  }
 }
 WHERE {
  

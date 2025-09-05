@@ -17,7 +17,10 @@ PREFIX rdagroup1elements: <http://rdvocab.info/Elements/>
 PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
 
 INSERT {
-  graph <http://beltrans-manifestations> { ?manifestation schema:isPartOf btid:beltransCorpus . }
+  graph <http://beltrans-manifestations> { 
+    ?manifestation schema:isPartOf btid:beltransCorpus ;
+                   a btid:BeltransTranslation .
+  }
 }
 WHERE {
   {
