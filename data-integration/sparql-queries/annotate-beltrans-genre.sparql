@@ -1,11 +1,12 @@
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix schema: <http://schema.org/>
 prefix btid: <http://kbr.be/id/data/>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
 
 INSERT {
   graph <http://beltrans-manifestations> { 
     ?m schema:isPartOf btid:beltransGenre ;
-       a btid:BeltransGenreTranslation .
+       a btm:BeltransGenreTranslation .
   }
 }
 WHERE {
