@@ -103,7 +103,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 # INPUT FILENAMES
 #
 
-exportDate="2025-08-14"
+exportDate="2025-09-23"
+correlationListDate='2025-09-23'
 
 # KBR - translations
 INPUT_KBR_TRL_NL="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_NL-FR_$exportDate.xml"
@@ -118,10 +119,10 @@ INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$exportDate.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$exportDate.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$exportDate.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$exportDate.xml"
+INPUT_KBR_LA_PERSON_NL="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$exportDate.xml"
+INPUT_KBR_LA_ORG_NL="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$exportDate.xml"
+INPUT_KBR_LA_PERSON_FR="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$exportDate.xml"
+INPUT_KBR_LA_ORG_FR="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$exportDate.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
@@ -176,7 +177,6 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-correlationListDate='2025-07-17'
 INPUT_CORRELATION_PERSON="/data/beltrans/data-sources/correlation/$correlationListDate""_person_contributors-correlation-list.csv"
 INPUT_CORRELATION_ORG="/data/beltrans/data-sources/correlation/$correlationListDate""_org_contributors-correlation-list.csv"
 INPUT_CORRELATION_TRANSLATIONS="/data/beltrans/data-sources/correlation/$correlationListDate""_translations_correlation-list.csv"
@@ -2629,7 +2629,7 @@ function extractKBRTranslationsAndContributions {
   cleanTranslations "$kbrTranslations" "$kbrTranslationsCleaned"
 
   echo "Extract CSV from $language translations XML..."
-  extractCSVFromXMLTranslations "$kbrTranslationsCleaned" "$kbrTranslationsCSVWorks" "$kbrTranslationsCSVCont" "$kbrTranslationsCollectionLinks"
+  extractCSVFromXMLTranslations "$kbrTranslationsCleaned" "$kbrTranslationsCSVWorks" "$kbrTranslationsCSVContDedup" "$kbrTranslationsCollectionLinks"
 
   # 2025-09-03: we no longer extract publisher information from MARC field 264
   # thus this step is no longer needed
