@@ -79,48 +79,50 @@ def addContributorFieldsToContributorCSV(elem, writer, stats):
       cNameNorm = utils.getNormalizedString(cName)
       foundContributors.append({'contributorType': 'org', 'contributorID': cID, 'contributorName': cNameNorm, 'contributorRole': cRole, 'uncertainty': uncertainty})
 
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus this step is no longer needed
   #
   # Publishers are also indicated in field 264, but only as text string as it appeared on the book
   # If we simply map 264 we get doubles because we also map 710
   # Thus we have to identify publishers which are ONLY encoded in field 264
   # In the previous step we collected all the names of organizational contributors (field 710) of this record
   #
-  orgContributorsWithoutLink = elem.findall('./marc:datafield[@tag="264"]', ALL_NS)
-  for ol in orgContributorsWithoutLink:
-    textName = utils.getElementValue(ol.find('./marc:subfield[@code="b"]', ALL_NS))
-    textNameNorm = utils.getNormalizedString(textName)
-    if textName != '':
-      foundMatch = False
-      for linked in linkedOrganizationNames:
+  #orgContributorsWithoutLink = elem.findall('./marc:datafield[@tag="264"]', ALL_NS)
+  #for ol in orgContributorsWithoutLink:
+  #  textName = utils.getElementValue(ol.find('./marc:subfield[@code="b"]', ALL_NS))
+  #  textNameNorm = utils.getNormalizedString(textName)
+  #  if textName != '':
+  #    foundMatch = False
+  #    for linked in linkedOrganizationNames:
+  #
+  #      # check first if the 264 name is part of the 710 name or vice versa
+  #      if textNameNorm in linked:
+  #        utils.count(stats['counter'], 'identified-264-in-710-by-264-in-710')
+  #        foundMatch = True
+  #        break
+  #      elif linked in textNameNorm:
+  #        utils.count(stats['counter'], 'identified-264-in-710-by-710-in-264')
+  #        foundMatch = True
+  #        break
+  #      else:
+  #        # if the name is no substring of the other name, do some more sophisticated comparisons
+  #        # based on the levenshtein distance of (parts of) the name
+  #        if utils.smallLevenshteinDistance(stats['counter'], textNameNorm, linked):
+  #          foundMatch = True
+  #          break
+  #
+  #    if not foundMatch:
+  #      # this publisher encoded as text does not seem to be already encoded as link in a 710 field
+  #      # thus create a new contribution and use a hash of the normalized name as ID
+  #      # alternatively a UUID can be used, but with a hash we can identify this publisher also in other records and get other links
 
-        # check first if the 264 name is part of the 710 name or vice versa
-        if textNameNorm in linked:
-          utils.count(stats['counter'], 'identified-264-in-710-by-264-in-710')
-          foundMatch = True
-          break
-        elif linked in textNameNorm:
-          utils.count(stats['counter'], 'identified-264-in-710-by-710-in-264')
-          foundMatch = True
-          break
-        else:
-          # if the name is no substring of the other name, do some more sophisticated comparisons
-          # based on the levenshtein distance of (parts of) the name
-          if utils.smallLevenshteinDistance(stats['counter'], textNameNorm, linked):
-            foundMatch = True
-            break
-
-      if not foundMatch:
-        # this publisher encoded as text does not seem to be already encoded as link in a 710 field
-        # thus create a new contribution and use a hash of the normalized name as ID
-        # alternatively a UUID can be used, but with a hash we can identify this publisher also in other records and get other links
-
-        if textName != 's. n' and textName != '[s.n.]':
-          normalizedName = utils.getNormalizedString(textName)
-          nameID = hashlib.md5(normalizedName.encode('utf-8')).hexdigest()
-          utils.count(stats['counter'], 'publishers-without-authority')
-          stats['unique-publishers-without-authority'].add(nameID)
-          textNameNorm = utils.getNormalizedString(textName)
-          foundContributors.append({'contributorType': 'org', 'contributorID': nameID, 'contributorName': textNameNorm, 'contributorRole': 'pbl', 'uncertainty': 'no'})
+  #      if textName != 's. n' and textName != '[s.n.]':
+  #        normalizedName = utils.getNormalizedString(textName)
+  #        nameID = hashlib.md5(normalizedName.encode('utf-8')).hexdigest()
+  #        utils.count(stats['counter'], 'publishers-without-authority')
+  #        stats['unique-publishers-without-authority'].add(nameID)
+  #        textNameNorm = utils.getNormalizedString(textName)
+  #        foundContributors.append({'contributorType': 'org', 'contributorID': nameID, 'contributorName': textNameNorm, 'contributorRole': 'pbl', 'uncertainty': 'no'})
        
 
   #
