@@ -68,6 +68,13 @@ mappings:
             - [grel:valueParameter, $(isImprintFrom)]
             - [grel:valueParameter2, ""] 
       - p: schema:name
+        o: $(name)
+        condition:
+          function: idlab-fn:notEqual
+          parameters:
+            - [grel:valueParameter, $(name)]
+            - [grel:valueParameter2, ""] 
+      - p: schema:name
         o:
           - value: $(nameNL)
             language: nl

@@ -103,30 +103,32 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 # INPUT FILENAMES
 #
 
+exportDate="2025-10-22"
+correlationListDate='2025-10-21'
 
 # KBR - translations
-INPUT_KBR_TRL_NL="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_2025-02-10.xml"
-INPUT_KBR_TRL_FR="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_2025-02-10.xml"
+INPUT_KBR_TRL_NL="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_NL-FR_$exportDate.xml"
+INPUT_KBR_TRL_FR="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_FR-NL_$exportDate.xml"
 
 INPUT_KBR_TRL_ORIG_NL_FR="/data/beltrans/data-sources/kbr/originals/BELTRANS_NL-FR_NL-documents.xml"
 INPUT_KBR_TRL_ORIG_FR_NL="/data/beltrans/data-sources/kbr/originals/BELTRANS_FR-NL_FR-documents.xml"
 
-INPUT_KBR_ORGS_LOOKUP="../data-sources/kbr/agents/aorg.csv"
+INPUT_KBR_ORGS_LOOKUP="/data/beltrans/data-sources/kbr/agents/aorg.csv"
 
 INPUT_KBR_APEP="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-21_APEP.xml"
 INPUT_KBR_AORG="../data-sources/kbr/agents/ExportSyracuse_Autoriteit_2023-10-23_AORG.xml"
 
 # KBR - linked authorities
-INPUT_KBR_LA_PERSON_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_2025-02-10.xml"
-INPUT_KBR_LA_ORG_NL="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_2025-02-10.xml"
-INPUT_KBR_LA_PERSON_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_2025-02-10.xml"
-INPUT_KBR_LA_ORG_FR="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_2025-02-10.xml"
+INPUT_KBR_LA_PERSON_NL="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$exportDate.xml"
+INPUT_KBR_LA_ORG_NL="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$exportDate.xml"
+INPUT_KBR_LA_PERSON_FR="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$exportDate.xml"
+INPUT_KBR_LA_ORG_FR="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$exportDate.xml"
 
 INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.csv"
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_2025-02-10.xml"
+INPUT_KBR_BELGIANS="/data/beltrans/data-sources/kbr/agents/ANAT-belg_$exportDate.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
@@ -175,10 +177,10 @@ INPUT_UNESCO_ENRICHED_ISBN13_FR_NL="../data-sources/unesco/beltrans_FR-NL_index-
 INPUT_UNESCO_ENRICHED_ISBN10_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn10.csv"
 INPUT_UNESCO_ENRICHED_ISBN13_NL_FR="../data-sources/unesco/beltrans_NL-FR_index-translationum_isbn13.csv"
 
-INPUT_CORRELATION_PERSON="../data-sources/correlation/2025-02-10_person_contributors-correlation-list.csv"
-INPUT_CORRELATION_ORG="../data-sources/correlation/2025-02-10_org_contributors-correlation-list.csv"
-INPUT_CORRELATION_TRANSLATIONS="../data-sources/correlation/2025-02-10_translations_correlation-list.csv"
-INPUT_CORRELATION_REMOVAL="../data-sources/correlation/2025-02-10_translations_removal-list.csv"
+INPUT_CORRELATION_PERSON="/data/beltrans/data-sources/correlation/$correlationListDate""_person_contributors-correlation-list.csv"
+INPUT_CORRELATION_ORG="/data/beltrans/data-sources/correlation/$correlationListDate""_org_contributors-correlation-list.csv"
+INPUT_CORRELATION_TRANSLATIONS="/data/beltrans/data-sources/correlation/$correlationListDate""_translations_correlation-list.csv"
+INPUT_CORRELATION_REMOVAL="/data/beltrans/data-sources/correlation/$correlationListDate""_translations_removal-list.csv"
 
 
 # #############################################################################
@@ -1627,10 +1629,13 @@ function folderHasToExist {
 function fetchKBR {
   local integrationName=$1
 
+  # create folder, because already fetched file needs to be created
+  mkdir -p "$integrationName"
+
   echo ""
   echo "FETCH - Download KBR data"
   fetchKBRTranslations "$1"
-  fetchKBRLinkedAuthorities
+  fetchKBRLinkedAuthorities "$1"
 }
 
 # -----------------------------------------------------------------------------
@@ -1642,8 +1647,8 @@ function fetchKBRTranslations {
   local queryNLFR="H041=('dut','dum') AND LAND='frans' AND ANPA=('*1970*', '*1971*', '*1972*', '*1973*', '*1974*', '*1975*', '*1976*', '*1977*', '*1978*', '*1979*', '*1980*', '*1981*', '*1982*', '*1983*', '*1984*', '*1985*', '*1986*', '*1987*', '*1988*', '*1989*', '*1990*', '*1991*', '*1992*', '*1993*', '*1994*', '*1995*', '*1996*', '*1997*', '*1998*', '*1999*', '*2000*', '*2001*', '*2002*', '*2003*', '*2004*', '*2005*', '*2006*', '*2007*', '*2008*', '*2009*', '*2010*', '*2011*', '*2012*', '*2013*', '*2014*', '*2015*', '*2016*', '*2017*', '*2018*', '*2019*', '*2020*') NOT TYPN=('COLL','CCOL')"
 
   local date=`date +"%Y-%m-%d"`
-  local dataFRNL="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
-  local dataNLFR="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
+  local dataFRNL="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
+  local dataNLFR="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
   
   echo ""
   echo "FETCH - Download KBR translations FR-NL"
@@ -1659,22 +1664,22 @@ function fetchKBRLinkedAuthorities {
   local integrationName=$1
 
   local date=`date +"%Y-%m-%d"`
-  local dataFRNL="../data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
-  local dataNLFR="../data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
+  local dataFRNL="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_FR-NL_$date.xml"
+  local dataNLFR="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_NL-FR_$date.xml"
 
-  local personsFRNLXML="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.xml"
-  local personsNLFRXML="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.xml"
+  local personsFRNLXML="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.xml"
+  local personsNLFRXML="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.xml"
 
-  local orgsFRNLXML="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.xml"
-  local orgsNLFRXML="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.xml"
+  local orgsFRNLXML="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.xml"
+  local orgsNLFRXML="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.xml"
 
-  local belgiansXML="../data-sources/kbr/agents/ANAT-belg_$date.xml"
+  local belgiansXML="/data/beltrans/data-sources/kbr/agents/ANAT-belg_$date.xml"
 
-  local personsFRNLIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.csv"
-  local personsNLFRIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.csv"
+  local personsFRNLIdentifiers="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_persons_$date.csv"
+  local personsNLFRIdentifiers="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_persons_$date.csv"
 
-  local orgsFRNLIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.csv"
-  local orgsNLFRIdentifiers="../data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.csv"
+  local orgsFRNLIdentifiers="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_FR-NL_orgs_$date.csv"
+  local orgsNLFRIdentifiers="/data/beltrans/data-sources/kbr/agents/KBR_1970-2020_NL-FR_orgs_$date.csv"
 
   checkFile $dataFRNL
   checkFile $dataNLFR
@@ -1783,13 +1788,13 @@ function extractKBR {
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked authorities data"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "contributorID" "$alreadyFetchedAut"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "contributorID" "$alreadyFetchedAut"
-  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "contributorID" "$alreadyFetchedAut"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_NL" "nl-fr" "authorityID" "$alreadyFetchedAut"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_LA_PERSON_FR" "fr-nl" "authorityID" "$alreadyFetchedAut"
+  extractKBRPersons "$integrationName" "kbr" "$INPUT_KBR_BELGIANS" "belgians" "authorityID" "$alreadyFetchedAut"
 
   # 2024-07-29: Provide full path as parameter instead of parts of the path
-  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "contributorID" "$alreadyFetchedAut"
-  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "contributorID" "$alreadyFetchedAut"
+  extractKBROrgs "$integrationName/kbr/agents/fr-nl" "$INPUT_KBR_LA_ORG_FR" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "authorityID" "$alreadyFetchedAut"
+  extractKBROrgs "$integrationName/kbr/agents/nl-fr" "$INPUT_KBR_LA_ORG_NL" "$SUFFIX_KBR_LA_ORGS_CLEANED" "$SUFFIX_KBR_LA_ORGS_IDENTIFIERS" "authorityID" "$alreadyFetchedAut"
 
   echo ""
   echo "EXTRACTION - Extract and clean KBR linked originals data"
@@ -2362,40 +2367,40 @@ function transformKBR {
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - fr-nl"
-  #mapKBRBookInformationAndContributions $integrationName "kbr" "fr-nl"
+  mapKBRBookInformationAndContributions $integrationName "kbr" "fr-nl"
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - nl-fr"
-  #mapKBRBookInformationAndContributions $integrationName "kbr" "nl-fr"
+  mapKBRBookInformationAndContributions $integrationName "kbr" "nl-fr"
 
   echo ""
   echo "TRANSFORMATION - Map KBR book data and contributions to RDF - linked-originals"
-  #mapKBRBookInformationAndContributions $integrationName "kbr" "linked-originals"
+  mapKBRBookInformationAndContributions $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR translation data to RDF - FR-NL"
-  #mapKBRTranslationsAndContributions $integrationName "kbr" "fr-nl"
+  mapKBRTranslationsAndContributions $integrationName "kbr" "fr-nl"
 
   echo ""
   echo "TRANSFORMATION - Map KBR translation data to RDF - NL-FR"
-  #mapKBRTranslationsAndContributions $integrationName "kbr" "nl-fr"
+  mapKBRTranslationsAndContributions $integrationName "kbr" "nl-fr"
 
   echo ""
   echo "TRANSFORMATION - Map KBR (limited) original information to RDF (FR-NL and NL-FR)"
-  #mapKBRTranslationLimitedOriginals $integrationName "kbr"
+  mapKBRTranslationLimitedOriginals $integrationName "kbr"
 
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked person authorities data to RDF"
-  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
-  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
-  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
-  #mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "fr-nl"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "nl-fr"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "belgians"
+  mapKBRLinkedPersonAuthorities $integrationName "kbr" "linked-originals"
 
   echo ""
   echo "TRANSFORMATION - Map KBR linked org authorities data to RDF"
-  #mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
-  #mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "fr-nl"
+  mapKBRLinkedOrgAuthorities $integrationName "kbr" "nl-fr"
   mapKBRLinkedOrgAuthorities $integrationName "kbr" "linked-originals"
 
 
@@ -2624,14 +2629,18 @@ function extractKBRTranslationsAndContributions {
   cleanTranslations "$kbrTranslations" "$kbrTranslationsCleaned"
 
   echo "Extract CSV from $language translations XML..."
-  extractCSVFromXMLTranslations "$kbrTranslationsCleaned" "$kbrTranslationsCSVWorks" "$kbrTranslationsCSVCont" "$kbrTranslationsCollectionLinks"
+  extractCSVFromXMLTranslations "$kbrTranslationsCleaned" "$kbrTranslationsCSVWorks" "$kbrTranslationsCSVContDedup" "$kbrTranslationsCollectionLinks"
 
-  echo "Replace publisher names to support deduplication - $language"
-  python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrTranslationsCSVCont -o $kbrTranslationsCSVContReplaced
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus this step is no longer needed
+  #echo "Replace publisher names to support deduplication - $language"
+  #python $SCRIPT_CHANGE_PUBLISHER_NAME -l $INPUT_KBR_PBL_REPLACE_LIST -i $kbrTranslationsCSVCont -o $kbrTranslationsCSVContReplaced
 
-  echo "Deduplicate newly identified contributors - $language"
-  echo ""
-  python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrTranslationsCSVContReplaced -o $kbrTranslationsCSVContDedup --no-matches-log $kbrNoMatches --multiple-matches-log $kbrMultipleMatches
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus this step is no longer needed
+  #echo "Deduplicate newly identified contributors - $language"
+  #echo ""
+  #python $SCRIPT_DEDUPLICATE_KBR_PUBLISHERS -l $INPUT_KBR_ORGS_LOOKUP -i $kbrTranslationsCSVContReplaced -o $kbrTranslationsCSVContDedup --no-matches-log $kbrNoMatches --multiple-matches-log $kbrMultipleMatches
 
   echo "Extract BB assignments for $language translations ..."
   extractBBEntries "$kbrTranslationsCSVWorks" "$kbrTranslationsCSVBB"
@@ -2650,9 +2659,11 @@ function extractKBRTranslationsAndContributions {
   extractISBN13 "$kbrTranslationsCSVWorks" "$kbrTranslationsISBN13"
 
 
-  echo "Extract newly identified contributors $language ..."
-  echo ""
-  extractIdentifiedAuthorities "$kbrTranslationsCSVContDedup" "$kbrTranslationsIdentifiedAuthorities"
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus this step is no longer needed
+  #echo "Extract newly identified contributors $language ..."
+  #echo ""
+  #extractIdentifiedAuthorities "$kbrTranslationsCSVContDedup" "$kbrTranslationsIdentifiedAuthorities"
 
 }
 
@@ -2687,6 +2698,7 @@ function extractKBRPersons {
 
   echo ""
   echo "Complete author names sequence numbers - $language ..."
+  echo "python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS -i $kbrPersonsNames -o $kbrPersonsNamesComplete --identifier-column "$kbrIDColumn" --sequence-number-column "sequence_number""
   python -m $MODULE_COMPLETE_SEQUENCE_NUMBERS \
     -i $kbrPersonsNames \
     -o $kbrPersonsNamesComplete \
@@ -2876,13 +2888,15 @@ function mapKBRBookInformationAndContributions {
 
   # map newly identified publishers
 
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus these steps 1) and 2) are no longer needed
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
-  export RML_SOURCE_KBR_CONT_IDENTIFIED="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_NEWAUT"
+  #export RML_SOURCE_KBR_CONT_IDENTIFIED="$integrationName/$dataSourceName/book-data-and-contributions/$language/$SUFFIX_KBR_TRL_NEWAUT"
 
-  # 2) execute the mapping
-  echo ""
-  echo "Map KBR newly identified contributors - $language ..."
-  . map.sh ../data-sources/kbr/kbr-identified-authorities.yml $kbrBookDataIdentifiedAuthorities
+  ## 2) execute the mapping
+  #echo ""
+  #echo "Map KBR newly identified contributors - $language ..."
+  #. map.sh ../data-sources/kbr/kbr-identified-authorities.yml $kbrBookDataIdentifiedAuthorities
 
   # map belgian bibliography assignments
 
@@ -2933,12 +2947,14 @@ function mapKBRBookInformationAndContributions {
 function mapKBRTranslationLimitedOriginals {
   local integrationName=$1
   local dataSourceName=$2
-  local language=$3
 
+  # output is a file with information to create limited original records
+  # for example to make proper schema:translationOfWork links to dummy records
   kbrLimitedOriginalsTurtle="$integrationName/$dataSourceName/rdf/$SUFFIX_KBR_TRL_LIMITED_ORIG_LD"
 
   # map the translations
 
+  # Input are the regular translation info from both language directions
   # 1) specify the input for the mapping (env variables taken into account by the YARRRML mapping)
   export RML_SOURCE_WORKS_FR="$integrationName/$dataSourceName/book-data-and-contributions/fr-nl/$SUFFIX_KBR_TRL_WORKS"
   export RML_SOURCE_WORKS_NL="$integrationName/$dataSourceName/book-data-and-contributions/nl-fr/$SUFFIX_KBR_TRL_WORKS"
@@ -3780,7 +3796,6 @@ function loadKBR {
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "nl-fr" "$linkedAuthoritiesNamedGraph"
   loadKBRLinkedOrgAuthorities "$integrationName" "$dataSourceName" "linked-originals" "$linkedAuthoritiesNamedGraph"
 
-  loadKBRPlaces "$integrationName" "$linkedAuthoritiesNamedGraph"
 }
 
 # -----------------------------------------------------------------------------
@@ -3877,7 +3892,7 @@ function loadKBRTranslationsAndContributions {
 
   echo "Load KBR translations and contributions ..."
   #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$translationsNamedGraph" \
-  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNameGraph" "$FORMAT_TURTLE" \
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNamedGraph" "$FORMAT_TURTLE" \
     "$kbrTranslations"
 }
 
@@ -3907,11 +3922,12 @@ function loadKBRBookInformationAndContributions {
   uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$translationsNamedGraph" "$FORMAT_TURTLE" \
     "$kbrBookInformationAndContributions" "$kbrTranslationsBB" "$kbrTranslationsPubCountries" "$kbrTranslationsPubPlaces" "$kbrTranslationsISBNTurtle"
 
+  # 2025-09-03: we no longer extract publisher information from MARC field 264
+  # thus this step is no longer needed
   # upload newly identified authorities to the linked authorities named graph
-  echo "Load newly identified KBR linked authorities $language ..."
-  #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$linkedAuthoritiesNamedGraph" \
-  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
-    "$kbrIdentifiedAuthorities"
+  #echo "Load newly identified KBR linked authorities $language ..."
+  #uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$linkedAuthoritiesNamedGraph" "$FORMAT_TURTLE" \
+  #  "$kbrIdentifiedAuthorities"
 
 }
 
@@ -4482,7 +4498,7 @@ function getKBRRecords {
 
   if [ ! -f "$alreadyFetchedIdentifiersFile" ];
   then
-    printf "$idColumn\n" > "$alreadyFetchedIdentifiersFile"
+    printf "KBR\n" > "$alreadyFetchedIdentifiersFile"
   fi
 
   echo "python -m $MODULE_CSV_SET_DIFFERENCE -o "$notYetFetched" --minus-rest --column "$idColumn" --column "KBR" --output-column "KBR" "$inputFile" "$alreadyFetchedIdentifiersFile""

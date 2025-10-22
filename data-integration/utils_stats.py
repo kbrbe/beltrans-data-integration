@@ -76,7 +76,7 @@ def countRowsWithValueForColumns(df, columns, whereColumnsEmpty=None):
       myDf[col] = ''
 
   # set empty values to nan such that the isnull()/notnull() approach below will work properly
-  myDf = myDf.replace('', np.nan)
+  myDf = myDf.replace('', np.nan).infer_objects(copy=False)
 
   # filter step: rows with the optionally given column should have an empty value for that column
   if whereColumnsEmpty is not None:
@@ -214,6 +214,7 @@ def createCorpusMeasurements(corpus, corpusDate, identifier, comment):
     'withIntegratedPublisher': countRowsWithValueForColumn(corpus, targetPublisherColumnName) if targetPublisherColumnName in corpus else 0,
     'withIntegratedSourcePublisher': countRowsWithValueForColumn(corpus, 'sourcePublisherIdentifiers') if 'sourcePublisherIdentifiers' in corpus else 0,
     'withTargetPlaceOfPublication': countRowsWithValueForColumn(corpus, 'targetPlaceOfPublication') if 'targetPlaceOfPublication' in corpus else 0,
+    'withSourceYearOfPublication': countRowsWithValueForColumn(corpus, 'sourceYearOfPublication') if 'sourceYearOfPublication' in corpus else 0,
     'withSourcePlaceOfPublication': countRowsWithValueForColumn(corpus, 'sourcePlaceOfPublication') if 'sourcePlaceOfPublication' in corpus else 0,
     'withTargetCountryOfPublication': countRowsWithValueForColumn(corpus, 'targetCountryOfPublication') if 'targetCountryOfPublication' in corpus else 0,
     'withSourceCountryOfPublication': countRowsWithValueForColumn(corpus, 'sourceCountryOfPublication') if 'sourceCountryOfPublication' in corpus else 0,

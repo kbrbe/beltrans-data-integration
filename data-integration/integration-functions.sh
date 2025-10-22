@@ -55,7 +55,7 @@ com.bigdata.journal.AbstractJournal.file=/opt/blazegraph/data/bigdata.jnl
 com.bigdata.rdf.store.AbstractTripleStore.quads=true
 com.bigdata.rdf.store.DataLoader.commit=Batch
 com.bigdata.rdf.store.DataLoader.flush=true
-com.bigdata.rdf.store.DataLoader.bufferCapacity=30000
+com.bigdata.rdf.store.DataLoader.bufferCapacity=100000
 com.bigdata.rdf.store.DataLoader.queueCapacity=5
 EOF
   #com.bigdata.rdf.store.DataLoader.commit=Batch

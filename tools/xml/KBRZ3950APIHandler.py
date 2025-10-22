@@ -50,10 +50,20 @@ class KBRZ3950APIHandler:
         if maxRecord == 0:
           return None
 
+        batches = 0
         for i in range(startRecord, maxRecord, self._batchSize):
+            batches += 1
             requestURL = self._queryURL + '&rows=' + str(self._batchSize) + '&start=' + str(i)
-            response = requests.get(requestURL)
-            tree = ET.fromstring(response.content)
-            records = tree.findall('./result/record')
-            for record in records:
-              yield record
+            try:
+              response = requests.get(requestURL)
+              tree = ET.fromstring(response.content)
+              records = tree.findall('./result/record')
+              for record in records:
+                yield record
+            except requests.exceptions.HTTPError as he:
+              statusCode = he.response.status_code
+              print(f'{statusCode} Error: Error fetching data for batch {batches}/{int(maxRecord/self._batchSize)} (&rows={self._batchSize}&start={i}): {he}')
+            except lxml.etree.XMLSyntaxError as e:
+              print(f'Error parsing fetched data in batch {batches}/{int(maxRecord/self._batchSize)} (&rows={self._batchSize}&start={i}): {e}')
+            except Exception as e:
+              print(f'Error fetching data in batch {batches}/{int(maxRecord/self._batchSize)} (&rows={self._batchSize}&start={i}): {e}')
