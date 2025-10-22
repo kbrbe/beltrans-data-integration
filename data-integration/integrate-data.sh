@@ -103,8 +103,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 # INPUT FILENAMES
 #
 
-exportDate="2025-09-23"
-correlationListDate='2025-09-23'
+exportDate="2025-10-22"
+correlationListDate='2025-10-21'
 
 # KBR - translations
 INPUT_KBR_TRL_NL="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_NL-FR_$exportDate.xml"
@@ -128,7 +128,7 @@ INPUT_KBR_PBL_REPLACE_LIST="../data-sources/kbr/agents/publisher-name-mapping.cs
 
 # KBR - Belgians
 #INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ExportSyracuse_ANAT-Belg_2023-11-08.xml"
-INPUT_KBR_BELGIANS="../data-sources/kbr/agents/ANAT-belg_$exportDate.xml"
+INPUT_KBR_BELGIANS="/data/beltrans/data-sources/kbr/agents/ANAT-belg_$exportDate.xml"
 
 # BNF
 INPUT_BNF_PERSON_AUTHORS="../data-sources/bnf/person-authors"
