@@ -626,6 +626,9 @@ SUFFIX_CORRELATION_TRL_LINK_SCENARISTS="correlation-trl-scenarist-links.csv"
 SUFFIX_CORRELATION_TRL_LINK_PUBLISHING_DIRECTORS="correlation-trl-publishing-director-links.csv"
 SUFFIX_CORRELATION_TRL_LINK_TARGET_PUBLISHERS="correlation-trl-target-publisher-links.csv"
 SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS="correlation-trl-source-publisher-links.csv"
+
+SUFFIX_CORRELATION_TRL_LINK_SOURCE_PLACE="correlation-trl-source-place-links.csv"
+SUFFIX_CORRELATION_TRL_LINK_SOURCE_COUNTRY="correlation-trl-source-country-links.csv"
   
 SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE="correlation-trl-target-place-links.csv"
 
@@ -1213,7 +1216,7 @@ function extractGeoInformation {
   echo "Get names of publication places (integrated data)"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeoText"
 
-  echo "Get names of publication places (correlation list)"
+  echo "Get names of publication places (correlation list translations)"
   queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$GET_GEO_TEXT_INFO_CORRELATION_QUERY_FILE" "$ENV_SPARQL_ENDPOINT" "$outputFileGeoTextCorrelation"
 
   echo "Get names of organization addresses"
@@ -1228,7 +1231,7 @@ function extractGeoInformation {
   python -m $MODULE_STACK_CSV_FILES -o "$combinedGeoTextMerged" -c "manifestationID" -c "placeOfPublication" -c "countryOfPublication" "$combinedGeoText" "$outputFileGeoTextCorrelation"
 
   echo ""
-  echo "Derive missing country names from place names - KBR targetPlace ..."
+  echo "Derive missing country names from place names - KBR targetPlace (integrated data and correlation list) ..."
   time python $SCRIPT_POSTPROCESS_DERIVE_COUNTRIES -i $combinedGeoTextMerged -o $combinedGeoTextEnriched \
     -g geonames/ -c "countryOfPublication" -p "placeOfPublication"
 
@@ -1238,7 +1241,7 @@ function extractGeoInformation {
     -g geonames/ -c "orgCountryLabel" -p "orgCity"
 
   echo ""
-  echo "Create geonames relationships for place of publications ..."
+  echo "Create geonames relationships for place of publications (add_coordinates script) ..."
   time python $SCRIPT_POSTPROCESS_GET_GEONAME_PLACE_OF_PUBLICATION \
     -i $combinedGeoTextEnriched -m $unknownGeonamesMapping -g geonames/ -p placeOfPublication \
     --input-id-column "manifestationID" \
@@ -3275,6 +3278,8 @@ function extractTranslationCorrelationList {
   local sourcePublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS"
   
   local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
+  local sourcePlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PLACE"
+  local sourceCountryLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_COUNTRY"
 
   local alreadyFetchedAut="$integrationName/$SUFFIX_KBR_LIST_FETCHED_AUT"
 
@@ -3307,6 +3312,11 @@ function extractTranslationCorrelationList {
   extractSeparatedColumn $correlationList $correlationListSourcePublishers "targetIdentifier" "sourcePublisherIdentifiers" "id" "sourcePublisherIdentifier"
 
   extractSeparatedColumn $correlationList $targetPlaceLinks "targetIdentifier" "targetPlaceOfPublication" "id" "targetPlaceOfPublication"
+
+  # 2025-10-23: also extract sourcePlaceOfPublication and sourceCountryOfPublication
+  # https://github.com/kbrbe/beltrans-data-integration/issues/291
+  extractSeparatedColumn $correlationList $sourcePlaceLinks "targetIdentifier" "sourcePlaceOfPublication" "id" "sourcePlaceOfPublication"
+  extractSeparatedColumn $correlationList $sourceCountryLinks "targetIdentifier" "sourceCountryOfPublication" "id" "sourceCountryOfPublication"
 
   
   python -m tools.csv.extract_contributor_identifier_from_column -i $correlationListAuthors -o $authorIdentifierLinks --id-column "id" -c "authorIdentifier"
@@ -3541,6 +3551,8 @@ function transformTranslationCorrelationList {
   local sourcePublisherIdentifierLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PUBLISHERS"
   
   local targetPlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_TARGET_PLACE"
+  local sourcePlaceLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_PLACE"
+  local sourceCountryLinks="$folderName/$SUFFIX_CORRELATION_TRL_LINK_SOURCE_COUNTRY"
 
   local correlationTurtle="$integrationName/correlation/translations/rdf/$SUFFIX_CORRELATION_TRL_LD"
   local correlationOriginalsTurtle="$integrationName/correlation/originals/rdf/$SUFFIX_CORRELATION_TRL_LD"
@@ -3569,6 +3581,8 @@ function transformTranslationCorrelationList {
   export RML_SOURCE_CORRELATION_TRL_SOURCE_PUBLISHER="$sourcePublisherIdentifierLinks"
 
   export RML_SOURCE_CORRELATION_TRL_TARGET_PLACE="$targetPlaceLinks"
+  export RML_SOURCE_CORRELATION_ORIG_SOURCE_PLACE="$sourcePlaceLinks"
+  export RML_SOURCE_CORRELATION_ORIG_SOURCE_COUNTRY="$sourceCountryLinks"
   
  
   echo ""
