@@ -1,7 +1,12 @@
 source .env
 
-DOWNLOAD_DATE="2025-08-08"
-NUMBER_ISNI_RECORDS=""
+trap 'echo ""; echo "ERROR: Integration stopped unexpectedly, one of the commands returned an error. ($0:$LINENO): $(sed -n "${LINENO}p" "$0")"' ERR
+set -Eeuo pipefail
+
+
+
+DOWNLOAD_DATE="2025-10-23"
+NUMBER_ISNI_RECORDS="56088"
 
 NAMED_GRAPH="http://isni-sru"
 ISNI_API_BATCH_SIZE=500
