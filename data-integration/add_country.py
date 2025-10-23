@@ -80,6 +80,9 @@ def main():
                     if 'montreal' in lNorm and 'Québec' in noBrackets:
                       foundCountries.add('Canada')
                       locationsMainSpelling.add('Montréal')
+                    elif 'lausanne' in lNorm:
+                      foundCountries.add('Switzerland')
+                      locationsMainSpelling.add('Lausanne')
                     else:
                       foundCountries.add('France')
                       locationsMainSpelling.add(utils_geo.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm]))
