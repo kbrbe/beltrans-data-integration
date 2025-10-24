@@ -21,17 +21,36 @@ PREFIX rdagroup2elements: <http://rdvocab.info/ElementsGr2/>
   SELECT DISTINCT 
     ?manifestationID
     (?locationCreated AS ?placeOfPublication)
-    ("" AS ?countryOfPublication)
+    (?country AS ?countryOfPublication)
   WHERE {
 
-    graph <http://beltrans-manifestations> { 
-      ?manifestation a schema:CreativeWork ;
-                     schema:isPartOf btid:beltransCorpus ;
-                     schema:locationCreated ?locationCreated ;
-                     dcterms:identifier ?manifestationID .
+    # ORIGINALS
+    {
+      graph <http://beltrans-originals> { 
+        ?manifestation a schema:CreativeWork ;
+                       schema:locationCreated ?locationCreated ;
+                       dcterms:identifier ?manifestationID .
 
-      ?anyCorrelationActivity a btm:CorrelationActivity ;
-                              prov:generated ?manifestation .
+        ?anyCorrelationActivity a btm:CorrelationActivity ;
+                                prov:generated ?manifestation .
 
+      }
+      OPTIONAL { graph <http://beltrans-originals> { ?manifestation schema:countryOfOrigin ?country . } }
     }
-  }
+    UNION
+
+    # TRANSLATIONS
+    {
+      graph <http://beltrans-manifestations> { 
+        ?manifestation a schema:CreativeWork ;
+                       schema:isPartOf btid:beltransCorpus ;
+                       schema:locationCreated ?locationCreated ;
+                       dcterms:identifier ?manifestationID .
+
+        ?anyCorrelationActivity a btm:CorrelationActivity ;
+                                prov:generated ?manifestation .
+
+      }
+      BIND("" AS ?country)
+    }
+}

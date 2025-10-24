@@ -33,6 +33,8 @@ variables:
   sourceOriginalContISBN13: &sourceOriginalContISBN13 ${RML_SOURCE_CORRELATION_ORIG_ISBN13}
   sourceContSourceLang: &sourceContSourceLang ${RML_SOURCE_CORRELATION_TRL_SOURCE_LANG}
   sourceOriginalContSourcePublisher: &sourceOriginalContSourcePublisher ${RML_SOURCE_CORRELATION_TRL_SOURCE_PUBLISHER}
+  sourceOriginalContSourcePlace: &sourceOriginalContSourcePlace ${RML_SOURCE_CORRELATION_ORIG_SOURCE_PLACE}
+  sourceOriginalContSourceCountry: &sourceOriginalContSourceCountry ${RML_SOURCE_CORRELATION_ORIG_SOURCE_COUNTRY}
 
 mappings:
 
@@ -267,10 +269,34 @@ mappings:
       - access: *sourceOriginalContSourcePublisher
         referenceFormulation: csv
         delimiter: ','
-    s: btid:$(id)
+    s: btid:original_$(id)
     po:
       - [schema:publisher, btid:$(sourcePublisherIdentifier)~iri]
       - [marcrel:pbl, btid:$(sourcePublisherIdentifier)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  sourcePlaceLink:
+    sources:
+      - access: *sourceOriginalContSourcePlace
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(id)
+    po:
+      - [schema:locationCreated, $(sourcePlaceOfPublication)]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  sourceCountryLink:
+    sources:
+      - access: *sourceOriginalContSourceCountry
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(id)
+    po:
+      - [schema:countryOfOrigin, $(sourceCountryOfPublication)]
 
 
 

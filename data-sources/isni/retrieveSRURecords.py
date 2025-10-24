@@ -126,7 +126,8 @@ def main():
     payload['startRecord'] = i
 
     try: 
-      payloadStr = urllib.parse.urlencode(payload, safe=',+*\\')
+
+      payloadStr = urllib.parse.urlencode(payload, safe=',+*%\\')
       startTimeRequest = time.time()
       r = requests.get(url, params=payloadStr)
       endTimeRequest = time.time()
@@ -162,7 +163,15 @@ def main():
       if 'X-SRU-Authentication-Token' in r.headers:
         token = r.headers['X-SRU-Authentication-Token']
         logger.info(f'x-info-2-auth1.0-authenticationToken is {token}')
-        payload['x-info-2-auth1.0-authenticationToken'] = urllib.parse.unquote(token)
+
+        # 2025-10-23: The last part of the token contains HTML encoded characters, the first part not
+        # To avoid double encoding we first unquote and then quote the last part
+        # no safe characters, but safe characters in the general encoding a few lines higher, including percentage
+        authTokenParts = token.rsplit(',',1)
+        decodedLastPart = urllib.parse.unquote(authTokenParts[1])
+        encodedLastPart = urllib.parse.quote(decodedLastPart, safe='')
+        payload['x-info-2-auth1.0-authenticationToken'] = authTokenParts[0] + "," + encodedLastPart
+
         logger.info(f'values obtained, new payload is {payload}')
       else:
         logging.error("No authentication token found, can't process further requests")

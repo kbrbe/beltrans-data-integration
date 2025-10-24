@@ -18,6 +18,7 @@ Via the member area of OCLC we have access to **60,564** Belgians. We use the Py
 * 2024-08-01: 61,065 Belgians (47,958 with status assigned, from which 36,516 are persons)
 * 2025-02-11: 68,612 Belgians (54,288 with status assigned, from which 37,558 are persons)
 * 2025-08-08: 63,572 Belgians (55,763 with status assigned, from which 38,234 are persons)
+* 2025-10-22: 63,960 Belgians (56,088 with status assigned, from which 38,361 are persons)
 
 ## Download ISNI records via the SRU API
 ```
