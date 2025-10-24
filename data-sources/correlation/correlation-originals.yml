@@ -269,7 +269,7 @@ mappings:
       - access: *sourceOriginalContSourcePublisher
         referenceFormulation: csv
         delimiter: ','
-    s: btid:$(id)
+    s: btid:original_$(id)
     po:
       - [schema:publisher, btid:$(sourcePublisherIdentifier)~iri]
       - [marcrel:pbl, btid:$(sourcePublisherIdentifier)~iri]
