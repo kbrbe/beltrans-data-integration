@@ -121,7 +121,7 @@ def main():
                       locationIdentifier = '6077243'
                       locationLongitude = '-73.58781'
                       locationLatitude = '45.50884'
-                    elif 'lausanne':
+                    elif 'lausanne' in lNorm:
                       locationMainSpelling = 'Lausanne'
                       locationCountry = 'Switzerland'
                       locationIdentifier = '2659994'
