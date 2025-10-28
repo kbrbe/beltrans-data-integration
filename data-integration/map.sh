@@ -49,15 +49,25 @@ if [ $? -eq 0 ]
 then
   echo "Execute RML mapping ..."
   echo "time java -jar $RML_MAPPER -m $rml_file -s $FORMAT > $output_file"
-  time $JAVA -jar $RML_MAPPER -m $rml_file -s $FORMAT > $output_file
-  if [ $? -eq 0 ]
+  output_and_error=$(
+  { 
+    time $JAVA -jar $RML_MAPPER -m $rml_file -s $FORMAT > $output_file 
+  } 2>&1 
+  )
+  if echo "$output_and_error" | grep -qi "ERR";
   then
-    echo "RDF created at '$output_file'"
-
-  else
-    echo "Could not map data"
+    echo "Could not map data: $output_and_error"
     exit 2
   fi
+  echo "RDF created at '$output_file'"
+  #if [ $? -eq 0 ]
+  #then
+  #  echo "RDF created at '$output_file'"
+
+  #else
+  #  echo "Could not map data"
+  #  exit 2
+  #fi
 else
   echo "Issues during yarrrml-parsing, could not generate RML"
   exit 1
