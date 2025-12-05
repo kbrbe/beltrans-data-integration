@@ -103,8 +103,8 @@ KBR_CONTRIBUTOR_HEADER_CONVERSION="../data-sources/kbr/contributor-header-mappin
 # INPUT FILENAMES
 #
 
-exportDate="2025-10-22"
-correlationListDate='2025-10-21'
+exportDate="2025-10-29"
+correlationListDate='2025-10-29'
 
 # KBR - translations
 INPUT_KBR_TRL_NL="/data/beltrans/data-sources/kbr/translations/KBR_1970-2020_NL-FR_$exportDate.xml"
