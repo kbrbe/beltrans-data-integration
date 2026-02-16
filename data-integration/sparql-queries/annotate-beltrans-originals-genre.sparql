@@ -1,0 +1,18 @@
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix schema: <http://schema.org/>
+prefix btid: <http://kbr.be/id/data/>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+
+INSERT {
+  graph <http://beltrans-originals> { 
+    ?original a btm:BeltransGenreOriginal .
+  }
+}
+WHERE {
+ 
+  graph <http://beltrans-manifestations> {
+    ?m a btm:BeltransGenreTranslation ;
+       schema:translationOfWork ?original .
+  }
+        
+}
