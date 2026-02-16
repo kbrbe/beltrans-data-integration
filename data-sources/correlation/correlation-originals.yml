@@ -119,7 +119,7 @@ mappings:
     s: btid:title_original_$(targetIdentifier)
     po:
       - [a, bf:Title]
-      - [bf:mainTitle, $(targetTitle)]
+      - [bf:mainTitle, $(sourceTitle)]
 
   # ---------------------------------------------------------------------------
   #
@@ -297,6 +297,47 @@ mappings:
     s: btid:original_$(id)
     po:
       - [schema:countryOfOrigin, $(sourceCountryOfPublication)]
+
+  # ---------------------------------------------------------------------------
+  #
+  sourcePlaceAssumedLink:
+    sources:
+      - access: *sourceCont
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:original_$(targetIdentifier)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(derivedSourceCountryOfPublication)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [prov:qualifiedInfluence, btid:assumedSourcePublisher_original_$(targetIdentifier)~iri]
+
+
+  # ---------------------------------------------------------------------------
+  #
+  # During the creation of these triples when mapping the correlation list
+  # the linked schema:Place is not yet known 
+  # (a later step transforms textual place information to URIs),
+  # hence afterwards, a SPARQL query has to add prov:entity properties and link to the place and country
+  # However, these triples here allow to identify originals that have derived source info
+  #
+  sourcePlaceAssumedInfluence:
+    sources:
+      - access: *sourceCont
+        referenceFormulation: csv
+        delimiter: ','
+    s: btid:assumedSourcePublisher_original_$(targetIdentifier)
+    condition:
+      function: idlab-fn:notEqual
+      parameters:
+        - [grel:valueParameter, $(derivedSourceCountryOfPublication)]
+        - [grel:valueParameter2, ""] 
+    po:
+      - [a, prov:Influence]
+      - [up:assertionType, up:HumanAsserted~iri]
+      - [up:assertionConfidence, 0.9]
 
 
 

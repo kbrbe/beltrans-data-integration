@@ -1,2 +1,2 @@
 date,measurementTime,numberEntries,withGender,withBirthDate,withDeathDate,withKBRIdentifier,withBnFIdentifier,withNTAIdentifier,withUnescoIdentifier,withVIAFIdentifier,withISNIIdentifier,withWikidataIdentifier,withMultipleGender,withMultipleKBR,withMultipleBnF,withMultipleNTA,withMultipleUnesco,withMultipleVIAF,withMultipleISNI,withMultipleWikidata,duplicateKBR,duplicateBnF,duplicateNTA,duplicateUnesco,duplicateVIAF,duplicateISNI,duplicateWikidata
-2024-06-12,2025-10-30 10:25:12.610175,22455,13888,5130,2272,15344,6522,6434,11498,10801,13926,5173,0,1,22,4,142,382,57,9,0,0,0,38,3,1,1
+2025-10-29,2025-10-30 10:25:15.577755,22471,14179,5107,2312,15523,6533,6418,11440,10789,14113,5157,0,0,23,4,152,382,57,9,2,0,0,37,4,2,1

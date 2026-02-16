@@ -3,6 +3,8 @@ import numpy as np
 from datetime import datetime
 import os
 import re
+pd.set_option('future.no_silent_downcasting', True)
+
 
 # -----------------------------------------------------------------------------
 def countRowsWithValueForColumn(df, column):

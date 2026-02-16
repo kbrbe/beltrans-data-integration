@@ -83,6 +83,9 @@ def main():
                     elif 'lausanne' in lNorm:
                       foundCountries.add('Switzerland')
                       locationsMainSpelling.add('Lausanne')
+                    elif 'cologne' in lNorm:
+                      foundCountries.add('Germany')
+                      locationsMainSpelling.add('Cologne')
                     else:
                       foundCountries.add('France')
                       locationsMainSpelling.add(utils_geo.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm]))

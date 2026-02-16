@@ -121,12 +121,18 @@ def main():
                       locationIdentifier = '6077243'
                       locationLongitude = '-73.58781'
                       locationLatitude = '45.50884'
-                    elif 'lausanne':
+                    elif 'lausanne' in lNorm:
                       locationMainSpelling = 'Lausanne'
                       locationCountry = 'Switzerland'
                       locationIdentifier = '2659994'
                       locationLongitude = '6.63282'
                       locationLatitude = '46.516'
+                    elif 'cologne' in lNorm:
+                      locationMainSpelling = 'Cologne'
+                      locationCountry = 'Germany'
+                      locationIdentifier = '2886242'
+                      locationLongitude = '6.95'
+                      locationLatitude = '50.93333'
                     else:
                       locationMainSpelling = utils_geo.getGeoNamesMainSpellingFromDataFrame(frContent, fr[lNorm])
                       locationCountry = 'France'

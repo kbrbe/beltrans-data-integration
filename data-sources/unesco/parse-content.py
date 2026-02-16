@@ -44,7 +44,6 @@ def parseFile(filename, foundFields, records, isbn10Records, isbn13Records, cont
 def main():
 
   parser = argparse.ArgumentParser()
-  parser.add_argument('-i', '--input-folder', action='store', help="The folder in which HTML files are stored which should be parsed")
   parser.add_argument('-o', '--output-file', action='store', help='The name of the output CSV file containing the parsed content')
   parser.add_argument('--isbn10-file', action='store', help='The name of the output CSV file containing 1:n relations between translations and ISBN 10 identifiers')
   parser.add_argument('--isbn13-file', action='store', help='The name of the output CSV file containing 1:n relations between translations and ISBN 13 identifiers')

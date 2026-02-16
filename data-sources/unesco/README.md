@@ -20,12 +20,12 @@ We create a CSV with the field names as provided in the `span` tags. For ISBN id
 
 The content was extracted using the script `get-content.py`.
 
-### NL-FR extraction
+### NL-FR download
 
 Following the web interface, there are `3,349` results, we use this information to configure our script
 
 ```
-time python get-content.py -u https://www.unesco.org/xtrans/bsresult.aspx -m 3349 -r 10 -o beltrans_NL-FR_index-translationum_3349.csv -w 0 --params lg=0 sl=nld l=fra from=1970 to=2020
+time python get-content.py -u https://www.unesco.org/xtrans/bsresult.aspx -m 3349 -r 10 -o beltrans_NL-FR_index-translationum_3349 -w 0 --params lg=0 sl=nld l=fra from=1970 to=2020
  82%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋                             | 275/335 [13:21<02:56,  2.94s/it]
 Invalid ISBN "2-93004-02-11-3" in record 2747/3349
 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 335/335 [16:13<00:00,  2.91s/it]
@@ -51,12 +51,12 @@ We used the ISBN converter <https://www.isbn.org/ISBN_converter> to manually com
 The invalid ISBN `2-93004-02-11-3` very likely refers to the second one (with a missing 0).
 We inserted the corrected data manually.
 
-### FR-NL extraction
+### FR-NL download
 
 Following the web interface, there are `11,899` results, we use this information to configure our script
 
 ```
-time python get-content.py -u https://www.unesco.org/xtrans/bsresult.aspx -m 11899 -r 10 -o beltrans_FR-NL_index-translationum_11899.csv -w 0 --params lg=0 sl=fra l=nld from=1970 to=2020
+time python get-content.py -u https://www.unesco.org/xtrans/bsresult.aspx -m 11899 -r 10 -o beltrans_FR-NL_index-translationum_11899 -w 0 --params lg=0 sl=fra l=nld from=1970 to=2020
  65%|█████████████████████████████████████████████████████████████████████████████████████████████████████████▋                                                         | 772/1190 [45:52<24:16,  3.48s/it]
 Invalid ISBN "PRG" in record 7713/11899
  72%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                                             | 856/1190 [50:26<19:40,  3.54s/it]
@@ -80,29 +80,28 @@ sys	0m0,325s
 The found wrong values are also visible in the web interface and likely are the result of a data quality issue at the source.
 
 
-## Step 2: data normalization
+## Step 2: data processing
 
-A search result may contain several ISBN10 or ISBN13 identifiers which are stored as semicolon-separated list in the respective `isbn10` or `isbn13` column.
+After the last step we ended up with folders containing the downloaded HTML files.
+Those will serve as provenance and as (manual) lookup if we want to check if the extraction went well.
+Also, if the online database will be offline in the future, we still get reproducible results based on the downloaded/cached data.
 
-We want to normalize the data and create separate CSV files with 1:1 relationships between books and ISBN identifier.
-Therefore we use the existing script `extract-and-normalize-separated-strings.py` of KBR data source directory.
+In this step we extract data into CSV files.
 
-Extraction of ISBN10/ISBN13 relationships for NL-FR translations:
-
-```
-python extract-and-normalize-separated-strings.py -i ../index-translationum/beltrans_NL-FR_index-translationum_3349.csv -o beltrans_NL-FR_index-translationum_isbn10.csv --input-id-column-name "id" --input-value-column-name "isbn10" --output-id-column-name "id" --output-value-column-name "isbn10"
-Finished without errors
-
-python extract-and-normalize-separated-strings.py -i ../index-translationum/beltrans_NL-FR_index-translationum_3349.csv -o beltrans_NL-FR_index-translationum_isbn13.csv --input-id-column-name "id" --input-value-column-name "isbn13" --output-id-column-name "id" --output-value-column-name "isbn13"
-Finished without errors
-```
-
-Extraction of ISBN10/ISBN13 relationships for FR-NL translations:
+The following command iterates over all HTML files in all given input directories (in our case both language directions)
+and creates structured CSV files.
+Please note that the quality of the extracted contributors (that each receive a unique identifier) is dependent on how consistent the authority name is used in the data.
+If the input data inconsistenly use e.g. "Sven Lieber" en "Lieber, Sven", then two authorities will be created.
 
 ```
-python extract-and-normalize-separated-strings.py -i ../index-translationum/beltrans_FR-NL_index-translationum_11899.csv -o beltrans_FR-NL_index-translationum_isbn10.csv --input-id-column-name "id" --input-value-column-name "isbn10" --output-id-column-name "id" --output-value-column-name "isbn10"
-Finished without errors
-
-python extract-and-normalize-separated-strings.py -i ../index-translationum/beltrans_FR-NL_index-translationum_11899.csv -o beltrans_FR-NL_index-translationum_isbn13.csv --input-id-column-name "id" --input-value-column-name "isbn13" --output-id-column-name "id" --output-value-column-name "isbn13"
-Finished without errors
+python parse-content.py \
+  -o trl_index-translationum.csv \
+  --isbn10-file trl_index-translationum_isbn10.csv \
+  --isbn13-file trl_index-translationum_isbn13.csv \
+  --contribution-file trl_index-translationum_contributions.csv
+  beltrans_NL-FR_index-translationum_3349 \
+  beltrans_FR-NL_index-translationum_11899
 ```
+ 
+
+
