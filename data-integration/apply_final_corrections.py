@@ -37,15 +37,18 @@ def main(manualCorrectionsFile, dry_run):
       field = row[config['columns']['fieldColumn']]
       if action in config['actionMapping']:
         # call the function that is defined in the action mapping
-        query = config['actionMapping'][action](row, config)
+        queries = config['actionMapping'][action](row, config)
 
-        if query:
+        if queries:
           if config['dryRun']:
             print('############################################################')
             print(f'### {row[config["columns"]["identifierColumn"]]} - {action} - {field}')
-            print(query)
+            
+            for counter, query in enumerate(queries):
+              print(f'Query {counter+1}/{len(queries)}')
+              print(query)
           else:
-            print(f'TODO: execute query')
+            print(f'TODO: execute queries')
         else:
           print(f'TODO: handle {action} - {field}')
 
@@ -72,15 +75,16 @@ def addInfo(row, config):
   newValues = newValueRaw.split(sc) if sc in newValueRaw else [newValueRaw]
 
   for newValue in newValues:
-    query = None
+    queries = []
+    label=row[config['columns']['labelColumn']]
+  
+    # TO DO: do we need a separation of the cases target and source identifier?
 
-     
     # add an identifier with our BIBFRAME ontology pattern (bf:identifiedBy ... bf:Identifier)
     # as well as with schema:sameAs links
     if field.startswith('target') and field.endswith('identifier'):
-      label=row[config['columns']['labelColumn']]
 
-      query = QUERY_DATA_SOURCE_IDENTIFIER.format(
+      query = QUERY_ADD_DATA_SOURCE_IDENTIFIER.format(
         graph=row[config['columns']['namedGraphColumn']],
         target_identifier= row[config['columns']['identifierColumn']],
         identifier_uri=buildIdentifierURI(newValue, label),
@@ -89,19 +93,44 @@ def addInfo(row, config):
         value=newValue
       )
 
-    # add links to an authority
-    elif field == 'translator-adapter':
-      pass
+      queryDeleteIdentifier = QUERY_REMOVE_DATA_SOURCE_IDENTIFIER.format(
+        graph=row[config['columns']['namedGraphColumn']],
+        target_identifier= row[config['columns']['identifierColumn']],
+        identifier_uri=buildIdentifierURI(newValue, label),
+        label=label,
+        value=newValue
+      )
+      queryDeleteSameAs = QUERY_REMOVE_DATA_SOURCE_SAMEAS.format(
+        graph=row[config['columns']['namedGraphColumn']],
+        target_identifier= row[config['columns']['identifierColumn']],
+        identified_resource=buildIdentifiedResourceURI(newValue, label),
+      )
 
+      queries = [query, queryDeleteIdentifier, queryDeleteSameAs]
    
     # add a link from the linked BELTRANS original to a KBR original
     elif field == 'sourcekbridentifier':
+
+      query = QUERY_ADD_DATA_SOURCE_IDENTIFIER.format(
+        graph=row[config['columns']['namedGraphColumn']],
+        target_identifier= row[config['columns']['identifierColumn']],
+        identifier_uri=buildIdentifierURI(newValue, label),
+        identified_resource=buildIdentifiedResourceURI(newValue, label),
+        label=label,
+        value=newValue
+      )
+
+
+      queries.append(query)
+
+    # add links to an authority
+    elif field == 'translator-adapter':
       pass
 
     else:
       print(f'No instructions how to process field  "{field}" ...')
 
-    return query
+    return queries
 
 # -----------------------------------------------------------------------------
 def buildIdentifierURI(identifier, label):
@@ -122,7 +151,7 @@ def buildIdentifiedResourceURI(identifier, label):
     return f'http://example.com/{identifier}'
 
 # -----------------------------------------------------------------------------
-QUERY_DATA_SOURCE_IDENTIFIER = """
+QUERY_ADD_DATA_SOURCE_IDENTIFIER = """
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -146,6 +175,54 @@ WHERE {{
 }}
 
 """
+
+# -----------------------------------------------------------------------------
+QUERY_REMOVE_DATA_SOURCE_IDENTIFIER = """
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+
+DELETE {{
+  GRAPH <{graph}> {{
+    ?book bf:identifiedBy ?toBeDeletedEntity .
+
+    ?toBeDeletedEntity a bf:Identifier ;
+        rdfs:label "{label}" ;
+        rdf:value "{value}" .
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?book dcterms:identifier "{target_identifier}" .
+  }}
+}}
+"""
+
+# -----------------------------------------------------------------------------
+QUERY_REMOVE_DATA_SOURCE_SAMEAS = """
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+
+DELETE {{
+  GRAPH <{graph}> {{
+    ?book schema:sameAs <{identified_resource}> .
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?book dcterms:identifier "{target_identifier}" .
+  }}
+}}
+"""
+
+
+
+
 
 # -----------------------------------------------------------------------------
 def parseArguments():
