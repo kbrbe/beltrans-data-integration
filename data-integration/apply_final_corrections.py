@@ -5,7 +5,7 @@ from tools.string import utils_string
 from tools import utils
 
 # -----------------------------------------------------------------------------
-def main(manualCorrectionsFile, dry_run):
+def main(manualCorrectionsFile, outputFile, dry_run):
 
   config = {
     'columns': {
@@ -25,11 +25,21 @@ def main(manualCorrectionsFile, dry_run):
       'replace info in record': replaceInfo
     },
     'valueSplitCharacter': ';',
+    'queryCounterColumnName': 'query counter',
+    'queryColumnName': 'query',
     'dryRun': dry_run
   }
 
-  with open(manualCorrectionsFile, 'r') as inputCSV:
+  with open(manualCorrectionsFile, 'r') as inputCSV,\
+       open(outputFile, 'w') as outputCSV:
+
+    # The output CSV file should contain all input columns + two query-related columns
+    outputColumns = list(config['columns'].values()) + ['query counter', 'query']
+
     inputReader = csv.DictReader(inputCSV)
+    outputWriter = csv.DictWriter(outputCSV,fieldnames=outputColumns)
+
+    outputWriter.writeheader()
 
     for row in inputReader:
 
@@ -39,18 +49,21 @@ def main(manualCorrectionsFile, dry_run):
         # call the function that is defined in the action mapping
         queries = config['actionMapping'][action](row, config)
 
+        outputRow = row
         if queries:
-          if config['dryRun']:
-            print('############################################################')
-            print(f'### {row[config["columns"]["identifierColumn"]]} - {action} - {field}')
-            
-            for counter, query in enumerate(queries):
-              print(f'Query {counter+1}/{len(queries)}')
-              print(query)
-          else:
-            print(f'TODO: execute queries')
+          for counter, query in enumerate(queries):
+            queryCounterString = f'{counter+1}/{len(queries)}'
+            outputRow.update({
+              config['queryCounterColumnName']: queryCounterString,
+              config['queryColumnName']: query
+            })
+            outputWriter.writerow(outputRow)
         else:
-          print(f'TODO: handle {action} - {field}')
+          outputRow.update({
+            config['queryCounterColumnName']: '0',
+            config['queryColumnName']: 'to do'
+          })
+          outputWriter.writerow(outputRow)
 
       else:
         print(f'Unknown action "{action}", it should be one of: {config["actionMapping"].keys()}')
@@ -84,6 +97,21 @@ def addInfo(row, config):
     # as well as with schema:sameAs links
     if field.startswith('target') and field.endswith('identifier'):
 
+      # This is addInfo, thus we do no delete existing identifiers
+      #queryDeleteIdentifier = QUERY_REMOVE_DATA_SOURCE_IDENTIFIER.format(
+      #  graph=row[config['columns']['namedGraphColumn']],
+      #  target_identifier= row[config['columns']['identifierColumn']],
+      #  identifier_uri=buildIdentifierURI(newValue, label),
+      #  label=label,
+      #  value=newValue
+      #)
+      #queryDeleteSameAs = QUERY_REMOVE_DATA_SOURCE_SAMEAS.format(
+      #  graph=row[config['columns']['namedGraphColumn']],
+      #  target_identifier= row[config['columns']['identifierColumn']],
+      #  identified_resource=buildIdentifiedResourceURI(newValue, label),
+      #)
+
+      # including sameAs link
       query = QUERY_ADD_DATA_SOURCE_IDENTIFIER.format(
         graph=row[config['columns']['namedGraphColumn']],
         target_identifier= row[config['columns']['identifierColumn']],
@@ -93,27 +121,18 @@ def addInfo(row, config):
         value=newValue
       )
 
-      queryDeleteIdentifier = QUERY_REMOVE_DATA_SOURCE_IDENTIFIER.format(
-        graph=row[config['columns']['namedGraphColumn']],
-        target_identifier= row[config['columns']['identifierColumn']],
-        identifier_uri=buildIdentifierURI(newValue, label),
-        label=label,
-        value=newValue
-      )
-      queryDeleteSameAs = QUERY_REMOVE_DATA_SOURCE_SAMEAS.format(
-        graph=row[config['columns']['namedGraphColumn']],
-        target_identifier= row[config['columns']['identifierColumn']],
-        identified_resource=buildIdentifiedResourceURI(newValue, label),
-      )
 
-      queries = [query, queryDeleteIdentifier, queryDeleteSameAs]
+
+      #queries = [query, queryDeleteIdentifier, queryDeleteSameAs]
+      queries = [query]
    
     # add a link from the linked BELTRANS original to a KBR original
     elif field == 'sourcekbridentifier':
 
+      # including sameAs link
       query = QUERY_ADD_DATA_SOURCE_IDENTIFIER.format(
         graph=row[config['columns']['namedGraphColumn']],
-        target_identifier= row[config['columns']['identifierColumn']],
+        target_identifier= 'original_' + row[config['columns']['identifierColumn']],
         identifier_uri=buildIdentifierURI(newValue, label),
         identified_resource=buildIdentifiedResourceURI(newValue, label),
         label=label,
@@ -125,8 +144,16 @@ def addInfo(row, config):
 
     # add links to an authority
     elif field == 'translator-adapter':
-      pass
 
+      query = QUERY_ADD_CONTRIBUTOR_LINK.format(
+        graph=row[config['columns']['namedGraphColumn']],
+        direct_schema_relationship="http://schema.org/translator",
+        direct_marc_relationship="http://id.loc.gov/vocabulary/relators/trl",
+        target_identifier=row[config['columns']['identifierColumn']],
+        contributor_uri=f'http://kbr.be/id/data/{newValue}'
+      )
+
+      queries.append(query)
     else:
       print(f'No instructions how to process field  "{field}" ...')
 
@@ -150,9 +177,30 @@ def buildIdentifiedResourceURI(identifier, label):
     print(f'ERROR: No instructions how to process data source "{label}"')
     return f'http://example.com/{identifier}'
 
+
 # -----------------------------------------------------------------------------
-QUERY_ADD_DATA_SOURCE_IDENTIFIER = """
-PREFIX dcterms: <http://purl.org/dc/terms/>
+QUERY_ADD_CONTRIBUTOR_LINK = """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+
+INSERT {{
+  GRAPH <{graph}> {{
+    ?book <{direct_schema_relationship}> <{contributor_uri}> ;
+          <{direct_marc_relationship}> <{contributor_uri}> .
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?book dcterms:identifier "{target_identifier}" .
+  }}
+}}
+
+"""
+
+# -----------------------------------------------------------------------------
+QUERY_ADD_DATA_SOURCE_IDENTIFIER = """PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -177,8 +225,7 @@ WHERE {{
 """
 
 # -----------------------------------------------------------------------------
-QUERY_REMOVE_DATA_SOURCE_IDENTIFIER = """
-PREFIX dcterms: <http://purl.org/dc/terms/>
+QUERY_REMOVE_DATA_SOURCE_IDENTIFIER = """PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -201,8 +248,7 @@ WHERE {{
 """
 
 # -----------------------------------------------------------------------------
-QUERY_REMOVE_DATA_SOURCE_SAMEAS = """
-PREFIX dcterms: <http://purl.org/dc/terms/>
+QUERY_REMOVE_DATA_SOURCE_SAMEAS = """PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -229,10 +275,11 @@ def parseArguments():
   parser = argparse.ArgumentParser()
   parser.add_argument('manualCorrectionsFile', help='A CSV file with the final corrections')
   parser.add_argument('-d', '--dry-run', action='store_true', help='If set, no SPARQL queries are executed')
+  parser.add_argument('-o', '--output-csv', action='store', required=True, help='The output CSV file, enriched with SPARQL queries')
   options = parser.parse_args()
   return options
 
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
   args = parseArguments()
-  main(args.manualCorrectionsFile, args.dry_run)
+  main(args.manualCorrectionsFile, args.output_csv, args.dry_run)
