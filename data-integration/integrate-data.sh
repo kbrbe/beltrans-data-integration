@@ -294,6 +294,7 @@ CREATE_QUERY_SCHEMA_TITLES="sparql-queries/derive-single-title-from-bibframe-tit
 ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
 ANNOTATE_QUERY_BELTRANS_GENRE="sparql-queries/annotate-beltrans-genre.sparql"
 ANNOTATE_QUERY_SAMPO_UI_LANGUAGES="sparql-queries/annotate-beltrans-ui-languages.sparql"
+ANNOTATE_QUERY_SAMPO_UI_FEMALE_CONTRIBUTIONS="sparql-queries/annotate-beltrans-ui-female-contributors.sparql"
 ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP="sparql-queries/annotate-found-originals-contributor-overlap.sparql"
 
 CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
@@ -1124,8 +1125,10 @@ function integrate {
   uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
 
   echo ""
-  echo "Create language-related annotations for SAMPO-UI"
-  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_SAMPO_UI_LANGUAGES"
+  echo "Create annotations for SAMPO-UI"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$ANNOTATE_QUERY_SAMPO_UI_LANGUAGES" "$ANNOTATE_QUERY_SAMPO_UI_FEMALE_CONTRIBUTIONS"
+
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
