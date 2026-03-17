@@ -159,6 +159,7 @@ INPUT_MASTER_MARC_BOOK_FORMATS="../data-sources/master-data/book-formats.csv"
 INPUT_MASTER_COUNTRIES="../data-sources/master-data/countries.nt"
 INPUT_MASTER_LANGUAGES="../data-sources/master-data/languages.nt"
 INPUT_MASTER_GENDER="../data-sources/master-data/gender.ttl"
+INPUT_MASTER_SAMPO_UI="../data-sources/master-data/sampo-ui-annotations.ttl"
 INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography-en.csv"
 INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl.csv"
 INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography-fr.csv"
@@ -292,6 +293,7 @@ CREATE_QUERY_SCHEMA_TITLES="sparql-queries/derive-single-title-from-bibframe-tit
 
 ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
 ANNOTATE_QUERY_BELTRANS_GENRE="sparql-queries/annotate-beltrans-genre.sparql"
+ANNOTATE_QUERY_SAMPO_UI_LANGUAGES="sparql-queries/annotate-beltrans-ui-languages.sparql"
 ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP="sparql-queries/annotate-found-originals-contributor-overlap.sparql"
 
 CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
@@ -551,6 +553,7 @@ SUFFIX_MASTER_BOOK_FORMATS="book-formats.csv"
 SUFFIX_MASTER_COUNTRIES="countries.nt"
 SUFFIX_MASTER_LANGUAGES="languages.nt"
 SUFFIX_MASTER_GENDER="gender.ttl"
+SUFFIX_MASTER_SAMPO_UI="sampo-ui-annotations.ttl"
 SUFFIX_MASTER_THES_EN="thesaurus-belgian-bibliography-en-hierarchy.csv"
 SUFFIX_MASTER_THES_NL="thesaurus-belgian-bibliography-nl-hierarchy.csv"
 SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
@@ -1119,6 +1122,10 @@ function integrate {
   echo "Annotate manifestations relevant for BELTRANS based on genre ..."
   #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
   uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
+
+  echo ""
+  echo "Create language-related annotations for SAMPO-UI"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_SAMPO_UI_LANGUAGES"
 
   echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
@@ -2310,6 +2317,7 @@ function extractMasterData {
   cp "$INPUT_MASTER_COUNTRIES" "$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
   cp "$INPUT_MASTER_LANGUAGES" "$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   cp "$INPUT_MASTER_GENDER" "$integrationName/master-data/$SUFFIX_MASTER_GENDER"
+  cp "$INPUT_MASTER_SAMPO_UI" "$integrationName/master-data/$SUFFIX_MASTER_SAMPO_UI"
 
 }
 
@@ -4339,6 +4347,7 @@ function loadMasterData {
   local masterDataLanguages="$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   local masterDataCountries="$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
   local masterDataGender="$integrationName/master-data/$SUFFIX_MASTER_GENDER"
+  local masterDataSampoUI="$integrationName/master-data/$SUFFIX_MASTER_SAMPO_UI"
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 

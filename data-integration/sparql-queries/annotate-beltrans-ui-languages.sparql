@@ -1,0 +1,47 @@
+prefix schema: <http://schema.org/>
+PREFIX oa: <http://www.w3.org/ns/oa#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX btid: <http://kbr.be/id/data/>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+
+INSERT {
+  graph <http://beltrans-manifestations> { 
+
+    ?a a oa:Annotation ;
+       oa:motivatedBy oa:classifying ;
+       oa:hasPurpose btid:BELTRANSLanguageAnnotation ;
+       oa:hasBody ?beltransLang ;
+       oa:hasTarget ?m .
+
+    ?m btm:inLanguage ?beltransLang .
+  } 
+}
+WHERE {
+  
+  graph <http://beltrans-manifestations> { ?m dcterms:identifier ?mID . } 
+        
+  BIND(
+   COALESCE(
+     IF(CONTAINS(?targetLangs, ';') && CONTAINS(?targetLangs, 'dut') && CONTAINS(?targetLangs, 'fre') && STRLEN(?targetLangs) > 85, btid:dutFreAndOther, 1/0),
+     IF(CONTAINS(?targetLangs, ';') && CONTAINS(?targetLangs, 'dut') && CONTAINS(?targetLangs, 'fre'), btid:dutFre, 1/0),
+     IF(CONTAINS(?targetLangs, ';') && CONTAINS(?targetLangs, 'dut'), btid:dutAndOther, 1/0),
+     IF(CONTAINS(?targetLangs, ';') && CONTAINS(?targetLangs, 'fre'), btid:freAndOther, 1/0),
+     IF(?targetLangs = 'http://id.loc.gov/vocabulary/languages/dut', <http://id.loc.gov/vocabulary/languages/dut>, 1/0),
+     IF(?targetLangs = 'http://id.loc.gov/vocabulary/languages/fre', <http://id.loc.gov/vocabulary/languages/fre>, 1/0),
+     btid:otherLang
+   )
+   AS ?beltransLang
+ )
+
+ BIND(IRI(CONCAT("http://kbr.be/id/data/annotation_language_", ?mID)) AS ?a)
+  
+  
+ {
+   SELECT ?m (group_concat(distinct ?targetLang; SEPARATOR=';') as ?targetLangs)
+   WHERE {
+ 	graph <http://beltrans-manifestations> { ?m a schema:CreativeWork ; schema:inLanguage ?targetLang . }
+  }
+  group by ?m
+ }
+  
+}
