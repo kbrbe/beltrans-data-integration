@@ -7,6 +7,10 @@ from tools import utils
 # -----------------------------------------------------------------------------
 def main(manualCorrectionsFile, outputFile, dry_run):
 
+  #
+  # This configuration specifies the mapping between columns in the input data
+  # and internal workings, e.g. which function to execute for which action
+  #
   config = {
     'columns': {
       'actionColumn': 'To do',
@@ -51,6 +55,8 @@ def main(manualCorrectionsFile, outputFile, dry_run):
 
         outputRow = row
         if queries:
+          # loop over all generated queries returned by the action
+          # and create one output row for each query
           for counter, query in enumerate(queries):
             queryCounterString = f'{counter+1}/{len(queries)}'
             outputRow.update({
@@ -59,6 +65,7 @@ def main(manualCorrectionsFile, outputFile, dry_run):
             })
             outputWriter.writerow(outputRow)
         else:
+          # if not query was returned the action likely is not implemented yet
           outputRow.update({
             config['queryCounterColumnName']: '0',
             config['queryColumnName']: 'to do'
@@ -72,10 +79,58 @@ def main(manualCorrectionsFile, outputFile, dry_run):
 # -----------------------------------------------------------------------------
 def removeInfo(row, config):
   return None
+
 def removeRecord(row, config):
   return None
+
+# -----------------------------------------------------------------------------
 def replaceInfo(row, config):
-  return None
+
+  field = row[config['columns']['fieldColumn']].lower()
+  labelCol = config['columns']['labelColumn']
+  wrongValueCol = config['columns']['currentValueColumn']
+  newValueRaw = row[config['columns']['newValueColumn']]
+  queries = []
+
+  if field == 'workclusteridentifier':
+
+    query = QUERY_REPLACE_CLUSTER.format(
+      graph=row[config['columns']['namedGraphColumn']],
+      manifestationGraph='http://beltrans-manifestations', # HARD CODED
+      target_identifier=row[config['columns']['identifierColumn']],
+      new_cluster_uri=buildClusterURI(newValueRaw)
+    )
+
+    # we only have one query for workclusteridentifier
+    queries = [query]
+
+  elif field.startswith('targetisbn'):
+    # seperate ISBN branch, because for ISBN we have direct properties and additionally a bf:identifiedBy construct
+
+    queryProperty = QUERY_REPLACE_ISBN_PROPERTY.format(
+      graph=row[config['columns']['namedGraphColumn']],
+      target_identifier=row[config['columns']['identifierColumn']],
+      singleProperty=row[labelCol],
+      isbnToDelete=row[wrongValueCol],
+      newISBN=newValueRaw 
+    )
+
+    queryBibframe = QUERY_REPLACE_ISBN_BIBFRAME.format(
+      graph=row[config['columns']['namedGraphColumn']],
+      target_identifier=row[config['columns']['identifierColumn']],
+      ISBNLabel='ISBN-10' if field.endswith('10') else 'ISBN-13',
+      isbnToDelete=row[wrongValueCol],
+      newISBN=newValueRaw 
+    )
+
+    queries = [queryProperty, queryBibframe]
+
+  elif field == 'sourcelanguage':
+    # seperate branch, because we have an annotation for the original and a direct property from the translation
+    pass
+
+  return queries
+
 # -----------------------------------------------------------------------------
 def addInfo(row, config):
   
@@ -121,8 +176,6 @@ def addInfo(row, config):
         value=newValue
       )
 
-
-
       #queries = [query, queryDeleteIdentifier, queryDeleteSameAs]
       queries = [query]
    
@@ -137,8 +190,7 @@ def addInfo(row, config):
         identified_resource=buildIdentifiedResourceURI(newValue, label),
         label=label,
         value=newValue
-      )
-
+      ) 
 
       queries.append(query)
 
@@ -162,6 +214,10 @@ def addInfo(row, config):
 # -----------------------------------------------------------------------------
 def buildIdentifierURI(identifier, label):
   return f'http://kbr.be/id/data/identifier_{label}_{identifier}'
+
+# -----------------------------------------------------------------------------
+def buildClusterURI(identifier):
+  return f'http://kbr.be/id/data/cluster_{identifier}'
 
 # -----------------------------------------------------------------------------
 def buildIdentifiedResourceURI(identifier, label):
@@ -198,6 +254,93 @@ WHERE {{
 }}
 
 """
+
+# -----------------------------------------------------------------------------
+QUERY_REPLACE_CLUSTER = """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+
+DELETE {{
+  GRAPH <{graph}> {{
+    ?oldClusterURI fabio:manifestationOf ?book .
+  }}
+}}
+INSERT {{
+  GRAPH <{graph}> {{
+    <{new_cluster_uri}> fabio:manifestationOf ?book .
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?oldClusterURI fabio:manifestationOf ?book .
+  }}
+  GRAPH <{manifestationGraph}> {{
+    ?book dcterms:identifier "{target_identifier}" .
+  }}
+}}
+
+"""
+
+# -----------------------------------------------------------------------------
+QUERY_REPLACE_ISBN_PROPERTY = """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+
+DELETE {{
+  GRAPH <{graph}> {{
+    ?book {singleProperty} {isbnToDelete} .
+  }}
+}}
+INSERT {{
+  GRAPH <{graph}> {{
+    ?book {singleProperty} "{newISBN}" .
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?book dcterms:identifier "{target_identifier}" .
+  }}
+}}
+
+"""
+
+# -----------------------------------------------------------------------------
+QUERY_REPLACE_ISBN_BIBFRAME = """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+
+DELETE {{
+  GRAPH <{graph}> {{
+    ?isbnEntity rdf:value {isbnToDelete} .
+  }}
+}}
+INSERT {{
+  GRAPH <{graph}> {{
+    ?isbnEntity rdf:value "{newISBN}" . 
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?book dcterms:identifier "{target_identifier}" ;
+          bf:identifiedBy ?isbnEntity .
+
+    ?isbnEntity rdf:label "{ISBNLabel}" .
+  }}
+}}
+
+"""
+
+
+
 
 # -----------------------------------------------------------------------------
 QUERY_ADD_DATA_SOURCE_IDENTIFIER = """PREFIX dcterms: <http://purl.org/dc/terms/>
