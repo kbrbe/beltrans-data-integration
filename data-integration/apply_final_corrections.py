@@ -202,7 +202,7 @@ def replaceInfo(row, config):
 
         queryReplaceProperty = QUERY_REPLACE_PROPERTY.format(
           graph=namedGraph,
-          target_identifier=identifier,
+          target_identifier=f'original_{identifier}',
           property=predicate,
           objectToDelete=buildDefaultURI(row[wrongValueCol]),
           newObject=buildDefaultURI(newValue)
@@ -217,7 +217,7 @@ def replaceInfo(row, config):
 
         queryReplaceProperty = QUERY_REPLACE_PROPERTY.format(
           graph=namedGraph,
-          target_identifier=identifier,
+          target_identifier=f'original_{identifier}',
           property=predicate,
           objectToDelete=f'"{row[wrongValueCol]}"',
           newObject=f'"{newValue}"'
@@ -226,7 +226,17 @@ def replaceInfo(row, config):
 
 
     elif field in ('targettitle', 'author-scenarist'):
-      pass
+      for predicate in label.split(sc):
+
+        queryReplaceProperty = QUERY_REPLACE_PROPERTY.format(
+          graph=namedGraph,
+          target_identifier=identifier,
+          property=predicate,
+          objectToDelete=f'"{row[wrongValueCol]}"',
+          newObject=f'"{newValue}"'
+        )
+        queries.append(queryReplaceProperty)
+
     else:
       print(f'No instructions how to handle replaceInfo for field "{field}" ... skipping {identifier} (named graph was "{namedGraph}")')
 
@@ -348,8 +358,8 @@ def buildIdentifiedResourceURI(identifier, label):
     return f'http://data.bibliotheken.nl/id/nbt/{identifier}'
   elif label == 'Unesco':
     return f'http://kbr.be/id/data/manifestation_unesco{identifier}'
-  elif label == '':
-    print(f'ERROR: No instructions how to process empty data source, will generate "{defaultURI}"')
+  elif label.strip() == '':
+    print(f'ERROR: No instructions how to build URI for an empty label ({identifier}), will generate "{defaultURI}"')
     return defaultURI
   else:
     print(f'ERROR: No instructions how to process data source "{label}", will generate "{defaultURI}"')
