@@ -165,11 +165,12 @@ def replaceInfo(row, config):
 
 
     elif field == 'targetthesaurusbb':
-      query = QUERY_REPLACE_GENRE.format(
+      query = QUERY_REPLACE_PROPERTY.format(
         graph=namedGraph,
         target_identifier=identifier,
-        oldGenreURI=buildGenreURI(row[wrongValueCol]),
-        newGenreURI=buildGenreURI(newValue)
+        property='schema:about',
+        objectToDelete=buildGenreURI(row[wrongValueCol]),
+        newObject=buildGenreURI(newValue)
       )
 
       queries.append(query)
@@ -179,7 +180,7 @@ def replaceInfo(row, config):
       queryReplaceSource = QUERY_REPLACE_PROPERTY.format(
         graph=namedGraph,
         target_identifier=identifier,
-        property='schema:inLanguage',
+        property=label,
         objectToDelete=buildLanguageURI(row[wrongValueCol]),
         newObject=buildLanguageURI(newValue)
       )
@@ -195,8 +196,35 @@ def replaceInfo(row, config):
 
       queries = [queryReplaceSource, queryReplaceTarget]
 
+    elif namedGraph == 'http://beltrans-originals' and field.endswith('identifiers'):
+
+      for predicate in label.split(sc):
+
+        queryReplaceProperty = QUERY_REPLACE_PROPERTY.format(
+          graph=namedGraph,
+          target_identifier=identifier,
+          property=predicate,
+          objectToDelete=buildDefaultURI(row[wrongValueCol]),
+          newObject=buildDefaultURI(newValue)
+        )
+        queries.append(queryReplaceProperty)
+
+
+
     elif namedGraph == 'http://beltrans-originals':
-      pass
+
+      for predicate in label.split(sc):
+
+        queryReplaceProperty = QUERY_REPLACE_PROPERTY.format(
+          graph=namedGraph,
+          target_identifier=identifier,
+          property=predicate,
+          objectToDelete=f'"{row[wrongValueCol]}"',
+          newObject=f'"{newValue}"'
+        )
+        queries.append(queryReplaceProperty)
+
+
     elif field in ('targettitle', 'author-scenarist'):
       pass
     else:
@@ -295,7 +323,12 @@ def buildClusterURI(identifier):
 
 # -----------------------------------------------------------------------------
 def buildGenreURI(identifier):
-  return f'http://kbr.be/id/data/{identifier}'
+  return buildDefaultURI(identifier)
+
+# -----------------------------------------------------------------------------
+def buildDefaultURI(identifier):
+  return f'<http://kbr.be/id/data/{identifier}>'
+
 
 # -----------------------------------------------------------------------------
 def buildLanguageURI(identifier):
@@ -443,7 +476,7 @@ DELETE {{
 }}
 INSERT {{
   GRAPH <{graph}> {{
-    ?book {property} "{newObject}" .
+    ?book {property} {newObject} .
   }}
 }}
 WHERE {{
@@ -454,34 +487,6 @@ WHERE {{
 
 """
 
-
-
-# -----------------------------------------------------------------------------
-QUERY_REPLACE_GENRE = """PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX schema: <http://schema.org/>
-PREFIX fabio: <http://purl.org/spar/fabio/>
-
-DELETE {{
-  GRAPH <{graph}> {{
-    ?book schema:about <{oldGenreURI}> .
-  }}
-}}
-INSERT {{
-  GRAPH <{graph}> {{
-    ?book schema:about <{newGenreURI}> .
-  }}
-}}
-WHERE {{
-  GRAPH <{graph}> {{
-    ?book dcterms:identifier "{target_identifier}" .
-  }}
-
-}}
-
-"""
 
 
 
