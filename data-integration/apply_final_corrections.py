@@ -176,7 +176,25 @@ def replaceInfo(row, config):
 
     elif field == 'sourcelanguage':
       # seperate branch, because we have an annotation for the original and a direct property from the translation
-      pass
+      queryReplaceSource = QUERY_REPLACE_PROPERTY.format(
+        graph=namedGraph,
+        target_identifier=identifier,
+        property='schema:inLanguage',
+        objectToDelete=buildLanguageURI(row[wrongValueCol]),
+        newObject=buildLanguageURI(newValue)
+      )
+
+      # hard coded target graph and property
+      queryReplaceTarget = QUERY_REPLACE_PROPERTY.format(
+        graph='http://beltrans-manifestations',
+        target_identifier=identifier,
+        property='btm:sourceLanguage',
+        objectToDelete=buildLanguageURI(row[wrongValueCol]),
+        newObject=buildLanguageURI(newValue)
+      )
+
+      queries = [queryReplaceSource, queryReplaceTarget]
+
     elif namedGraph == 'http://beltrans-originals':
       pass
     elif field in ('targettitle', 'author-scenarist'):
@@ -278,6 +296,11 @@ def buildClusterURI(identifier):
 # -----------------------------------------------------------------------------
 def buildGenreURI(identifier):
   return f'http://kbr.be/id/data/{identifier}'
+
+# -----------------------------------------------------------------------------
+def buildLanguageURI(identifier):
+  return f'http://id.loc.gov/vocabulary/languages/{identifier}'
+
 
 
 
@@ -404,6 +427,34 @@ WHERE {{
 }}
 
 """
+
+# -----------------------------------------------------------------------------
+QUERY_REPLACE_PROPERTY = """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+
+DELETE {{
+  GRAPH <{graph}> {{
+    ?book {property} {objectToDelete} .
+  }}
+}}
+INSERT {{
+  GRAPH <{graph}> {{
+    ?book {property} "{newObject}" .
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?book dcterms:identifier "{target_identifier}" .
+  }}
+}}
+
+"""
+
+
 
 # -----------------------------------------------------------------------------
 QUERY_REPLACE_GENRE = """PREFIX dcterms: <http://purl.org/dc/terms/>
