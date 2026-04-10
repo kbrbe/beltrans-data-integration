@@ -19,7 +19,8 @@ def main(manualCorrectionsFile, outputFile, dry_run):
       'currentValueColumn': 'Wrong or blank value',
       'newValueColumn': 'Correct value',
       'namedGraphColumn': 'Named Graph',
-      'labelColumn': 'Label'
+      'labelColumn': 'Label',
+      'commentColumn': 'Comment'
     },
     'actionMapping': {
       'add info to record': addInfo,
@@ -34,7 +35,7 @@ def main(manualCorrectionsFile, outputFile, dry_run):
     'dryRun': dry_run
   }
 
-  with open(manualCorrectionsFile, 'r') as inputCSV,\
+  with open(manualCorrectionsFile, 'r', encoding='utf-8-sig') as inputCSV,\
        open(outputFile, 'w') as outputCSV:
 
     # The output CSV file should contain all input columns + two query-related columns
@@ -86,48 +87,102 @@ def removeRecord(row, config):
 # -----------------------------------------------------------------------------
 def replaceInfo(row, config):
 
+  sc = config['valueSplitCharacter']
+  identifier = row[config['columns']['identifierColumn']]
   field = row[config['columns']['fieldColumn']].lower()
-  labelCol = config['columns']['labelColumn']
+  label = row[config['columns']['labelColumn']]
   wrongValueCol = config['columns']['currentValueColumn']
   newValueRaw = row[config['columns']['newValueColumn']]
+  namedGraph = row[config['columns']['namedGraphColumn']]
   queries = []
 
-  if field == 'workclusteridentifier':
+  # we might have a single value or multiple
+  # use a list in any case such that the following loop always applies
+  newValues = newValueRaw.split(sc) if sc in newValueRaw else [newValueRaw]
 
-    query = QUERY_REPLACE_CLUSTER.format(
-      graph=row[config['columns']['namedGraphColumn']],
-      manifestationGraph='http://beltrans-manifestations', # HARD CODED
-      target_identifier=row[config['columns']['identifierColumn']],
-      new_cluster_uri=buildClusterURI(newValueRaw)
-    )
+  for newValue in newValues:
+   
 
-    # we only have one query for workclusteridentifier
-    queries = [query]
+    if field == 'workclusteridentifier':
 
-  elif field.startswith('targetisbn'):
-    # seperate ISBN branch, because for ISBN we have direct properties and additionally a bf:identifiedBy construct
+      query = QUERY_REPLACE_CLUSTER.format(
+        graph=namedGraph,
+        manifestationGraph='http://beltrans-manifestations', # HARD CODED
+        target_identifier=identifier,
+        new_cluster_uri=buildClusterURI(newValue)
+      )
 
-    queryProperty = QUERY_REPLACE_ISBN_PROPERTY.format(
-      graph=row[config['columns']['namedGraphColumn']],
-      target_identifier=row[config['columns']['identifierColumn']],
-      singleProperty=row[labelCol],
-      isbnToDelete=row[wrongValueCol],
-      newISBN=newValueRaw 
-    )
+      # we only have one query for workclusteridentifier
+      queries.append(query)
 
-    queryBibframe = QUERY_REPLACE_ISBN_BIBFRAME.format(
-      graph=row[config['columns']['namedGraphColumn']],
-      target_identifier=row[config['columns']['identifierColumn']],
-      ISBNLabel='ISBN-10' if field.endswith('10') else 'ISBN-13',
-      isbnToDelete=row[wrongValueCol],
-      newISBN=newValueRaw 
-    )
+    elif field.startswith('targetisbn'):
+      # seperate ISBN branch, because for ISBN we have direct properties and additionally a bf:identifiedBy construct
 
-    queries = [queryProperty, queryBibframe]
+      queryProperty = QUERY_REPLACE_ISBN_PROPERTY.format(
+        graph=namedGraph,
+        target_identifier=identifier,
+        singleProperty=label,
+        isbnToDelete=row[wrongValueCol],
+        newISBN=newValue 
+      )
 
-  elif field == 'sourcelanguage':
-    # seperate branch, because we have an annotation for the original and a direct property from the translation
-    pass
+      queryBibframe = QUERY_REPLACE_ISBN_BIBFRAME.format(
+        graph=namedGraph,
+        target_identifier=identifier,
+        ISBNLabel='ISBN-10' if field.endswith('10') else 'ISBN-13',
+        isbnToDelete=row[wrongValueCol],
+        newISBN=newValue
+      )
+
+      queries.extend([queryProperty, queryBibframe])
+
+    elif field == 'sourcekbridentifier':
+
+        # add identifier according to BIBFRAME and additionally sameAs link
+        queryAddIdentifier = QUERY_ADD_DATA_SOURCE_IDENTIFIER.format(
+          graph=namedGraph,
+          target_identifier= 'original_' + identifier,
+          identifier_uri=buildIdentifierURI(newValue, label),
+          identified_resource=buildIdentifiedResourceURI(newValue, label),
+          label=label,
+          value=row[wrongValueCol]
+        ) 
+
+        queryDeleteIdentifier = QUERY_REMOVE_DATA_SOURCE_IDENTIFIER.format(
+          graph=namedGraph,
+          target_identifier=identifier,
+          identifier_uri=buildIdentifierURI(newValue, label),
+          label=label,
+          value=row[wrongValueCol]
+        )
+        queryDeleteSameAs = QUERY_REMOVE_DATA_SOURCE_SAMEAS.format(
+          graph=namedGraph,
+          target_identifier= identifier,
+          identified_resource=buildIdentifiedResourceURI(newValue, label),
+        )
+
+        queries.extend([queryDeleteIdentifier, queryDeleteSameAs, queryAddIdentifier])
+
+
+    elif field == 'targetthesaurusbb':
+      query = QUERY_REPLACE_GENRE.format(
+        graph=namedGraph,
+        target_identifier=identifier,
+        oldGenreURI=buildGenreURI(row[wrongValueCol]),
+        newGenreURI=buildGenreURI(newValue)
+      )
+
+      queries.append(query)
+
+    elif field == 'sourcelanguage':
+      # seperate branch, because we have an annotation for the original and a direct property from the translation
+      pass
+    elif namedGraph == 'http://beltrans-originals':
+      pass
+    elif field in ('targettitle', 'author-scenarist'):
+      pass
+    else:
+      print(f'No instructions how to handle replaceInfo for field "{field}" ... skipping {identifier} (named graph was "{namedGraph}")')
 
   return queries
 
@@ -136,7 +191,9 @@ def addInfo(row, config):
   
   sc = config['valueSplitCharacter']
   newValueRaw = row[config['columns']['newValueColumn']]
+  identifier = row[config['columns']['identifierColumn']]
   field = row[config['columns']['fieldColumn']].lower()
+  label=row[config['columns']['labelColumn']]
 
   # we might have a single value or multiple
   # use a list in any case such that the following loop always applies
@@ -144,7 +201,6 @@ def addInfo(row, config):
 
   for newValue in newValues:
     queries = []
-    label=row[config['columns']['labelColumn']]
   
     # TO DO: do we need a separation of the cases target and source identifier?
 
@@ -169,7 +225,7 @@ def addInfo(row, config):
       # including sameAs link
       query = QUERY_ADD_DATA_SOURCE_IDENTIFIER.format(
         graph=row[config['columns']['namedGraphColumn']],
-        target_identifier= row[config['columns']['identifierColumn']],
+        target_identifier= identifier,
         identifier_uri=buildIdentifierURI(newValue, label),
         identified_resource=buildIdentifiedResourceURI(newValue, label),
         label=label,
@@ -177,7 +233,7 @@ def addInfo(row, config):
       )
 
       #queries = [query, queryDeleteIdentifier, queryDeleteSameAs]
-      queries = [query]
+      queries.append(query)
    
     # add a link from the linked BELTRANS original to a KBR original
     elif field == 'sourcekbridentifier':
@@ -185,7 +241,7 @@ def addInfo(row, config):
       # including sameAs link
       query = QUERY_ADD_DATA_SOURCE_IDENTIFIER.format(
         graph=row[config['columns']['namedGraphColumn']],
-        target_identifier= 'original_' + row[config['columns']['identifierColumn']],
+        target_identifier= 'original_' + identifier,
         identifier_uri=buildIdentifierURI(newValue, label),
         identified_resource=buildIdentifiedResourceURI(newValue, label),
         label=label,
@@ -201,7 +257,7 @@ def addInfo(row, config):
         graph=row[config['columns']['namedGraphColumn']],
         direct_schema_relationship="http://schema.org/translator",
         direct_marc_relationship="http://id.loc.gov/vocabulary/relators/trl",
-        target_identifier=row[config['columns']['identifierColumn']],
+        target_identifier=identifier,
         contributor_uri=f'http://kbr.be/id/data/{newValue}'
       )
 
@@ -220,7 +276,14 @@ def buildClusterURI(identifier):
   return f'http://kbr.be/id/data/cluster_{identifier}'
 
 # -----------------------------------------------------------------------------
+def buildGenreURI(identifier):
+  return f'http://kbr.be/id/data/{identifier}'
+
+
+
+# -----------------------------------------------------------------------------
 def buildIdentifiedResourceURI(identifier, label):
+  defaultURI = f'http://example.com/{identifier}'
   if label == 'KBR':
     return f'http://kbr.be/id/data/manifestation_{identifier}'
   elif label == 'BnF':
@@ -229,9 +292,12 @@ def buildIdentifiedResourceURI(identifier, label):
     return f'http://data.bibliotheken.nl/id/nbt/{identifier}'
   elif label == 'Unesco':
     return f'http://kbr.be/id/data/manifestation_unesco{identifier}'
+  elif label == '':
+    print(f'ERROR: No instructions how to process empty data source, will generate "{defaultURI}"')
+    return defaultURI
   else:
-    print(f'ERROR: No instructions how to process data source "{label}"')
-    return f'http://example.com/{identifier}'
+    print(f'ERROR: No instructions how to process data source "{label}", will generate "{defaultURI}"')
+    return defaultURI
 
 
 # -----------------------------------------------------------------------------
@@ -335,6 +401,33 @@ WHERE {{
 
     ?isbnEntity rdf:label "{ISBNLabel}" .
   }}
+}}
+
+"""
+
+# -----------------------------------------------------------------------------
+QUERY_REPLACE_GENRE = """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+
+DELETE {{
+  GRAPH <{graph}> {{
+    ?book schema:about <{oldGenreURI}> .
+  }}
+}}
+INSERT {{
+  GRAPH <{graph}> {{
+    ?book schema:about <{newGenreURI}> .
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?book dcterms:identifier "{target_identifier}" .
+  }}
+
 }}
 
 """
