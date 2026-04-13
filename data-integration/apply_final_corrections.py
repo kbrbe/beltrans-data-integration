@@ -255,8 +255,8 @@ def addInfo(row, config):
   # use a list in any case such that the following loop always applies
   newValues = newValueRaw.split(sc) if sc in newValueRaw else [newValueRaw]
 
+  queries = []
   for newValue in newValues:
-    queries = []
   
     # TO DO: do we need a separation of the cases target and source identifier?
 
@@ -321,7 +321,7 @@ def addInfo(row, config):
     else:
       print(f'No instructions how to process field  "{field}" ...')
 
-    return queries
+  return queries
 
 # -----------------------------------------------------------------------------
 def buildIdentifierURI(identifier, label):
