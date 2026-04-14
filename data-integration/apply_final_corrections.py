@@ -143,8 +143,24 @@ def removeInfo(row, config):
 
 
 
+# -----------------------------------------------------------------------------
 def removeRecord(row, config):
-  return None
+  identifier = row[config['columns']['identifierColumn']]
+  field = row[config['columns']['fieldColumn']].lower()
+  label = row[config['columns']['labelColumn']]
+  wrongValueCol = config['columns']['currentValueColumn']
+  newValueRaw = row[config['columns']['newValueColumn']]
+  namedGraph = row[config['columns']['namedGraphColumn']]
+  queries = []
+
+  
+  # Query to delete the record
+  queryDelete = QUERY_REMOVE_RECORD.format(
+    graph=namedGraph,
+    target_identifier=identifier
+  )
+
+  return [queryDelete]
 
 # -----------------------------------------------------------------------------
 def replaceInfo(row, config):
@@ -681,6 +697,44 @@ WHERE {{
   }}
 }}
 """
+
+# -----------------------------------------------------------------------------
+QUERY_REMOVE_RECORD = """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+
+DELETE {{
+  GRAPH <{graph}> {{ 
+    ?book ?p ?o . 
+    ?entity ?entityP ?entityO .
+  }}
+  GRAPH ?g {{ ?s ?incomingP ?book . }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+
+    #
+    # fetch all properties of the record
+    #
+    ?book dcterms:identifier "{target_identifier}" ;
+          bf:identifiedBy ?entity ;
+          ?p ?o .
+
+    #
+    # fetch all properties of the linked identifier entity
+    #
+    ?entity ?entityP ?entityO .
+  }}
+
+  #
+  # fetch all incoming links
+  #
+  GRAPH ?g {{ ?s ?incomingP ?book . }}
+}}
+"""
+
 
 
 
