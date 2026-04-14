@@ -79,7 +79,69 @@ def main(manualCorrectionsFile, outputFile, dry_run):
 
 # -----------------------------------------------------------------------------
 def removeInfo(row, config):
-  return None
+  sc = config['valueSplitCharacter']
+  identifier = row[config['columns']['identifierColumn']]
+  field = row[config['columns']['fieldColumn']].lower()
+  label = row[config['columns']['labelColumn']]
+  wrongValueCol = config['columns']['currentValueColumn']
+  newValueRaw = row[config['columns']['newValueColumn']]
+  namedGraph = row[config['columns']['namedGraphColumn']]
+  queries = []
+
+  if field.startswith('targetisbn') or field.startswith('sourceisbn'):
+    # seperate ISBN branch, because for ISBN we have direct properties and additionally a bf:identifiedBy construct
+
+    queryProperty = QUERY_DELETE_PROPERTY.format(
+      graph=namedGraph,
+      target_identifier=identifier,
+      property=label,
+      objectToDelete=f'"{row[wrongValueCol]}"'
+    )
+
+    queryBibframe = QUERY_DELETE_BIBFRAME_IDENTIFIER.format(
+      graph=namedGraph,
+      target_identifier=identifier,
+      identifierLabel='ISBN-10' if field.endswith('10') else 'ISBN-13',
+      objectToDelete=f'"{row[wrongValueCol]}"'
+    )
+
+    queries.extend([queryProperty, queryBibframe])
+
+  elif field.startswith('target') and field.endswith('identifier'):
+
+    queryProperty = QUERY_DELETE_PROPERTY.format(
+      graph=namedGraph,
+      target_identifier=identifier,
+      property=label,
+      objectToDelete=f'"{row[wrongValueCol]}"'
+    )
+
+    queryBibframe = QUERY_DELETE_BIBFRAME_IDENTIFIER.format(
+      graph=namedGraph,
+      target_identifier=identifier,
+      identifierLabel=label,
+      objectToDelete=f'"{row[wrongValueCol]}"'
+    )
+
+    queries.extend([queryBibframe])
+   
+  elif field in ('author-scenarist'):
+    for predicate in label.split(sc):
+
+      queryDeleteProperty = QUERY_DELETE_PROPERTY.format(
+        graph=namedGraph,
+        target_identifier=identifier,
+        property=predicate,
+        objectToDelete=f'"{row[wrongValueCol]}"'
+      )
+      queries.append(queryDeleteProperty)
+
+  else:
+    print(f'No instructions how to handle removeInfo for field "{field}" ... skipping {identifier} (named graph was "{namedGraph}")')
+
+  return queries
+
+
 
 def removeRecord(row, config):
   return None
@@ -442,6 +504,7 @@ WHERE {{
 
 """
 
+
 # -----------------------------------------------------------------------------
 QUERY_REPLACE_ISBN_BIBFRAME = """PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
@@ -470,6 +533,57 @@ WHERE {{
 }}
 
 """
+
+# -----------------------------------------------------------------------------
+QUERY_DELETE_BIBFRAME_IDENTIFIER = """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+
+DELETE {{
+  GRAPH <{graph}> {{
+    ?book bf:identifiedBy ?entity .
+    ?entity ?p ?o . 
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?book dcterms:identifier "{target_identifier}" ;
+          bf:identifiedBy ?entity .
+
+    ?entity rdfs:label "{identifierLabel}" ;
+            rdf:value {objectToDelete} ;
+            ?p ?o .
+  }}
+}}
+
+"""
+
+
+# -----------------------------------------------------------------------------
+QUERY_DELETE_PROPERTY = """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+
+DELETE {{
+  GRAPH <{graph}> {{
+    ?book {property} {objectToDelete} .
+  }}
+}}
+WHERE {{
+  GRAPH <{graph}> {{
+    ?book dcterms:identifier "{target_identifier}" .
+  }}
+}}
+
+"""
+
+
 
 # -----------------------------------------------------------------------------
 QUERY_REPLACE_PROPERTY = """PREFIX dcterms: <http://purl.org/dc/terms/>
