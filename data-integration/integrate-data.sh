@@ -1389,10 +1389,17 @@ function query {
   outputFileGeo="$integrationName/csv/$SUFFIX_GEO_BELTRANS_MANIFESTATIONS"
   outputFileOldestManifestations="$integrationName/csv/$SUFFIX_DATA_PROFILE_OLDEST_MANIFESTATIONS"
 
+  dataprofileConfig="config-integration-query-manifestations.json"
+  #dataprofileConfig="config-query_francis-mus_all-NL.json"
+
   echo ""
   echo "Creating the dataprofile CSV file ..."
   #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
-  time python $SCRIPT_QUERY_DATAPROFILE -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" --output-file "$integratedData" --config "config-integration-query-manifestations.json" --query-log-dir "$integrationName/csv/query-manifestation"
+  time python $SCRIPT_QUERY_DATAPROFILE \
+    -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
+    --output-file "$integratedData" \
+    --config $dataprofileConfig \
+    --query-log-dir "$integrationName/csv/query-manifestation"
 
   echo ""
   echo "Creating the contributor persons CSV file ..."
