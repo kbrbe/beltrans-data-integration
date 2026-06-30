@@ -159,6 +159,7 @@ INPUT_MASTER_MARC_BOOK_FORMATS="../data-sources/master-data/book-formats.csv"
 INPUT_MASTER_COUNTRIES="../data-sources/master-data/countries.nt"
 INPUT_MASTER_LANGUAGES="../data-sources/master-data/languages.nt"
 INPUT_MASTER_GENDER="../data-sources/master-data/gender.ttl"
+INPUT_MASTER_SAMPO_UI="../data-sources/master-data/sampo-ui-annotations.ttl"
 INPUT_MASTER_THES_EN="../data-sources/master-data/thesaurus-belgian-bibliography-en.csv"
 INPUT_MASTER_THES_NL="../data-sources/master-data/thesaurus-belgian-bibliography-nl.csv"
 INPUT_MASTER_THES_FR="../data-sources/master-data/thesaurus-belgian-bibliography-fr.csv"
@@ -292,6 +293,8 @@ CREATE_QUERY_SCHEMA_TITLES="sparql-queries/derive-single-title-from-bibframe-tit
 
 ANNOTATE_QUERY_BELTRANS_CORPUS="sparql-queries/annotate-beltrans-corpus.sparql"
 ANNOTATE_QUERY_BELTRANS_GENRE="sparql-queries/annotate-beltrans-genre.sparql"
+ANNOTATE_QUERY_SAMPO_UI_LANGUAGES="sparql-queries/annotate-beltrans-ui-languages.sparql"
+ANNOTATE_QUERY_SAMPO_UI_FEMALE_CONTRIBUTIONS="sparql-queries/annotate-beltrans-ui-female-contributors.sparql"
 ANNOTATE_QUERY_KBR_ORIGINALS_CONTRIBUTOR_OVERLAP="sparql-queries/annotate-found-originals-contributor-overlap.sparql"
 
 CREATE_QUERY_CORRELATION_DATA="sparql-queries/add-contributors-local-data.sparql"
@@ -551,6 +554,7 @@ SUFFIX_MASTER_BOOK_FORMATS="book-formats.csv"
 SUFFIX_MASTER_COUNTRIES="countries.nt"
 SUFFIX_MASTER_LANGUAGES="languages.nt"
 SUFFIX_MASTER_GENDER="gender.ttl"
+SUFFIX_MASTER_SAMPO_UI="sampo-ui-annotations.ttl"
 SUFFIX_MASTER_THES_EN="thesaurus-belgian-bibliography-en-hierarchy.csv"
 SUFFIX_MASTER_THES_NL="thesaurus-belgian-bibliography-nl-hierarchy.csv"
 SUFFIX_MASTER_THES_FR="thesaurus-belgian-bibliography-fr-hierarchy.csv"
@@ -1121,6 +1125,12 @@ function integrate {
   uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$ANNOTATE_QUERY_BELTRANS_GENRE"
 
   echo ""
+  echo "Create annotations for SAMPO-UI"
+  uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" \
+  "$ANNOTATE_QUERY_SAMPO_UI_LANGUAGES" "$ANNOTATE_QUERY_SAMPO_UI_FEMALE_CONTRIBUTIONS"
+
+
+  echo ""
   echo "Create title/subtitles according to the BIBFRAME ontology (now also for integrated BELTRANS manifestations)"
   #python upload_data.py -u "$integrationNamespace" --content-type "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
   uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "" "$FORMAT_SPARQL_UPDATE" "$CREATE_QUERY_BIBFRAME_TITLES"
@@ -1379,10 +1389,17 @@ function query {
   outputFileGeo="$integrationName/csv/$SUFFIX_GEO_BELTRANS_MANIFESTATIONS"
   outputFileOldestManifestations="$integrationName/csv/$SUFFIX_DATA_PROFILE_OLDEST_MANIFESTATIONS"
 
+  dataprofileConfig="config-integration-query-manifestations.json"
+  #dataprofileConfig="config-query_francis-mus_all-NL.json"
+
   echo ""
   echo "Creating the dataprofile CSV file ..."
   #queryDataBlazegraph "$TRIPLE_STORE_NAMESPACE" "$queryFileAgg" "$ENV_SPARQL_ENDPOINT" "$outputFileAgg"
-  time python $SCRIPT_QUERY_DATAPROFILE -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" --output-file "$integratedData" --config "config-integration-query-manifestations.json" --query-log-dir "$integrationName/csv/query-manifestation"
+  time python $SCRIPT_QUERY_DATAPROFILE \
+    -u "$ENV_SPARQL_ENDPOINT_INTEGRATION" \
+    --output-file "$integratedData" \
+    --config $dataprofileConfig \
+    --query-log-dir "$integrationName/csv/query-manifestation"
 
   echo ""
   echo "Creating the contributor persons CSV file ..."
@@ -2310,6 +2327,7 @@ function extractMasterData {
   cp "$INPUT_MASTER_COUNTRIES" "$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
   cp "$INPUT_MASTER_LANGUAGES" "$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   cp "$INPUT_MASTER_GENDER" "$integrationName/master-data/$SUFFIX_MASTER_GENDER"
+  cp "$INPUT_MASTER_SAMPO_UI" "$integrationName/master-data/$SUFFIX_MASTER_SAMPO_UI"
 
 }
 
@@ -4339,6 +4357,7 @@ function loadMasterData {
   local masterDataLanguages="$integrationName/master-data/$SUFFIX_MASTER_LANGUAGES"
   local masterDataCountries="$integrationName/master-data/$SUFFIX_MASTER_COUNTRIES"
   local masterDataGender="$integrationName/master-data/$SUFFIX_MASTER_GENDER"
+  local masterDataSampoUI="$integrationName/master-data/$SUFFIX_MASTER_SAMPO_UI"
 
   local uploadURL="$ENV_SPARQL_ENDPOINT/namespace/$TRIPLE_STORE_NAMESPACE/sparql"
 

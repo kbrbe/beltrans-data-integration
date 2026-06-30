@@ -1,0 +1,73 @@
+prefix schema: <http://schema.org/>
+PREFIX oa: <http://www.w3.org/ns/oa#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX btid: <http://kbr.be/id/data/>
+PREFIX btm: <http://kbr.be/ns/beltrans/model#>
+PREFIX marcrel: <http://id.loc.gov/vocabulary/relators/>
+
+INSERT {
+  graph <http://beltrans-manifestations> {
+
+    ?a a oa:Annotation ;
+       oa:motivatedBy oa:classifying ;
+       oa:hasPurpose btid:FemaleContributorAnnotation ;
+       oa:hasBody ?body ;
+       oa:hasTarget ?m .
+    
+    ?body rdf:value ?hasFemaleContributor ;
+          dcterms:type ?broadRole .
+
+    ?m ?btmProperty ?hasFemaleContributor .
+  }
+}
+WHERE {
+  
+  graph <http://beltrans-manifestations> { ?m dcterms:identifier ?mID . } 
+  
+  BIND(
+   COALESCE(
+     IF(CONTAINS(?genderLabelList, 'Female'), btid:yes, 1/0),
+     IF(CONTAINS(?genderLabelList, 'Unknown'), btid:unknown, 1/0),
+     btid:no
+   )
+   AS ?hasFemaleContributor
+ )
+  
+  # map role to single property needed for SAMPO-UI facetted search
+  BIND(
+    IF(?broadRole = "author", btm:hasFemaleAuthor,
+    IF(?broadRole = "translator", btm:hasFemaleTranslator,
+    IF(?broadRole = "illustrator", btm:hasFemaleIllustrator,
+    IF(?broadRole = "editor", btm:hasFemaleEditor,
+    btm:hasFemaleContributor)))) AS ?btmProperty
+  )
+
+  BIND(IRI(CONCAT("http://kbr.be/id/data/annotation_female_contribution_", ?broadRole, "_", ?mID)) AS ?a)
+  BIND(IRI(CONCAT("http://kbr.be/id/data/annotation_female_contribution_body_", ?broadRole, "_", ?mID)) AS ?body)
+  
+ {
+   SELECT ?m ?broadRole (group_concat(distinct ?genderLabel; SEPARATOR=';') as ?genderLabelList)
+   WHERE {
+ 	graph <http://beltrans-manifestations> { ?m a schema:CreativeWork ; ?role ?c . }
+    
+    OPTIONAL {
+      graph <http://beltrans-contributors> { ?c schema:gender ?g . }
+   	  graph <http://master-data> { ?g rdfs:label ?gLabel . }
+      FILTER(LANG(?gLabel) = 'en')
+    }
+    BIND(COALESCE(?gLabel, "Unknown") AS ?genderLabel)
+    FILTER (?role in (marcrel:aut, marcrel:sce, marcrel:trl, marcrel:adp, marcrel:ill, marcrel:pdb))
+    
+    # Map to broader roles according to BELTRANS SAMPO-UI
+    BIND(
+      IF(?role IN (marcrel:aut, marcrel:sce), "author",
+      IF(?role IN (marcrel:trl, marcrel:adp), "translator",
+      IF(?role = marcrel:ill, "illustrator",
+      IF(?role = marcrel:pdb, "editor",
+      "other")))) AS ?broadRole
+    )
+  }
+  group by ?m ?broadRole
+ }
+  
+}

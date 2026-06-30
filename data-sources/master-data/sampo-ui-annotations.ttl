@@ -1,0 +1,60 @@
+@prefix btid: <http://kbr.be/id/data/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix oa: <http://www.w3.org/ns/oa#> .
+
+#
+# W3C Web Annotations-related motivations that can be used as purpose
+#
+btid:BELTRANSLanguageAnnotation a skos:Concept, oa:Motiviation ;
+  skos:prefLabel "BELTRANS language annotation"@en ;
+  skos:note "A more generalized language classification used in the SAMPO-UI instance of BELTRANS." .
+
+btid:FemaleContributorAnnotation a skos:Concept, oa:Motivation ;
+  skos:prefLabel "Female contributor annotation"@en ;
+  skos:note "Annotating a schema:CreativeWork with possible multiple contributors of a certain role with a classification regarding if at least one of those contributors is female."@en .
+
+#
+# BELTRANS language classifications
+#
+btid:dut a skos:Concept ;
+         skos:prefLabel "Dutch"@en .
+
+btid:fre a skos:Concept ;
+         skos:prefLabel "French"@en .
+
+btid:dutAndOther a skos:Concept ;
+                 skos:prefLabel "Dutch and other"@en .
+
+btid:freAndOther a skos:Concept ;
+                 skos:prefLabel "French and other"@en .
+
+btid:dutFre a skos:Concept ;
+            skos:prefLabel "Dutch and French"@en .
+
+btid:dutFreAndOther a skos:Concept ;
+                    skos:prefLabel "Dutch and French and other"@en .
+
+#
+# General concepts used e.g. for female contributor annotation
+#
+btid:yes a skos:Concept ;
+         skos:prefLabel "Yes"@en ;
+         skos:prefLabel "Ja"@nl ;
+         skos:prefLabel "Oui"@fr ;
+         skos:prefLabel "Ja"@de .
+
+btid:no a skos:Concept ;
+        skos:prefLabel "No"@en ;
+        skos:prefLabel "nee"@nl ;
+        skos:prefLabel "Non"@fr ;
+        skos:prefLabel "Nein"@de .
+
+btid:unknown a skos:Concept ;
+        skos:prefLabel "Unknown"@en ;
+        skos:prefLabel "Onbekend"@nl ;
+        skos:prefLabel "Inconnu"@fr ;
+        skos:prefLabel "Unbekannt"@de .
+
+
+
+
