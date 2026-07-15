@@ -20,8 +20,8 @@ If _+ provenance_ is indicated, this means that the previously mentioned data so
 
 * All integrated data flattened (all in a single named-graph): [get-flattened-data](data-integration/sparql-queries/get-flattened-data.sparql)
 * All integrated data + provenance flattened (all in a single named-graph): [get-flattened-data-with-provenance](data-integration/sparql-queries/get-flattened-data-with-provenance.sparql)
-* Due to limitations of the SPARQL 1.1 standard, it is not possible to CONSTRUCT a named-graph from a named-graph in the WHERE clause (https://github.com/w3c-cg/sparql-dev/issues/31).
-   * ~~All integrated data: [get-data](data-integration/sparql-queries/get-data-with-provenance.sparql)~~
-   * ~~All integrated data + provenance: [get-data-with-provenance](data-integration/sparql-queries/get-data-with-provenance.sparql)~~
+* Due to limitations of the SPARQL 1.1 standard, it is not possible to CONSTRUCT a named-graph from a named-graph in the WHERE clause (https://github.com/w3c-cg/sparql-dev/issues/31). Hence the following queries are regular SELECT queries, but you can query them in TSV format (accept header `text/tab-separated-values`) and afterwards remove the first line and add a dot to the end of each line, e.g. via search and replace in VIM or with the following sed call: `sed -i 's/\r$/./' all-data-sample.nt`, the output are `nquads` that preserve IRIs and literal data types.
+   * All integrated data: [get-data](data-integration/sparql-queries/get-data-with-provenance.sparql)
+   * All integrated data + provenance: [get-data-with-provenance](data-integration/sparql-queries/get-data-with-provenance.sparql)
 
 
