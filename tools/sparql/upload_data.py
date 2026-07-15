@@ -29,18 +29,7 @@ def parseArguments():
 
 def main(url, contentType, namedGraph, files):
 
-  load_dotenv('.env')
-  userEnvVar="ENV_SPARQL_ENDPOINT_USER"
-  passwordEnvVar="ENV_SPARQL_ENDPOINT_PASSWORD"
-  user = os.getenv(userEnvVar)
-  password = os.getenv(passwordEnvVar)
-
-  auth=None
-  if(user == None or password == None):
-    print(f'No SPARQL endpoint user or password specified using environment variable "{userEnvVar}" and "{passwordEnvVar}"')
-    print(f'continuing with no authentication')
-  else:
-    auth=(user,password)
+  auth = utils_sparql.get_auth('.env')
  
   for inputFile in files:
     queryName = ''

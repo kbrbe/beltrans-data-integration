@@ -7,6 +7,7 @@ import time
 import rdflib
 import pandas as pd
 from io import StringIO
+from dotenv import load_dotenv
 
 # -----------------------------------------------------------------------------
 def addTestData(target, loadConfig):
@@ -196,6 +197,22 @@ def sparqlUpdate(url, queryString, fileFormat, queryName, auth=None):
     print(e)
     sys.exit(1)
 
+# -----------------------------------------------------------------------------
+def get_auth(dotfile='.env'):
+
+  load_dotenv('.env')
+  userEnvVar="ENV_SPARQL_ENDPOINT_USER"
+  passwordEnvVar="ENV_SPARQL_ENDPOINT_PASSWORD"
+  user = os.getenv(userEnvVar)
+  password = os.getenv(passwordEnvVar)
+
+  auth=None
+  if(user == None or password == None):
+    print(f'No SPARQL endpoint user or password specified using environment variable "{userEnvVar}" and "{passwordEnvVar}"')
+    print(f'continuing with no authentication')
+  else:
+    return (user,password)
+ 
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
