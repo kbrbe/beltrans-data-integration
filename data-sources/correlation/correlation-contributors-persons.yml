@@ -109,7 +109,7 @@ mappings:
     s: btid:$(id)
     po:
       - p: bf:identifiedBy
-        o: btid:kbr_$(KBR)~iri
+        o: btid:identifier_KBR_$(KBR)~iri
         condition:
           function: idlab-fn:notEqual
           parameters:
@@ -285,7 +285,7 @@ mappings:
       - access: *sourceContKBR
         referenceFormulation: csv
         delimiter: ','
-    s: btid:kbr_$(KBR)
+    s: btid:identifier_KBR_$(KBR)
     condition:
       function: idlab-fn:notEqual
       parameters:
