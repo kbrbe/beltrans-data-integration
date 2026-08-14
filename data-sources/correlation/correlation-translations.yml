@@ -481,7 +481,7 @@ mappings:
         delimiter: ','
     s: btid:$(id)
     po:
-      - [schema:locationCreated, $(targetPlaceOfPublication)]
+      - [schema:location, $(targetPlaceOfPublication)]
 
 
   # ---------------------------------------------------------------------------

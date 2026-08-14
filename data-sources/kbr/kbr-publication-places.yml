@@ -35,5 +35,5 @@ mappings:
         delimiter: ','
     s: btid:manifestation_$(KBRID)
     po:
-      - [schema:locationCreated, $(place)]
+      - [schema:location, $(place)]
 

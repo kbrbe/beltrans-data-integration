@@ -53,7 +53,7 @@ mappings:
           parameters:
             - [grel:valueParameter, $(publisher)]
             - [grel:valueParameter2, ""] 
-      - p: schema:locationCreated
+      - p: schema:location
         o: $(place)
         condition:
           function: idlab-fn:notEqual
