@@ -9,9 +9,9 @@ btid:BELTRANSLanguageAnnotation a skos:Concept, oa:Motiviation ;
   skos:prefLabel "BELTRANS language annotation"@en ;
   skos:note "A more generalized language classification used in the SAMPO-UI instance of BELTRANS." .
 
-btid:FemaleContributorAnnotation a skos:Concept, oa:Motivation ;
-  skos:prefLabel "Female contributor annotation"@en ;
-  skos:note "Annotating a schema:CreativeWork with possible multiple contributors of a certain role with a classification regarding if at least one of those contributors is female."@en .
+btid:GenderCategoryAnnotation a skos:Concept, oa:Motivation ;
+  skos:prefLabel "Gender category annotation"@en ;
+  skos:note "Annotating a schema:CreativeWork with possible multiple contributors of a certain role with a classification regarding gender."@en .
 
 #
 # BELTRANS language classifications
@@ -35,26 +35,25 @@ btid:dutFreAndOther a skos:Concept ;
                     skos:prefLabel "Dutch and French and other"@en .
 
 #
-# General concepts used e.g. for female contributor annotation
+# General concepts used e.g. for gender annotation
 #
-btid:yes a skos:Concept ;
-         skos:prefLabel "Yes"@en ;
-         skos:prefLabel "Ja"@nl ;
-         skos:prefLabel "Oui"@fr ;
-         skos:prefLabel "Ja"@de .
 
-btid:no a skos:Concept ;
-        skos:prefLabel "No"@en ;
-        skos:prefLabel "nee"@nl ;
-        skos:prefLabel "Non"@fr ;
-        skos:prefLabel "Nein"@de .
+btm:genderCategoryMale a skos:Concept ;
+        skos:prefLabel "Male"@en ;
+        skos:prefLabel "Mannelijk"@nl ;
+        skos:prefLabel "Homme"@fr ;
+        skos:prefLabel "Männlich"@de ;
+        skos:relatedMatch <https://homosaurus.org/v5/homoit0001008> .
 
-btid:unknown a skos:Concept ;
-        skos:prefLabel "Unknown"@en ;
-        skos:prefLabel "Onbekend"@nl ;
-        skos:prefLabel "Inconnu"@fr ;
-        skos:prefLabel "Unbekannt"@de .
+btm:genderCategoryFemale a skos:Concept ;
+        skos:prefLabel "Female"@en ;
+        skos:prefLabel "Vrouwelijk"@nl ;
+        skos:prefLabel "Femme"@fr ;
+        skos:prefLabel "Weiblich"@de ;
+        skos:relatedMatch <https://homosaurus.org/v5/homoit0001509> .
 
-
-
-
+btm:genderCategoryMaleFemale a skos:Concept ;
+        skos:prefLabel "Male and female"@en ;
+        skos:prefLabel "Mannelijk en vrouwelijk"@nl ;
+        skos:prefLabel "Homme et femme"@fr ;
+        skos:prefLabel "Männlich und weiblich"@de .
