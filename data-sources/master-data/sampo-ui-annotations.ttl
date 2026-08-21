@@ -13,6 +13,16 @@ btid:GenderCategoryAnnotation a skos:Concept, oa:Motivation ;
   skos:prefLabel "Gender category annotation"@en ;
   skos:note "Annotating a schema:CreativeWork with possible multiple contributors of a certain role with a classification regarding gender."@en .
 
+btm:NumberOfManifestationsPerRoleAnnotation a skos:Concept, oa:Motivation ;
+  skos:prefLabel "Number of manifestations per role annotation"@en ;
+  skos:note "Annotating a schema:Person with the number of book translations the person contributed to in a specific role."@en .
+
+btm:NumberOfManifestationsAnnotation a skos:Concept, oa:Motivation ;
+  skos:prefLabel "Number of manifestations annotation"@en ;
+  skos:note "Annotating a schema:Person with the number of book translations the person contributed to."@en .
+
+
+
 #
 # BELTRANS language classifications
 #
@@ -57,3 +67,5 @@ btm:genderCategoryMaleFemale a skos:Concept ;
         skos:prefLabel "Mannelijk en vrouwelijk"@nl ;
         skos:prefLabel "Homme et femme"@fr ;
         skos:prefLabel "Männlich und weiblich"@de .
+
+# so far no instances in the data, but we can also add classifications related to non binary here
