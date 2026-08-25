@@ -1,4 +1,6 @@
 @prefix btid: <http://kbr.be/id/data/> .
+@prefix btm: <http://kbr.be/ns/beltrans/model#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix oa: <http://www.w3.org/ns/oa#> .
@@ -52,7 +54,7 @@ btid:dutFreAndOther a skos:Concept ;
 btm:beltransGenderCategory a skos:ConceptScheme ;
         dcterms:title "BELTRANS gender categories" ;
         dcterms:description "A controlled vocabulary to annotate a single gender category for all book contributors of a certain role. E.g. if a book has two authors and both are male, the category is btm:genderCategoryMale. If a book has three illustrators where one is male and two are female, the category is btm:genderCategoryMaleFemale. Terms of this controlled vocabulary are aligned with the Homosaurus. The intention of this controlled vocabulary is to easily filter books to e.g. identify female literature even if there are multiple contributors of a certain role." ;
-        rdfs:seeAlso <https://homosaurus.org/v5/homoit0000560>
+        rdfs:seeAlso <https://homosaurus.org/v5/homoit0000560> .
 
 btm:genderCategoryMale a skos:Concept ;
         skos:inScheme btm:beltransGenderCategory ;
