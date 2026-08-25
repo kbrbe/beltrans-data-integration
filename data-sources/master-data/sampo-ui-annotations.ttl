@@ -58,50 +58,70 @@ btm:beltransGenderCategory a skos:ConceptScheme ;
 
 btm:genderCategoryMale a skos:Concept ;
         skos:inScheme btm:beltransGenderCategory ;
-        skos:prefLabel "BELTRANS gender category male"@en ;
-        skos:prefLabel "BELTRANS gendercategorie mannelijk"@nl ;
-        skos:prefLabel "BELTRANS catégorie de genre homme"@fr ;
-        skos:prefLabel "BELTRANS Geschlechtskategorie männlich"@de ;
+        skos:prefLabel "Male"@en ;
+        skos:prefLabel "Mannelijk"@nl ;
+        skos:prefLabel "Homme"@fr ;
+        skos:prefLabel "Männlich"@de ;
+        skos:altLabel "BELTRANS gender category male"@en ;
+        skos:altLabel "BELTRANS gendercategorie mannelijk"@nl ;
+        skos:altLabel "BELTRANS catégorie de genre homme"@fr ;
+        skos:altLabel "BELTRANS Geschlechtskategorie männlich"@de ;
         skos:relatedMatch <https://homosaurus.org/v5/homoit0001008> ;
         skos:note "All book contributors of a certain role have the gender male." ;
         rdfs:seeAlso <https://homosaurus.org/v5/homoit0001008> .
 
 btm:genderCategoryFemale a skos:Concept ;
         skos:inScheme btm:beltransGenderCategory ;
-        skos:prefLabel "BELTRANS gender category female"@en ;
-        skos:prefLabel "BELTRANS gendercategorie vrouwelijk"@nl ;
-        skos:prefLabel "BELTRANS catégorie de genre femme"@fr ;
-        skos:prefLabel "BELTRANS Geschlechtskategorie weiblich"@de ;
+        skos:prefLabel "Female"@en ;
+        skos:prefLabel "Vrouwelijk"@nl ;
+        skos:prefLabel "Femme"@fr ;
+        skos:prefLabel "Weiblich"@de ;
+        skos:altLabel "BELTRANS gender category female"@en ;
+        skos:altLabel "BELTRANS gendercategorie vrouwelijk"@nl ;
+        skos:altLabel "BELTRANS catégorie de genre femme"@fr ;
+        skos:altLabel "BELTRANS Geschlechtskategorie weiblich"@de ;
         skos:relatedMatch <https://homosaurus.org/v5/homoit0001509> ;
         skos:note "All book contributors of a certain role have the gender female." ;
         rdfs:seeAlso <https://homosaurus.org/v5/homoit0001509> .
 
 btm:genderCategoryMinority a skos:Concept ;
         skos:inScheme btm:beltransGenderCategory ;
-        skos:prefLabel "BELTRANS gender category minority"@en ;
-        skos:prefLabel "BELTRANS gendercategorie vrouwelijk"@nl ;
-        skos:prefLabel "BELTRANS catégorie de genre femme"@fr ;
-        skos:prefLabel "BELTRANS Geschlechtskategorie minderheit"@de ;
+        skos:prefLabel "Minority"@en ;
+        skos:prefLabel "Minderheid"@nl ;
+        skos:prefLabel "Femme"@fr ;
+        skos:prefLabel "Minderheit"@de ;
+        skos:altLabel "BELTRANS gender category minority"@en ;
+        skos:altLabel "BELTRANS gendercategorie vrouwelijk"@nl ;
+        skos:altLabel "BELTRANS catégorie de genre femme"@fr ;
+        skos:altLabel "BELTRANS Geschlechtskategorie minderheit"@de ;
         skos:relatedMatch <https://homosaurus.org/v5/homoit0001817> ;
         skos:note "All book contributors of a certain role have a gender different from those of the dominant binary gender culture. See https://homosaurus.org/v5/homoit0001817" ;
         rdfs:seeAlso <https://homosaurus.org/v5/homoit0001817> .
 
 btm:genderCategoryMaleFemale a skos:Concept ;
         skos:inScheme btm:beltransGenderCategory ;
-        skos:prefLabel "BELTRANS gender category male and female"@en ;
-        skos:prefLabel "BELTRANS gendercategorie mannelijk en vrouwelijk"@nl ;
-        skos:prefLabel "BELTRANS catégorie de genre homme et femme"@fr ;
-        skos:prefLabel "BELTRANS Geschlechtskategorie männlich und weiblich"@de ;
+        skos:prefLabel "Male and female"@en ;
+        skos:prefLabel "Mannelijk en vrouwelijk"@nl ;
+        skos:prefLabel "Homme et femme"@fr ;
+        skos:prefLabel "Männlich und weiblich"@de ;
+        skos:altLabel "BELTRANS gender category male and female"@en ;
+        skos:altLabel "BELTRANS gendercategorie mannelijk en vrouwelijk"@nl ;
+        skos:altLabel "BELTRANS catégorie de genre homme et femme"@fr ;
+        skos:altLabel "BELTRANS Geschlechtskategorie männlich und weiblich"@de ;
         skos:related btm:genderCategoryMale ;
         skos:related btm:genderCategoryFemale ;
         skos:note "There are at least two book contributors of a certain role, some of them are male and some female." .
 
 btm:genderCategoryBinaryAndMinority a skos:Concept ;
         skos:inScheme btm:beltransGenderCategory ;
-        skos:prefLabel "BELTRANS gender category binary and minority"@en ;
-        skos:prefLabel "BELTRANS gendercategorie binair en minderheid"@nl ;
-        skos:prefLabel "BELTRANS catégorie de genre binaire et minorité"@fr ;
-        skos:prefLabel "BELTRANS Geschlechtskategorie binär und Minderheit"@de ;
+        skos:prefLabel "Binary and minority"@en ;
+        skos:prefLabel "Binair en minderheid"@nl ;
+        skos:prefLabel "Binaire et minorité"@fr ;
+        skos:prefLabel "Binär und Minderheit"@de ;
+        skos:altLabel "BELTRANS gender category binary and minority"@en ;
+        skos:altLabel "BELTRANS gendercategorie binair en minderheid"@nl ;
+        skos:altLabel "BELTRANS catégorie de genre binaire et minorité"@fr ;
+        skos:altLabel "BELTRANS Geschlechtskategorie binär und Minderheit"@de ;
         skos:related btm:genderCategoryMale ;
         skos:related btm:genderCategoryFemale ;
         skos:related btm:genderCategoryMinority ;
