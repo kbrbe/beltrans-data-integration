@@ -4364,7 +4364,7 @@ function loadMasterData {
   echo "Load master data (mapped content, countries, languages and gender information)"
   #python upload_data.py -u "$uploadURL" --content-type "$FORMAT_TURTLE" --named-graph "$TRIPLE_STORE_GRAPH_MASTER" \
   uploadRDFData "$ENV_SPARQL_ENDPOINT" "$TRIPLE_STORE_NAMESPACE" "$TRIPLE_STORE_GRAPH_MASTER" "$FORMAT_TURTLE" \
-    "$masterDataTurtle" "$masterDataCountries" "$masterDataLanguages" "$masterDataGender"
+    "$masterDataTurtle" "$masterDataCountries" "$masterDataLanguages" "$masterDataGender" "$masterDataSampoUI"
 
 }
 
