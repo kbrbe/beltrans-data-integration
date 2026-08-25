@@ -1,5 +1,6 @@
 @prefix btid: <http://kbr.be/id/data/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix oa: <http://www.w3.org/ns/oa#> .
 
 #
@@ -48,24 +49,59 @@ btid:dutFreAndOther a skos:Concept ;
 # General concepts used e.g. for gender annotation
 #
 
+btm:beltransGenderCategory a skos:ConceptScheme ;
+        dcterms:title "BELTRANS gender categories" ;
+        dcterms:description "A controlled vocabulary to annotate a single gender category for all book contributors of a certain role. E.g. if a book has two authors and both are male, the category is btm:genderCategoryMale. If a book has three illustrators where one is male and two are female, the category is btm:genderCategoryMaleFemale. Terms of this controlled vocabulary are aligned with the Homosaurus. The intention of this controlled vocabulary is to easily filter books to e.g. identify female literature even if there are multiple contributors of a certain role." ;
+        rdfs:seeAlso <https://homosaurus.org/v5/homoit0000560>
+
 btm:genderCategoryMale a skos:Concept ;
-        skos:prefLabel "Male"@en ;
-        skos:prefLabel "Mannelijk"@nl ;
-        skos:prefLabel "Homme"@fr ;
-        skos:prefLabel "Männlich"@de ;
-        skos:relatedMatch <https://homosaurus.org/v5/homoit0001008> .
+        skos:inScheme btm:beltransGenderCategory ;
+        skos:prefLabel "BELTRANS gender category male"@en ;
+        skos:prefLabel "BELTRANS gendercategorie mannelijk"@nl ;
+        skos:prefLabel "BELTRANS catégorie de genre homme"@fr ;
+        skos:prefLabel "BELTRANS Geschlechtskategorie männlich"@de ;
+        skos:relatedMatch <https://homosaurus.org/v5/homoit0001008> ;
+        skos:note "All book contributors of a certain role have the gender male." ;
+        rdfs:seeAlso <https://homosaurus.org/v5/homoit0001008> .
 
 btm:genderCategoryFemale a skos:Concept ;
-        skos:prefLabel "Female"@en ;
-        skos:prefLabel "Vrouwelijk"@nl ;
-        skos:prefLabel "Femme"@fr ;
-        skos:prefLabel "Weiblich"@de ;
-        skos:relatedMatch <https://homosaurus.org/v5/homoit0001509> .
+        skos:inScheme btm:beltransGenderCategory ;
+        skos:prefLabel "BELTRANS gender category female"@en ;
+        skos:prefLabel "BELTRANS gendercategorie vrouwelijk"@nl ;
+        skos:prefLabel "BELTRANS catégorie de genre femme"@fr ;
+        skos:prefLabel "BELTRANS Geschlechtskategorie weiblich"@de ;
+        skos:relatedMatch <https://homosaurus.org/v5/homoit0001509> ;
+        skos:note "All book contributors of a certain role have the gender female." ;
+        rdfs:seeAlso <https://homosaurus.org/v5/homoit0001509> .
+
+btm:genderCategoryMinority a skos:Concept ;
+        skos:inScheme btm:beltransGenderCategory ;
+        skos:prefLabel "BELTRANS gender category minority"@en ;
+        skos:prefLabel "BELTRANS gendercategorie vrouwelijk"@nl ;
+        skos:prefLabel "BELTRANS catégorie de genre femme"@fr ;
+        skos:prefLabel "BELTRANS Geschlechtskategorie minderheit"@de ;
+        skos:relatedMatch <https://homosaurus.org/v5/homoit0001817> ;
+        skos:note "All book contributors of a certain role have a gender different from those of the dominant binary gender culture. See https://homosaurus.org/v5/homoit0001817" ;
+        rdfs:seeAlso <https://homosaurus.org/v5/homoit0001817> .
 
 btm:genderCategoryMaleFemale a skos:Concept ;
-        skos:prefLabel "Male and female"@en ;
-        skos:prefLabel "Mannelijk en vrouwelijk"@nl ;
-        skos:prefLabel "Homme et femme"@fr ;
-        skos:prefLabel "Männlich und weiblich"@de .
+        skos:inScheme btm:beltransGenderCategory ;
+        skos:prefLabel "BELTRANS gender category male and female"@en ;
+        skos:prefLabel "BELTRANS gendercategorie mannelijk en vrouwelijk"@nl ;
+        skos:prefLabel "BELTRANS catégorie de genre homme et femme"@fr ;
+        skos:prefLabel "BELTRANS Geschlechtskategorie männlich und weiblich"@de ;
+        skos:related btm:genderCategoryMale ;
+        skos:related btm:genderCategoryFemale ;
+        skos:note "There are at least two book contributors of a certain role, some of them are male and some female." .
 
-# so far no instances in the data, but we can also add classifications related to non binary here
+btm:genderCategoryBinaryAndMinority a skos:Concept ;
+        skos:inScheme btm:beltransGenderCategory ;
+        skos:prefLabel "BELTRANS gender category binary and minority"@en ;
+        skos:prefLabel "BELTRANS gendercategorie binair en minderheid"@nl ;
+        skos:prefLabel "BELTRANS catégorie de genre binaire et minorité"@fr ;
+        skos:prefLabel "BELTRANS Geschlechtskategorie binär und Minderheit"@de ;
+        skos:related btm:genderCategoryMale ;
+        skos:related btm:genderCategoryFemale ;
+        skos:related btm:genderCategoryMinority ;
+        skos:note "There are at least two book contributors of a certain role, some of them them identify with a binary gender and some with a minority gender. See https://homosaurus.org/v5/homoit0001817" .
+
